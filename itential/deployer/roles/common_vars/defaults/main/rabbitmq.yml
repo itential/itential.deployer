@@ -1,0 +1,8 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+# The name of the vhost to use so we do not use the default rabbitmq vhost
+rabbitmq_vhost: iap
+
+# Default installation will not have RabbitMQ SSL configured
+rabbitmq_ssl: false

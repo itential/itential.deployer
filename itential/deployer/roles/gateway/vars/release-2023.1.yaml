@@ -1,0 +1,11 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+iag_python_version: 3.9.7
+iag_pip_version: 20.2.4
+iag_ansible_version: ansible==7.7.0
+iag_python_src_url: https://www.python.org/ftp/python/3.9.7/Python-3.9.7.tgz
+iag_terraform_url: https://releases.hashicorp.com/terraform/0.12.31/terraform_0.12.31_linux_amd64.zip
+iag_python_dependencies:
+  - wheel
+  - setuptools==58.0.1

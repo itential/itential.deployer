@@ -1,0 +1,10 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+- name: Install python3 with yum
+  ansible.builtin.yum:
+    name: python36
+
+- name: Install pymongo
+  ansible.builtin.command:
+    cmd: pip3 install pymongo

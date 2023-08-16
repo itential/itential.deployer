@@ -1,0 +1,41 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+- name: Default the primary server to the first server in the mongodb group
+  ansible.builtin.set_fact:
+    primary_server: "{{ groups['mongodb'][0] }}"
+
+- name: Check if replication is enabled
+  community.mongodb.mongodb_shell:
+    mongo_cmd: auto
+    login_user: "{{ mongo_auth_enabled is defined and mongo_auth_enabled | ternary('admin', omit) }}"
+    login_password: "{{ mongo_auth_enabled is defined and mongo_auth_enabled | ternary(mongo_user_admin_password, omit) }}"
+    eval: "rs.status()"
+  register: rs_status_result
+  changed_when: false
+  failed_when: false
+  when: inventory_hostname in groups.mongodb
+
+- name: Set the mongodb_replication_enabled variable
+  ansible.builtin.set_fact:
+    mongodb_replication_enabled: "{{ rs_status_result.transformed_output.ok is defined }}"
+
+- name: Set the primary server to the primary server of the replica set
+  when:
+    - inventory_hostname in groups.mongodb
+    - mongodb_replication_enabled
+  block:
+    - name: Check the replication status
+      community.mongodb.mongodb_status:
+        login_user: "{{ mongo_auth_enabled is defined and mongo_auth_enabled | ternary('admin', omit) }}"
+        login_password: "{{ mongo_auth_enabled is defined and mongo_auth_enabled | ternary(mongo_user_admin_password, omit) }}"
+        replica_set: rs0
+      register: mongodb_status_result
+
+    - name: Lookup primary replicaset member
+      ansible.builtin.set_fact:
+        primary_server: "{{ item.key.split(':')[0] }}"
+      loop: "{{ lookup('dict', mongodb_status_result.replicaset) }}"
+      when:
+        - not mongodb_status_result.failed
+        - "'PRIMARY' in item.value"

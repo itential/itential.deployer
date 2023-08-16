@@ -1,0 +1,14 @@
+gateway_packages:
+  - "@Development tools"
+  - bzip2-devel
+  - haproxy
+  - libffi-devel
+  - libyaml
+  - openldap
+  - openldap-clients
+  - openssl-devel
+  - python3-libselinux
+  - sqlite-devel
+  - yaml-cpp
+  - yaml-cpp-devel
+  - zlib-devel

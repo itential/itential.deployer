@@ -1,0 +1,6 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+app_artifact: false
+iap_user: itential
+iap_group: itential

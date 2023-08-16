@@ -1,0 +1,81 @@
+{# Build the MongoDB connection string #}
+
+{% set mongo_hosts = [] %}
+{% if mongodb_replication | bool %}
+  {% for h in groups['mongodb'] %}
+    {{ mongo_hosts.append( h + ":" + mongo_port|string) }}
+  {% endfor %}
+  {% if groups["mongodb_arbiter"] is defined and groups["mongodb_arbiter"] | length > 0 %}
+    {{ mongo_hosts.append( hostvars [ groups["mongodb_arbiter"][0] ].inventory_hostname + ":" + mongo_port|string ) }}
+  {% endif %}
+  {% set mongo_hosts_str = mongo_hosts|join(',') %}
+  {% set url = "mongodb://" + mongo_hosts_str + "/?replicaSet=" + mongo_replset_name %}
+{% else %}
+  {% set url = "mongodb://" + hostvars[ groups['mongodb'][0] ].inventory_hostname + ":" + mongo_port|string %}
+{% endif %}
+{# Build SSL props #}
+{% set acceptInvalidCerts = True %}
+{% set checkServerIdentity = False %}
+{% set sslCA = "" %}
+{% set sslValidate = False %}
+{% if mongodb_tls | bool %}
+  {% set acceptInvalidCerts = False %}
+  {% set checkServerIdentity = True %}
+  {% set sslCA = itential_root_ca_file_destination %}
+  {% set sslValidate = True %}
+{% endif %}
+{
+  "isEncrypted": true,
+  "loggerProps": {
+    "console_level": "info",
+    "description": "Logging",
+    "log_directory": "{{ iap_install_dir }}/logs",
+    "log_filename": "local_aaa.log",
+    "log_level": "info",
+    "log_max_file_size": 10485760,
+    "log_max_files": 10,
+    "log_timezone_offset": 0,
+    "syslog": {
+      "app_name": "",
+      "eol": "",
+      "facility": "local0",
+      "host": "127.0.0.1",
+      "level": "warning",
+      "localhost": "",
+      "path": "",
+      "pid": "process.pid",
+      "port": 514,
+      "protocol": "udp4",
+      "type": "BSD"
+    }
+  },
+  "model": "@itential/adapter-local_aaa",
+  "name": "local_aaa",
+  "properties": {
+    "brokers": [
+      "aaa"
+    ],
+    "groups": [],
+    "id": "local_aaa",
+    "properties": {
+      "database": {
+        "credentials": {
+          "dbAuth": {{ mongodb_auth | bool | to_json }},
+          "passwd": "{{ mongo_user_localaaa_password }}",
+          "user": "localaaa"
+        },
+        "db": "{{ mongo_localaaa_db_name }}",
+        "ssl": {
+          "acceptInvalidCerts": {{ acceptInvalidCerts | bool | to_json }},
+          "checkServerIdentity": {{ checkServerIdentity | bool | to_json }},
+          "enabled": {{ mongodb_tls | bool | to_json }},
+          "sslCA": "{{ sslCA }}",
+          "sslValidate": {{ sslValidate | bool | to_json }}
+        },
+        "url": "{{ url }}"
+      }
+    },
+    "type": "local_aaa"
+  },
+  "type": "Adapter"
+}

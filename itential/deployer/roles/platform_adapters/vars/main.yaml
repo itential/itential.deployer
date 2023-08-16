@@ -1,0 +1,18 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+# If there are no opensource or custom apps and adapters to install then leave
+# these configurations commented out and this role will be skipped.
+
+# List the HTTP/HTTPS URL of each itential opensource adapter
+# Example:
+#   https://gitlab.com/itentialopensource/adapters/persistence/adapter-db_mongo.git
+#itential_adapters:
+
+# Best practice mandates a naming convention like this "@<name-of-custom-dir>"
+#custom_location: "@customer"
+
+# List the HTTP/HTTPS URL of each custom adapter or application
+# This is intended to point at an internal repo within the customer's
+# environment. It is used for custom apps and/or adapters
+#custom_adapters:

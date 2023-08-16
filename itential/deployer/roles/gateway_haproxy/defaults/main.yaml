@@ -1,0 +1,11 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+# Location of the HAProxy config file
+haproxy_conf_file: /etc/haproxy/haproxy.cfg
+
+# Destination location of the HTTPS certificate for the HAProxy
+haproxy_cert_destination: /etc/ssl/certs/
+
+# HTTPS port to use in HAProxy
+haproxy_port: 8443

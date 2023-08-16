@@ -1,0 +1,45 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+- name: Create the default Itential properties.json file
+  ansible.builtin.template:
+    src: "{{ iap_release }}-properties.j2"
+    dest: "{{ iap_install_dir }}/current/properties.json"
+    mode: 0600
+    owner: "{{ iap_user }}"
+    group: "{{ iap_group }}"
+    lstrip_blocks: true
+  vars:
+    profile_name: Local_AAA
+  when:
+    - (groups["redis_secondary"] is not defined and groups["rabbitmq_secondary"] is not defined) or
+      (groups["redis_secondary"] | length == 0 and groups["rabbitmq_secondary"] | length == 0)
+
+- name: Create the Itential properties.json files for advanced prod builds
+  when:
+    - groups["redis_secondary"] is defined and groups["rabbitmq_secondary"] is defined
+    - groups["redis_secondary"] | length > 0 and groups["rabbitmq_secondary"] | length > 0
+  block:
+    - name: Create the default Itential properties.json file for the primary
+      ansible.builtin.template:
+        src: "{{ iap_release }}-properties.j2"
+        dest: "{{ iap_install_dir }}/current/properties.json"
+        mode: 0600
+        owner: "{{ iap_user }}"
+        group: "{{ iap_group }}"
+        lstrip_blocks: true
+      vars:
+        profile_name: Primary_Local_AAA
+      when: inventory_hostname in groups['platform']
+
+    - name: Create the Itential properties.json file for the secondary
+      ansible.builtin.template:
+        src: "{{ iap_release }}-properties.j2"
+        dest: "{{ iap_install_dir }}/current/properties.json"
+        mode: 0600
+        owner: "{{ iap_user }}"
+        group: "{{ iap_group }}"
+        lstrip_blocks: true
+      vars:
+        profile_name: Secondary_Local_AAA
+      when: inventory_hostname in groups['platform_secondary']

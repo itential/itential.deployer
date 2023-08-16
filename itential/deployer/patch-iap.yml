@@ -1,0 +1,21 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+# Disclaimer
+# This playbook is not officially supported by Itential at this time.  Use at your own risk.
+
+### IAP
+- name: Patch IAP
+  hosts: platform
+  become: true
+  vars:
+    mongo_backup: true
+  tasks:
+    - name: Pull in the common vars
+      ansible.builtin.import_role:
+        name: common_vars
+
+    - name: Patch IAP
+      ansible.builtin.import_role:
+        name: platform
+        tasks_from: upgrade-iap

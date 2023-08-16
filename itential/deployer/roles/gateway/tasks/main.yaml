@@ -1,0 +1,300 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Include default vars
+  ansible.builtin.include_vars:
+    file: defaults/main.yaml
+
+- name: Include release vars
+  ansible.builtin.include_vars:
+    file: "{{ item }}"
+  with_first_found:
+    - "release-{{ iag_release }}.yaml"
+    - "release-undefined.yaml"
+
+- name: Include Redhat release vars
+  ansible.builtin.include_vars:
+    file: "{{ item }}"
+  with_first_found:
+    - "redhat-{{ ansible_distribution_major_version }}.yaml"
+
+- name: Check for valid IAG release
+  fail:
+    msg: "missing or invalid iag_release"
+  when: iag_release == "UNDEFINED"
+
+- name: Include base OS updates
+  ansible.builtin.include_role:
+    name: os
+
+- name: Install Gateway packages
+  ansible.builtin.yum:
+    name: "{{ gateway_packages }}"
+    state: present
+
+- name: Write IAG release file
+  ansible.builtin.lineinfile:
+    path: "{{ itential_release_file }}"
+    line: "GATEWAY={{ iag_release }}"
+    create: yes
+
+- name: Create temporary working directory
+  ansible.builtin.tempfile:
+    state: directory
+  register: workingdir
+
+- name: Create itential group
+  ansible.builtin.group:
+    name: "{{ iag_group }}"
+
+- name: Create itential user
+  ansible.builtin.user:
+    name: "{{ iag_user }}"
+    group: "{{ iag_group }}"
+    groups: wheel
+    generate_ssh_key: yes
+    state: present
+
+- name: Create working directories
+  ansible.builtin.file:
+    name: "{{ item }}"
+    owner: "{{ iag_user }}"
+    group: "{{ iag_group }}"
+    mode: "0775"
+    state: directory
+  with_items:
+    - /etc/ansible
+    - "{{ iag_properties_location }}"
+    - "{{ iag_data_dir }}"
+    - "{{ iag_data_dir }}/data"
+    - "{{ iag_install_dir }}"
+    - "{{ iag_install_dir }}/ansible/collections"
+    - "{{ iag_install_dir }}/ansible/inventory"
+    - "{{ iag_install_dir }}/ansible/modules"
+    - "{{ iag_install_dir }}/ansible/roles"
+    - "{{ iag_install_dir }}/ansible/collections"
+    - "{{ iag_install_dir }}/ansible/playbooks"
+    - "{{ iag_install_dir }}/ansible/plugins/modules"
+    - "{{ iag_install_dir }}/ansible/scripts"
+    - "{{ iag_install_dir }}/conf"
+    - "{{ iag_install_dir }}/conf/certs"
+    - "{{ iag_install_dir }}/nornir/conf"
+    - "{{ iag_install_dir }}/nornir/inventory"
+    - "{{ iag_install_dir }}/nornir/modules"
+    - "{{ iag_install_dir }}/scripts"
+    - "{{ iag_install_dir }}/terraform"
+    - "{{ iag_install_dir }}/terraform/scripts"
+
+- name: Check if Python is already installed
+  ansible.builtin.stat:
+    path: "/usr/local/bin/python3"
+  register: python_installed
+
+- name: Check if Pip is already installed
+  ansible.builtin.stat:
+    path: "/usr/local/bin/pip3"
+  register: pip_installed
+
+# Installing python3 on RHEL7 & Centos7 requires building python from source
+# in order to support the documented version of python3. Dynamically include a
+# task file that can handle the steps to build from source when we detect that
+# this host is a version 7.
+- name: Include tasks to install python on version 7
+  ansible.builtin.include_tasks:
+    file: "python-for-7.yaml"
+  when:
+    - ansible_distribution_major_version == "7"
+    - python_installed.stat.exists == False or pip_installed.stat.exists == False
+
+# Include a file for RHEL8 steps to install the appropriate version of python.
+- name: Include tasks to install python on version 8
+  ansible.builtin.include_tasks:
+    file: "python-for-8.yaml"
+  when:
+    - ansible_distribution_major_version == "8"
+    - python_installed.stat.exists == False or pip_installed.stat.exists == False
+
+# Include a file for RHEL9 steps to install the appropriate version of python.
+- name: Include tasks to install python on version 9
+  ansible.builtin.include_tasks:
+    file: "python-for-9.yaml"
+  when:
+    - ansible_distribution_major_version == "9"
+    - python_installed.stat.exists == False or pip_installed.stat.exists == False
+
+- name: Install Python dependencies
+  ansible.builtin.pip:
+    name: "{{ iag_python_dependencies }}"
+    executable: /usr/local/bin/pip3
+
+- name: Setup python virtual environment
+  ansible.builtin.command:
+    chdir: "{{ iag_install_dir }}"
+    cmd: /usr/local/bin/python3 -m venv venv
+
+- name: Activate the virtual environment for the current session
+  ansible.builtin.shell:
+    cmd: "source {{ iag_install_dir }}/venv/bin/activate"
+
+- name: Include the virtual environment in default shell
+  ansible.builtin.shell:
+    cmd: echo source {{ iag_install_dir }}/venv/bin/activate > /etc/profile.d/venv.sh
+
+# Need to install ansible within the virtual environment
+- name: Install Ansible
+  block:
+    - name: Install Ansible into the python virtual environment
+      ansible.builtin.pip:
+        name: "{{ iag_ansible_version }}"
+        virtualenv: "{{ iag_install_dir }}/venv"
+
+    - name: Create Ansible config file
+      ansible.builtin.template:
+        src: ansible.cfg.j2
+        dest: /etc/ansible/ansible.cfg
+        backup: yes
+
+    - name: Create empty ansible inventory files
+      ansible.builtin.file:
+        name: "{{ iag_install_dir }}/ansible/inventory/hosts"
+        owner: "{{ iag_user }}"
+        group: "{{ iag_group }}"
+        mode: "0660"
+        state: touch
+
+    - name: Create empty ansible vault file
+      ansible.builtin.file:
+        name: "{{ iag_install_dir }}/conf/.vault_password_file"
+        owner: "{{ iag_user }}"
+        group: "{{ iag_group }}"
+        mode: "0400"
+        state: touch
+
+    - name: Update release file
+      ansible.builtin.lineinfile:
+        path: "{{ itential_release_file }}"
+        line: "ANSIBLE={{ iag_ansible_version }}"
+        create: yes
+  when: iag_enable_ansible | bool
+
+- name: Install Terraform
+  block:
+    - name: Download Terraform
+      ansible.builtin.get_url:
+        url: "{{ iag_terraform_url }}"
+        dest: "{{ workingdir.path }}/{{ iag_terraform_url | basename }}"
+        mode: "0644"
+
+    - name: Extract Terraform
+      ansible.builtin.unarchive:
+        src: "{{ workingdir.path }}/{{ iag_terraform_url | basename }}"
+        dest: /usr/local/bin
+        remote_src: yes
+
+    - name: Update release file
+      ansible.builtin.lineinfile:
+        path: "{{ itential_release_file }}"
+        line: "TERRAFORM=true"
+        create: yes
+  when: iag_enable_terraform | bool
+
+- name: Check if Automation Gateway is already installed
+  ansible.builtin.stat:
+    path: "{{ iag_install_dir }}/venv/automation-gateway"
+  register: iag_installed
+
+- name: Install Automation Gateway
+  block:
+    - name: Copy IAG to host
+      ansible.builtin.copy:
+        src: "{{ iag_whl_file }}"
+        dest: "{{ workingdir.path }}/{{ iag_whl_file | basename }}"
+        mode: '0644'
+
+    - name: Install IAG
+      ansible.builtin.pip:
+        name: "{{ workingdir.path }}/{{ iag_whl_file | basename }}"
+        virtualenv: "{{ iag_install_dir }}/venv"
+
+    # Using chown and chmod is a faster way to enforce the file ownership and
+    # permissions. The file module in ansible checks each and every file/dir
+    # in the tree, 'chown -R ' does not, it just sets it.
+    - name: Set appropriate ownership on all gateway files
+      ansible.builtin.command:
+        cmd: "chown -R {{ iag_user }}:{{ iag_group }} {{ iag_install_dir }}/venv"
+
+    - name: Set appropriate permissions on all gateway files
+      ansible.builtin.command:
+        cmd: "chmod -R 775 {{ iag_install_dir }}/venv"
+
+    - name: Create properties.yaml using template based on the version
+      ansible.builtin.template:
+        src: "properties.{{ iag_release }}.yaml.j2"
+        dest: "{{ iag_properties_location }}/properties.yaml"
+        owner: "{{ iag_user }}"
+        group: "{{ iag_group }}"
+        mode: "0660"
+  when: iag_installed.stat.exists == false
+
+- name: Create Nornir files
+  block:
+
+    - name: Create Nornir inventory files (empty)
+      ansible.builtin.file:
+        name: "{{ item }}"
+        owner: "{{ iag_user }}"
+        group: "{{ iag_group }}"
+        mode: "0660"
+        state: touch
+      with_items:
+        - "{{ iag_install_dir }}/nornir/inventory/defaults.yaml"
+        - "{{ iag_install_dir }}/nornir/inventory/groups.yaml"
+        - "{{ iag_install_dir }}/nornir/inventory/hosts.yaml"
+
+    - name: Create Nornir config file
+      ansible.builtin.template:
+        src: nornir.config.yaml.j2
+        dest: "{{ iag_install_dir }}/nornir/conf/config.yaml"
+        owner: "{{ iag_user }}"
+        group: "{{ iag_group }}"
+        mode: "0660"
+
+    - name: Update release file
+      ansible.builtin.lineinfile:
+        path: "{{ itential_release_file }}"
+        line: "NORNIR=true"
+        create: yes
+  when: iag_enable_nornir | bool
+
+- name: Write automation-gateway.service to host
+  ansible.builtin.template:
+    src: automation-gateway.service.j2
+    dest: /etc/systemd/system/automation-gateway.service
+    backup: yes
+
+# Check if firewalld is running, if it is then open the appropriate ports
+- name: Gather service facts
+  ansible.builtin.service_facts:
+
+- name: Open Port on FirewallD Public Zone
+  ansible.posix.firewalld:
+    port: "{{ iag_port }}/tcp"
+    permanent: yes
+    state: enabled
+    zone: public
+    immediate: yes
+  when: (ansible_facts.services["firewalld.service"].state == "running") and
+        (ansible_facts.services["firewalld.service"].status == "enabled")
+  ignore_errors: true
+
+- name: Start Automation Gateway service
+  ansible.builtin.service:
+    name: automation-gateway
+    enabled: yes
+    state: started
+    daemon_reload: true
+
+- name: Remove temporary working directory
+  ansible.builtin.file:
+    path: "{{ workingdir.path }}"
+    state: absent

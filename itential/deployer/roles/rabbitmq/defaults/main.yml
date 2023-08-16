@@ -1,0 +1,26 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+# Feature flags that can be overriden in the hosts file
+# Essentially, a default installation will not have clustering
+rabbitmq_cluster: false
+
+# The Location of the config rabbitmq config file
+rabbitmq_config: /etc/rabbitmq/rabbitmq.conf
+
+# The default rabbitmq port
+rabbitmq_port: 5672
+
+# The default rabbitmq mgt console port
+rabbitmq_mgt_console_port: 15672
+
+rabbitmq_owner: rabbitmq
+rabbitmq_group: rabbitmq
+
+rabbitmq_user: itential
+rabbitmq_password: itential
+rabbitmq_admin_user: admin
+rabbitmq_admin_password: admin
+
+rabbitmq_repo_baseurl: "https://packagecloud.io/rabbitmq/rabbitmq-server/el/$releasever/$basearch"
+erlang_repo_baseurl: "https://packagecloud.io/rabbitmq/erlang/el/$releasever/$basearch"

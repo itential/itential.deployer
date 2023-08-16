@@ -1,0 +1,12 @@
+---
+# The default user that runs vault
+vault_user: vault
+
+# Default directory to store the unseal keys
+unseal_keys_dir: /opt/vault/keys/unseal_keys
+
+# Default default to store the root key
+root_key_dir: /opt/vault/keys/root_key
+
+# Default port of the vault server
+vault_port: 8200

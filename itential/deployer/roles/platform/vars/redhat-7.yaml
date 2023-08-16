@@ -1,0 +1,12 @@
+platform_packages:
+  - bzip2-devel
+  - gcc
+  - glibc-common
+  - libffi-devel
+  - openldap
+  - openldap-clients
+  - openssl-devel
+  - zlib-devel
+
+iap_openssl_url: https://www.openssl.org/source/openssl-1.0.2q.tar.gz
+iap_python_src_url: https://www.python.org/ftp/python/3.9.5/Python-3.9.5.tgz

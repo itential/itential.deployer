@@ -1,0 +1,32 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+### IAP
+- name: Install IAP
+  hosts: platform, platform_secondary
+  become: true
+  roles:
+    # Pull in the common vars
+    - role: common_vars
+
+    # Perform a base installation of IAP
+    - role: platform
+      tags:
+        - platform
+        - platform_install
+
+    # Install app-artifact into IAP
+    # This should only be done in a development environment
+    - role: platform_app_artifact
+      when:
+        - "'platform' in group_names"
+        - app_artifact | bool
+      tags:
+        - platform
+        - platform_app_artifact
+
+    # Install any listed apps and/or adapters
+    - role: platform_adapters
+      tags:
+        - platform
+        - platform_adapters
