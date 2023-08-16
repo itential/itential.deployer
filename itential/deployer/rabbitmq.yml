@@ -1,0 +1,34 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+### RABBITMQ
+- name: Install RabbitMQ
+  hosts: rabbitmq, rabbitmq_secondary
+  become: true
+  roles:
+    # Pull in the common vars
+    - role: common_vars
+
+    # Perform a base installation of Rabbitmq
+    - role: rabbitmq
+      tags:
+        - rabbitmq
+        - rabbitmq_install
+
+    # Add on any Rabbit features, HA, auth, etc...
+    # Configure Rabbit in a cluster
+    # https://www.rabbitmq.com/clustering.html
+    - role: rabbitmq_cluster
+      when:
+        - rabbitmq_cluster | bool
+      tags:
+        - rabbitmq
+        - rabbitmq_cluster
+
+    # Configure rabbit to only accept SSL connections
+    - role: rabbitmq_ssl
+      when:
+        - rabbitmq_ssl | bool
+      tags:
+        - rabbitmq
+        - rabbitmq_ssl

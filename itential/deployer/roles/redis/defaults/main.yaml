@@ -1,0 +1,29 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+# The location of the Redis log file
+redis_log: /var/log/redis/redis.log
+
+# The location of the Redis config file
+redis_conf_path: /etc/redis
+redis_conf_file: "{{ redis_conf_path }}/redis.conf"
+
+# The name of the Redis data file
+redis_dbDumpFileName: dump.rdb
+
+# The location of the Redis data directory
+redis_data_dir: /var/lib/redis
+
+# Default redis port
+redis_port: 6379
+
+redis_owner: redis
+redis_group: redis
+
+# The bind address source
+# Will default to inventory_hostname unless set to default_ipv4_address
+redis_bind_addr: inventory_hostname
+
+iap_redis_packages:
+  - redis
+  - jemalloc

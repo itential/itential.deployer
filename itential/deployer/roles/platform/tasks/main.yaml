@@ -1,0 +1,105 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+- name: Determine release vars
+  ansible.builtin.include_tasks:
+    file: determine-release-vars.yml
+
+- name: Include base OS updates
+  ansible.builtin.include_role:
+    name: os
+
+- name: Install Platform dependent packages
+  ansible.builtin.yum:
+    name: "{{ platform_packages }}"
+    state: present
+
+# We should create a proper security policy moving forward, but using this for now
+- name: Put SELinux in permissive mode, logging actions that would be blocked.
+  ansible.posix.selinux:
+    policy: targeted
+    state: permissive
+
+- name: Install nodejs
+  ansible.builtin.include_tasks:
+    file: install-nodejs.yml
+
+- name: Install python
+  ansible.builtin.include_tasks:
+    file: install-python.yml
+
+- name: Install textfsm
+  ansible.builtin.include_tasks:
+    file: install-textfsm.yml
+
+- name: Install jinja2
+  ansible.builtin.include_tasks:
+    file: install-jinja2.yml
+
+- name: Create itential user
+  ansible.builtin.include_tasks:
+    file: create-itential-user.yml
+
+- name: Create itential directories
+  ansible.builtin.file:
+    name: "{{ item }}"
+    state: directory
+    owner: "{{ iap_user }}"
+    group: "{{ iap_group }}"
+    mode: 0775
+    setype: haproxy_var_lib_t
+  with_items:
+    - "{{ iap_install_dir }}"
+    - "{{ iap_install_dir }}/keys"
+    - "{{ iap_install_dir }}/automation"
+    - "{{ iap_install_dir }}/automation/public"
+    - /var/log/itential
+    - /var/log/itential/automation
+
+- name: Ensure secure mode for TemplateBuilder
+  ansible.builtin.lineinfile:
+    path: /etc/sudoers
+    insertafter: EOF
+    state: present
+    line: "{{ iap_user }} ALL=(ALL) NOPASSWD: /usr/sbin/chroot, /sbin/chroot"
+
+- name: Install Platform
+  ansible.builtin.include_tasks:
+    file: install-platform.yml
+
+- name: Create properties.json file
+  ansible.builtin.include_tasks:
+    file: create-properties-file.yml
+
+- name: Make the "custom" directories
+  ansible.builtin.file:
+    name: "{{ item }}"
+    state: directory
+    owner: "{{ iap_user }}"
+    group: "{{ iap_group }}"
+    mode: 0775
+  with_items:
+    - "{{ iap_install_dir }}/current/custom/@itential"
+    - "{{ iap_install_dir }}/current/custom/@itentialopensource"
+
+- name: Copy certs
+  ansible.builtin.include_tasks:
+    file: copy-certs.yml
+
+- name: Configure firewalld
+  ansible.builtin.include_tasks:
+    file: configure-firewalld.yml
+
+- name: Configure vault
+  ansible.builtin.include_tasks:
+    file: configure-vault.yml
+
+- name: Set file ownership and permissions
+  ansible.builtin.include_tasks:
+    file: set-file-ownership.yml
+
+- name: Enable and start IAP
+  ansible.builtin.systemd:
+    name: automation-platform
+    enabled: yes
+    state: started

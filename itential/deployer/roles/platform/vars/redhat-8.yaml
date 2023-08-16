@@ -1,0 +1,9 @@
+platform_packages:
+  - bzip2-devel
+  - gcc
+  - glibc-common
+  - libffi-devel
+  - openldap
+  - openldap-clients
+  - openssl-devel
+  - zlib-devel

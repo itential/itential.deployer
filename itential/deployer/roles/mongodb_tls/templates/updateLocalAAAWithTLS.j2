@@ -1,0 +1,37 @@
+
+{# Build the appropriate connection string #}
+{# check for replset #}
+{% set mongo_hosts = [] %}
+{% for h in groups['mongodb'] %}
+{{ mongo_hosts.append( h + ":" + mongo_port|string) }}
+{% endfor %}
+{% if groups["mongodb_arbiter"] is defined and groups["mongodb_arbiter"] | length > 0 %}
+{{ mongo_hosts.append( hostvars [ groups["mongodb_arbiter"][0] ].inventory_hostname + ":" + mongo_port|string) }}
+{% endif %}
+{% set mongo_hosts_str = mongo_hosts|join(',') %}
+
+{% set userPass = "" %}
+{% if mongodb_auth | bool %}
+{% set userPass = "itential:itential@" %}
+{% endif %}
+
+{% set replicaSetName = "" %}
+{% if mongodb_replication | bool %}
+{% set replicaSetName = "?replicaSet=rs0" %}
+{% endif %}
+
+conn = new Mongo("mongodb://{{ userPass }}{{ mongo_hosts_str }}/itential{{ replicaSetName }}");
+
+db = conn.getDB("itential");
+
+{# Build the update command #}
+db.service_configs.findOneAndUpdate(
+  {"name":"local_aaa"},
+  {"$set":{
+    "properties.properties.database.ssl.enabled":true,
+    "properties.properties.database.ssl.sslValidate":true,
+    "properties.properties.database.ssl.acceptInvalidCerts":false,
+    "properties.properties.database.ssl.checkServerIdentity":true,
+    "properties.properties.database.ssl.sslCA":"{{ itential_root_ca_file_destination }}"
+  }}
+);

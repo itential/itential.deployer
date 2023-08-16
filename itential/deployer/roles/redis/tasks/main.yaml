@@ -1,0 +1,92 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Include release vars
+  ansible.builtin.include_vars:
+    file: "{{ item }}"
+  with_first_found:
+    - "release-{{ iap_release }}.yaml"
+    - "release-undefined.yaml"
+
+- name: Check for valid Redis release
+  fail:
+    msg: "missing or invalid redis_release"
+  when: redis_release == "UNDEFINED"
+
+- name: Include base OS updates
+  ansible.builtin.include_role:
+    name: os
+
+# This task will install a direct link to the redis RPM as the repo thus
+# enabling control of the redis version to the release files where there is a
+# mapping of "versions" to RPM locations.
+- name: Install redis RPM as a repo
+  ansible.builtin.yum:
+    update_cache: true
+    name: "{{ redis_release[ ansible_distribution_major_version ] }}"
+    state: present
+    disable_gpg_check: true
+
+- name: Ensure the directories for the config exists
+  ansible.builtin.file:
+    path: "{{ redis_conf_path }}"
+    state: directory
+    owner: "{{ redis_owner }}"
+    group: "{{ redis_group }}"
+    mode: "0760"
+
+- name: Use template to generate redis.conf
+  ansible.builtin.template:
+    src: redis.conf.j2
+    dest: "{{ redis_conf_file }}"
+    owner: "{{ redis_owner }}"
+    group: "{{ redis_group }}"
+    mode: "0640"
+
+# We should create a proper security policy moving forward, but using this for now
+- name: Put SELinux in permissive mode, logging actions that would be blocked.
+  ansible.posix.selinux:
+    policy: targeted
+    state: permissive
+
+# Check if firewalld is running, if it is then open the appropriate ports
+- name: Gather service facts
+  ansible.builtin.service_facts:
+
+- name: Open Port on FirewallD Public Zone
+  ansible.posix.firewalld:
+    port: "{{ redis_port }}/tcp"
+    permanent: yes
+    state: enabled
+    zone: public
+    immediate: yes
+  when:
+    - ansible_facts.services["firewalld.service"] is defined
+    - (ansible_facts.services["firewalld.service"].state == "running")
+    - (ansible_facts.services["firewalld.service"].status == "enabled")
+  ignore_errors: true
+
+- name: Enable redis
+  throttle: 1
+  ansible.builtin.systemd:
+    name: redis
+    enabled: yes
+    state: restarted
+
+- name: Determine redis version
+  ansible.builtin.shell:
+    cmd: redis-server --version | cut -d" " -f3 | cut -d"=" -f2
+  register: result
+  check_mode: false
+  changed_when: false
+  failed_when: result.rc != 0 and result.rc != 127
+
+- name: Set redis version variable
+  ansible.builtin.set_fact:
+    redis_server_version: "{{ result.stdout }}"
+
+- name: Write redis release information
+  ansible.builtin.lineinfile:
+    path: "/etc/iap-release"
+    line: "REDIS={{ redis_server_version }}"
+    create: yes

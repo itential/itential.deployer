@@ -1,0 +1,26 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+# The default user that runs the server process
+iap_user: itential
+
+# The default group that runs the server process
+iap_group: itential
+
+# The default hostname of the mongo server
+iap_mongo_host: localhost
+
+# The default hostname of the redis server
+iap_redis_host: localhost
+
+# The default hostname of the rabbitmq server
+iap_rabbitmq_host: localhost
+
+# The directory to store the vault root key in
+vault_install_dir: /opt/vault
+
+# By default, IAP should be configured to process tasks on start
+process_tasks_on_start: true
+
+# By default, IAP should be configured to process jobs on start
+process_jobs_on_start: true

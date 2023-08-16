@@ -1,0 +1,26 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+mongodb_release_url:
+  "7": https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/5.0/x86_64/
+  "8": https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/5.0/x86_64/
+
+mongodb_gpgkey_url:
+  "7": https://www.mongodb.org/static/pgp/server-5.0.asc
+  "8": https://www.mongodb.org/static/pgp/server-5.0.asc
+
+mongodb_packages:
+  "7":
+    - mongodb-org
+    - mongodb-org-database
+    - mongodb-org-server
+    - mongodb-org-shell
+    - mongodb-org-mongos
+    - mongodb-org-tools
+  "8":
+    - mongodb-org
+    - mongodb-org-database
+    - mongodb-org-server
+    - mongodb-org-shell
+    - mongodb-org-mongos
+    - mongodb-org-tools

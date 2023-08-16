@@ -1,0 +1,12 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+# The directory to install IAP in
+iap_install_dir: /opt/itential
+
+# Run IAP server as HTTPS
+iap_https: false
+
+# The IAP listen ports
+iap_http_port: 3000
+iap_https_port: 3443

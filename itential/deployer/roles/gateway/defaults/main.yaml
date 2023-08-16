@@ -1,0 +1,33 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+# Default feature flags
+# Enable everything by default, override in the hosts file if required
+iag_enable_ansible: true
+iag_enable_terraform: true
+iag_enable_nornir: true
+iag_enable_netmiko: true
+iag_enable_scripts: true
+iag_enable_netconf: true
+iag_enable_httpreq: true
+iag_haproxy: false
+
+# Location of IAG assets
+iag_install_dir: /opt/automation-gateway
+
+# Location of IAG data
+iag_data_dir: /opt/automation-gateway
+
+# Default port
+iag_port: 8083
+
+# location of IAG config file
+iag_properties_location: /etc/automation-gateway
+
+iag_user: itential
+iag_group: itential
+
+# These are only used for RHEL7 installs and are not referenced by RHEL8/9 tasks
+iag_openssl_url: https://www.openssl.org/source/openssl-1.0.2q.tar.gz
+iag_python_src_url: https://www.python.org/ftp/python/3.9.5/Python-3.9.5.tgz
+iag_python_version: 3.9.5

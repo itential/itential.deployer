@@ -1,0 +1,61 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+- name: Install nodejs if RHEL 8 or 9
+  block:
+    - name: Set the nodejs dnf module variable
+      ansible.builtin.set_fact:
+        nodejs_dnf_module: "nodejs:{{ iap_nodejs[ ansible_distribution_major_version ]['version'] }}"
+
+    - name: Append the nodejs module profile to nodejs dnf module (if profile is defined)
+      ansible.builtin.set_fact:
+        nodejs_dnf_module: "{{ nodejs_dnf_module }}/{{ iap_nodejs_dnf_module_profile }}"
+      when:
+        - iap_nodejs_dnf_module_profile is defined
+
+    # Enable and install the module if the profile is defined
+    # https://dnf.readthedocs.io/en/latest/command_ref.html#module-switch-to-command-label
+    - name: DNF switch to the nodejs module (if profile is defined)
+      command: dnf module switch-to -y "{{ nodejs_dnf_module }}"
+      register: result
+      changed_when:
+        - '"Enabling module streams" in result.stdout'
+      when: iap_nodejs_dnf_module_profile is defined
+
+    # Install the module if the profile is not defined
+    - name: DNF install nodejs
+      ansible.builtin.dnf:
+        name: "@{{ nodejs_dnf_module }}"
+        state: present
+      when: iap_nodejs_dnf_module_profile is not defined
+  when: ansible_distribution_major_version == "8" or ansible_distribution_major_version == "9"
+
+- name: Install nodejs if RHEL7
+  block:
+    - name: Create temp working dir
+      ansible.builtin.tempfile:
+        state: directory
+      register: workingdir
+
+    - name: Download NodeJS repo install script
+      ansible.builtin.get_url:
+        url: "{{ iap_nodejs[ ansible_distribution_major_version ]['url'] }}"
+        dest: "{{ workingdir.path }}/{{ iap_nodejs[ ansible_distribution_major_version ]['url'] | basename }}"
+        mode: 0755
+
+    # This will install the appropriate yum repo for nodejs
+    - name: Install appropriate nodejs yum repo
+      ansible.builtin.command: "{{ workingdir.path }}/{{ iap_nodejs[ ansible_distribution_major_version ]['url'] | basename }}"
+
+    # This will perform the actual install of nodejs
+    - name: Yum install nodejs
+      ansible.builtin.yum:
+        name: nodejs
+        state: present
+
+    - name: Remove workingdir
+      ansible.builtin.file:
+        path: "{{ workingdir.path }}"
+        state: absent
+
+  when: ansible_distribution_major_version == "7"

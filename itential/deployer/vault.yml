@@ -1,0 +1,26 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+## VAULT
+- name: Install Vault
+  hosts: vault
+  become: true
+  roles:
+    # Pull in the common vars
+    - role: common_vars
+
+    # Install and initialize Vault
+    - role: vault
+      when:
+        - vault_install | bool
+      tags:
+        - vault
+        - vault_install
+
+    # Setup Vault (initialize server and unseal)
+    - role: vault_unseal
+      when:
+        - vault_setup | bool
+      tags:
+        - vault
+        - vault_unseal
