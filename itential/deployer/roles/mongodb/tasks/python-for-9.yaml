@@ -10,5 +10,5 @@
     cmd: python -m ensurepip --upgrade
 
 - name: Install pymongo
-  ansible.builtin.command:
-    cmd: pip3 install pymongo
+  ansible.builtin.pip:
+    name: pymongo
