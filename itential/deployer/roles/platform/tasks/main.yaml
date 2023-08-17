@@ -53,8 +53,8 @@
     - "{{ iap_install_dir }}/keys"
     - "{{ iap_install_dir }}/automation"
     - "{{ iap_install_dir }}/automation/public"
-    - /var/log/itential
-    - /var/log/itential/automation
+    - "{{ iap_log_dir }}"
+    - "{{ iap_log_dir }}"/automation
 
 - name: Ensure secure mode for TemplateBuilder
   ansible.builtin.lineinfile:

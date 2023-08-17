@@ -4,6 +4,9 @@
 # The directory to install IAP in
 iap_install_dir: /opt/itential
 
+# The directory to write logs to
+iap_log_dir: /var/log/itential
+
 # Run IAP server as HTTPS
 iap_https: false
 
