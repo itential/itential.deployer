@@ -54,4 +54,4 @@
   ansible.builtin.include_role:
     name: mongodb_common
     tasks_from: restart-mongo.yml
-  when: result1.changed or result2.changed
+
