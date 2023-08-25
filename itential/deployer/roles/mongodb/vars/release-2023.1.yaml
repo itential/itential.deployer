@@ -15,11 +15,9 @@ mongodb_packages:
     - mongodb-org-database
     - mongodb-org-server
     - mongodb-org-shell
-    - mongodb-org-mongos
     - mongodb-org-tools
   "9":
     - mongodb-org
     - mongodb-org-database
     - mongodb-org-server
-    - mongodb-org-mongos
     - mongodb-org-tools

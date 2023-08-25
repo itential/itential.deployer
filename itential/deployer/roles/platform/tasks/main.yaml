@@ -9,9 +9,31 @@
   ansible.builtin.include_role:
     name: os
 
+- name: Gather the package facts
+  ansible.builtin.package_facts:
+    manager: auto
+
 - name: Install Platform dependent packages
   ansible.builtin.yum:
     name: "{{ platform_packages }}"
+    state: present
+
+# Install the mongodb repo if mongodb is not already installed. The platform role
+# will need mongo cmd line tools to import some initial data. It does not install
+# the database, just the cmd line tools and the mongo shell.
+- name: Install mongodb repo (for cmd line tools)
+  ansible.builtin.yum_repository:
+    name: "mongodb"
+    description: MongoDB Repository
+    baseurl: "{{ mongodb_release_url[ansible_distribution_major_version] }}"
+    enabled: yes
+    gpgcheck: yes
+    gpgkey: "{{ mongodb_gpgkey_url[ansible_distribution_major_version] }}"
+
+# Install mongodb tools if they are not already installed
+- name: Install the MongoDB tools packages
+  ansible.builtin.yum:
+    name: "{{ mongodb_tools_packages[ansible_distribution_major_version] }}"
     state: present
 
 # We should create a proper security policy moving forward, but using this for now
@@ -97,6 +119,11 @@
 - name: Set file ownership and permissions
   ansible.builtin.include_tasks:
     file: set-file-ownership.yml
+
+- name: Initialize MongoDB with IAP data
+  when: configure_iap | bool
+  ansible.builtin.include_tasks:
+    file: mongo-init.yml
 
 - name: Enable and start IAP
   ansible.builtin.systemd:

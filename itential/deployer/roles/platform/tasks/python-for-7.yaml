@@ -103,6 +103,10 @@
         src: /usr/local/bin/pip3.9
         path: /usr/local/bin/pip3
 
+    - name: Install pymongo
+      ansible.builtin.command:
+        cmd: /usr/local/bin/pip3 install pymongo
+
     - name: Capture pip version
       ansible.builtin.command:
         cmd: /usr/local/bin/pip3 -V

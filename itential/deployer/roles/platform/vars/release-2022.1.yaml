@@ -7,16 +7,37 @@ iap_textfsm_version:
   "8": 1.1.2
   "9": 1.1.2
 
-iap_jinja2_version: 
+iap_jinja2_version:
   "8": 2.11.3
   "9": 2.11.3
 
 iap_nodejs:
-  "8": 
+  "8":
     version: 16
-  "9": 
+  "9":
     version: 18
 
-iap_python_version: 
+iap_python_version:
   "8": 3.9.5
   "9": 3.9.5
+
+mongodb_release_url:
+  "7": https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/5.0/x86_64/
+  "8": https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/5.0/x86_64/
+  "9": https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/6.0/x86_64/
+
+mongodb_gpgkey_url:
+  "7": https://www.mongodb.org/static/pgp/server-5.0.asc
+  "8": https://www.mongodb.org/static/pgp/server-5.0.asc
+  "9": https://www.mongodb.org/static/pgp/server-6.0.asc
+
+mongodb_tools_packages:
+  "7":
+    - mongodb-org-tools
+    - mongodb-mongosh
+  "8":
+    - mongodb-org-tools
+    - mongodb-mongosh
+  "9":
+    - mongodb-database-tools
+    - mongodb-mongosh

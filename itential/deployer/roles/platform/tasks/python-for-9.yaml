@@ -26,6 +26,10 @@
   ansible.builtin.command:
     cmd: python -m ensurepip --upgrade
 
+- name: Install pymongo
+  ansible.builtin.pip:
+    name: pymongo
+
 - name: Capture pip3 version
   ansible.builtin.command:
     cmd: /usr/local/bin/pip3 -V

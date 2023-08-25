@@ -47,7 +47,7 @@
 - name: Prevent yum from updating mongo
   ansible.builtin.lineinfile:
     path: /etc/yum.conf
-    line: exclude=mongodb-org* 
+    line: exclude=mongodb-org*
 
 # Disable Transparent Huge Pages (THP)
 - name: Create the systemd unit file
@@ -138,7 +138,7 @@
     owner: "{{ mongo_owner }}"
     group: "{{ mongo_group }}"
   when:
-    - groups.mongodb_arbiter is defined 
+    - groups.mongodb_arbiter is defined
     - inventory_hostname in groups.mongodb_arbiter
 
 - name: Configure mongo
@@ -154,8 +154,8 @@
     path: "{{ mongo_conf_file }}"
     regexp: "^  dbPath: {{ mongo_data_dir }}"
     line: "  dbPath: {{ mongo_arbiter_data_dir }}"
-  when: 
-    - groups.mongodb_arbiter is defined 
+  when:
+    - groups.mongodb_arbiter is defined
     - inventory_hostname in groups.mongodb_arbiter
 
 # Configure SELinux
@@ -164,15 +164,15 @@
     state: directory
   register: workingdir
 
-# Adjust SELinux to permit access to the cgroup. According to the MongoDB 
-# documentation, the current SELinux policy does not allow the MongoDB 
-# process to access /sys/fs/cgroup, which is required to determine the 
+# Adjust SELinux to permit access to the cgroup. According to the MongoDB
+# documentation, the current SELinux policy does not allow the MongoDB
+# process to access /sys/fs/cgroup, which is required to determine the
 # available memory on your system.
 - name: SELinux - Create a custom policy file to permit access to cgroup
   ansible.builtin.copy:
     src: "{{ role_path }}/files/mongodb_cgroup_memory.te"
     dest: "{{ workingdir.path }}/mongodb_cgroup_memory.te"
-    
+
 - name: SELinux - Compile and load the custom cgroup policy
   ansible.builtin.command:
     cmd: "{{ item }}"
@@ -182,11 +182,11 @@
     - semodule -i "{{ workingdir.path }}/mongodb_cgroup_memory.pp"
   ignore_errors: true
 
-# Adjust SELinux to permit access to netstat for FTDC. /proc/net/netstat 
+# Adjust SELinux to permit access to netstat for FTDC. /proc/net/netstat
 # is required for Full Time Diagnostic Data Capture (FTDC). FTDC in short
-# is a mechanism  to facilitate analysis of the MongoDB server. The data 
+# is a mechanism  to facilitate analysis of the MongoDB server. The data
 # files in FTDC are compressed, not human-readable, and inherit the same
-# file access  permission as the MongoDB data files. Due to this, only 
+# file access  permission as the MongoDB data files. Due to this, only
 # users with access to the FTDC data files can transmit the data.
 - name: SELinux - Create a custom policy file to permit access to netstat for FTDC
   ansible.builtin.copy:
@@ -203,11 +203,11 @@
   ignore_errors: true
 
 # MongoDB is configured to use non-default paths for its data and log
-# directories. First, we need to update the SELinux policy to allow the 
-# mongod service to use the new directory, it’s worth to note that we 
-# need to make sure to include the .* at the end of the directory. Then, 
-# update the SELinux user policy for the new directory. Finally, apply 
-# the updated SELinux policies to the directory. Do this for data and logs. 
+# directories. First, we need to update the SELinux policy to allow the
+# mongod service to use the new directory, it’s worth to note that we
+# need to make sure to include the .* at the end of the directory. Then,
+# update the SELinux user policy for the new directory. Finally, apply
+# the updated SELinux policies to the directory. Do this for data and logs.
 - name: SELinux - Update the policy to allow the mongod service to use the custom data directory
   ansible.builtin.command: "{{ item }}"
   with_items:
@@ -241,8 +241,8 @@
     - result.rc is defined
     - result.rc > 0
     - "'already defined' not in result.stderr"
-  when: 
-    - groups.mongodb_arbiter is defined 
+  when:
+    - groups.mongodb_arbiter is defined
     - inventory_hostname in groups.mongodb_arbiter
 
 # Check if firewalld is running, if it is then open the appropriate ports
@@ -267,6 +267,73 @@
     name: mongod
     state: restarted
     enabled: true
+
+- name: Determine the primary server
+  ansible.builtin.include_role:
+    name: mongodb_common
+    tasks_from: determine-primary-server.yml
+
+- name: Determine auth status
+  ansible.builtin.include_role:
+    name: mongodb_common
+    tasks_from: check-auth-status.yml
+
+- name: Add users to database
+  when: inventory_hostname == primary_server
+  block:
+    # The tasks in this file should only run on one host if configuring a replica set
+    # This creates the admin user that has root access to the database
+    - name: Add admin user to database
+      community.mongodb.mongodb_user:
+        login_user: "{{ mongodb_auth_enabled is defined and mongodb_auth_enabled | ternary('admin', omit) }}"
+        login_password: "{{ mongodb_auth_enabled is defined and mongodb_auth_enabled | ternary(mongo_user_admin_password, omit) }}"
+        database: "{{ mongo_admin_db_name }}"
+        name: admin
+        password: "{{ mongo_user_admin_password }}"
+        state: present
+        roles:
+          - db: "{{ mongo_admin_db_name }}"
+            role: root
+        update_password: on_create
+        replica_set: "{{ mongodb_replication_enabled | ternary(mongo_replset_name, omit) }}"
+      vars:
+        ansible_python_interpreter: /usr/bin/python3
+
+    # This creates the itential user that only has read & write access to the
+    # itential database.  It is used by IAP to connect to the db.
+    - name: Add itential user to database
+      community.mongodb.mongodb_user:
+        login_user: "{{ mongodb_auth_enabled is defined and mongodb_auth_enabled | ternary('admin', omit) }}"
+        login_password: "{{ mongodb_auth_enabled is defined and mongodb_auth_enabled | ternary(mongo_user_admin_password, omit) }}"
+        database: "{{ mongo_itential_db_name }}"
+        user: itential
+        password: "{{ mongo_user_itential_password }}"
+        state: present
+        roles:
+          - db: "{{ mongo_itential_db_name }}"
+            role: readWrite
+        update_password: on_create
+        replica_set: "{{ mongodb_replication_enabled | ternary(mongo_replset_name, omit) }}"
+      vars:
+        ansible_python_interpreter: /usr/bin/python3
+
+    # This creates the localaaa user that only has read & write access to the
+    # LocalAAA database.  It is used by the local AAA adapter to login to IAP.
+    - name: Add localaaa user to database
+      community.mongodb.mongodb_user:
+        login_user: "{{ mongodb_auth_enabled is defined and mongodb_auth_enabled | ternary('admin', omit) }}"
+        login_password: "{{ mongodb_auth_enabled is defined and mongodb_auth_enabled | ternary(mongo_user_admin_password, omit) }}"
+        database: "{{ mongo_localaaa_db_name }}"
+        user: localaaa
+        password: "{{ mongo_user_localaaa_password }}"
+        state: present
+        roles:
+          - db: "{{ mongo_localaaa_db_name }}"
+            role: readWrite
+        update_password: on_create
+        replica_set: "{{ mongodb_replication_enabled | ternary(mongo_replset_name, omit) }}"
+      vars:
+        ansible_python_interpreter: /usr/bin/python3
 
 - name: Remove temporary working directory
   ansible.builtin.file:
