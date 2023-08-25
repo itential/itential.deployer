@@ -34,6 +34,10 @@
     path: /usr/local/bin/pip3
   when: not pip3_installed.stat.exists
 
+- name: Install pymongo
+  ansible.builtin.command:
+    cmd: /usr/local/bin/pip3 install pymongo
+
 - name: Capture pip3 version
   ansible.builtin.command:
     cmd: /usr/local/bin/pip3 -V

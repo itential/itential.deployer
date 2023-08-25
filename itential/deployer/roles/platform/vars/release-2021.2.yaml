@@ -21,3 +21,19 @@ iap_nodejs:
 iap_python_version:
   "7": 3.9.5
   "8": 3.9.5
+
+mongodb_release_url:
+  "7": https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/5.0/x86_64/
+  "8": https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/5.0/x86_64/
+
+mongodb_gpgkey_url:
+  "7": https://www.mongodb.org/static/pgp/server-5.0.asc
+  "8": https://www.mongodb.org/static/pgp/server-5.0.asc
+
+mongodb_tools_packages:
+  "7":
+    - mongodb-org-tools
+    - mongodb-mongosh
+  "8":
+    - mongodb-org-tools
+    - mongodb-mongosh

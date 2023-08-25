@@ -39,17 +39,6 @@
     tasks_from: determine-primary-server.yml
   when: inventory_hostname in groups.mongodb
 
-- name: Modify Local AAA adapter to use authorization
-  community.mongodb.mongodb_shell:
-    mongo_cmd: auto
-    login_user: "{{ mongodb_auth_enabled is defined and mongodb_auth_enabled | ternary('admin', omit) }}"
-    login_password: "{{ mongodb_auth_enabled is defined and mongodb_auth_enabled | ternary(mongo_user_admin_password, omit) }}"
-    db: itential
-    eval: "db.service_configs.findOneAndUpdate({name:'local_aaa'},{$set:{'properties.properties.database.credentials.dbAuth':true}})"
-  when:
-    - inventory_hostname in groups.mongodb
-    - inventory_hostname == primary_server
-
 - name: Restart mongo
   ansible.builtin.include_role:
     name: mongodb_common

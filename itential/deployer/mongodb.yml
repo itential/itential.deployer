@@ -17,13 +17,6 @@
         - mongodb
         - mongodb_install
 
-    # Insert some day zero data into the MongoDB, Itential users, profiles,
-    # configure redis, configure rabbitmq, etc...
-    - role: mongodb_init
-      tags:
-        - mongodb
-        - mongodb_init
-
     # Enable MongoDB replication, configure replica set if required
     # https://www.mongodb.com/docs/manual/replication/
     - role: mongodb_replication

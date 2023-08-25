@@ -45,6 +45,11 @@
 {% if iap_release == 2021.1 %}
   {% set login_page = "node_modules/@itential/pronghorn-core/ui/views/login.pug" %}
 {% endif %}
+{# Set the correct services list #}
+{% set services = vars.defaultServices %}
+{% if discovered_services[0].services is defined %}
+  {% set services = discovered_services[0].services %}
+{% endif %}
 {
   "adapterStrategy": {
     "device": {
@@ -189,9 +194,7 @@
     "maxRetries": 10,
     "retryResetTimer": 60000
   },
-  "services": [
-    "{{ vars.service }}"
-  ],
+  "services": {{ services | to_json }},
   "systemProps": {
     "deadProcessCheck": false,
     "deadProcessCheckInterval": 5,
@@ -207,7 +210,7 @@
     "edit_user": "node_modules/@itential/pronghorn-core/ui/views/dialogs/edit_user.pug",
     "fav_icon": "node_modules/@itential/pronghorn-core/ui/img/favicon.ico",
     "group_config": "node_modules/@itential/pronghorn-core/ui/views/group_config.pug",
-    "home": "node_modules/@itential/pronghorn-core/ui/lib/iap-ui/build/index.html",
+    "home": "node_modules/@itential/iap-ui/build/index.html",
     "layout": "node_modules/@itential/pronghorn-core/ui/views/layout.pug",
     "login": "{{ login_page }}",
     "new_group": "node_modules/@itential/pronghorn-core/ui/views/dialogs/new_group.pug",
