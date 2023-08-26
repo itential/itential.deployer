@@ -12,3 +12,18 @@
     path: "{{ itential_release_file }}"
     line: "JINJA2={{ iap_jinja2_version[ ansible_distribution_major_version ] }}"
     create: true
+
+# Immediately downgrade the markupsafe package that is installed
+# with jinja2 because it has its own dependency problems and this
+# version is the safest that we have successfully tested against.
+- name: Downgrade Markupsafe package
+  ansible.builtin.pip:
+    name: markupsafe
+    version: "{{ iap_markupsafe_version }}"
+    executable: /usr/local/bin/pip3
+
+- name: Update release file with markupsafe version
+  ansible.builtin.lineinfile:
+    path: "{{ itential_release_file }}"
+    line: "MARKUPSAFE={{ iap_markupsafe_version }}"
+    create: true
