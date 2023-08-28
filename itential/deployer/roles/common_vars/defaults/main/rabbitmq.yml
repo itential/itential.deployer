@@ -6,3 +6,11 @@ rabbitmq_vhost: iap
 
 # Default installation will not have RabbitMQ SSL configured
 rabbitmq_ssl: false
+
+# Default HTTP ports for rabbit and management app
+rabbit_port: 5672
+rabbit_mgt_port: 15672
+
+# Default HTTPS ports for rabbit and management app
+rabbit_ssl_port: 5671
+rabbit_ssl_mgt_port: 15671

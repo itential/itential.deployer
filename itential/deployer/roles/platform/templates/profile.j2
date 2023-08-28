@@ -9,14 +9,20 @@
 {% set rabbit_hosts = [] %}
 {% set rabbit_user = "itential" %}
 {% set rabbit_password = "itential" %}
-{% set rabbit_port = 5672 %}
+{% set r_port = rabbit_port %}
+{% set r_mgt_port = rabbit_mgt_port %}
 {% set rabbit_protocol = "amqp" %}
+{% set r_passphrase = "" %}
 {% for rabbit in groups[vars.rabbit_group_name] %}
   {{ rabbit_hosts.append( hostvars[ rabbit ].inventory_hostname ) }}
 {% endfor %}
 {% if rabbitmq_ssl | bool -%}
-  {% set rabbit_port = 5671 %}
+  {% set r_port = rabbit_ssl_port %}
+  {% set r_mgt_port = rabbit_ssl_mgt_port %}
   {% set rabbit_protocol = "amqps" %}
+  {% if rabbitmq_cert_passphrase is defined -%}
+    {% set r_passphrase = rabbitmq_cert_passphrase %}
+  {%- endif %}
 {% endif %}
 {# Set the correct redis settings #}
 {% set redis_host = "" %}
@@ -41,7 +47,7 @@
   {% endfor %}
 {% endif %}
 {# Set the correct value for the login page #}
-{% set login_page = "node_modules/@itential/pronghorn-core/ui/lib/iap-ui/build/index.html" %}
+{% set login_page = "node_modules/@itential/iap-ui/build/index.html" %}
 {% if iap_release == 2021.1 %}
   {% set login_page = "node_modules/@itential/pronghorn-core/ui/views/login.pug" %}
 {% endif %}
@@ -164,16 +170,23 @@
     }
   },
   "rabbitmq": {
-    "adminPort": 15672,
+    "adminPort": {{ r_mgt_port }},
     "frameMax": 0,
     "heartbeat": 0,
     "hosts": {{ rabbit_hosts | to_json }},
     "locale": "en_US",
     "password": "{{ rabbit_password }}",
-    "port": {{ rabbit_port }},
+    "port": {{ r_port }},
     "protocol": "{{ rabbit_protocol }}",
     "username": "{{ rabbit_user }}",
     "vhost": "{{ rabbitmq_vhost }}"
+{% if rabbitmq_ssl | bool %}
+    ,
+    "keyPath": "{{ iap_install_dir }}/keys/rabbitmq/{{ rabbitmq_server_key_source }}",
+    "certPath": "{{ iap_install_dir }}/keys/rabbitmq/{{ rabbitmq_server_cert_source }}",
+    "caPath": "{{ iap_install_dir }}/keys/rabbitmq/{{ rabbitmq_root_ca_file_source }}",
+    "passphrase": "{{ r_passphrase }}"
+{% endif %}
   },
   "redisProps": {
     "db" : 0,

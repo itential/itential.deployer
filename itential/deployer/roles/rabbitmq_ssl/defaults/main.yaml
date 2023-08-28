@@ -6,5 +6,3 @@ rabbitmq_config: /etc/rabbitmq/rabbitmq.conf
 
 # The directory where certs and other stuff are stored.
 rabbit_ssl_dir: /etc/rabbitmq/ssl
-
-rabbit_ssl_port: 5671

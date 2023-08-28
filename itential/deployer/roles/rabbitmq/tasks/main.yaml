@@ -84,6 +84,14 @@
     src: "{{ role_path }}/files/limits.conf"
     dest: /etc/systemd/system/rabbitmq-server.service.d/limits.conf
 
+- name: Set appropriate permissions on the rabbit directory
+  ansible.builtin.file:
+    path: "{{ rabbitmq_config_dir }}"
+    state: directory
+    owner: "{{ rabbitmq_owner }}"
+    group: "{{ rabbitmq_group }}"
+    mode: "0755"
+
 - name: Create rabbitmq config file
   ansible.builtin.template:
     src: rabbitmq.conf.j2

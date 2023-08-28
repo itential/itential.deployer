@@ -6,7 +6,8 @@
 rabbitmq_cluster: false
 
 # The Location of the config rabbitmq config file
-rabbitmq_config: /etc/rabbitmq/rabbitmq.conf
+rabbitmq_config_dir: /etc/rabbitmq/
+rabbitmq_config: "{{ rabbitmq_config_dir }}rabbitmq.conf"
 
 # The default rabbitmq port
 rabbitmq_port: 5672

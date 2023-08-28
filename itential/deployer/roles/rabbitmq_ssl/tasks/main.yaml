@@ -5,52 +5,69 @@
   ansible.builtin.file:
     path: "{{ rabbit_ssl_dir }}"
     state: directory
-    owner: rabbitmq
-    group: rabbitmq
-    mode: "0700"
+    owner: "{{ rabbitmq_owner }}"
+    group: "{{ rabbitmq_group }}"
+    mode: "0755"
 
 - name: Copy Server Certificate
   ansible.builtin.copy:
-    src: "{{ role_path }}/files/server_certificate.pem"
-    dest: "{{ rabbit_ssl_dir }}/serverCert.pem"
-    owner: rabbitmq
-    group: rabbitmq
-    mode: "0600"
+    src: "files/rabbitmq/{{ rabbitmq_server_cert_source }}"
+    dest: "{{ rabbit_ssl_dir }}/{{ rabbitmq_server_cert_source }}"
+    owner: "{{ rabbitmq_owner }}"
+    group: "{{ rabbitmq_group }}"
+    mode: "0660"
 
 - name: Copy Server Key
   ansible.builtin.copy:
-    src: "{{ role_path }}/files/server_key.pem"
-    dest: "{{ rabbit_ssl_dir }}/serverKey.pem"
-    owner: rabbitmq
-    group: rabbitmq
-    mode: "0600"
+    src: "files/rabbitmq/{{ rabbitmq_server_key_source }}"
+    dest: "{{ rabbit_ssl_dir }}/{{ rabbitmq_server_key_source }}"
+    owner: "{{ rabbitmq_owner }}"
+    group: "{{ rabbitmq_group }}"
+    mode: "0660"
 
 - name: Copy CA Certificate
   ansible.builtin.copy:
-    src: "{{ role_path }}/files/ca_certificate.pem"
-    dest: "{{ rabbit_ssl_dir }}/ca_certificate.pem"
-    owner: rabbitmq
-    group: rabbitmq
-    mode: "0600"
+    src: "files/rabbitmq/{{ rabbitmq_root_ca_file_source }}"
+    dest: "{{ rabbit_ssl_dir }}/{{ rabbitmq_root_ca_file_source }}"
+    owner: "{{ rabbitmq_owner }}"
+    group: "{{ rabbitmq_group }}"
+    mode: "0660"
 
-# Modify many lines on the config file for the SSL settings
-- name: Modify rabbitmq config with SSL settings
+- name: Uncomment lines in rabbit config to enable SSL
   ansible.builtin.lineinfile:
     path: "{{ rabbitmq_config }}"
-    regexp: ^\s*#\s*{{ item.name }}.*$
-    line: "{{ item.name }} = {{ item.value }} "
-    insertafter: ^\s*#\s*{{ item.name }}.*$
+    regexp: ^#\s({{ item }}.*)$
+    line: '\1'
+    backrefs: true
     firstmatch: true
   with_items:
-    - { name: "listeners.ssl.1", value: "{{ rabbit_ssl_port }}" }
-    - { name: "listeners.tcp", value: "none" }
-    - { name: "ssl_options.cacertfile", value: "{{ rabbit_ssl_dir }}/ca_certificate.pem" }
-    - { name: "ssl_options.certfile", value: "{{ rabbit_ssl_dir }}/serverCert.pem" }
-    - { name: "ssl_options.keyfile", value: "{{ rabbit_ssl_dir }}/serverKey.pem" }
-    - { name: "management.ssl.port", value: "15671" }
-    - { name: "management.ssl.cacertfile", value: "{{ rabbit_ssl_dir }}/ca_certificate.pem" }
-    - { name: "management.ssl.certfile", value: "{{ rabbit_ssl_dir }}/serverCert.pem" }
-    - { name: "management.ssl.keyfile", value: "{{ rabbit_ssl_dir }}/serverKey.pem" }
+    - listeners.tcp = none
+    - listeners.ssl.default
+    - listeners.ssl.1
+    - listeners.ssl.2
+    - ssl_options.cacertfile
+    - ssl_options.certfile
+    - ssl_options.keyfile
+    - ssl_options.verify
+    - ssl_options.fail_if_no_peer_cert
+    - ssl_options.password
+    - management.ssl.port
+    - management.ssl.cacertfile
+    - management.ssl.certfile
+    - management.ssl.keyfile
+    - management.ssl.password
+
+- name: Comment lines in rabbit config to disable non-SSL
+  ansible.builtin.lineinfile:
+    path: "{{ rabbitmq_config }}"
+    regexp: ^({{ item }}.*)$
+    line: '# \1'
+    backrefs: true
+    firstmatch: true
+  with_items:
+    - listeners.tcp.local
+    - listeners.tcp.local_v6
+    - listeners.tcp.other_ip
 
 # Check if firewalld is running, if it is then open the appropriate ports
 - name: Gather service facts

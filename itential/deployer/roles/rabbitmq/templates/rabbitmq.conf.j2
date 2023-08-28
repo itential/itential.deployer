@@ -28,31 +28,48 @@
 ## By default, RabbitMQ will listen on all interfaces, using
 ## the standard (reserved) AMQP 0-9-1 and 1.0 port.
 ##
-# listeners.tcp.default = 5672
 
 
-## To listen on a specific interface, provide an IP address with port.
-## For example, to listen only on localhost for both IPv4 and IPv6:
-##
-# IPv4
-listeners.tcp.local    = 127.0.0.1:5672
-# IPv6
-listeners.tcp.local_v6 = ::1:5672
+# Default Itential networking configurations for non SSL
+# Enable local IPv4 connections
+listeners.tcp.local = 127.0.0.1:{{ rabbit_port }}
 
-## You can define multiple listeners using listener names
-# listeners.tcp.other_port = 5673
-# listeners.tcp.other_ip   = 10.10.10.10:5672
-listeners.tcp.other_ip = {{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}:{{ rabbitmq_port }}
+# Enable local IPv6 connections
+listeners.tcp.local_v6 = ::1:{{ rabbit_port }}
 
-## TLS listeners are configured in the same fashion as TCP listeners,
-## including the option to control the choice of interface.
-##
-# listeners.ssl.default = 5671
+# Enable other connections on specific interfaces
+listeners.tcp.other_ip = {{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}:{{ rabbit_port }}
 
-## It is possible to disable regular TCP (non-TLS) listeners. Clients
-## not configured to use TLS and the correct TLS-enabled port won't be able
-## to connect to this node.
+{% if rabbitmq_ssl | bool -%}
+# Default Itential networking configurations for SSL
+# disables non-TLS listeners, only TLS-enabled clients will be able to connect
 # listeners.tcp = none
+
+# Enable connections on specific interfaces and local addresses
+# listeners.ssl.default = {{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}:{{ rabbit_ssl_port }}
+# listeners.ssl.1 = 127.0.0.1:{{ rabbit_ssl_port }}
+# listeners.ssl.2 = ::1:{{ rabbit_ssl_port }}
+
+# Define locations for certs
+# ssl_options.cacertfile = {{ rabbit_ssl_dir }}/{{ rabbitmq_root_ca_file_source }}
+# ssl_options.certfile   = {{ rabbit_ssl_dir }}/{{ rabbitmq_server_cert_source }}
+# ssl_options.keyfile    = {{ rabbit_ssl_dir }}/{{ rabbitmq_server_key_source }}
+# ssl_options.verify     = verify_peer
+# ssl_options.fail_if_no_peer_cert = true
+
+# Configure SSL on the rabbit management console
+# management.ssl.port = {{ rabbit_ssl_mgt_port }}
+# management.ssl.cacertfile = {{ rabbit_ssl_dir }}/{{ rabbitmq_root_ca_file_source }}
+# management.ssl.certfile   = {{ rabbit_ssl_dir }}/{{ rabbitmq_server_cert_source }}
+# management.ssl.keyfile    = {{ rabbit_ssl_dir }}/{{ rabbitmq_server_key_source }}
+
+{% if rabbitmq_cert_passphrase is defined -%}
+# Define the passphrase for the certs if required
+# ssl_options.password = {{ rabbitmq_cert_passphrase }}
+# management.ssl.password   = {{ rabbitmq_cert_passphrase }}
+{%- endif %}
+
+{%- endif %}
 
 ## Number of Erlang processes that will accept connections for the TCP
 ## and TLS listeners.
@@ -100,16 +117,6 @@ listeners.tcp.other_ip = {{ hostvars[inventory_hostname]['ansible_default_ipv4']
 ##
 ## Related doc guide: https://rabbitmq.com/ssl.html.
 ##
-# listeners.ssl.1                  = 5671
-#
-# ssl_options.verify               = verify_peer
-# ssl_options.fail_if_no_peer_cert = false
-# ssl_options.cacertfile           = /path/to/cacert.pem
-# ssl_options.certfile             = /path/to/cert.pem
-# ssl_options.keyfile              = /path/to/key.pem
-#
-# ssl_options.honor_cipher_order   = true
-# ssl_options.honor_ecc_order      = true
 #
 ## These are highly recommended for TLSv1.2 but cannot be used
 ## with TLSv1.3. If TLSv1.3 is enabled, these lines MUST be removed.

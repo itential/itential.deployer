@@ -28,3 +28,27 @@
     owner: "{{ iap_user }}"
   when:
     - mongodb_tls | bool
+
+- name: Upload RabbitMQ SSL files
+  when: rabbitmq_ssl | bool
+  block:
+    - name: Create directories for rabbitmq certs
+      ansible.builtin.file:
+        name: "{{ iap_install_dir }}/keys/rabbitmq/"
+        state: directory
+        owner: "{{ iap_user }}"
+        group: "{{ iap_group }}"
+        mode: 0775
+        setype: haproxy_var_lib_t
+
+    - name: Upload rabbitmq SSL certs to correct location
+      ansible.builtin.copy:
+        src: "files/rabbitmq/{{ item }}"
+        dest: "{{ iap_install_dir }}/keys/rabbitmq/"
+        mode: 0400
+        group: "{{ iap_group }}"
+        owner: "{{ iap_user }}"
+      with_items:
+        - "{{ rabbitmq_root_ca_file_source }}"
+        - "{{ rabbitmq_server_cert_source }}"
+        - "{{ rabbitmq_server_key_source }}"

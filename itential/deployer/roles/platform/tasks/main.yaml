@@ -104,10 +104,6 @@
     - "{{ iap_install_dir }}/current/custom/@itential"
     - "{{ iap_install_dir }}/current/custom/@itentialopensource"
 
-- name: Copy certs
-  ansible.builtin.include_tasks:
-    file: copy-certs.yml
-
 - name: Configure firewalld
   ansible.builtin.include_tasks:
     file: configure-firewalld.yml
@@ -120,6 +116,10 @@
   ansible.builtin.include_tasks:
     file: set-file-ownership.yml
 
+- name: Copy certs
+  ansible.builtin.include_tasks:
+    file: copy-certs.yml
+
 - name: Initialize MongoDB with IAP data
   when: configure_iap | bool
   ansible.builtin.include_tasks:
@@ -129,4 +129,4 @@
   ansible.builtin.systemd:
     name: automation-platform
     enabled: yes
-    state: started
+    state: restarted
