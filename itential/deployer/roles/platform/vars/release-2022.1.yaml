@@ -38,7 +38,7 @@ mongodb_tools_packages:
     - mongodb-org-tools
     - mongodb-mongosh
   "8":
-    - mongodb-org-tools
+    - mongodb-database-tools
     - mongodb-mongosh
   "9":
     - mongodb-database-tools
