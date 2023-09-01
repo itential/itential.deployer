@@ -129,4 +129,4 @@
   ansible.builtin.systemd:
     name: automation-platform
     enabled: yes
-    state: started
+    state: restarted

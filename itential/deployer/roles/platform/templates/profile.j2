@@ -41,7 +41,7 @@
   {% endfor %}
 {% endif %}
 {# Set the correct value for the login page #}
-{% set login_page = "node_modules/@itential/pronghorn-core/ui/lib/iap-ui/build/index.html" %}
+{% set login_page = "node_modules/@itential/iap-ui/build/index.html" %}
 {% if iap_release == 2021.1 %}
   {% set login_page = "node_modules/@itential/pronghorn-core/ui/views/login.pug" %}
 {% endif %}
@@ -49,6 +49,12 @@
 {% set services = vars.defaultServices %}
 {% if discovered_services[0].services is defined %}
   {% set services = discovered_services[0].services %}
+{% endif %}
+{% if configure_iag_adapters | bool%}
+  {% for iag in groups["gateway"] %}
+    {% set iagAdapterName = "IAG-" + iag %}
+    {{ services.append(iagAdapterName) }}
+  {% endfor %}
 {% endif %}
 {
   "adapterStrategy": {
