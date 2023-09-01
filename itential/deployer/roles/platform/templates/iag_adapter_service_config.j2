@@ -1,0 +1,134 @@
+{
+  "name": "IAG-{{ item }}",
+  "model": "@itential/adapter-automation_gateway",
+  "type": "Adapter",
+  "properties": {
+    "id": "IAG-{{ item }}",
+    "type": "AutomationGateway",
+    "brokers": [
+      "device",
+      "method"
+    ],
+    "groups": [],
+    "properties": {
+      "host": "{{ item }}",
+      "port": 8083,
+      "base_path": "/api",
+      "version": "v2.0",
+      "cache_location": "none",
+      "stub": false,
+      "protocol": "http",
+      "authentication": {
+        "auth_method": "request_token",
+        "username": "admin@itential",
+        "password": "admin",
+        "token": "token",
+        "token_user_field": "username",
+        "token_password_field": "password",
+        "token_result_field": "token",
+        "token_URI_path": "/api/v2.0/login",
+        "invalid_token_error": 401,
+        "token_timeout": 6000,
+        "token_cache": "local",
+        "auth_field": "header.headers.Authorization",
+        "auth_field_format": "{token}"
+      },
+      "healthcheck": {
+        "type": "intermittent",
+        "frequency": 300000,
+        "protocol": "REST",
+        "URI_Path": "/api/v2.0/poll"
+      },
+      "throttle": {
+        "throttle_enabled": false,
+        "number_pronghorns": 1,
+        "sync_async": "sync",
+        "max_in_queue": 1000,
+        "concurrent_max": 1,
+        "expire_timeout": 0,
+        "avg_runtime": 200
+      },
+      "request": {
+        "number_redirects": 0,
+        "number_retries": 3,
+        "limit_retry_error": 0,
+        "failover_codes": [],
+        "attempt_timeout": 600000,
+        "global_request": {
+          "payload": {},
+          "uriOptions": {},
+          "addlHeaders": {},
+          "authData": {}
+        },
+        "healthcheck_on_timeout": false,
+        "return_raw": false,
+        "archiving": false
+      },
+      "proxy": {
+        "enabled": false,
+        "host": "",
+        "port": 8083,
+        "protocol": "http"
+      },
+      "ssl": {
+        "ecdhCurve": "",
+        "enabled": false,
+        "accept_invalid_cert": false,
+        "ca_file": "",
+        "key_file": "",
+        "cert_file": "",
+        "secure_protocol": "",
+        "ciphers": ""
+      },
+      "visibility": {
+        "grpc": "all",
+        "module": "all",
+        "role": "all",
+        "playbook": "certified",
+        "script": "all",
+        "terraform": "all",
+        "collection_module": "all",
+        "collection_role": "all",
+        "nornir": "all",
+        "netconf": "all",
+        "netmiko": "all"
+      },
+      "cluster_name": "",
+      "save_metric": false,
+      "mongo": {
+        "host": "",
+        "port": 443,
+        "database": "",
+        "username": "",
+        "password": "************",
+        "replSet": ""
+      },
+      "strip_escapes": false
+    }
+  },
+  "isEncrypted": true,
+  "loggerProps": {
+    "console_level": "info",
+    "description": "Logging",
+    "log_directory": "{{ iap_log_dir }}",
+    "log_filename": "IAG-{{ item }}.log",
+    "log_level": "info",
+    "log_max_file_size": 10485760,
+    "log_max_files": 10,
+    "log_timezone_offset": 0,
+    "syslog": {
+      "app_name": "",
+      "eol": "",
+      "facility": "local0",
+      "host": "127.0.0.1",
+      "level": "warning",
+      "localhost": "",
+      "path": "",
+      "pid": "process.pid",
+      "port": 514,
+      "protocol": "udp4",
+      "type": "BSD"
+    }
+  },
+  "virtual": false
+}

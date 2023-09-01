@@ -203,6 +203,22 @@
         dest: /tmp/itential_sc_ldap_adapter.json
         mode: '1777'
 
+    - name: Create adapter configs for all defined gateways
+      when:
+        - configure_iag_adapters | bool
+        - groups["gateway"] | default([]) | length > 0
+      ansible.builtin.template:
+        src: iag_adapter_service_config.j2
+        dest: "/tmp/itential_sc_{{ item }}_adapter.json"
+        mode: '1777'
+      loop: "{{ groups['gateway'] }}"
+
+    - name: Find all rendered service config templates
+      ansible.builtin.find:
+        paths: /tmp
+        patterns: 'itential_sc_*.json'
+      register: foundSCFiles
+
     # Import all of the service configs that were generated
     - name: Insert service configs into MongoDB
       ansible.builtin.command:
@@ -212,10 +228,8 @@
           - --collection=service_configs
           - --mode=upsert
           - --upsertFields=name
-          - --file="{{ item }}"
-      loop:
-        - /tmp/itential_sc_local_aaa.json
-        - /tmp/itential_sc_ldap_adapter.json
+          - --file="{{ item.path }}"
+      loop: "{{ foundSCFiles.files}}"
 
 - name: Clean up all rendered template files in /tmp
   ansible.builtin.file:

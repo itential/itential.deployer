@@ -21,3 +21,9 @@ iap_https_port: 3443
 # any documents into their database. In that case, this var can
 # be overridden and the mongo_init tasks will be skipped.
 configure_iap: true
+
+# Should the platform configure and add any IAG adapters that it
+# discovers? Based on the presence of devices in the gateway group
+# this will build adapter configs for each that it finds and insert
+# them into the mongo database.
+configure_iag_adapters: true
