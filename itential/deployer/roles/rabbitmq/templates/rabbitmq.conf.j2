@@ -71,7 +71,12 @@ listeners.tcp.other_ip = {{ hostvars[inventory_hostname]['ansible_default_ipv4']
 ## Maximum amount of time allowed for the AMQP 0-9-1 and AMQP 1.0 handshake
 ## (performed after socket connection and TLS handshake) to complete, in milliseconds.
 ##
-# handshake_timeout = 10000
+{% if rabbitmq_ssl | bool %}
+## TLS handshake timeout, in milliseconds.
+ssl_handshake_timeout = 60000
+{% else %}
+handshake_timeout = 60000
+{% endif %}
 
 ## Set to 'true' to perform reverse DNS lookups when accepting a
 ## connection. rabbitmqctl and management UI will then display hostnames
@@ -260,11 +265,6 @@ listeners.tcp.other_ip = {{ hostvars[inventory_hostname]['ansible_default_ipv4']
 ##
 # ssl_cert_login_from   = common_name
 
-## TLS handshake timeout, in milliseconds.
-##
-# ssl_handshake_timeout = 5000
-
-
 ## Cluster name
 ##
 cluster_name = iap_rabbitmq
@@ -329,7 +329,7 @@ cluster_name = iap_rabbitmq
 ## * https://rabbitmq.com/heartbeats.html
 ## * https://rabbitmq.com/networking.html
 ##
-# heartbeat = 60
+heartbeat = 120
 
 ## Set the max permissible size of an AMQP frame (in bytes).
 ##
@@ -353,8 +353,8 @@ cluster_name = iap_rabbitmq
 ## * https://www.erlang.org/doc/man/inet.html#setopts-2
 ##
 
-# tcp_listen_options.backlog = 128
-# tcp_listen_options.nodelay = true
+tcp_listen_options.backlog = 128
+tcp_listen_options.nodelay = true
 # tcp_listen_options.exit_on_close = false
 #
 # tcp_listen_options.keepalive = true
@@ -441,7 +441,7 @@ cluster_name = iap_rabbitmq
 ## Alternatively, we can set a limit relative to total available RAM.
 ##
 ## Values lower than 1.0 can be dangerous and should be used carefully.
-# disk_free_limit.relative = 2.0
+disk_free_limit.relative = 1.0
 
 ##
 ## Clustering
@@ -771,7 +771,7 @@ cluster_name = iap_rabbitmq
 
 ## Log level for console logging
 ##
-# log.console.level = info
+log.console.level = error
 
 ## Logging to the amq.rabbitmq.log exchange (can be true or false)
 ##
