@@ -163,7 +163,7 @@
     - hostvars[groups['rabbitmq_secondary'][0]].ansible_hostname != ansible_hostname
 
 # From the cmd line run this to set the proper HA policy on the iap vhost
-# rabbitmqctl set_policy ha-all -p iap ".*" '{"ha-mode":"all", "ha-sync-mode": "automatic"}'
+# rabbitmqctl set_policy ha-all -p iap ".*" '{"ha-mode":"all", "ha-promote-on-shutdown": "when-synced", "ha-sync-mode": "automatic"}'
 - name: Queue mirroring
   ansible.builtin.command:
-    cmd: "rabbitmqctl set_policy ha-all -p {{ rabbitmq_vhost }} \".*\" '{\"ha-mode\":\"all\", \"ha-sync-mode\": \"automatic\"}'"
+    cmd: "rabbitmqctl set_policy ha-all -p {{ rabbitmq_vhost }} \".*\" '{\"ha-mode\":\"all\", \"ha-promote-on-shutdown\": \"when-synced\", \"ha-sync-mode\": \"automatic\"}'"
