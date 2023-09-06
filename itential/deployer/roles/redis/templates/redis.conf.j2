@@ -891,7 +891,7 @@ replica-announce-ip {{ inventory_hostname }}
 ###########################
 # user default off
 # user admin on allkeys allchannels allcommands >admin
-# user itential on allkeys allchannels allcommands -asking -cluster -readonly -readwrite -acl|deluser -acl|load -acl|log -acl|list -acl|save -acl|setuser -acl|dryrun -bgrewriteaof -bgsave -config|resetstat -config|rewrite -config|set -failover -flushall -flushdb -psync -replconf -replicaof -save -shutdown -sync >itential
+# user itential on allkeys allchannels allcommands -asking -cluster -readonly -readwrite -bgrewriteaof -bgsave -failover -flushall -flushdb -psync -replconf -replicaof -save -shutdown -sync >itential
 # user repluser on allchannels +psync +replconf +ping >repluser
 # user sentineluser on allchannels +multi +slaveof +ping +exec +subscribe +config|rewrite +role +publish +info +client|setname +client|kill +script|kill >sentineluser
 
