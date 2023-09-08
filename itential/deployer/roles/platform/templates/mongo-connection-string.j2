@@ -1,6 +1,10 @@
 {% set mongo_hosts = [] %}
 {% set userpassword = "" %}
 {% set replsetOption = "" %}
+{% set tlsOptions = "" %}
+{% if mongodb_tls | bool %}
+  {% set tlsOptions = "&tls=true&tlsCAFile=" + itential_root_ca_file_destination %}
+{% endif %}
 {% if mongodb_auth | bool %}
   {% set userpassword = "itential:" + mongo_user_itential_password + "@" %}
 {% endif %}
@@ -16,5 +20,5 @@
 {% else %}
   {% set mongo_hosts_str = hostvars[ groups['mongodb'][0] ].inventory_hostname + ":" + mongo_port|string %}
 {% endif %}
-{% set connection_string = "mongodb://" + userpassword + mongo_hosts_str + "/" + mongo_itential_db_name + replsetOption %}
+{% set connection_string = "mongodb://" + userpassword + mongo_hosts_str + "/" + mongo_itential_db_name + replsetOption + tlsOptions %}
 {{ connection_string }}

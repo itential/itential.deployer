@@ -27,3 +27,8 @@ configure_iap: true
 # this will build adapter configs for each that it finds and insert
 # them into the mongo database.
 configure_iag_adapters: true
+
+# Destination as referenced by itential user when connecting from itential host.
+# This is ultimately stored in the mongo database to be read by IAP, therefore
+# this is the location as seen from the IAP host.
+itential_root_ca_file_destination: /opt/itential/keys/mongo-rootCA.pem

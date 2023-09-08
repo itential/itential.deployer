@@ -12,7 +12,7 @@
   register: workingdir
 
 - name: Install openssl
-  when: openssl_installed.stat.exists == False
+  when: not openssl_installed.stat.exists
   block:
     - name: Download openssl Source
       ansible.builtin.get_url:
@@ -42,7 +42,7 @@
   register: python_installed
 
 - name: Install Python
-  when: python_installed.stat.exists == False
+  when: not python_installed.stat.exists
   block:
     - name: Download Python Source
       ansible.builtin.get_url:
@@ -59,7 +59,7 @@
     # Modify many lines on the config file for the SSL settings
     - name: Modify SSL setup lines (1)
       ansible.builtin.lineinfile:
-        path: "{{ workingdir.path }}/Python-{{ iap_python_version[ ansible_distribution_major_version ] }}/Modules/Setup"
+        path: "{{ workingdir.path }}/Python-{{ iap_python_version[ansible_distribution_major_version] }}/Modules/Setup"
         regexp: ^#SSL=/usr/local/ssl$
         line: "SSL=/usr/local/ssl"
         insertafter: ^#SSL=/usr/local/ssl$
@@ -67,7 +67,7 @@
 
     - name: Modify SSL setup lines (2)
       ansible.builtin.lineinfile:
-        path: "{{ workingdir.path }}/Python-{{ iap_python_version[ ansible_distribution_major_version ] }}/Modules/Setup"
+        path: "{{ workingdir.path }}/Python-{{ iap_python_version[ansible_distribution_major_version] }}/Modules/Setup"
         line: "_ssl _ssl.c -DUSE_SSL -I$(SSL)/include -I$(SSL)/include/openssl -L$(SSL)/lib -lssl -lcrypto"
         insertafter: ^SSL=/usr/local/ssl$
         firstmatch: true
@@ -75,7 +75,7 @@
     - name: Configure and install Python from source
       ansible.builtin.command:
         cmd: "{{ item }}"
-        chdir: "{{ workingdir.path }}/Python-{{ iap_python_version[ ansible_distribution_major_version ] }}"
+        chdir: "{{ workingdir.path }}/Python-{{ iap_python_version[ansible_distribution_major_version] }}"
       with_items:
         - ./configure --enable-optimizations --with-openssl=/usr/local/ssl
         - make altinstall

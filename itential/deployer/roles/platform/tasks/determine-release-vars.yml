@@ -19,7 +19,7 @@
     - "release-undefined.yaml"
 
 - name: Check for valid IAP release
-  fail:
+  ansible.builtin.fail:
     msg: "missing or invalid iap_release"
   when: iap_release == "UNDEFINED"
 

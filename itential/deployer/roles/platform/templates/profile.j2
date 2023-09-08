@@ -46,7 +46,7 @@
   {% set login_page = "node_modules/@itential/pronghorn-core/ui/views/login.pug" %}
 {% endif %}
 {# Set the correct services list #}
-{% set services = vars.defaultServices %}
+{% set services = vars.default_services %}
 {% if discovered_services[0].services is defined %}
   {% set services = discovered_services[0].services %}
 {% endif %}
