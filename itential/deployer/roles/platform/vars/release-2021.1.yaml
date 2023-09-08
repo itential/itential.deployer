@@ -39,3 +39,7 @@ mongodb_tools_packages:
   "8":
     - mongodb-org-tools
     - mongodb-mongosh
+
+mongo_shell:
+  "7": mongo
+  "8": mongosh

@@ -25,20 +25,17 @@
 
     # Determine if the Local_AAA profile is already in the database
     - name: Determine if the Local_AAA profile document already exists
-      community.mongodb.mongodb_shell:
-        db: itential
-        eval: 'db.iap_profiles.find({"id":"Local_AAA"},{"_id":0,"services":1}).toArray()'
-        login_database: itential
-        login_host: "{{ primary_server }}"
-        login_password: itential
-        login_user: itential
-        stringify: true
-        transform: json
-      register: localAAAProfile
+      ansible.builtin.command:
+        argv:
+          - "{{ mongo_shell[ansible_distribution_major_version] }}"
+          - --quiet
+          - --eval='EJSON.stringify(db.iap_profiles.find({"id":"Local_AAA"},{"_id":0,"services":1}).toArray());'
+          - "{{ mongo_connection_string }}"
+      register: local_aaa_profile
 
     - name: Set discovered services list for Local_AAA
       ansible.builtin.set_fact:
-        discovered_services: "{{ localAAAProfile.transformed_output }}"
+        discovered_services: "{{ local_aaa_profile.stdout }}"
 
     # Create a default profile document in the itential database. This template
     # contains the logic to modify various properties based on the vars set in
@@ -47,31 +44,28 @@
     - name: Create Local AAA profile document for standard non-production environments
       ansible.builtin.template:
         src: profile.j2
-        dest: /tmp/itential_localaaa_profile.json
+        dest: /tmp/itential_local_aaa_profile.json
         mode: '1777'
       vars:
         desc: A default IAP profile that is using the Local AAA adapter to login
         id: Local_AAA
-        defaultServices:
+        default_services:
           - local_aaa
         redis_group_name: redis
         rabbit_group_name: rabbitmq
 
     - name: Determine if the LDAP profile document already exists
-      community.mongodb.mongodb_shell:
-        db: itential
-        eval: 'db.iap_profiles.find({"id":"LDAP"},{"_id":0,"services":1}).toArray()'
-        login_database: itential
-        login_host: "{{ primary_server }}"
-        login_password: itential
-        login_user: itential
-        stringify: true
-        transform: json
-      register: LDAPProfile
+      ansible.builtin.command:
+        argv:
+          - "{{ mongo_shell[ansible_distribution_major_version] }}"
+          - --quiet
+          - --eval='EJSON.stringify(db.iap_profiles.find({"id":"LDAP"},{"_id":0,"services":1}).toArray());'
+          - "{{ mongo_connection_string }}"
+      register: ldap_profile
 
     - name: Set discovered services list for LDAP
       ansible.builtin.set_fact:
-        discovered_services: "{{ LDAPProfile.transformed_output }}"
+        discovered_services: "{{ ldap_profile.stdout }}"
 
     # Create a second profile document that is configured to use the LDAP adapter.
     # This still requires the admins to correctly configure the LDAP adapter to
@@ -85,7 +79,7 @@
       vars:
         desc: An IAP profile that is using the LDAP adapter to login
         id: LDAP
-        defaultServices:
+        default_services:
           - LDAP
         redis_group_name: redis
         rabbit_group_name: rabbitmq
@@ -100,7 +94,7 @@
           - --upsertFields=id
           - --file="{{ item }}"
       loop:
-        - /tmp/itential_localaaa_profile.json
+        - /tmp/itential_local_aaa_profile.json
         - /tmp/itential_ldap_profile.json
       changed_when: true
 
@@ -110,62 +104,55 @@
     - groups["redis_secondary"] | default([]) | length > 0
     - groups["rabbitmq_secondary"] | default([]) | length > 0
   block:
-    # Determine if the Primary_Local_AAA profile is already in the database
+    # Determine if the Local_AAA profile is already in the database
     - name: Determine if the Primary_Local_AAA profile document already exists
-      community.mongodb.mongodb_shell:
-        db: itential
-        eval: 'db.iap_profiles.find({"id":"Primary_Local_AAA"},{"_id":0,"services":1}).toArray()'
-        login_database: itential
-        login_host: "{{ primary_server }}"
-        login_password: itential
-        login_user: itential
-        stringify: true
-        transform: json
-      register: PrimaryLocalAAA
+      ansible.builtin.command:
+        argv:
+          - "{{ mongo_shell[ansible_distribution_major_version] }}"
+          - --quiet
+          - --eval='EJSON.stringify(db.iap_profiles.find({"id":"Local_AAA"},{"_id":0,"services":1}).toArray());'
+          - "{{ mongo_connection_string }}"
+      register: primary_local_aaa_profile
 
     - name: Set discovered services list for Primary_Local_AAA
       ansible.builtin.set_fact:
-        discovered_services: "{{ PrimaryLocalAAA.transformed_output }}"
+        discovered_services: "{{ primary_local_aaa_profile.stdout }}"
 
     - name: Create Primary Local AAA profile document non-default production environments
       ansible.builtin.template:
         src: profile.j2
-        dest: /tmp/itential_primary_localaaa_profile.json
+        dest: /tmp/itential_primary_local_aaa_profile.json
         mode: '1777'
       vars:
         desc: A default IAP profile that is using the Local AAA adapter to login for the primary data center
-        id: Primary_Local_AAA
-        defaultServices:
+        id: primary_local_aaa_profile
+        default_services:
           - local_aaa
         redis_group_name: redis
         rabbit_group_name: rabbitmq
 
-    # Determine if the Secondary_Local_AAA profile is already in the database
     - name: Determine if the Secondary_Local_AAA profile document already exists
-      community.mongodb.mongodb_shell:
-        db: itential
-        eval: 'db.iap_profiles.find({"id":"Secondary_Local_AAA"},{"_id":0,"services":1}).toArray()'
-        login_database: itential
-        login_host: "{{ primary_server }}"
-        login_password: itential
-        login_user: itential
-        stringify: true
-        transform: json
-      register: SecondaryLocalAAA
+      ansible.builtin.command:
+        argv:
+          - "{{ mongo_shell[ansible_distribution_major_version] }}"
+          - --quiet
+          - --eval='EJSON.stringify(db.iap_profiles.find({"id":"Secondary_Local_AAA"},{"_id":0,"services":1}).toArray());'
+          - "{{ mongo_connection_string }}"
+      register: secondary_local_aaa_profile
 
     - name: Set discovered services list for Secondary_Local_AAA
       ansible.builtin.set_fact:
-        discovered_services: "{{ SecondaryLocalAAA.transformed_output }}"
+        discovered_services: "{{ secondary_local_aaa_profile.stdout }}"
 
     - name: Create Secondary Local AAA profile document non-default production environments
       ansible.builtin.template:
         src: profile.j2
-        dest: /tmp/itential_secondary_localaaa_profile.json
+        dest: /tmp/itential_secondary_local_aaa_profile.json
         mode: '1777'
       vars:
         desc: A default IAP profile that is using the Local AAA adapter to login for the primary data center
         id: Secondary_Local_AAA
-        defaultServices:
+        default_services:
           - local_aaa
         redis_group_name: redis_secondary
         rabbit_group_name: rabbitmq_secondary
@@ -180,8 +167,8 @@
           - --upsertFields=id
           - --file="{{ item }}"
       loop:
-        - /tmp/itential_primary_localaaa_profile.json
-        - /tmp/itential_secondary_localaaa_profile.json
+        - /tmp/itential_primary_local_aaa_profile.json
+        - /tmp/itential_secondary_local_aaa_profile.json
       changed_when: true
 
 # For each unique service config use a template to generate a JSON file with a
@@ -230,6 +217,10 @@
           - --upsertFields=name
           - --file="{{ item.path }}"
       loop: "{{ foundSCFiles.files}}"
+
+- name: Restart IAP
+  command: /bin/true
+  notify: Restart IAP
 
 - name: Clean up all rendered template files in /tmp
   ansible.builtin.file:

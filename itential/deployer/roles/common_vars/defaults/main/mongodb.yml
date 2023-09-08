@@ -31,3 +31,9 @@ mongo_user_localaaa_password: localaaa
 
 # The name of the mongo replica set
 mongo_replset_name: rs0
+
+# Destination location of the certificate key file used for TLS connections
+mongo_cert_keyfile_destination: /etc/ssl/mongo-certificate.pem
+
+# Destination location of the CA root file used for TLS connections
+mongo_root_ca_file_destination: /etc/ssl/mongo-rootCA.pem

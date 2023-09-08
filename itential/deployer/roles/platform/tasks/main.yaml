@@ -26,8 +26,8 @@
     name: "mongodb"
     description: MongoDB Repository
     baseurl: "{{ mongodb_release_url[ansible_distribution_major_version] }}"
-    enabled: yes
-    gpgcheck: yes
+    enabled: true
+    gpgcheck: true
     gpgkey: "{{ mongodb_gpgkey_url[ansible_distribution_major_version] }}"
 
 # Install mongodb tools if they are not already installed
@@ -120,10 +120,12 @@
   ansible.builtin.include_tasks:
     file: set-file-ownership.yml
 
-- name: Initialize MongoDB with IAP data
-  when: configure_iap | bool
-  ansible.builtin.include_tasks:
-    file: mongo-init.yml
+- block:
+  - name: Initialize MongoDB with IAP data
+    when: configure_iap | bool
+    ansible.builtin.include_tasks:
+      file: mongo-init.yml
+  tags: mongodb_init
 
 - name: Enable and start IAP
   ansible.builtin.systemd:

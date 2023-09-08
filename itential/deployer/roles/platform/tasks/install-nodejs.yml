@@ -5,7 +5,7 @@
   block:
     - name: Set the nodejs dnf module variable
       ansible.builtin.set_fact:
-        nodejs_dnf_module: "nodejs:{{ iap_nodejs[ ansible_distribution_major_version ]['version'] }}"
+        nodejs_dnf_module: "nodejs:{{ iap_nodejs[ansible_distribution_major_version]['version'] }}"
 
     - name: Append the nodejs module profile to nodejs dnf module (if profile is defined)
       ansible.builtin.set_fact:
@@ -16,7 +16,7 @@
     # Enable and install the module if the profile is defined
     # https://dnf.readthedocs.io/en/latest/command_ref.html#module-switch-to-command-label
     - name: DNF switch to the nodejs module (if profile is defined)
-      command: dnf module switch-to -y "{{ nodejs_dnf_module }}"
+      ansible.builtin.command: dnf module switch-to -y "{{ nodejs_dnf_module }}"
       register: result
       changed_when:
         - '"Enabling module streams" in result.stdout'
@@ -39,13 +39,13 @@
 
     - name: Download NodeJS repo install script
       ansible.builtin.get_url:
-        url: "{{ iap_nodejs[ ansible_distribution_major_version ]['url'] }}"
-        dest: "{{ workingdir.path }}/{{ iap_nodejs[ ansible_distribution_major_version ]['url'] | basename }}"
+        url: "{{ iap_nodejs[ansible_distribution_major_version]['url'] }}"
+        dest: "{{ workingdir.path }}/{{ iap_nodejs[ansible_distribution_major_version]['url'] | basename }}"
         mode: 0755
 
     # This will install the appropriate yum repo for nodejs
     - name: Install appropriate nodejs yum repo
-      ansible.builtin.command: "{{ workingdir.path }}/{{ iap_nodejs[ ansible_distribution_major_version ]['url'] | basename }}"
+      ansible.builtin.command: "{{ workingdir.path }}/{{ iap_nodejs[ansible_distribution_major_version]['url'] | basename }}"
 
     # This will perform the actual install of nodejs
     - name: Yum install nodejs
