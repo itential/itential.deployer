@@ -35,9 +35,11 @@
 ## For example, to listen only on localhost for both IPv4 and IPv6:
 ##
 # IPv4
-listeners.tcp.local    = 127.0.0.1:5672
+listeners.tcp.local    = {{ rabbitmq_bind_addr }}:{{ rabbitmq_port }}
 # IPv6
-listeners.tcp.local_v6 = ::1:5672
+{% if rabbitmq_bind_ipv6 | bool %}
+listeners.tcp.local_v6 = ::1:{{ rabbitmq_port }}
+{% endif %}
 
 ## You can define multiple listeners using listener names
 # listeners.tcp.other_port = 5673

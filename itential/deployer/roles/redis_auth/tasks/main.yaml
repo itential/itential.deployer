@@ -1,6 +1,6 @@
 # Copyright (c) 2022, Itential, LLC
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
----
+
 # The authorization users are already included in the redis.conf file from the
 # role that installed redis. This task is simply uncommenting those lines to
 # enable/disable the necessary users.
@@ -36,7 +36,7 @@
 - name: Restart Redis
   ansible.builtin.systemd:
     name: redis
-    enabled: yes
+    enabled: true
     state: restarted
 
 # Starting in Redis 7.0 the default user was being automatically inserted
@@ -68,6 +68,6 @@
 - name: Restart Redis Sentinel
   ansible.builtin.systemd:
     name: redis-sentinel
-    enabled: yes
+    enabled: true
     state: restarted
   when: redis_replication | bool
