@@ -355,7 +355,7 @@ heartbeat = 120
 ## * https://www.erlang.org/doc/man/inet.html#setopts-2
 ##
 
-tcp_listen_options.backlog = 128
+tcp_listen_options.backlog = 1024
 tcp_listen_options.nodelay = true
 # tcp_listen_options.exit_on_close = false
 #
@@ -374,7 +374,7 @@ tcp_listen_options.nodelay = true
 
 ## Memory-based Flow Control threshold.
 ##
-# vm_memory_high_watermark.relative = 0.4
+vm_memory_high_watermark.relative = 0.9
 
 ## Alternatively, we can set a limit (in bytes) of RAM used by the node.
 ##
@@ -411,7 +411,7 @@ tcp_listen_options.nodelay = true
 ## persistent and transient) to disk as quickly
 ## as possible, see https://rabbitmq.com/lazy-queues.html.
 ##
-# vm_memory_high_watermark_paging_ratio = 0.5
+vm_memory_high_watermark_paging_ratio = 0.75
 
 ## Selects Erlang VM memory consumption calculation strategy. Can be `allocated`, `rss` or `legacy` (aliased as `erlang`),
 ## Introduced in 3.6.11. `rss` is the default as of 3.6.12.
@@ -426,6 +426,9 @@ tcp_listen_options.nodelay = true
 ## The total memory available can be calculated from the OS resources
 ## - default option - or provided as a configuration parameter.
 # total_memory_available_override_value = 2GB
+{% if rabbit_total_mem_available_override is defined %}
+total_memory_available_override_value = {{ rabbit_total_mem_available_override }}
+{% endif %}
 
 ## Set disk free limit (in bytes). Once free disk space reaches this
 ## lower bound, a disk alarm will be set - see the documentation
@@ -782,3 +785,8 @@ log.console.level = error
 ## Log level to use when logging to the amq.rabbitmq.log exchange
 ##
 # log.exchange.level = info
+
+# Max Messaging size - set it to 512MB ( Default limit is 128MB (134217728 bytes))
+{% if rabbit_max_msg_size is defined %}
+max_message_size = {{ rabbit_max_msg_size }}
+{% endif %}

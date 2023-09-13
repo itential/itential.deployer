@@ -31,3 +31,17 @@ rabbitmq_admin_password: admin
 
 rabbitmq_repo_baseurl: "https://packagecloud.io/rabbitmq/rabbitmq-server/el/$releasever/$basearch"
 erlang_repo_baseurl: "https://packagecloud.io/rabbitmq/erlang/el/$releasever/$basearch"
+
+# The largest allowed message payload size in bytes. Messages of larger size will be
+# rejected with a suitable channel exception. Default: 134217728, Max value: 536870912
+#rabbit_max_msg_size: 536870911
+
+# Makes it possible to override the total amount of memory available, as opposed to
+# inferring it from the environment using OS-specific means. This should only be used
+# when actual maximum amount of RAM available to the node doesn't match the value
+# that will be inferred by the node, e.g. due to containerization or similar
+# constraints the node cannot be aware of. The value may be set to an integer number
+# of bytes or, alternatively, in information units (e.g `8GB`). For example, when the
+# value is set to 4 GB, the node will believe it is running on a machine with 4 GB of RAM.
+# Default: undefined (not set or used).
+#rabbit_total_mem_available_override: 8GB
