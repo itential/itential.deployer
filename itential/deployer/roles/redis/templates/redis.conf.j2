@@ -72,7 +72,10 @@
 # IF YOU ARE SURE YOU WANT YOUR INSTANCE TO LISTEN TO ALL THE INTERFACES
 # JUST COMMENT OUT THE FOLLOWING LINE.
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-{% set bind_addrs = ['127.0.0.1', '::1'] %}
+{% set bind_addrs = redis_bind_addrs.split(' ') %}
+{% if redis_bind_ipv6 | bool %}
+  {{ bind_addrs.insert(0, '::1') }}
+{% endif %}
 {% if redis_bind_addr is defined and redis_bind_addr == "default_ipv4_address" %}
   {{ bind_addrs.insert(0, hostvars[inventory_hostname]['ansible_default_ipv4']['address']) }}
 {% else %}
@@ -439,7 +442,7 @@ rdbchecksum yes
 # sanitize-dump-payload no
 
 # The filename where to dump the DB
-dbfilename {{ redis_dbDumpFileName }}
+dbfilename {{ redis_db_filename }}
 
 # Remove RDB files used by replication in instances without persistence
 # enabled. By default this option is disabled, however there are environments

@@ -39,13 +39,13 @@ security:
 net:
   # The TCP port on which the MongoDB instance listens for client connections.
   port: {{ mongo_port }}
-  ipv6: {{ mongodb_net_ipv6 | to_nice_json }}
+  ipv6: {{ mongodb_bind_ipv6 | to_nice_json }}
   
   # The hostnames and/or IP addresses and/or full Unix domain socket paths on
   # which mongos or mongod should listen for client connections. You may attach
   # mongos or mongod to any interface. To bind to multiple addresses, enter a
   # list of comma-separated values.
-  bindIp: {{ mongodb_net_bindip }}, {{ inventory_hostname }}
+  bindIp: {{ mongodb_bind_ipv6 | ternary('::1, ', None) }}{{ mongodb_bind_addrs }}, {{ inventory_hostname }}
   
   tls:
     mode: disabled

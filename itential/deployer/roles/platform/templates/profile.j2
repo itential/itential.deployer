@@ -50,7 +50,7 @@
 {% if discovered_services[0].services is defined %}
   {% set services = discovered_services[0].services %}
 {% endif %}
-{% if configure_iag_adapters | bool%}
+{% if configure_iag_adapters | bool and 'gateway' in groups %}
   {% for iag in groups["gateway"] %}
     {% set iagAdapterName = "IAG-" + iag %}
     {{ services.append(iagAdapterName) }}
