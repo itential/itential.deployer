@@ -22,6 +22,7 @@
 # will need mongo cmd line tools to import some initial data. It does not install
 # the database, just the cmd line tools and the mongo shell.
 - name: Install mongodb repo (for cmd line tools)
+  when: configure_iap | bool
   ansible.builtin.yum_repository:
     name: "mongodb"
     description: MongoDB Repository
@@ -32,6 +33,7 @@
 
 # Install mongodb tools if they are not already installed
 - name: Install the MongoDB tools packages
+  when: configure_iap | bool
   ansible.builtin.yum:
     name: "{{ mongodb_tools_packages[ansible_distribution_major_version] }}"
     state: present
