@@ -1,10 +1,21 @@
 # Copyright (c) 2022, Itential, LLC
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
-- name: Upload the IAP bin file
+- name: Upload the IAP bin file using rsync
   ansible.posix.synchronize:
     src: "{{ iap_bin_file }}"
     dest: "{{ iap_install_dir }}/{{ iap_bin_file }}"
+    rsync_opts:
+      - "--copy-links"
+  when: upload_using_rsync
+
+- name: Upload the IAP bin file using copy
+  ansible.builtin.copy:
+    src: "{{ iap_bin_file }}"
+    dest: "{{ iap_install_dir }}/{{ iap_bin_file }}"
+    mode: 0775
+    force: false
+  when: not upload_using_rsync
 
 - name: Change bin file ownership, group and permissions
   ansible.builtin.file:
