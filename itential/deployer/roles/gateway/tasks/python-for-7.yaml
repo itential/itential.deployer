@@ -8,6 +8,7 @@
   register: openssl_installed
 
 - name: Install openssl
+  when: not openssl_installed.stat.exists
   block:
     - name: Download openssl Source
       ansible.builtin.get_url:
@@ -18,9 +19,9 @@
 
     - name: Get openssl Source
       ansible.builtin.unarchive:
-        src: "{{workingdir.path }}/{{ iag_openssl_url | basename }}"
-        dest:  "{{ workingdir.path }}"
-        remote_src: yes
+        src: "{{ workingdir.path }}/{{ iag_openssl_url | basename }}"
+        dest: "{{ workingdir.path }}"
+        remote_src: true
 
     - name: Configure and build openssl
       ansible.builtin.command:
@@ -30,7 +31,6 @@
         - ./config
         - make
         - make install
-  when: openssl_installed.stat.exists == False
 
 - name: Check if Python is already installed
   ansible.builtin.stat:
@@ -38,6 +38,7 @@
   register: python_installed
 
 - name: Install Python
+  when: not python_installed.stat.exists
   block:
     - name: Download Python Source
       ansible.builtin.get_url:
@@ -47,14 +48,14 @@
 
     - name: Get Python source
       ansible.builtin.unarchive:
-        src: "{{workingdir.path }}/{{ iag_python_src_url | basename }}"
-        dest:  "{{ workingdir.path }}"
-        remote_src: yes
+        src: "{{ workingdir.path }}/{{ iag_python_src_url | basename }}"
+        dest: "{{ workingdir.path }}"
+        remote_src: true
 
     # Modify many lines on the config file for the SSL settings
     - name: Modify SSL setup lines (1)
       ansible.builtin.lineinfile:
-        path: "{{workingdir.path }}/Python-{{ iag_python_version }}/Modules/Setup"
+        path: "{{ workingdir.path }}/Python-{{ iag_python_version }}/Modules/Setup"
         regexp: ^#SSL=/usr/local/ssl$
         line: "SSL=/usr/local/ssl"
         insertafter: ^#SSL=/usr/local/ssl$
@@ -62,7 +63,7 @@
 
     - name: Modify SSL setup lines (2)
       ansible.builtin.lineinfile:
-        path: "{{workingdir.path }}/Python-{{ iag_python_version }}/Modules/Setup"
+        path: "{{ workingdir.path }}/Python-{{ iag_python_version }}/Modules/Setup"
         line: "_ssl _ssl.c -DUSE_SSL -I$(SSL)/include -I$(SSL)/include/openssl -L$(SSL)/lib -lssl -lcrypto"
         insertafter: ^SSL=/usr/local/ssl$
         firstmatch: true
@@ -89,14 +90,14 @@
     - name: Update release file for python version
       ansible.builtin.lineinfile:
         path: "{{ itential_release_file }}"
-        line: "PYTHON={{ python_installed_version.stdout}}"
-        create: yes
+        line: "PYTHON={{ python_installed_version.stdout }}"
+        create: true
 
     - name: Add pip3 symlink
       ansible.builtin.file:
-         state: link
-         src: /usr/local/bin/pip3.9
-         path: /usr/local/bin/pip3
+        state: link
+        src: /usr/local/bin/pip3.9
+        path: /usr/local/bin/pip3
 
     - name: Capture pip version
       ansible.builtin.command:
@@ -106,6 +107,5 @@
     - name: Update release file for pip version
       ansible.builtin.lineinfile:
         path: "{{ itential_release_file }}"
-        line: "PIP={{ pip_installed_version.stdout}}"
-        create: yes
-  when: python_installed.stat.exists == False
+        line: "PIP={{ pip_installed_version.stdout }}"
+        create: true

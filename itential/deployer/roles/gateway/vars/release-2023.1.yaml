@@ -9,3 +9,4 @@ iag_terraform_url: https://releases.hashicorp.com/terraform/0.12.31/terraform_0.
 iag_python_dependencies:
   - wheel
   - setuptools==58.0.1
+  - ansible-pylibssh

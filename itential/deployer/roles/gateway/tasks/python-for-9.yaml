@@ -21,8 +21,8 @@
 - name: Update release file for python version
   ansible.builtin.lineinfile:
     path: "{{ itential_release_file }}"
-    line: "PYTHON={{ python_installed_version.stdout}}"
-    create: yes
+    line: "PYTHON={{ python_installed_version.stdout }}"
+    create: true
 
 - name: Install pip3
   ansible.builtin.command:
@@ -37,4 +37,4 @@
   ansible.builtin.lineinfile:
     path: "{{ itential_release_file }}"
     line: "PIP={{ pip_installed_version.stdout }}"
-    create: yes
+    create: true

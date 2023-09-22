@@ -3,7 +3,7 @@
 ---
 - name: Install python3 with yum
   ansible.builtin.yum:
-    name: 
+    name:
       - python39
       - python39-devel
 
@@ -21,8 +21,8 @@
 - name: Update release file for python version
   ansible.builtin.lineinfile:
     path: "{{ itential_release_file }}"
-    line: "PYTHON={{ python_installed_version.stdout}}"
-    create: yes
+    line: "PYTHON={{ python_installed_version.stdout }}"
+    create: true
 
 - name: Add pip3 symlink
   ansible.builtin.file:
@@ -39,4 +39,4 @@
   ansible.builtin.lineinfile:
     path: "{{ itential_release_file }}"
     line: "PIP={{ pip_installed_version.stdout }}"
-    create: yes
+    create: true

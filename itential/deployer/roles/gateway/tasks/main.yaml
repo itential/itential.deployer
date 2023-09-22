@@ -19,7 +19,7 @@
     - "redhat-{{ ansible_distribution_major_version }}.yaml"
 
 - name: Check for valid IAG release
-  fail:
+  ansible.builtin.fail:
     msg: "missing or invalid iag_release"
   when: iag_release == "UNDEFINED"
 
@@ -36,7 +36,7 @@
   ansible.builtin.lineinfile:
     path: "{{ itential_release_file }}"
     line: "GATEWAY={{ iag_release }}"
-    create: yes
+    create: true
 
 - name: Create temporary working directory
   ansible.builtin.tempfile:
@@ -52,7 +52,7 @@
     name: "{{ iag_user }}"
     group: "{{ iag_group }}"
     groups: wheel
-    generate_ssh_key: yes
+    generate_ssh_key: true
     state: present
 
 - name: Create working directories
@@ -104,7 +104,7 @@
     file: "python-for-7.yaml"
   when:
     - ansible_distribution_major_version == "7"
-    - python_installed.stat.exists == False or pip_installed.stat.exists == False
+    - not python_installed.stat.exists or not pip_installed.stat.exists
 
 # Include a file for RHEL8 steps to install the appropriate version of python.
 - name: Include tasks to install python on version 8
@@ -112,7 +112,7 @@
     file: "python-for-8.yaml"
   when:
     - ansible_distribution_major_version == "8"
-    - python_installed.stat.exists == False or pip_installed.stat.exists == False
+    - not python_installed.stat.exists or not pip_installed.stat.exists
 
 # Include a file for RHEL9 steps to install the appropriate version of python.
 - name: Include tasks to install python on version 9
@@ -120,12 +120,7 @@
     file: "python-for-9.yaml"
   when:
     - ansible_distribution_major_version == "9"
-    - python_installed.stat.exists == False or pip_installed.stat.exists == False
-
-- name: Install Python dependencies
-  ansible.builtin.pip:
-    name: "{{ iag_python_dependencies }}"
-    executable: /usr/local/bin/pip3
+    - not python_installed.stat.exists or not pip_installed.stat.exists
 
 - name: Setup python virtual environment
   ansible.builtin.command:
@@ -140,8 +135,16 @@
   ansible.builtin.shell:
     cmd: echo source {{ iag_install_dir }}/venv/bin/activate > /etc/profile.d/venv.sh
 
+- name: Install Python dependencies
+  ansible.builtin.pip:
+    name: "{{ item }}"
+    virtualenv: "{{ iag_install_dir }}/venv"
+  with_items:
+    - "{{ iag_python_dependencies }}"
+
 # Need to install ansible within the virtual environment
 - name: Install Ansible
+  when: iag_enable_ansible | bool
   block:
     - name: Install Ansible into the python virtual environment
       ansible.builtin.pip:
@@ -152,7 +155,7 @@
       ansible.builtin.template:
         src: ansible.cfg.j2
         dest: /etc/ansible/ansible.cfg
-        backup: yes
+        backup: true
 
     - name: Create empty ansible inventory files
       ansible.builtin.file:
@@ -174,10 +177,10 @@
       ansible.builtin.lineinfile:
         path: "{{ itential_release_file }}"
         line: "ANSIBLE={{ iag_ansible_version }}"
-        create: yes
-  when: iag_enable_ansible | bool
+        create: true
 
 - name: Install Terraform
+  when: iag_enable_terraform | bool
   block:
     - name: Download Terraform
       ansible.builtin.get_url:
@@ -189,14 +192,13 @@
       ansible.builtin.unarchive:
         src: "{{ workingdir.path }}/{{ iag_terraform_url | basename }}"
         dest: /usr/local/bin
-        remote_src: yes
+        remote_src: true
 
     - name: Update release file
       ansible.builtin.lineinfile:
         path: "{{ itential_release_file }}"
         line: "TERRAFORM=true"
-        create: yes
-  when: iag_enable_terraform | bool
+        create: true
 
 - name: Check if Automation Gateway is already installed
   ansible.builtin.stat:
@@ -204,6 +206,7 @@
   register: iag_installed
 
 - name: Install Automation Gateway
+  when: not iag_installed.stat.exists
   block:
     - name: Copy IAG to host
       ansible.builtin.copy:
@@ -234,11 +237,10 @@
         owner: "{{ iag_user }}"
         group: "{{ iag_group }}"
         mode: "0660"
-  when: iag_installed.stat.exists == false
 
 - name: Create Nornir files
+  when: iag_enable_nornir | bool
   block:
-
     - name: Create Nornir inventory files (empty)
       ansible.builtin.file:
         name: "{{ item }}"
@@ -263,14 +265,13 @@
       ansible.builtin.lineinfile:
         path: "{{ itential_release_file }}"
         line: "NORNIR=true"
-        create: yes
-  when: iag_enable_nornir | bool
+        create: true
 
 - name: Write automation-gateway.service to host
   ansible.builtin.template:
     src: automation-gateway.service.j2
     dest: /etc/systemd/system/automation-gateway.service
-    backup: yes
+    backup: true
 
 # Check if firewalld is running, if it is then open the appropriate ports
 - name: Gather service facts
@@ -279,10 +280,10 @@
 - name: Open Port on FirewallD Public Zone
   ansible.posix.firewalld:
     port: "{{ iag_port }}/tcp"
-    permanent: yes
+    permanent: true
     state: enabled
     zone: public
-    immediate: yes
+    immediate: true
   when: (ansible_facts.services["firewalld.service"].state == "running") and
         (ansible_facts.services["firewalld.service"].status == "enabled")
   ignore_errors: true
@@ -290,7 +291,7 @@
 - name: Start Automation Gateway service
   ansible.builtin.service:
     name: automation-gateway
-    enabled: yes
+    enabled: true
     state: started
     daemon_reload: true
 
