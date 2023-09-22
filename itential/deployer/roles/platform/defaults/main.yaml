@@ -24,3 +24,6 @@ process_tasks_on_start: true
 
 # By default, IAP should be configured to process jobs on start
 process_jobs_on_start: true
+
+# Flag to determine whether to use rsync when uploading artifacts
+upload_using_rsync: false
