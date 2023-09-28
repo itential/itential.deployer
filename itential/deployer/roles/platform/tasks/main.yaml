@@ -39,10 +39,10 @@
     state: present
 
 # We should create a proper security policy moving forward, but using this for now
-- name: Put SELinux in permissive mode, logging actions that would be blocked.
-  ansible.posix.selinux:
-    policy: targeted
-    state: permissive
+# - name: Put SELinux in permissive mode, logging actions that would be blocked.
+#   ansible.posix.selinux:
+#     policy: targeted
+#     state: permissive
 
 - name: Install nodejs
   ansible.builtin.include_tasks:
@@ -113,6 +113,10 @@
 - name: Configure firewalld
   ansible.builtin.include_tasks:
     file: configure-firewalld.yml
+
+- name: Configure SELinux
+  ansible.builtin.include_tasks:
+    file: configure-selinux.yml
 
 - name: Configure vault
   ansible.builtin.include_tasks:

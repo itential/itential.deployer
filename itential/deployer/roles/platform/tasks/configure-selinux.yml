@@ -1,0 +1,13 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+- name: SELinux - Update the policy to allow the IAP service to use the install and log directory
+  ansible.builtin.command: "{{ item }}"
+  with_items:
+    - restorecon -R -v '{{ iap_install_dir }}'
+    - restorecon -R -v '{{ iap_log_dir }}'
+  register: result
+  failed_when:
+    - result.rc is defined
+    - result.rc > 0
+    - "'already defined' not in result.stderr"
