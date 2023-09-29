@@ -28,12 +28,21 @@
     tasks_from: restart-mongo.yml
   when: result1.changed or result2.changed
 
-- name: Combine the mongodb and arbiter server lists
+- name: Create the replicaset members list (no arbiter)
+  ansible.builtin.set_fact:
+    mongodb_servers: "{{ groups.mongodb }}"
+  when:
+    - inventory_hostname in groups.mongodb
+    - groups.mongodb.index(inventory_hostname) == 0
+    - not groups.mongodb_arbiter is defined
+
+- name: Create the replicaset members list (with arbiter)
   ansible.builtin.set_fact:
     mongodb_servers: "{{ groups.mongodb + groups.mongodb_arbiter }}"
   when:
     - inventory_hostname in groups.mongodb
     - groups.mongodb.index(inventory_hostname) == 0
+    - groups.mongodb_arbiter is defined
 
 - name: Create the replicaset
   community.mongodb.mongodb_replicaset:
