@@ -1,0 +1,26 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+- name: Copy the cert file
+  ansible.builtin.copy:
+    src: "{{ iag_ssl_cert_src }}"
+    dest: "{{ iag_ssl_cert_dest }}"
+    mode: 0400
+    owner: "{{ iag_user }}"
+    group: "{{ iag_group }}"
+
+- name: Copy the key file
+  ansible.builtin.copy:
+    src: "{{ iag_ssl_key_src }}"
+    dest: "{{ iag_ssl_key_dest }}"
+    mode: 0400
+    owner: "{{ iag_user }}"
+    group: "{{ iag_group }}"
+
+- name: Copy the root CA file
+  ansible.builtin.copy:
+    src: "{{ iag_ssl_rootca_src }}"
+    dest: "{{ iag_ssl_rootca_dest }}"
+    mode: 0400
+    group: "{{ iag_group }}"
+    owner: "{{ iag_user }}"

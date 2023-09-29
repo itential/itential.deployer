@@ -8,5 +8,4 @@ iag_python_src_url: https://www.python.org/ftp/python/3.9.7/Python-3.9.7.tgz
 iag_terraform_url: https://releases.hashicorp.com/terraform/0.12.31/terraform_0.12.31_linux_amd64.zip
 iag_python_dependencies:
   - wheel
-  - setuptools==58.0.1
   - ansible-pylibssh

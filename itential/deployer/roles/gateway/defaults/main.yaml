@@ -18,6 +18,9 @@ iag_install_dir: /opt/automation-gateway
 # Location of IAG data
 iag_data_dir: /opt/automation-gateway
 
+# Location of IAG logs
+iag_log_dir: /var/log/automation-gateway
+
 # Default port
 iag_port: 8083
 
@@ -31,3 +34,16 @@ iag_group: itential
 iag_openssl_url: https://www.openssl.org/source/openssl-1.0.2q.tar.gz
 iag_python_src_url: https://www.python.org/ftp/python/3.9.5/Python-3.9.5.tgz
 iag_python_version: 3.9.5
+
+# Default HTTPS/SSL settings
+iag_https: false
+iag_https_port: 8443
+iag_ssl_copy_certs: true
+iag_ssl_dir: "{{ iag_install_dir }}/conf/certs"
+iag_ssl_cert_src: server.crt
+iag_ssl_cert_dest: "{{ iag_ssl_dir }}/{{ iag_ssl_cert_src }}"
+iag_ssl_key_src: server.key
+iag_ssl_key_dest: "{{ iag_ssl_dir }}/{{ iag_ssl_key_src }}"
+iag_ssl_rootca_src: rootCA.crt
+iag_ssl_rootca_dest: "{{ iag_ssl_dir }}/{{ iag_ssl_rootca_src }}"
+iag_tlsv1_2: false
