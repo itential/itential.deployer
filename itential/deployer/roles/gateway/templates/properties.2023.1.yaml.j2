@@ -13,7 +13,11 @@
 
 # The port on which Automation Gateway server will listen for requests.
 # Mutually exclusive with bind_list
+{% if iag_https %}
+port: {{ iag_https_port }}
+{% else %}
 port: {{ iag_port }}
+{% endif %}
 
 # The IP addresses to bind the web application to.
 # For ipv4 only use "0.0.0.0", for ipv6 and ipv4 use "[::]"
@@ -46,7 +50,7 @@ authentication_idle_timeout: 600
 password_reset_enabled: true
 
 # Directory to write global log files to
-global_log_directory: '/var/log/automation-gateway'
+global_log_directory: '{{ iag_log_dir }}'
 
 # Maximum log files kept in rotation
 # Valid range of values is 1-100. If value is set to 1, log file will not be limited in size.
@@ -76,21 +80,38 @@ strict_args: true
 ################
 
 # To start the server using SSL/TLS please fill out the following properties.
-#server_certfile: "{{ iag_install_dir }}/conf/certs/cert.pem"
+{% if iag_https %}
+server_certfile: "{{ iag_ssl_cert_dest }}"
 
 # Note: gunicorn does not currently support encrypted key files.
-#server_keyfile: "{{ iag_install_dir }}/conf/certs/key.pem"
+server_keyfile: "{{ iag_ssl_key_dest }}"
 
-# server_cabundle: "~/cabundle.crt"
+server_cabundle: "{{ iag_ssl_rootca_dest }}"
+{% else %}
+#server_certfile: "{{ iag_ssl_cert_dest }}"
+
+# Note: gunicorn does not currently support encrypted key files.
+#server_keyfile: "{{ iag_ssl_key_dest }}"
+
+# server_cabundle: "{{ iag_ssl_rootca_dest }}"
+{% endif %}
 
 # TLSv1_2
+{% if iag_https and iag_tlsv1_2 %}
+server_ssl_version: "TLSv1_2"
+{% else %}
 #server_ssl_version: "TLSv1_2"
+{% endif %}
 
 # You may also set custom SSL Ciphers.
 #
 # https://docs.gunicorn.org/en/20.x/settings.html#ciphers
 #
+{% if server_ssl_ciphers is defined %}
+server_ssl_ciphers: "{{ server_ssl_ciphers }}"
+{% else %}
 # server_ssl_ciphers: "ECDHE-ECDSA-AES128-GCM-SHA256:...""
+{% endif %}
 
 #############
 # Databases #
