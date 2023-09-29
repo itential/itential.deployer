@@ -1,9 +1,5 @@
 # Copyright (c) 2022, Itential, LLC
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
----
-- name: Include default vars
-  ansible.builtin.include_vars:
-    file: defaults/main.yaml
 
 - name: Include release vars
   ansible.builtin.include_vars:
@@ -64,6 +60,7 @@
     state: directory
   with_items:
     - /etc/ansible
+    - "{{ iag_log_dir }}"
     - "{{ iag_properties_location }}"
     - "{{ iag_data_dir }}"
     - "{{ iag_data_dir }}/data"
@@ -84,6 +81,11 @@
     - "{{ iag_install_dir }}/scripts"
     - "{{ iag_install_dir }}/terraform"
     - "{{ iag_install_dir }}/terraform/scripts"
+
+- name: Copy certs
+  ansible.builtin.include_tasks:
+    file: copy-certs.yml
+  when: iag_https and iag_ssl_copy_certs
 
 - name: Check if Python is already installed
   ansible.builtin.stat:
@@ -277,22 +279,37 @@
 - name: Gather service facts
   ansible.builtin.service_facts:
 
-- name: Open Port on FirewallD Public Zone
+- name: Open Port on FirewallD Public Zone (HTTP)
   ansible.posix.firewalld:
     port: "{{ iag_port }}/tcp"
     permanent: true
     state: enabled
     zone: public
     immediate: true
-  when: (ansible_facts.services["firewalld.service"].state == "running") and
-        (ansible_facts.services["firewalld.service"].status == "enabled")
+  when: 
+    - ansible_facts.services["firewalld.service"].state == "running"
+    - ansible_facts.services["firewalld.service"].status == "enabled"
+    - not iag_https
+  ignore_errors: true
+
+- name: Open Port on FirewallD Public Zone (HTTPS)
+  ansible.posix.firewalld:
+    port: "{{ iag_https_port }}/tcp"
+    permanent: true
+    state: enabled
+    zone: public
+    immediate: true
+  when: 
+    - ansible_facts.services["firewalld.service"].state == "running"
+    - ansible_facts.services["firewalld.service"].status == "enabled"
+    - iag_https
   ignore_errors: true
 
 - name: Start Automation Gateway service
   ansible.builtin.service:
     name: automation-gateway
     enabled: true
-    state: started
+    state: restarted
     daemon_reload: true
 
 - name: Remove temporary working directory
