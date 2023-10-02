@@ -8,8 +8,16 @@
     owner: "{{ iap_user }}"
     group: "{{ iap_group }}"
     mode: 0770
-  when:
-    - configure_vault | bool
+
+- name: SELinux - Update the policy to allow the IAP service to use the vault directory
+  ansible.builtin.command: "{{ item }}"
+  with_items:
+    - restorecon -R -v '{{ vault_install_dir }}'
+  register: result
+  failed_when:
+    - result.rc is defined
+    - result.rc > 0
+    - "'already defined' not in result.stderr"
 
 - name: Copy vault token file to IAP server
   ansible.builtin.copy:
@@ -18,16 +26,12 @@
     mode: 0600
     owner: "{{ iap_user }}"
     group: "{{ iap_group }}"
-  when:
-    - configure_vault | bool
 
 - name: Add itential user to vault group
   ansible.builtin.user:
     name: "{{ iap_user }}"
     groups: "{{ vault_group }}"
     append: true
-  when:
-    - configure_vault | bool
 
 - name: Delete token file off control machine
   ansible.builtin.file:
@@ -35,5 +39,3 @@
     state: absent
   delegate_to: localhost
   ignore_errors: true
-  when:
-    - configure_vault | bool

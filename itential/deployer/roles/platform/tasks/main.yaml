@@ -121,6 +121,8 @@
 - name: Configure vault
   ansible.builtin.include_tasks:
     file: configure-vault.yml
+  when:
+    - configure_vault | bool
 
 - name: Set file ownership and permissions
   ansible.builtin.include_tasks:
