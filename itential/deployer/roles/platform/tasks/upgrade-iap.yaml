@@ -17,6 +17,7 @@
 - name: Backup mongodb itential database
   ansible.builtin.include_tasks:
     file: backup-mongo.yml
+  when: mongo_backup | bool
 
 - name: Install Platform
   ansible.builtin.include_tasks:
