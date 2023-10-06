@@ -2,6 +2,7 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 - name: Install nodejs if RHEL 8 or 9
+  when: ansible_distribution_major_version == "8" or ansible_distribution_major_version == "9"
   block:
     - name: Set the nodejs dnf module variable
       ansible.builtin.set_fact:
@@ -28,9 +29,9 @@
         name: "@{{ nodejs_dnf_module }}"
         state: present
       when: iap_nodejs_dnf_module_profile is not defined
-  when: ansible_distribution_major_version == "8" or ansible_distribution_major_version == "9"
 
 - name: Install nodejs if RHEL7
+  when: ansible_distribution_major_version == "7"
   block:
     - name: Create temp working dir
       ansible.builtin.tempfile:
@@ -41,7 +42,7 @@
       ansible.builtin.get_url:
         url: "{{ iap_nodejs[ansible_distribution_major_version]['url'] }}"
         dest: "{{ workingdir.path }}/{{ iap_nodejs[ansible_distribution_major_version]['url'] | basename }}"
-        mode: 0755
+        mode: "0755"
 
     # This will install the appropriate yum repo for nodejs
     - name: Install appropriate nodejs yum repo
@@ -57,5 +58,3 @@
       ansible.builtin.file:
         path: "{{ workingdir.path }}"
         state: absent
-
-  when: ansible_distribution_major_version == "7"

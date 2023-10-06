@@ -45,7 +45,7 @@
       ansible.builtin.template:
         src: profile.j2
         dest: /tmp/itential_local_aaa_profile.json
-        mode: '1777'
+        mode: "0644"
       vars:
         desc: A default IAP profile that is using the Local AAA adapter to login
         id: Local_AAA
@@ -75,7 +75,7 @@
       ansible.builtin.template:
         src: profile.j2
         dest: /tmp/itential_ldap_profile.json
-        mode: '1777'
+        mode: "0644"
       vars:
         desc: An IAP profile that is using the LDAP adapter to login
         id: LDAP
@@ -122,7 +122,7 @@
       ansible.builtin.template:
         src: profile.j2
         dest: /tmp/itential_primary_local_aaa_profile.json
-        mode: '1777'
+        mode: "0644"
       vars:
         desc: A default IAP profile that is using the Local AAA adapter to login for the primary data center
         id: primary_local_aaa_profile
@@ -148,7 +148,7 @@
       ansible.builtin.template:
         src: profile.j2
         dest: /tmp/itential_secondary_local_aaa_profile.json
-        mode: '1777'
+        mode: "0644"
       vars:
         desc: A default IAP profile that is using the Local AAA adapter to login for the primary data center
         id: Secondary_Local_AAA
@@ -182,13 +182,13 @@
       ansible.builtin.template:
         src: local_aaa_service_config.j2
         dest: /tmp/itential_sc_local_aaa.json
-        mode: '1777'
+        mode: "0644"
 
     - name: Create the default LDAP adapter config
       ansible.builtin.template:
         src: ldap_adapter_service_config.j2
         dest: /tmp/itential_sc_ldap_adapter.json
-        mode: '1777'
+        mode: "0644"
 
     - name: Create adapter configs for all defined gateways
       when:
@@ -197,14 +197,14 @@
       ansible.builtin.template:
         src: iag_adapter_service_config.j2
         dest: "/tmp/itential_sc_{{ item }}_adapter.json"
-        mode: '1777'
+        mode: "0644"
       loop: "{{ groups['gateway'] }}"
 
     - name: Find all rendered service config templates
       ansible.builtin.find:
         paths: /tmp
         patterns: 'itential_sc_*.json'
-      register: foundSCFiles
+      register: found_sc_files
 
     # Import all of the service configs that were generated
     - name: Insert service configs into MongoDB
@@ -216,10 +216,10 @@
           - --mode=upsert
           - --upsertFields=name
           - --file="{{ item.path }}"
-      loop: "{{ foundSCFiles.files}}"
+      loop: "{{ found_sc_files.files }}"
 
 - name: Restart IAP
-  command: /bin/true
+  ansible.builtin.command: /bin/true
   notify: Restart IAP
 
 - name: Clean up all rendered template files in /tmp

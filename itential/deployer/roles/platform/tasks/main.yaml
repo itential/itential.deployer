@@ -70,8 +70,7 @@
     state: directory
     owner: "{{ iap_user }}"
     group: "{{ iap_group }}"
-    mode: 0775
-    setype: haproxy_var_lib_t
+    mode: "0775"
   with_items:
     - "{{ iap_install_dir }}"
     - "{{ iap_install_dir }}/keys"
@@ -101,7 +100,7 @@
     state: directory
     owner: "{{ iap_user }}"
     group: "{{ iap_group }}"
-    mode: 0775
+    mode: "0775"
   with_items:
     - "{{ iap_install_dir }}/current/custom/@itential"
     - "{{ iap_install_dir }}/current/custom/@itentialopensource"
@@ -114,29 +113,22 @@
   ansible.builtin.include_tasks:
     file: configure-firewalld.yml
 
-- name: Configure SELinux
-  ansible.builtin.include_tasks:
-    file: configure-selinux.yml
-
 - name: Configure vault
   ansible.builtin.include_tasks:
     file: configure-vault.yml
-  when:
-    - configure_vault | bool
+  when: configure_vault | bool
 
 - name: Set file ownership and permissions
   ansible.builtin.include_tasks:
     file: set-file-ownership.yml
 
-- block:
-  - name: Initialize MongoDB with IAP data
-    when: configure_iap | bool
-    ansible.builtin.include_tasks:
-      file: mongo-init.yml
-  tags: mongodb_init
+- name: Initialize MongoDB with IAP data
+  ansible.builtin.include_tasks:
+    file: mongo-init.yml
+  when: configure_iap | bool
 
 - name: Enable and start IAP
   ansible.builtin.systemd:
     name: automation-platform
-    enabled: yes
+    enabled: true
     state: restarted

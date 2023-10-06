@@ -27,7 +27,7 @@
     src: "{{ prev_iap_install_dir }}/properties.json"
     dest: "{{ iap_install_dir }}/current/properties.json"
     remote_src: true
-    mode: 0664
+    mode: "0664"
     owner: "{{ iap_user }}"
     group: "{{ iap_group }}"
 
@@ -45,7 +45,7 @@
     src: "{{ prev_iap_install_dir }}/custom/"
     dest: "{{ iap_install_dir }}/{{ iap_package_name }}/custom"
     remote_src: true
-    mode: 0775
+    mode: "0775"
     owner: "{{ iap_user }}"
     group: "{{ iap_group }}"
   when: prev_custom_stat_result.stat.exists
@@ -107,7 +107,7 @@
   ansible.builtin.file:
     path: "{{ iap_install_dir }}/current/node_modules/{{ item | dirname }}"
     state: directory
-    mode: 0775
+    mode: "0775"
     owner: "{{ iap_user }}"
     group: "{{ iap_group }}"
   loop: "{{ links }}"
