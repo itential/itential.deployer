@@ -38,12 +38,6 @@
     name: "{{ mongodb_tools_packages[ansible_distribution_major_version] }}"
     state: present
 
-# We should create a proper security policy moving forward, but using this for now
-# - name: Put SELinux in permissive mode, logging actions that would be blocked.
-#   ansible.posix.selinux:
-#     policy: targeted
-#     state: permissive
-
 - name: Install nodejs
   ansible.builtin.include_tasks:
     file: install-nodejs.yml
