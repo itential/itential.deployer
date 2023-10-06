@@ -218,10 +218,6 @@
           - --file="{{ item.path }}"
       loop: "{{ found_sc_files.files }}"
 
-- name: Restart IAP
-  ansible.builtin.command: /bin/true
-  notify: Restart IAP
-
 - name: Clean up all rendered template files in /tmp
   ansible.builtin.file:
     path: "/tmp/itential_*.json"

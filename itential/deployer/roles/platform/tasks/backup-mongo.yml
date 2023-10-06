@@ -13,9 +13,6 @@
     mode: "0775"
     owner: "{{ iap_user }}"
     group: "{{ iap_group }}"
-  when:
-    - mongo_backup is defined
-    - mongo_backup
 
 - name: Backup mongodb itential database (no auth)
   ansible.builtin.command:
@@ -27,8 +24,6 @@
       - --out="{{ iap_install_dir }}/current/backups"
   when:
     - mongodb_auth_enabled is not defined or not mongodb_auth_enabled
-    - mongo_backup is defined
-    - mongo_backup
 
 - name: Backup mongodb itential database (auth enabled)
   ansible.builtin.command:
@@ -43,5 +38,3 @@
   when:
     - mongodb_auth_enabled is defined
     - mongodb_auth_enabled
-    - mongo_backup is defined
-    - mongo_backup
