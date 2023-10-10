@@ -1,0 +1,95 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+- name: Create temporary working directory
+  ansible.builtin.tempfile:
+    state: directory
+  register: workingdir
+
+- name: SELinux - Copy the custom policy files
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ workingdir.path }}/{{ item | basename }}"
+  with_fileglob:
+    - "{{ role_path }}/files/*.te"
+
+- name: SELinux - Find the custom policy files
+  ansible.builtin.find:
+    paths: "{{ workingdir.path }}"
+    patterns: "*.te"
+  register: selinux_policies
+
+- name: SELinux - Compile the modules
+  ansible.builtin.command:
+    cmd: "checkmodule -M -m -o {{ workingdir.path }}/{{ item.path | basename | splitext | first }}.mod {{ item.path }}"
+  with_items:
+    - "{{ selinux_policies.files }}"
+
+- name: SELinux - Find the compiled modules
+  ansible.builtin.find:
+    paths: "{{ workingdir.path }}"
+    patterns: "*.mod"
+  register: compiled_modules
+
+- name: SELinux - Package the modules
+  ansible.builtin.command:
+    cmd: "semodule_package -o {{ workingdir.path }}/{{ item.path | basename | splitext | first }}.pp -m {{ item.path }}"
+  with_items:
+    - "{{ compiled_modules.files }}"
+
+- name: SELinux - Install the modules
+  ansible.builtin.shell: semodule -i *.pp
+  args:
+    executable: /bin/bash
+    chdir: "{{ workingdir.path }}"
+
+# MongoDB is configured to use non-default paths for its data and log
+# directories. First, we need to update the SELinux policy to allow the
+# mongod service to use the new directory, it’s worth to note that we
+# need to make sure to include the .* at the end of the directory. Then,
+# update the SELinux user policy for the new directory. Finally, apply
+# the updated SELinux policies to the directory. Do this for data and logs.
+- name: SELinux - Update the policy to allow the mongod service to use the custom data directory
+  ansible.builtin.command: "{{ item }}"
+  with_items:
+    - semanage fcontext -a -t mongod_var_lib_t '{{ mongo_data_dir }}.*'
+    - chcon -Rv -u system_u -t mongod_var_lib_t '{{ mongo_data_dir }}'
+    - restorecon -R -v '{{ mongo_data_dir }}'
+  register: result
+  failed_when:
+    - result.rc is defined
+    - result.rc > 0
+    - "'already defined' not in result.stderr"
+  when: mongo_data_dir != "/var/lib/mongo"
+
+- name: SELinux - Update the policy to allow the mongod service to use the custom log directory
+  ansible.builtin.command: "{{ item }}"
+  with_items:
+    - semanage fcontext -a -t mongod_log_t '{{ mongo_log_dir }}'
+    - chcon -Rv -u system_u -t mongod_log_t '{{ mongo_log_dir }}'
+    - restorecon -R -v '{{ mongo_log_dir }}'
+  failed_when:
+    - result.rc is defined
+    - result.rc > 0
+    - "'already defined' not in result.stderr"
+  when: mongo_log_dir != "/var/log/mongodb"
+
+- name: SELinux - Update the policy to allow the mongod service to use the arbiter custom data directory
+  ansible.builtin.command: "{{ item }}"
+  with_items:
+    - semanage fcontext -a -t mongod_var_lib_t '{{ mongo_arbiter_data_dir }}.*'
+    - chcon -Rv -u system_u -t mongod_var_lib_t '{{ mongo_arbiter_data_dir }}'
+    - restorecon -R -v '{{ mongo_data_dir }}'
+  failed_when:
+    - result.rc is defined
+    - result.rc > 0
+    - "'already defined' not in result.stderr"
+  when:
+    - mongo_arbiter_data_dir != "/var/lib/mongo"
+    - groups.mongodb_arbiter is defined
+    - inventory_hostname in groups.mongodb_arbiter
+
+- name: Remove temporary working directory
+  ansible.builtin.file:
+    path: "{{ workingdir.path }}"
+    state: absent

@@ -18,14 +18,14 @@ mongodb_bind_addrs: 127.0.0.1
 mongo_conf_file: /etc/mongod.conf
 
 # Directory that stores mongodb data files
-mongo_data_dir: /data/mongo
+mongo_data_dir: /var/lib/mongo
 
 # Data directory for a mongo arbiter, even though it does not store data
 # this needs to be created.
-mongo_arbiter_data_dir: "{{ mongo_data_dir }}/arb"
+mongo_arbiter_data_dir: "{{ mongo_data_dir }}"
 
 # Target path for writing mongodb log files
-mongo_log_dir: /var/log/mongodb/mongod.log
+mongo_log_dir: /var/log/mongodb
 
 mongo_owner: mongod
 mongo_group: mongod

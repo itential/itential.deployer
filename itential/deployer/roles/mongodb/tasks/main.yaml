@@ -17,6 +17,10 @@
   ansible.builtin.include_role:
     name: os
 
+- name: Configure SELinux
+  ansible.builtin.include_tasks:
+    file: configure-selinux.yml
+
 - name: Get the list of installed packages
   ansible.builtin.package_facts:
     manager: "auto"
@@ -85,7 +89,7 @@
   ansible.builtin.command: tuned-adm profile virtual-guest-no-thp
   ignore_errors: true
 
-  # Tune Kernel parameters
+# Tune Kernel parameters
 - name: Adjust keepalive
   ansible.posix.sysctl:
     name: net.ipv4.tcp_keepalive_time
@@ -154,93 +158,6 @@
     path: "{{ mongo_conf_file }}"
     regexp: "^  dbPath: {{ mongo_data_dir }}"
     line: "  dbPath: {{ mongo_arbiter_data_dir }}"
-  when:
-    - groups.mongodb_arbiter is defined
-    - inventory_hostname in groups.mongodb_arbiter
-
-# Configure SELinux
-- name: Create temporary working directory
-  ansible.builtin.tempfile:
-    state: directory
-  register: workingdir
-
-# Adjust SELinux to permit access to the cgroup. According to the MongoDB
-# documentation, the current SELinux policy does not allow the MongoDB
-# process to access /sys/fs/cgroup, which is required to determine the
-# available memory on your system.
-- name: SELinux - Create a custom policy file to permit access to cgroup
-  ansible.builtin.copy:
-    src: "{{ role_path }}/files/mongodb_cgroup_memory.te"
-    dest: "{{ workingdir.path }}/mongodb_cgroup_memory.te"
-
-- name: SELinux - Compile and load the custom cgroup policy
-  ansible.builtin.command:
-    cmd: "{{ item }}"
-  loop:
-    - checkmodule -M -m -o "{{ workingdir.path }}/mongodb_cgroup_memory.mod" "{{ workingdir.path }}/mongodb_cgroup_memory.te"
-    - semodule_package -o "{{ workingdir.path }}/mongodb_cgroup_memory.pp" -m "{{ workingdir.path }}/mongodb_cgroup_memory.mod"
-    - semodule -i "{{ workingdir.path }}/mongodb_cgroup_memory.pp"
-  ignore_errors: true
-
-# Adjust SELinux to permit access to netstat for FTDC. /proc/net/netstat
-# is required for Full Time Diagnostic Data Capture (FTDC). FTDC in short
-# is a mechanism  to facilitate analysis of the MongoDB server. The data
-# files in FTDC are compressed, not human-readable, and inherit the same
-# file access  permission as the MongoDB data files. Due to this, only
-# users with access to the FTDC data files can transmit the data.
-- name: SELinux - Create a custom policy file to permit access to netstat for FTDC
-  ansible.builtin.copy:
-    src: "{{ role_path }}/files/mongodb_proc_net.te"
-    dest: "{{ workingdir.path }}/mongodb_proc_net.te"
-
-- name: SELinux - Compile and load the custom netstat for FTDC policy
-  ansible.builtin.command:
-    cmd: "{{ item }}"
-  loop:
-    - checkmodule -M -m -o "{{ workingdir.path }}/mongodb_proc_net.mod" "{{ workingdir.path }}/mongodb_proc_net.te"
-    - semodule_package -o "{{ workingdir.path }}/mongodb_proc_net.pp" -m "{{ workingdir.path }}/mongodb_proc_net.mod"
-    - semodule -i "{{ workingdir.path }}/mongodb_proc_net.pp"
-  ignore_errors: true
-
-# MongoDB is configured to use non-default paths for its data and log
-# directories. First, we need to update the SELinux policy to allow the
-# mongod service to use the new directory, it’s worth to note that we
-# need to make sure to include the .* at the end of the directory. Then,
-# update the SELinux user policy for the new directory. Finally, apply
-# the updated SELinux policies to the directory. Do this for data and logs.
-- name: SELinux - Update the policy to allow the mongod service to use the custom data directory
-  ansible.builtin.command: "{{ item }}"
-  with_items:
-    - semanage fcontext -a -t mongod_var_lib_t '{{ mongo_data_dir }}.*'
-    - chcon -Rv -u system_u -t mongod_var_lib_t '{{ mongo_data_dir }}'
-    - restorecon -R -v '{{ mongo_data_dir }}'
-  register: result
-  failed_when:
-    - result.rc is defined
-    - result.rc > 0
-    - "'already defined' not in result.stderr"
-
-- name: SELinux - Update the policy to allow the mongod service to use the custom log directory
-  ansible.builtin.command: "{{ item }}"
-  with_items:
-    - semanage fcontext -a -t mongod_log_t '{{ mongo_log_dir }}'
-    - chcon -Rv -u system_u -t mongod_log_t '{{ mongo_log_dir }}'
-    - restorecon -R -v '{{ mongo_log_dir }}'
-  failed_when:
-    - result.rc is defined
-    - result.rc > 0
-    - "'already defined' not in result.stderr"
-
-- name: SELinux - Update the policy to allow the mongod service to use the arbiter custom data directory
-  ansible.builtin.command: "{{ item }}"
-  with_items:
-    - semanage fcontext -a -t mongod_var_lib_t '{{ mongo_arbiter_data_dir }}.*'
-    - chcon -Rv -u system_u -t mongod_var_lib_t '{{ mongo_arbiter_data_dir }}'
-    - restorecon -R -v '{{ mongo_data_dir }}'
-  failed_when:
-    - result.rc is defined
-    - result.rc > 0
-    - "'already defined' not in result.stderr"
   when:
     - groups.mongodb_arbiter is defined
     - inventory_hostname in groups.mongodb_arbiter
@@ -334,11 +251,6 @@
         replica_set: "{{ mongodb_replication_enabled | ternary(mongo_replset_name, omit) }}"
       vars:
         ansible_python_interpreter: /usr/bin/python3
-
-- name: Remove temporary working directory
-  ansible.builtin.file:
-    path: "{{ workingdir.path }}"
-    state: absent
 
 - name: Determine mongo version
   ansible.builtin.shell:
