@@ -8,8 +8,6 @@
 - name: Patch IAP
   hosts: platform
   become: true
-  vars:
-    mongo_backup: true
   tasks:
     - name: Pull in the common vars
       ansible.builtin.import_role:
