@@ -53,7 +53,10 @@
 {% if configure_iag_adapters | bool and 'gateway' in groups %}
   {% for iag in groups["gateway"] %}
     {% set iagAdapterName = "IAG-" + iag %}
-    {{ services.append(iagAdapterName) }}
+    {# Add the name to the list ONLY if it is currently not present #}
+    {% if iagAdapterName not in services %}
+      {{ services.append(iagAdapterName) }}
+    {% endif %}
   {% endfor %}
 {% endif %}
 {
