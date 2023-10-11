@@ -117,23 +117,12 @@
     file: set-file-ownership.yml
 
 - name: Initialize MongoDB with IAP data
-<<<<<<< HEAD
-  ansible.builtin.include_tasks:
-    file: mongo-init.yml
-  when: configure_iap | bool
-=======
   when: configure_iap | bool
   ansible.builtin.include_tasks:
     file: mongo-init.yml
->>>>>>> main
 
 - name: Enable and start IAP
   ansible.builtin.systemd:
     name: automation-platform
-<<<<<<< HEAD
     enabled: true
     state: restarted
-=======
-    enabled: yes
-    state: restarted
->>>>>>> main
