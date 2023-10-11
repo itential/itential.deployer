@@ -1,11 +1,6 @@
 # Copyright (c) 2022, Itential, LLC
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
-- name: Check the auth status
-  ansible.builtin.include_role:
-    name: mongodb_common
-    tasks_from: check-auth-status.yml
-
 - name: Create the mongodb backup directory
   ansible.builtin.file:
     path: "{{ iap_install_dir }}/current/backups"
@@ -14,27 +9,14 @@
     owner: "{{ iap_user }}"
     group: "{{ iap_group }}"
 
-- name: Backup mongodb itential database (no auth)
-  ansible.builtin.command:
-    argv:
-      - mongodump
-      - --db="{{ mongo_itential_db_name }}"
-      - --host="{{ hostvars[groups['mongodb'][0]].inventory_hostname }}"
-      - --port="{{ mongo_port }}"
-      - --out="{{ iap_install_dir }}/current/backups"
-  when:
-    - mongodb_auth_enabled is not defined or not mongodb_auth_enabled
+- name: Build mongo connection string from template, set as fact
+  ansible.builtin.set_fact:
+    mongo_connection_string: "{{ lookup('ansible.builtin.template', 'mongo-connection-string.j2', lstrip_blocks=true) | trim }}"
 
-- name: Backup mongodb itential database (auth enabled)
+- name: Backup mongodb itential database
   ansible.builtin.command:
     argv:
       - mongodump
-      - --db="{{ mongo_itential_db_name }}"
-      - --host="{{ hostvars[groups['mongodb'][0]].inventory_hostname }}"
-      - --port="{{ mongo_port }}"
-      - --username=admin
-      - --password="{{ mongo_user_admin_password }}"
       - --out="{{ iap_install_dir }}/current/backups"
-  when:
-    - mongodb_auth_enabled is defined
-    - mongodb_auth_enabled
+      - --gzip
+      - "{{ mongo_connection_string }}"

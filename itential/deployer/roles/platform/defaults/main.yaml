@@ -27,3 +27,9 @@ process_jobs_on_start: true
 
 # Flag to determine whether to use rsync when uploading artifacts
 upload_using_rsync: false
+
+# Flag to perform mongo backup when using upgrade-iap role
+mongo_backup: true
+
+# Flag to remove the IAP bin/tar file when complete
+remove_iap_source_file: true

@@ -51,6 +51,12 @@
     src: automation-platform.service.j2
     dest: /usr/lib/systemd/system/automation-platform.service
 
+- name: Remove Itential source file
+  when: remove_iap_source_file | bool
+  ansible.builtin.file:
+    path: "{{ iap_install_dir }}/{{ iap_bin_file }}"
+    state: absent
+
 - name: Write IAP release file
   ansible.builtin.lineinfile:
     path: "{{ itential_release_file }}"
