@@ -5,22 +5,24 @@
 - name: Install Vault
   hosts: vault
   become: true
+
   roles:
     # Pull in the common vars
     - role: common_vars
 
-    # Install and initialize Vault
-    - role: vault
-      when:
-        - vault_install | bool
+  tasks:
+    - name: Install and initialize Vault
+      ansible.builtin.import_role:
+        name: vault
+        tasks_from: main
       tags:
         - vault
         - vault_install
 
-    # Setup Vault (initialize server and unseal)
-    - role: vault_unseal
-      when:
-        - vault_setup | bool
+    - name: Vault (initialize server and unseal)
+      ansible.builtin.import_role:
+        name: vault
+        tasks_from: unseal
       tags:
         - vault
         - vault_unseal

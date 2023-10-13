@@ -13,7 +13,13 @@ vault_port: 8200
 # The default port used by vault clusters to communicate with eachother
 vault_cluster_port: 8201
 
-# The default behavior for installing vault 
+# The default behavior for installing vault
 vault_install: false
 
 vault_setup: false
+
+# Default directory to store the unseal keys
+vault_unseal_keys_dir: /opt/vault/keys/unseal_keys
+
+# Default default to store the root key
+vault_root_key_dir: /opt/vault/keys/root_key
