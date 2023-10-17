@@ -1,15 +1,4 @@
 # Copyright (c) 2022, Itential, LLC
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
-redis_conf_path: /etc/redis
-
-# The location of the Redis config file
-redis_conf_file: "{{ redis_conf_path }}/redis.conf"
-
-# The location of the Redis Sentinel config file
-redis_sentinel_conf_file: "{{ redis_conf_path }}/sentinel.conf"
-
 redis_sentinel_port: 26379
-
-redis_owner: redis
-redis_group: redis
