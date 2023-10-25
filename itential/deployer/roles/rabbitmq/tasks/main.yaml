@@ -175,7 +175,7 @@
     line: "ERLANG={{ erlangVersion.stdout_lines[1] }}"
     create: true
 
-- name: Get installed erlang version
+- name: Get installed rabbitmq version
   ansible.builtin.command:
     cmd: rabbitmqctl version
   register: rabbitmqVersion
