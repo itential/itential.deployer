@@ -1,6 +1,6 @@
 # Copyright (c) 2022, Itential, LLC
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
----
+
 - name: Include release vars
   ansible.builtin.include_vars:
     file: "{{ item }}"
@@ -16,6 +16,10 @@
 - name: Include base OS updates
   ansible.builtin.include_role:
     name: os
+
+- name: Install custom SELinux profiles
+  ansible.builtin.include_role:
+    name: selinux
 
 # This task will install a direct link to the redis RPM as the repo thus
 # enabling control of the redis version to the release files where there is a
@@ -42,12 +46,6 @@
     owner: "{{ redis_owner }}"
     group: "{{ redis_group }}"
     mode: "0640"
-
-# We should create a proper security policy moving forward, but using this for now
-- name: Put SELinux in permissive mode, logging actions that would be blocked.
-  ansible.posix.selinux:
-    policy: targeted
-    state: permissive
 
 # Check if firewalld is running, if it is then open the appropriate ports
 - name: Gather service facts

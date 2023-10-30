@@ -6,7 +6,7 @@
     remote_src: true
     src: "{{ iap_install_dir }}/current/keys/key.pem"
     dest: "{{ iap_install_dir }}/keys/itential.key"
-    mode: 0400
+    mode: "0400"
     owner: "{{ iap_user }}"
     group: "{{ iap_group }}"
 
@@ -15,7 +15,7 @@
     remote_src: true
     src: "{{ iap_install_dir }}/current/keys/cert.pem"
     dest: "{{ iap_install_dir }}/keys/itential.cert"
-    mode: 0400
+    mode: "0400"
     owner: "{{ iap_user }}"
     group: "{{ iap_group }}"
 
@@ -23,7 +23,7 @@
   ansible.builtin.copy:
     src: "{{ mongo_root_ca_file_source }}"
     dest: "{{ itential_root_ca_file_destination }}"
-    mode: 0400
+    mode: "0400"
     group: "{{ iap_group }}"
     owner: "{{ iap_user }}"
   when:

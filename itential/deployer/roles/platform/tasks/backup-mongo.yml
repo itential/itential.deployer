@@ -5,7 +5,7 @@
   ansible.builtin.file:
     path: "{{ iap_install_dir }}/current/backups"
     state: directory
-    mode: 0775
+    mode: "0775"
     owner: "{{ iap_user }}"
     group: "{{ iap_group }}"
 

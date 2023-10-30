@@ -38,12 +38,6 @@
     name: "{{ mongodb_tools_packages[ansible_distribution_major_version] }}"
     state: present
 
-# We should create a proper security policy moving forward, but using this for now
-- name: Put SELinux in permissive mode, logging actions that would be blocked.
-  ansible.posix.selinux:
-    policy: targeted
-    state: permissive
-
 - name: Install nodejs
   ansible.builtin.include_tasks:
     file: install-nodejs.yml
@@ -70,8 +64,7 @@
     state: directory
     owner: "{{ iap_user }}"
     group: "{{ iap_group }}"
-    mode: 0775
-    setype: haproxy_var_lib_t
+    mode: "0775"
   with_items:
     - "{{ iap_install_dir }}"
     - "{{ iap_install_dir }}/keys"
@@ -101,7 +94,7 @@
     state: directory
     owner: "{{ iap_user }}"
     group: "{{ iap_group }}"
-    mode: 0775
+    mode: "0775"
   with_items:
     - "{{ iap_install_dir }}/current/custom/@itential"
     - "{{ iap_install_dir }}/current/custom/@itentialopensource"
@@ -117,15 +110,16 @@
 - name: Configure vault
   ansible.builtin.include_tasks:
     file: configure-vault.yml
+  when: configure_vault | bool
 
 - name: Set file ownership and permissions
   ansible.builtin.include_tasks:
     file: set-file-ownership.yml
 
 - name: Initialize MongoDB with IAP data
-  when: configure_iap | bool
   ansible.builtin.include_tasks:
     file: mongo-init.yml
+  when: configure_iap | bool
 
 - name: Enable and start IAP
   ansible.builtin.systemd:

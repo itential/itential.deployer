@@ -1,0 +1,37 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+- name: Install custom SELinux profiles
+  ansible.builtin.include_role:
+    name: selinux
+
+# MongoDB is configured to use non-default paths for its data and log
+# directories. First, we need to update the SELinux policy to allow the
+# mongod service to use the new directory, it’s worth to note that we
+# need to make sure to include the .* at the end of the directory. Then,
+# update the SELinux user policy for the new directory. Finally, apply
+# the updated SELinux policies to the directory. Do this for data and logs.
+- name: SELinux - Update the policy to allow the mongod service to use the custom data directory
+  ansible.builtin.command: "{{ item }}"
+  with_items:
+    - semanage fcontext -a -t mongod_var_lib_t '{{ mongo_data_dir }}.*'
+    - chcon -Rv -u system_u -t mongod_var_lib_t '{{ mongo_data_dir }}'
+    - restorecon -R -v '{{ mongo_data_dir }}'
+  register: result
+  failed_when:
+    - result.rc is defined
+    - result.rc > 0
+    - "'already defined' not in result.stderr"
+  when: mongo_data_dir != "/var/lib/mongo"
+
+- name: SELinux - Update the policy to allow the mongod service to use the custom log directory
+  ansible.builtin.command: "{{ item }}"
+  with_items:
+    - semanage fcontext -a -t mongod_log_t '{{ mongo_log_dir }}'
+    - chcon -Rv -u system_u -t mongod_log_t '{{ mongo_log_dir }}'
+    - restorecon -R -v '{{ mongo_log_dir }}'
+  failed_when:
+    - result.rc is defined
+    - result.rc > 0
+    - "'already defined' not in result.stderr"
+  when: mongo_log_dir != "/var/log/mongodb"

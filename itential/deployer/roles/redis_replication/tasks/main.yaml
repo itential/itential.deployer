@@ -50,11 +50,6 @@
     - inventory_hostname in groups['redis_secondary']
     - inventory_hostname not in groups['redis_secondary'][0]
 
-- name: Put SELinux in permissive mode, logging actions that would be blocked.
-  ansible.posix.selinux:
-    policy: targeted
-    state: permissive
-
 # Check if firewalld is running, if it is then open the appropriate ports
 - name: Gather service facts
   ansible.builtin.service_facts:
@@ -73,13 +68,9 @@
   ignore_errors: true
 
 - name: Restart Redis
-  ansible.builtin.systemd:
-    name: redis
-    enabled: yes
-    state: restarted
+  command: /bin/true
+  notify: Restart Redis
 
 - name: Restart Sentinel
-  ansible.builtin.systemd:
-    name: redis-sentinel
-    enabled: yes
-    state: restarted
+  command: /bin/true
+  notify: Restart Sentinel

@@ -7,27 +7,21 @@
     state: directory
     owner: "{{ iap_user }}"
     group: "{{ iap_group }}"
-    mode: 0770
-  when:
-    - configure_vault | bool
+    mode: "0770"
 
 - name: Copy vault token file to IAP server
   ansible.builtin.copy:
     src: ./token.txt
     dest: "{{ vault_install_dir }}/token.txt"
-    mode: 0600
+    mode: "0600"
     owner: "{{ iap_user }}"
     group: "{{ iap_group }}"
-  when:
-    - configure_vault | bool
 
 - name: Add itential user to vault group
   ansible.builtin.user:
     name: "{{ iap_user }}"
     groups: "{{ vault_group }}"
     append: true
-  when:
-    - configure_vault | bool
 
 - name: Delete token file off control machine
   ansible.builtin.file:
@@ -35,5 +29,3 @@
     state: absent
   delegate_to: localhost
   ignore_errors: true
-  when:
-    - configure_vault | bool
