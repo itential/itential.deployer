@@ -1,0 +1,14 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+- name: Restart Redis
+  ansible.builtin.systemd:
+    name: redis
+    enabled: yes
+    state: restarted
+
+- name: Restart Sentinel
+  ansible.builtin.systemd:
+    name: redis-sentinel
+    enabled: yes
+    state: restarted

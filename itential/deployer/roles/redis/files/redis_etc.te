@@ -1,0 +1,12 @@
+module redis_etc 1.0;
+
+require {
+	type etc_t;
+	type redis_t;
+	class file { create setattr write rename unlink };
+	class dir { add_name remove_name write };
+}
+
+#============= redis_t ==============
+allow redis_t etc_t:file { create write setattr rename unlink };
+allow redis_t etc_t:dir { add_name remove_name write };

@@ -34,10 +34,19 @@
   when: redis_replication | bool
 
 - name: Restart Redis
-  ansible.builtin.systemd:
-    name: redis
-    enabled: true
-    state: restarted
+  command: /bin/true
+  notify: Restart Redis
+
+# Starting in Redis 7.0 the default user was being automatically inserted
+# into the redis.conf when missing. This will remove that extra line
+# when auth is enabled to avoid a configuration error that will prevent
+# Redis from starting.
+- name: Modify redis.conf and remove any extra default user lines
+  ansible.builtin.lineinfile:
+    path: "{{ redis_conf_file }}"
+    regexp: "user default on nopass.+$"
+    state: absent
+  when: redis_replication | bool
 
 # Starting in Redis 7.0 the default user was being automatically inserted
 # into the sentinel.conf when missing. This will remove that extra line
@@ -65,9 +74,7 @@
     - user sentineluser
   when: redis_replication | bool
 
-- name: Restart Redis Sentinel
-  ansible.builtin.systemd:
-    name: redis-sentinel
-    enabled: true
-    state: restarted
+- name: Restart Sentinel
+  command: /bin/true
+  notify: Restart Sentinel
   when: redis_replication | bool

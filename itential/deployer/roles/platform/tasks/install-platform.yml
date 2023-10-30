@@ -13,7 +13,7 @@
   ansible.builtin.copy:
     src: "{{ iap_bin_file }}"
     dest: "{{ iap_install_dir }}/{{ iap_bin_file }}"
-    mode: 0775
+    mode: "0775"
     force: false
   when: not upload_using_rsync
 
@@ -22,7 +22,7 @@
     path: "{{ iap_install_dir }}/{{ iap_bin_file }}"
     owner: "{{ iap_user }}"
     group: "{{ iap_group }}"
-    mode: '0755'
+    mode: "0755"
 
 # Extract bin file contents
 # -e Extract tar archive and exit
@@ -50,6 +50,7 @@
   ansible.builtin.template:
     src: automation-platform.service.j2
     dest: /usr/lib/systemd/system/automation-platform.service
+    mode: "0644"
 
 - name: Remove Itential source file
   when: remove_iap_source_file | bool
@@ -61,4 +62,5 @@
   ansible.builtin.lineinfile:
     path: "{{ itential_release_file }}"
     line: "PLATFORM={{ iap_release }}"
+    mode: "0644"
     create: true

@@ -95,6 +95,7 @@
       ansible.builtin.lineinfile:
         path: "{{ itential_release_file }}"
         line: "PYTHON={{ python_installed_version.stdout }}"
+        mode: "0644"
         create: true
 
     - name: Add pip3 symlink
@@ -116,6 +117,7 @@
       ansible.builtin.lineinfile:
         path: "{{ itential_release_file }}"
         line: "PIP={{ pip_installed_version.stdout }}"
+        mode: "0644"
         create: true
 
 - name: Remove temp working directory
