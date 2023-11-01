@@ -5,3 +5,13 @@
 # Essentially, a default installation will not have auth or replication
 redis_auth: false
 redis_replication: false
+
+# The location of the Redis config file
+redis_conf_path: /etc/redis
+redis_conf_file: "{{ redis_conf_path }}/redis.conf"
+
+redis_owner: redis
+redis_group: redis
+
+# The location of the Redis Sentinel config file
+redis_sentinel_conf_file: "{{ redis_conf_path }}/sentinel.conf"
