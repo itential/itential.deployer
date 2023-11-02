@@ -42,7 +42,7 @@
     owner: "root"
     group: "root"
     mode: 0644
-    baseurl: "{{ erlang_repo_baseurl }}"
+    baseurl: "{{ rabbitmq_erlang_repo_baseurl }}"
     gpgcheck: true
     gpgkey:
       - https://packagecloud.io/rabbitmq/erlang/gpgkey
@@ -58,7 +58,7 @@
     owner: "root"
     group: "root"
     mode: 0644
-    baseurl: "{{ rabbitmq_repo_baseurl }}"
+    baseurl: "{{ rabbitmq_server_repo_baseurl }}"
     gpgcheck: true
     gpgkey:
       - https://packagecloud.io/rabbitmq/rabbitmq-server/gpgkey
