@@ -3,7 +3,7 @@
 ---
 - name: Create ssl directory
   ansible.builtin.file:
-    path: "{{ rabbit_ssl_dir }}"
+    path: "{{ rabbitmq_ssl_dir }}"
     state: directory
     owner: rabbitmq
     group: rabbitmq
@@ -12,7 +12,7 @@
 - name: Copy Server Certificate
   ansible.builtin.copy:
     src: "{{ role_path }}/files/server_certificate.pem"
-    dest: "{{ rabbit_ssl_dir }}/serverCert.pem"
+    dest: "{{ rabbitmq_ssl_dir }}/serverCert.pem"
     owner: rabbitmq
     group: rabbitmq
     mode: "0600"
@@ -20,7 +20,7 @@
 - name: Copy Server Key
   ansible.builtin.copy:
     src: "{{ role_path }}/files/server_key.pem"
-    dest: "{{ rabbit_ssl_dir }}/serverKey.pem"
+    dest: "{{ rabbitmq_ssl_dir }}/serverKey.pem"
     owner: rabbitmq
     group: rabbitmq
     mode: "0600"
@@ -28,7 +28,7 @@
 - name: Copy CA Certificate
   ansible.builtin.copy:
     src: "{{ role_path }}/files/ca_certificate.pem"
-    dest: "{{ rabbit_ssl_dir }}/ca_certificate.pem"
+    dest: "{{ rabbitmq_ssl_dir }}/ca_certificate.pem"
     owner: rabbitmq
     group: rabbitmq
     mode: "0600"
@@ -42,15 +42,15 @@
     insertafter: ^\s*#\s*{{ item.name }}.*$
     firstmatch: true
   with_items:
-    - { name: "listeners.ssl.1", value: "{{ rabbit_ssl_port }}" }
+    - { name: "listeners.ssl.1", value: "{{ rabbitmq_ssl_port }}" }
     - { name: "listeners.tcp", value: "none" }
-    - { name: "ssl_options.cacertfile", value: "{{ rabbit_ssl_dir }}/ca_certificate.pem" }
-    - { name: "ssl_options.certfile", value: "{{ rabbit_ssl_dir }}/serverCert.pem" }
-    - { name: "ssl_options.keyfile", value: "{{ rabbit_ssl_dir }}/serverKey.pem" }
+    - { name: "ssl_options.cacertfile", value: "{{ rabbitmq_ssl_dir }}/ca_certificate.pem" }
+    - { name: "ssl_options.certfile", value: "{{ rabbitmq_ssl_dir }}/serverCert.pem" }
+    - { name: "ssl_options.keyfile", value: "{{ rabbitmq_ssl_dir }}/serverKey.pem" }
     - { name: "management.ssl.port", value: "15671" }
-    - { name: "management.ssl.cacertfile", value: "{{ rabbit_ssl_dir }}/ca_certificate.pem" }
-    - { name: "management.ssl.certfile", value: "{{ rabbit_ssl_dir }}/serverCert.pem" }
-    - { name: "management.ssl.keyfile", value: "{{ rabbit_ssl_dir }}/serverKey.pem" }
+    - { name: "management.ssl.cacertfile", value: "{{ rabbitmq_ssl_dir }}/ca_certificate.pem" }
+    - { name: "management.ssl.certfile", value: "{{ rabbitmq_ssl_dir }}/serverCert.pem" }
+    - { name: "management.ssl.keyfile", value: "{{ rabbitmq_ssl_dir }}/serverKey.pem" }
 
 # Check if firewalld is running, if it is then open the appropriate ports
 - name: Gather service facts
@@ -58,7 +58,7 @@
 
 - name: Open Port on FirewallD Public Zone
   ansible.posix.firewalld:
-    port: "{{ rabbit_ssl_port }}/tcp"
+    port: "{{ rabbitmq_ssl_port }}/tcp"
     permanent: yes
     state: enabled
     zone: public

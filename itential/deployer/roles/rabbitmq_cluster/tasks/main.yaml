@@ -87,8 +87,8 @@
     zone: public
     immediate: yes
   loop:
-    - "{{ rabbit_cluster_port }}/tcp"
-    - "{{ rabbit_epmd_port }}/tcp"
+    - "{{ rabbitmq_cluster_port }}/tcp"
+    - "{{ rabbitmq_epmd_port }}/tcp"
   when:
     - ansible_facts.services["firewalld.service"] is defined
     - (ansible_facts.services["firewalld.service"].state == "running")
