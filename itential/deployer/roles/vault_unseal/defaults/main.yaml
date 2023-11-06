@@ -1,12 +1,11 @@
----
-# The default user that runs vault
-vault_user: vault
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+# The default behavior for setting up vault 
+vault_setup: false
 
 # Default directory to store the unseal keys
 unseal_keys_dir: /opt/vault/keys/unseal_keys
 
 # Default default to store the root key
 root_key_dir: /opt/vault/keys/root_key
-
-# Default port of the vault server
-vault_port: 8200
