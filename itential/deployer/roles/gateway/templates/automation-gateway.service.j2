@@ -6,11 +6,11 @@ After=network.target
 User=itential
 Restart=always
 Type=simple
-ExecStart={{ iag_install_dir }}/venv/bin/automation-gateway --properties-file={{ iag_properties_location }}/properties.yaml
+ExecStart={{ iag_venv_dir }}/bin/automation-gateway --properties-file={{ iag_properties_dir }}/properties.yaml
 WorkingDirectory=/tmp
 Environment=MAX_EVENT_RES=15000000
-Environment=PATH={{ iag_install_dir }}/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-Environment=ANSIBLE_PYTHON_INTERPRETER={{ iag_install_dir }}/venv/bin/python
+Environment=PATH={{ iag_venv_dir }}/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+Environment=ANSIBLE_PYTHON_INTERPRETER={{ iag_venv_dir }}/bin/python
 
 [Install]
 WantedBy=multi-user.target

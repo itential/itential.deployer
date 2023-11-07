@@ -11,9 +11,20 @@ iag_enable_scripts: true
 iag_enable_netconf: true
 iag_enable_httpreq: true
 iag_haproxy: false
+iag_enable_python_vir_env: true
+iag_enable_grpc: true
+
+# Starting after 23.2 release it is now required to install the dependencies
+# This flag is here to help older versions skip dependency install tasks. For
+# IAG 23.2 and above this will be overridden.
+install_dependencies: false
 
 # Location of IAG assets
 iag_install_dir: /opt/automation-gateway
+
+# IAG is installed in a python virtual environment with this name
+iag_venv_name: iag
+iag_venv_dir: "{{ iag_install_dir }}/{{ iag_venv_name }}"
 
 # Location of IAG data
 iag_data_dir: /opt/automation-gateway
@@ -21,11 +32,14 @@ iag_data_dir: /opt/automation-gateway
 # Location of IAG logs
 iag_log_dir: /var/log/automation-gateway
 
+# location of IAG config file
+iag_properties_dir: /opt/automation-gateway/conf
+
+# Location of all the IAG resources and integrations
+iag_resources_dir: "{{ iag_install_dir }}/iag-resources"
+
 # Default port
 iag_port: 8083
-
-# location of IAG config file
-iag_properties_location: /etc/automation-gateway
 
 iag_user: itential
 iag_group: itential
