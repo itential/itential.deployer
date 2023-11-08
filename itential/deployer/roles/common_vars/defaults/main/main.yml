@@ -3,3 +3,6 @@
 
 # The file containing the installed components and versions
 itential_release_file: /etc/iap-release
+
+# By default, do not configure vault
+configure_vault: false
