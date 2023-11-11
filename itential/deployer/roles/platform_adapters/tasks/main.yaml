@@ -8,9 +8,7 @@
 - name: Disable safe repository checks
   ansible.builtin.command:
     cmd: "git config --global --add safe.directory '*'"
-  when:
-    - disable_git_safe_repo_checks is defined
-    - disable_git_safe_repo_checks
+  when: disable_git_safe_repo_checks
 
 - name: Install any configured opensource adapters
   block:
@@ -49,9 +47,7 @@
         path: "{{ iap_install_dir }}/current/custom/@itentialopensource/{{ item }}/package-lock.json"
         state: absent
       loop: "{{ adapter_names }}"
-      when:
-        - delete_package_lock_file is defined
-        - delete_package_lock_file
+      when: delete_package_lock_file
 
     - name: Run npm install
       community.general.npm:
