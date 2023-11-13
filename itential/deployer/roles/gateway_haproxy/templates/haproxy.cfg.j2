@@ -61,15 +61,13 @@ defaults
 # itential frontend which proxys to the IAG backend
 #---------------------------------------------------------------------
 frontend  automation-gateway-frontend
-    reqadd X-Forwarded-Proto:\ https
-    rspadd Strict-Transport-Security:\ max-age=31536000;\ includeSubDomains
     option forwardfor except 127.0.0.1
     maxconn 100
-    bind *:{{ haproxy_port }} ssl crt {{ haproxy_cert_destination }} force-tlsv12 ciphers DHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256
+    bind *:{{ iag_https_port }} ssl crt {{ haproxy_ssl_cert_dest }} force-tlsv12 ciphers DHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256
     default_backend automation-gateway-backend
 
 #---------------------------------------------------------------------
 # IAG backend
 #---------------------------------------------------------------------
 backend automation-gateway-backend
-    server  app1 127.0.0.1:{{ iag_port }}
+    server  app1 {{ inventory_hostname }}:{{ iag_port }}

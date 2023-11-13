@@ -25,8 +25,9 @@
 
 - name: Install Gateway packages
   ansible.builtin.yum:
-    name: "{{ gateway_packages }}"
+    name: "{{ item }}"
     state: present
+  with_items: "{{ gateway_packages }}"
 
 - name: Write IAG release file
   ansible.builtin.lineinfile:
@@ -279,31 +280,34 @@
 - name: Gather service facts
   ansible.builtin.service_facts:
 
-- name: Open Port on FirewallD Public Zone (HTTP)
+- name: Configure HTTP Port on FirewallD Public Zone
   ansible.posix.firewalld:
     port: "{{ iag_port }}/tcp"
     permanent: true
-    state: enabled
+    state: "{{ iag_https or iag_haproxy | ternary('disabled', 'enabled') }}"
     zone: public
     immediate: true
   when: 
     - ansible_facts.services["firewalld.service"].state == "running"
     - ansible_facts.services["firewalld.service"].status == "enabled"
-    - not iag_https
-  ignore_errors: true
 
-- name: Open Port on FirewallD Public Zone (HTTPS)
+- name: Configure HTTPS Port on FirewallD Public Zone
   ansible.posix.firewalld:
     port: "{{ iag_https_port }}/tcp"
     permanent: true
-    state: enabled
+    state: "{{ iag_https or iag_haproxy | ternary('enabled', 'disabled') }}"
     zone: public
     immediate: true
   when: 
     - ansible_facts.services["firewalld.service"].state == "running"
     - ansible_facts.services["firewalld.service"].status == "enabled"
-    - iag_https
-  ignore_errors: true
+
+- name: Allow IAG to listen on tcp port {{ iag_port }}
+  community.general.seport:
+    ports: "{{ iag_port }}"
+    proto: tcp
+    setype: http_port_t
+    state: present
 
 - name: Start Automation Gateway service
   ansible.builtin.service:

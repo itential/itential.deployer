@@ -4,8 +4,8 @@
 # Location of the HAProxy config file
 haproxy_conf_file: /etc/haproxy/haproxy.cfg
 
-# Destination location of the HTTPS certificate for the HAProxy
-haproxy_cert_destination: /etc/ssl/certs/
+# The SSL cert file name
+haproxy_ssl_cert_src: server.pem
 
-# HTTPS port to use in HAProxy
-haproxy_port: 8443
+# The SSL cert destination
+haproxy_ssl_cert_dest: "/etc/ssl/certs/{{ haproxy_ssl_cert_src }}"
