@@ -1,9 +1,5 @@
 # Copyright (c) 2022, Itential, LLC
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
----
-- name: Include default vars
-  ansible.builtin.include_vars:
-    file: main.yaml
 
 - name: Include release vars
   ansible.builtin.include_vars:
@@ -13,7 +9,7 @@
     - "release-undefined.yaml"
 
 - name: Check for valid IAG release
-  fail:
+  ansible.builtin.fail:
     msg: "missing or invalid iag_release"
   when: iag_release == "UNDEFINED"
 
@@ -27,8 +23,8 @@
 # the installer will ensure that they get uploaded to the correct location.
 - name: Copy IAG HTTPS certificates to the appropriate remote location
   ansible.builtin.copy:
-    src: "{{ haproxy_cert_source }}"
-    dest: "{{ haproxy_cert_destination }}"
+    src: "{{ haproxy_ssl_cert_src }}"
+    dest: "{{ haproxy_ssl_cert_dest }}"
     mode: '0400'
     group: haproxy
     owner: haproxy
@@ -44,5 +40,5 @@
 - name: Start HAProxy
   ansible.builtin.service:
     name: haproxy
-    enabled: yes
+    enabled: false
     state: restarted
