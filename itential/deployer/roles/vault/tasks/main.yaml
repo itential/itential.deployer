@@ -17,7 +17,7 @@
     description: Hashicorp Vault repo
     baseurl: https://rpm.releases.hashicorp.com/RHEL/$releasever/$basearch/stable
     state: present
-    gpgcheck: no
+    gpgcheck: false
 
 - name: Install vault
   ansible.builtin.yum:
@@ -42,7 +42,26 @@
     state: directory
     owner: "{{ vault_user }}"
     group: "{{ vault_group }}"
-    mode: 0770
+    mode: "0770"
+
+# Check if firewalld is running, if it is then open the appropriate ports
+- name: Gather service facts
+  ansible.builtin.service_facts:
+
+- name: Open Vault Ports on FirewallD Public Zone
+  ansible.posix.firewalld:
+    port: "{{ vault_port }}/tcp"
+    permanent: true
+    state: enabled
+    zone: public
+    immediate: true
+  with_items:
+    - "{{ vault_port }}"
+    - "{{ vault_cluster_port }}"
+  when:
+    - ansible_facts.services["firewalld.service"] is defined
+    - ansible_facts.services["firewalld.service"].state == "running"
+    - ansible_facts.services["firewalld.service"].status == "enabled"
 
 # Configure vault
 - name: Create vault config file
@@ -51,16 +70,19 @@
     dest: "{{ vault_dir }}/config.hcl"
     owner: "{{ vault_user }}"
     group: "{{ vault_group }}"
-    mode: 0640
+    mode: "0640"
 
-- name: Create service unit file 
+- name: Create service unit file
   ansible.builtin.template:
     src: "vault.service.j2"
     dest: /etc/systemd/system/vault.service
+    owner: root
+    group: root
+    mode: "0644"
 
 - name: Enable and start vault
   ansible.builtin.systemd:
     name: vault
     state: started
-    enabled: yes
+    enabled: true
     daemon_reload: true

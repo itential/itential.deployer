@@ -1,4 +1,6 @@
----
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
 # Saving unseal keys to a directory (may remove this later for security)
 - name: Create directory to store unseal keys
   ansible.builtin.file:
@@ -6,7 +8,7 @@
     state: directory
     owner: "{{ vault_user }}"
     group: "{{ vault_group }}"
-    mode: 0750
+    mode: "0750"
 
 - name: Create directory to store root key
   ansible.builtin.file:
@@ -14,7 +16,7 @@
     state: directory
     owner: "{{ vault_user }}"
     group: "{{ vault_group }}"
-    mode: 0750
+    mode: "0750"
 
 # Show status of vault server
 - name: Get status of vault server
@@ -22,23 +24,27 @@
   environment:
     VAULT_ADDR: "http://{{ inventory_hostname }}:{{ vault_port }}"
   register: vault_status
-  ignore_errors: true
+  failed_when:
+    - vault_status.stderr_lines is defined
+    - vault_status.stderr_lines | length > 0
+  changed_when: false
 
 - name: Parse output of vault status
-  ansible.builtin.set_fact: 
+  ansible.builtin.set_fact:
     vault_status_parsed: "{{ vault_status.stdout | from_json }}"
 
 - name: Initialize vault server
-  ansible.builtin.shell: vault operator init -format json
-  environment:  
+  ansible.builtin.command: vault operator init -format json
+  environment:
     VAULT_ADDR: "http://{{ inventory_hostname }}:{{ vault_port }}"
   register: vault_init_results
-  when: vault_status_parsed.initialized == false
+  changed_when: vault_init_results.changed
+  when: not vault_status_parsed.initialized
 
 - name: Parse output of vault init
   ansible.builtin.set_fact:
-    vault_init_parsed: "{{ vault_init_results.stdout | from_json}}"
-  when: vault_status_parsed.initialized == false
+    vault_init_parsed: "{{ vault_init_results.stdout | from_json }}"
+  when: not vault_status_parsed.initialized
 
 - name: Write unseal keys to files
   ansible.builtin.copy:
@@ -46,9 +52,9 @@
     content: "{{ item.1 }}"
     owner: "{{ vault_user }}"
     group: "{{ vault_group }}"
-    mode: 0660
+    mode: "0660"
   with_indexed_items: "{{ vault_init_parsed.unseal_keys_hex }}"
-  when: vault_status_parsed.initialized == false
+  when: not vault_status_parsed.initialized
   no_log: true
 
 - name: Write root token to file
@@ -57,55 +63,60 @@
     dest: "{{ root_key_dir }}/token.txt"
     owner: "{{ vault_user }}"
     group: "{{ vault_group }}"
-    mode: 0660
-  when: vault_status_parsed.initialized == false
+    mode: "0660"
+  when: not vault_status_parsed.initialized
 
 - name: Fetch root token
   ansible.builtin.fetch: 
     src: "{{ root_key_dir }}/token.txt"
     dest: ./token.txt
     flat: yes
-  when: 
-    - configure_vault | bool
-    - inventory_hostname in groups["vault"]
+  when: configure_vault | bool
+  run_once: true
 
-- name: Getting path to unseal keys
-  find:
+- name: Get path to unseal keys
+  ansible.builtin.find:
     paths: "{{ unseal_keys_dir }}"
   register: unseal_key_files
-  when: vault_status_parsed.sealed == true
+  when: vault_status_parsed.sealed
 
-- name: Reading unseal key contents
-  command: cat {{ item.path }}
+- name: Read unseal key contents
+  ansible.builtin.command: cat {{ item.path }}
   with_items: "{{ unseal_key_files.files }}"
   register: unseal_keys
-  when: vault_status_parsed.sealed == true
+  when: vault_status_parsed.sealed
   no_log: true
+  changed_when: false
 
 - name: Unseal vault with unseal keys
-  shell: vault operator unseal {{ item.stdout }}
-  environment: 
+  ansible.builtin.command: vault operator unseal {{ item.stdout }}
+  environment:
     VAULT_ADDR: "http://{{ inventory_hostname }}:{{ vault_port }}"
   with_items: "{{ unseal_keys.results }}"
-  when: vault_status_parsed.sealed == true
+  register: vault_unseal_result
+  changed_when: vault_unseal_result.changed
+  when: vault_status_parsed.sealed
   no_log: true
 
 - name: Get root key
   ansible.builtin.slurp:
     src: '{{ root_key_dir }}/token.txt'
-  register: rootKey
+  register: root_key
 
 # Check if kv-v2 engine exists
 - name: Check for kv-v2 secrets engine
-  shell: vault secrets list
-  environment: 
+  ansible.builtin.command: vault secrets list
+  environment:
     VAULT_ADDR: "http://{{ inventory_hostname }}:{{ vault_port }}"
-    VAULT_TOKEN: "{{ rootKey.content | b64decode }}"
+    VAULT_TOKEN: "{{ root_key.content | b64decode }}"
   register: secrets
+  changed_when: false
 
 - name: Enable KV Secrets Engine
-  shell: vault secrets enable kv-v2
-  environment:  
+  ansible.builtin.command: vault secrets enable kv-v2
+  environment:
     VAULT_ADDR: "http://{{ inventory_hostname }}:{{ vault_port }}"
-    VAULT_TOKEN: "{{ rootKey.content | b64decode }}"
+    VAULT_TOKEN: "{{ root_key.content | b64decode }}"
+  register: vault_secrets_enable_result
+  changed_when: vault_secrets_enable_result.changed
   when: '"kv-v2" not in secrets.stdout'
