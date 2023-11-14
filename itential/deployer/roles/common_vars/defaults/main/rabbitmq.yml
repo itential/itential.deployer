@@ -1,18 +1,8 @@
 # Copyright (c) 2022, Itential, LLC
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
-# The Location of the config rabbitmq config file
-rabbitmq_config: /etc/rabbitmq/rabbitmq.conf
-
 # The name of the vhost to use so we do not use the default rabbitmq vhost
 rabbitmq_vhost: iap
 
-# Feature flags that can be overriden in the hosts file
-# Essentially, a default installation will not have clustering
-rabbitmq_cluster: false
-
 # Default installation will not have RabbitMQ SSL configured
 rabbitmq_ssl: false
-
-rabbitmq_owner: rabbitmq
-rabbitmq_group: rabbitmq

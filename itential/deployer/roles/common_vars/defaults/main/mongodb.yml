@@ -1,18 +1,11 @@
 # Copyright (c) 2022, Itential, LLC
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
-# Location of mongo conf file
-mongo_conf_file: /etc/mongod.conf
-
 # The TCP port on which the MongoDB instance listens for client connections.
 mongo_port: 27017
 
-mongo_owner: mongod
-mongo_group: mongod
-
 # Default Itential database name in MongoDB
 mongo_itential_db_name: itential
-mongo_admin_db_name: admin
 mongo_localaaa_db_name: LocalAAA
 
 # Feature flags that can be overriden in the hosts file
@@ -37,9 +30,3 @@ mongo_user_localaaa_password: localaaa
 
 # The name of the mongo replica set
 mongo_replset_name: rs0
-
-# Destination location of the certificate key file used for TLS connections
-mongo_cert_keyfile_destination: /etc/ssl/mongo-certificate.pem
-
-# Destination location of the CA root file used for TLS connections
-mongo_root_ca_file_destination: /etc/ssl/mongo-rootCA.pem

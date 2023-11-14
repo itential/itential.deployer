@@ -1,3 +1,6 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
 gateway_packages:
   - "@Development tools"
   - bzip2-devel
@@ -15,3 +18,7 @@ gateway_packages:
   - yaml-cpp
   - yaml-cpp-devel
   - zlib-devel
+
+iag_openssl_url: https://www.openssl.org/source/openssl-1.0.2q.tar.gz
+iag_python_src_url: https://www.python.org/ftp/python/3.9.5/Python-3.9.5.tgz
+iag_python_version: 3.9.5
