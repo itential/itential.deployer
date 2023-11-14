@@ -7,7 +7,19 @@
     dest: "{{ iap_install_dir }}/{{ iap_bin_file }}"
     rsync_opts:
       - "--copy-links"
-  when: upload_using_rsync
+  when:
+    - upload_using_rsync
+    - iap_bin_file is defined
+
+- name: Upload the IAP tar file using rsync
+  ansible.posix.synchronize:
+    src: "{{ iap_tar_file }}"
+    dest: "{{ iap_install_dir }}/{{ iap_tar_file }}"
+    rsync_opts:
+      - "--copy-links"
+  when:
+    - upload_using_rsync
+    - iap_tar_file is defined
 
 - name: Upload the IAP bin file using copy
   ansible.builtin.copy:
@@ -15,7 +27,19 @@
     dest: "{{ iap_install_dir }}/{{ iap_bin_file }}"
     mode: "0775"
     force: false
-  when: not upload_using_rsync
+  when:
+    - not upload_using_rsync
+    - iap_bin_file is defined
+
+- name: Upload the IAP tar file using copy
+  ansible.builtin.copy:
+    src: "{{ iap_tar_file }}"
+    dest: "{{ iap_install_dir }}/{{ iap_tar_file }}"
+    mode: "0775"
+    force: false
+  when:
+    - not upload_using_rsync
+    - iap_tar_file is defined
 
 - name: Change bin file ownership, group and permissions
   ansible.builtin.file:
@@ -23,6 +47,15 @@
     owner: "{{ iap_user }}"
     group: "{{ iap_group }}"
     mode: "0755"
+  when: iap_bin_file is defined
+
+- name: Change tar file ownership, group and permissions
+  ansible.builtin.file:
+    path: "{{ iap_install_dir }}/{{ iap_tar_file }}"
+    owner: "{{ iap_user }}"
+    group: "{{ iap_group }}"
+    mode: "0755"
+  when: iap_tar_file is defined
 
 # Extract bin file contents
 # -e Extract tar archive and exit
@@ -37,6 +70,14 @@
     cmd: "{{ iap_install_dir }}/{{ iap_bin_file }} -ey -d {{ iap_install_dir }}"
     chdir: "{{ iap_install_dir }}"
     creates: "{{ iap_install_dir }}/{{ iap_package_name }}"
+  when: iap_bin_file is defined
+
+- name: Extract the tar file contents
+  ansible.builtin.unarchive:
+    src: "{{ iap_install_dir }}/{{ iap_tar_file }}"
+    dest: "{{ iap_install_dir }}"
+    remote_src: yes
+  when: iap_tar_file is defined
 
 - name: Create the "current" symlink
   ansible.builtin.file:
@@ -53,7 +94,9 @@
     mode: "0644"
 
 - name: Remove Itential source file
-  when: remove_iap_source_file | bool
+  when:
+    - (remove_iap_source_file | bool)
+    - iap_bin_file is defined
   ansible.builtin.file:
     path: "{{ iap_install_dir }}/{{ iap_bin_file }}"
     state: absent

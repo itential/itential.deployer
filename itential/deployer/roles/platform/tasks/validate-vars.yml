@@ -1,0 +1,13 @@
+- name: Check if both IAP bin file and tar file are undefined
+  ansible.builtin.fail:
+    msg: Either iap_bin_file file or iap_tar_file file should be defined.
+  when:
+    - iap_bin_file is not defined
+    - iap_tar_file is not defined
+
+- name: Check if both IAP bin file and tar file are defined
+  ansible.builtin.fail:
+    msg: Only one of iap_bin_file file or iap_tar_file file should be defined.
+  when:
+    - iap_bin_file is defined
+    - iap_tar_file is defined
