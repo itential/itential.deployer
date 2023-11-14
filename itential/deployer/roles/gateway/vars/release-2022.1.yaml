@@ -1,6 +1,6 @@
 # Copyright (c) 2022, Itential, LLC
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
----
+
 iag_python_version: 3.9.7
 iag_pip_version: 20.2.4
 iag_ansible_version: ansible==2.10.7

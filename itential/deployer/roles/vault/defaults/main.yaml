@@ -7,5 +7,11 @@ vault_install: false
 # The default directory to store vault data and other config data
 vault_dir: /opt/vault
 
+# The default port of the vault server
+vault_port: 8200
+
 # The default port used by vault clusters to communicate with eachother
 vault_cluster_port: 8201
+
+# The default user that runs vault
+vault_user: vault

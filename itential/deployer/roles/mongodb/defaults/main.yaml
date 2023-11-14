@@ -1,6 +1,22 @@
 # Copyright (c) 2022, Itential, LLC
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
+# Location of mongo conf file
+mongo_conf_file: /etc/mongod.conf
+
+# Directory that stores mongodb data files
+mongo_data_dir: /var/lib/mongo
+
+# Target path for writing mongodb log files
+mongo_log_dir: /var/log/mongodb
+
+# The Mongo user and group
+mongo_owner: mongod
+mongo_group: mongod
+
+# The default admin database name
+mongo_admin_db_name: admin
+
 # Flag to enable/disable IPv6
 mongodb_bind_ipv6: true
 
@@ -13,9 +29,3 @@ mongodb_bind_ipv6: true
 #
 # If mongodb_bind_ipv6 is set to true, '::1' will be added to mongodb_bind_addrs.
 mongodb_bind_addrs: 127.0.0.1
-
-# Directory that stores mongodb data files
-mongo_data_dir: /var/lib/mongo
-
-# Target path for writing mongodb log files
-mongo_log_dir: /var/log/mongodb

@@ -1,6 +1,10 @@
 # Copyright (c) 2022, Itential, LLC
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
+# The location of the Redis config file
+redis_conf_path: /etc/redis
+redis_conf_file: "{{ redis_conf_path }}/redis.conf"
+
 # The location of the Redis log file
 redis_log: /var/log/redis/redis.log
 
@@ -13,7 +17,11 @@ redis_data_dir: /var/lib/redis
 # Default redis port
 redis_port: 6379
 
-# Flag to enable/disable IPv6
+# Redis user and group
+redis_owner: redis
+redis_group: redis
+
+# Flag to enable IPv6
 redis_bind_ipv6: true
 
 # The bind address source
