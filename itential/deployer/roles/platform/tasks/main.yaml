@@ -1,6 +1,10 @@
 # Copyright (c) 2022, Itential, LLC
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
+- name: Validate vars
+  ansible.builtin.include_tasks:
+    file: validate-vars.yml
+
 - name: Determine release vars
   ansible.builtin.include_tasks:
     file: determine-release-vars.yml
