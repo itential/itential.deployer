@@ -21,15 +21,15 @@
   ansible.builtin.include_role:
     name: selinux
 
-# This task will install a direct link to the redis RPM as the repo thus
-# enabling control of the redis version to the release files where there is a
-# mapping of "versions" to RPM locations.
-- name: Install redis RPM as a repo
-  ansible.builtin.yum:
-    update_cache: true
-    name: "{{ redis_release[ ansible_distribution_major_version ] }}"
-    state: present
-    disable_gpg_check: true
+- name: Include tasks to install redis using YUM
+  ansible.builtin.include_tasks:
+    file: redis-using-yum.yaml
+  when: ansible_distribution_major_version | int == 7
+
+- name: Include tasks to install redis using DNF
+  ansible.builtin.include_tasks:
+    file: redis-using-dnf.yaml
+  when: ansible_distribution_major_version | int >= 8
 
 - name: Ensure the directories for the config exists
   ansible.builtin.file:
