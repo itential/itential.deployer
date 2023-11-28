@@ -28,3 +28,4 @@
     owner: "{{ iap_user }}"
   when:
     - mongodb_tls | bool
+    - mongo_root_ca_file_source is defined

@@ -287,7 +287,8 @@
     state: "{{ iag_https or iag_haproxy | ternary('disabled', 'enabled') }}"
     zone: public
     immediate: true
-  when: 
+  when:
+    - ansible_facts.services["firewalld.service"] is defined
     - ansible_facts.services["firewalld.service"].state == "running"
     - ansible_facts.services["firewalld.service"].status == "enabled"
 
@@ -298,7 +299,8 @@
     state: "{{ iag_https or iag_haproxy | ternary('enabled', 'disabled') }}"
     zone: public
     immediate: true
-  when: 
+  when:
+    - ansible_facts.services["firewalld.service"] is defined
     - ansible_facts.services["firewalld.service"].state == "running"
     - ansible_facts.services["firewalld.service"].status == "enabled"
 

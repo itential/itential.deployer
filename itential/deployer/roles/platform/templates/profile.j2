@@ -7,38 +7,64 @@
 {% endif %}
 {# Set the correct rabbitmq settings #}
 {% set rabbit_hosts = [] %}
-{% set rabbit_user = "itential" %}
-{% set rabbit_password = "itential" %}
-{% set rabbit_port = 5672 %}
-{% set rabbit_protocol = "amqp" %}
-{% for rabbit in groups[vars.rabbit_group_name] %}
-  {{ rabbit_hosts.append( hostvars[ rabbit ].inventory_hostname ) }}
-{% endfor %}
-{% if rabbitmq_ssl | bool -%}
+{% if rabbit_user is not defined %}
+  {% set rabbit_user = "itential" %}
+{% endif %}
+{% if rabbit_password is not defined %}
+  {% set rabbit_password = "itential" %}
+{% endif %}
+{% if rabbit_svc_url is defined %}
+  {{ rabbit_hosts.append(rabbit_svc_url) }}
   {% set rabbit_port = 5671 %}
   {% set rabbit_protocol = "amqps" %}
+  {% set rabbit_certPath = "" %}
+  {% set rabbit_keyPath = "" %}
+  {% set rabbit_passphrase = "guest" %}
+  {% set rabbit_caPath = "" %}
+{% else %}
+  {% set rabbit_port = 5672 %}
+  {% set rabbit_protocol = "amqp" %}
+  {% for rabbit in groups[vars.rabbit_group_name] %}
+    {{ rabbit_hosts.append( hostvars[ rabbit ].inventory_hostname ) }}
+  {% endfor %}
+  {% if rabbitmq_ssl | bool -%}
+    {% set rabbit_port = 5671 %}
+    {% set rabbit_protocol = "amqps" %}
+    {% set rabbit_certPath = "" %}
+    {% set rabbit_keyPath = "" %}
+    {% set rabbit_passphrase = "guest" %}
+    {% set rabbit_caPath = "" %}
+  {% endif %}
 {% endif %}
 {# Set the correct redis settings #}
-{% set redis_host = "" %}
-{% set redis_user = "" %}
-{% set redis_password = "" %}
+{% if redis_user is not defined %}
+  {% set redis_user = "" %}
+{% endif %}
+{% if redis_password is not defined %}
+  {% set redis_password = "" %}
+{% endif %}
 {% set sentinels = None %}
 {% set sentinel_user = None %}
 {% set sentinel_password = None %}
-{% set redis_host = hostvars[ groups[vars.redis_group_name][0] ].inventory_hostname %}
-{% if redis_auth | bool -%}
-  {% set redis_user = "itential" %}
-  {% set redis_password = "itential" %}
-  {% set sentinel_user = "sentineluser" %}
-  {% set sentinel_password = "sentineluser" %}
-{% endif %}
-{% if redis_replication | bool %}
-  {% set redis_host = None %}
-  {% set sentinels = [] %}
-  {% for sentinel in groups[vars.redis_group_name] %}
-    {% set sentinel = dict(host = hostvars[ sentinel ].inventory_hostname, port = 26379) %}
-    {{ sentinels.append(sentinel) }}
-  {% endfor %}
+{% if redis_svc_url is defined %}
+   {% set redis_host = redis_svc_url %}
+{% else %}
+  {% set redis_host = "" %}
+  {% set redis_host = hostvars[ groups[vars.redis_group_name][0] ].inventory_hostname %}
+  {% if redis_auth | bool -%}
+    {% set redis_user = "itential" %}
+    {% set redis_password = "itential" %}
+    {% set sentinel_user = "sentineluser" %}
+    {% set sentinel_password = "sentineluser" %}
+  {% endif %}
+  {% if redis_replication | bool %}
+    {% set redis_host = None %}
+    {% set sentinels = [] %}
+    {% for sentinel in groups[vars.redis_group_name] %}
+      {% set sentinel = dict(host = hostvars[ sentinel ].inventory_hostname, port = 26379) %}
+      {{ sentinels.append(sentinel) }}
+    {% endfor %}
+  {% endif %}
 {% endif %}
 {# Set the correct value for the login page #}
 {% set login_page = "node_modules/@itential/iap-ui/build/index.html" %}
@@ -174,10 +200,14 @@
   },
   "rabbitmq": {
     "adminPort": 15672,
+    "caPath": "",
+    "certPath": "",
     "frameMax": 0,
     "heartbeat": 0,
     "hosts": {{ rabbit_hosts | to_json }},
+    "keyPath": "",
     "locale": "en_US",
+    "passphrase": "guest",
     "password": "{{ rabbit_password }}",
     "port": {{ rabbit_port }},
     "protocol": "{{ rabbit_protocol }}",
@@ -196,6 +226,9 @@
     "sentinels" : {{ sentinels | to_json }},
     "sentinelPassword" : {{ sentinel_password | to_json }},
     "sentinelUsername" : {{ sentinel_user | to_json }},
+{% endif %}
+{% if redis_tls | bool %}
+    "tls": {},
 {% endif %}
     "username" : {{ redis_user | to_json }}
   },
