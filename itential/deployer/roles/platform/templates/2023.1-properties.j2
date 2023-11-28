@@ -1,33 +1,49 @@
-{# Build the MongoDB connection string #}
-{% set url = "mongodb://localhost:" + mongo_port|string + "/" %}
-{% set mongo_hosts = [] %}
-{% if mongodb_replication | bool %}
-  {% for h in groups['mongodb'] -%}
-    {{ mongo_hosts.append( h + ":" + mongo_port|string) }}
-  {%- endfor %}
-  {% if groups["mongodb_arbiter"] is defined and groups["mongodb_arbiter"] | length > 0 -%}
-    {{ mongo_hosts.append( hostvars [ groups["mongodb_arbiter"][0] ].inventory_hostname + ":" + mongo_port|string ) }}
-  {%- endif %}
-  {% set mongo_hosts_str = mongo_hosts|join(',') %}
-  {% set url = "mongodb://" + mongo_hosts_str + "/?replicaSet=" + mongo_replset_name %}
+{# Sensible default SSL props #}
+{% set acceptInvalidCerts = True %}
+{% set checkServerIdentity = False %}
+{% set sslCA = "" %}
+{% set sslValidate = False %}
+{% set sslEnabled = False %}
+{#
+Build the MongoDB connection string.
+In the case where the user wants to bring their own database,
+just use that. Else, build the connection string from the properties
+defined in the host file.
+#}
+{% if mongobdb_svc_url_itential is defined %}
+  {% set url = mongobdb_svc_url_itential %}
 {% else %}
-  {% set url = "mongodb://" + hostvars[ groups['mongodb'][0] ].inventory_hostname + ":" + mongo_port|string %}
+  {% set url = "mongodb://localhost:" + mongo_port|string + "/" %}
+  {% set mongo_hosts = [] %}
+  {% if mongodb_replication | bool %}
+    {% for h in groups['mongodb'] -%}
+      {{ mongo_hosts.append( h + ":" + mongo_port|string) }}
+    {%- endfor %}
+    {% if groups["mongodb_arbiter"] is defined and groups["mongodb_arbiter"] | length > 0 -%}
+      {{ mongo_hosts.append( hostvars [ groups["mongodb_arbiter"][0] ].inventory_hostname + ":" + mongo_port|string ) }}
+    {%- endif %}
+    {% set mongo_hosts_str = mongo_hosts|join(',') %}
+    {% set url = "mongodb://" + mongo_hosts_str + "/?replicaSet=" + mongo_replset_name %}
+  {% else %}
+    {% set url = "mongodb://" + hostvars[ groups['mongodb'][0] ].inventory_hostname + ":" + mongo_port|string %}
+  {% endif %}
+{% endif %}
+{# Override TLS defaults if it is enabled #}
+{% if mongodb_tls | bool %}
+  {% set sslEnabled = True %}
+  {% set acceptInvalidCerts = False %}
+  {% set checkServerIdentity = True %}
+  {% set sslValidate = True %}
+  {% if mongo_root_ca_file_source is not defined %}
+    {% set sslCA = "" %}
+  {% else %}
+    {% set sslCA = itential_root_ca_file_destination %}
+  {% endif %}
 {% endif %}
 {# Build Vault props #}
 {% set vaultProps = None %}
 {% if configure_vault | bool %}
   {% set vaultProps = dict(url = "http://" ~ hostvars[groups['vault'][0]].inventory_hostname ~ ":8200", token = vault_install_dir ~ "/token.txt", endpoint = "kv-v2/data" ) %}
-{% endif %}
-{# Build SSL props #}
-{% set acceptInvalidCerts = True %}
-{% set checkServerIdentity = False %}
-{% set sslCA = "" %}
-{% set sslValidate = False %}
-{% if mongodb_tls | bool %}
-  {% set acceptInvalidCerts = False %}
-  {% set checkServerIdentity = True %}
-  {% set sslCA = itential_root_ca_file_destination %}
-  {% set sslValidate = True %}
 {% endif %}
 {
   "id": "{{ profile_name }}",
@@ -41,7 +57,7 @@
     "ssl": {
       "acceptInvalidCerts": {{ acceptInvalidCerts | bool | to_json }},
       "checkServerIdentity": {{ checkServerIdentity | bool | to_json }},
-      "enabled": {{ mongodb_tls | bool | to_json }},
+      "enabled": {{ sslEnabled | bool | to_json }},
       "sslCA": "{{ sslCA }}",
       "sslValidate": {{ sslValidate | bool | to_json }}
     },

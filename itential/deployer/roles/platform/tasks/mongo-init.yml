@@ -9,6 +9,7 @@
   ansible.builtin.include_role:
     name: mongodb_common
     tasks_from: determine-primary-server.yml
+  when: mongobdb_svc_url_itential is not defined
 
 # This task will use a jinja template to build the appropriate mongo connection
 # string.
