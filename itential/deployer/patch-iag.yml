@@ -8,14 +8,10 @@
 - name: Patch IAG
   hosts: gateway
   become: true
+  roles:
+    - role: common_vars
   tasks:
-
-    - name: Pull in the common vars
-      ansible.builtin.import_role:
-        name: common_vars
-
     - name: Patch IAP
       ansible.builtin.import_role:
         name: gateway
         tasks_from: upgrade-iag
-
