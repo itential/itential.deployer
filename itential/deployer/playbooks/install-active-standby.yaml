@@ -133,13 +133,13 @@
   roles:
     ### IAP
     # Perform a base installation of IAP
-    - role: platform
+    - role: itential.deployer.platform
       tags:
         - platform
         - platform_install
 
     # Install any listed apps and/or adapters
-    - role: platform_adapters
+    - role: itential.deployer.platform_adapters
       tags:
         - platform
 
@@ -149,7 +149,7 @@
   roles:
     # Install app-artifact into IAP
     # This should only be done in a development environment
-    - role: platform_app_artifact
+    - role: itential.deployer.platform_app_artifact
       when:
         - app_artifact | bool
       tags:
@@ -161,11 +161,11 @@
   roles:
     ### IAG
     # Perform a base installation of IAG
-    - role: gateway
+    - role: itential.deployer.gateway
       tags:
         - gateway
 
-    - role: gateway_haproxy
+    - role: itential.deployer.gateway_haproxy
       when:
         - iag_haproxy | bool
       tags:

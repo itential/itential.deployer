@@ -7,17 +7,17 @@
   become: true
   roles:
     # Pull in the common vars
-    - role: common_vars
+    - role: itential.deployer.common_vars
 
     # Perform a base installation of IAP
-    - role: platform
+    - role: itential.deployer.platform
       tags:
         - platform
         - platform_install
 
     # Install app-artifact into IAP
     # This should only be done in a development environment
-    - role: platform_app_artifact
+    - role: itential.deployer.platform_app_artifact
       when:
         - "'platform' in group_names"
         - app_artifact | bool
@@ -26,7 +26,7 @@
         - platform_app_artifact
 
     # Install any listed apps and/or adapters
-    - role: platform_adapters
+    - role: itential.deployer.platform_adapters
       tags:
         - platform
         - platform_adapters

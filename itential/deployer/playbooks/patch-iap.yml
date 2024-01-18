@@ -9,7 +9,7 @@
   hosts: platform
   become: true
   roles:
-    - role: common_vars
+    - role: itential.deployer.common_vars
   tasks:
     - name: Patch IAP
       ansible.builtin.import_role:
