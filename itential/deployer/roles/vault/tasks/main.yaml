@@ -5,25 +5,15 @@
   ansible.builtin.include_role:
     name: os
 
-- name: Install yum-config-manager
-  ansible.builtin.yum:
-    name: yum-utils
-    state: present
-    update_cache: true
+- name: Include tasks to install vault (online)
+  ansible.builtin.include_tasks:
+    file: vault-online.yml
+  when: not offline_install
 
-- name: Add Hashicorp Vault repo
-  ansible.builtin.yum_repository:
-    name: hashicorp
-    description: Hashicorp Vault repo
-    baseurl: https://rpm.releases.hashicorp.com/RHEL/$releasever/$basearch/stable
-    state: present
-    gpgcheck: false
-
-- name: Install vault
-  ansible.builtin.yum:
-    name: "{{ vault_version }}"
-    update_cache: true
-    state: present
+- name: Include tasks to install vault (offline)
+  ansible.builtin.include_tasks:
+    file: vault-offline.yml
+  when: offline_install
 
 - name: Create vault group
   ansible.builtin.group:
@@ -48,7 +38,7 @@
 - name: Gather service facts
   ansible.builtin.service_facts:
 
-- name: Open Vault Ports on FirewallD Public Zone
+- name: Open vault ports on FirewallD Public Zone
   ansible.posix.firewalld:
     port: "{{ vault_port }}/tcp"
     permanent: true
@@ -86,3 +76,15 @@
     state: started
     enabled: true
     daemon_reload: true
+
+- name: Capture vault version
+  ansible.builtin.shell:
+    cmd: vault --version
+  register: vault_installed_version
+
+- name: Update release file with vault version
+  ansible.builtin.lineinfile:
+    path: "{{ itential_release_file }}"
+    line: "VAULT={{ vault_installed_version.stdout }}"
+    mode: "0644"
+    create: true

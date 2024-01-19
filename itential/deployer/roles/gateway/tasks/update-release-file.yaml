@@ -1,0 +1,28 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+- name: Capture python version
+  ansible.builtin.command:
+    cmd: /usr/local/bin/python3 -V
+  register: python_installed_version
+  changed_when: false
+
+- name: Update release file with python version
+  ansible.builtin.lineinfile:
+    path: "{{ itential_release_file }}"
+    line: "PYTHON={{ python_installed_version.stdout }}"
+    create: true
+  changed_when: true
+
+- name: Capture pip3 version
+  ansible.builtin.command:
+    cmd: /usr/local/bin/pip3 -V
+  register: pip_installed_version
+  changed_when: false
+
+- name: Update release file with pip version
+  ansible.builtin.lineinfile:
+    path: "{{ itential_release_file }}"
+    line: "PIP={{ pip_installed_version.stdout }}"
+    create: true
+  changed_when: true

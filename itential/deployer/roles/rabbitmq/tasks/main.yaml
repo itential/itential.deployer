@@ -9,7 +9,7 @@
     - "release-undefined.yaml"
 
 - name: Check for valid RabbitMQ release
-  fail:
+  ansible.builtin.fail:
     msg: "missing or invalid rabbitmq_packages"
   when: rabbitmq_packages == "UNDEFINED"
 
@@ -17,62 +17,15 @@
   ansible.builtin.include_role:
     name: os
 
-- name: Import PackageCloud signing key
-  ansible.builtin.rpm_key:
-    state: present
-    key: https://packagecloud.io/rabbitmq/erlang/gpgkey
-  when: ansible_distribution_major_version | int <= 8   # SHA-1 is deprecated in RHEL 9
+- name: Include tasks to install RabbitMQ (online)
+  ansible.builtin.include_tasks:
+    file: rabbitmq-online.yml
+  when: not offline_install
 
-- name: Import rabbitmq primary signing key
-  ansible.builtin.rpm_key:
-    state: present
-    key: https://github.com/rabbitmq/signing-keys/releases/download/2.0/rabbitmq-release-signing-key.asc
-
-- name: Import rabbitmq signing key
-  ansible.builtin.rpm_key:
-    state: present
-    key: https://packagecloud.io/rabbitmq/rabbitmq-server/gpgkey
-  when: ansible_distribution_major_version | int <= 8   # SHA-1 is deprecated in RHEL 9
-
-# Install yum repos for the appropriate erlang and rabbitmq version
-- name: Install erlang repo
-  ansible.builtin.yum_repository:
-    name: rabbitmq_erlang
-    description: rabbitmq_erlang
-    owner: "root"
-    group: "root"
-    mode: 0644
-    baseurl: "{{ rabbitmq_erlang_repo_baseurl }}"
-    gpgcheck: true
-    gpgkey:
-      - https://packagecloud.io/rabbitmq/erlang/gpgkey
-    enabled: true
-    repo_gpgcheck: false
-    sslverify: true
-    sslcacert: /etc/pki/tls/certs/ca-bundle.crt
-
-- name: Install rabbitmq repo
-  ansible.builtin.yum_repository:
-    name: rabbitmq_server
-    description: rabbitmq_server
-    owner: "root"
-    group: "root"
-    mode: 0644
-    baseurl: "{{ rabbitmq_server_repo_baseurl }}"
-    gpgcheck: true
-    gpgkey:
-      - https://packagecloud.io/rabbitmq/rabbitmq-server/gpgkey
-    enabled: true
-    repo_gpgcheck: false
-    sslverify: true
-    sslcacert: /etc/pki/tls/certs/ca-bundle.crt
-    metadata_expire: 300
-
-# Installs the packages enabled by the above repos
-- name: Install packages
-  ansible.builtin.yum:
-    name: "{{ rabbitmq_packages[ ansible_distribution_major_version ] }}"
-    update_cache: true
+- name: Include tasks to install RabbitMQ (offline)
+  ansible.builtin.include_tasks:
+    file: rabbitmq-offline.yml
+  when: offline_install
 
 - name: Create systemd dir
   ansible.builtin.file:
@@ -182,5 +135,5 @@
 
 - name: Write rabbitmq release information
   ansible.builtin.lineinfile:
-    path: "/etc/iap-release"
+    path: "{{ itential_release_file }}"
     line: "RABBITMQ={{ rabbitmqVersion.stdout }}"

@@ -1,10 +1,21 @@
 # Copyright (c) 2022, Itential, LLC
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)---
 
-- name: Install python3 with yum
+- name: Install Python packages (online)
   ansible.builtin.yum:
-    name: python39
+    name: "{{ item }}"
+    state: present
+  with_items: "{{ mongodb_python_packages[ansible_distribution_major_version] }}"
+  register: python_install_result
+  when: not offline_install
 
-- name: Install pymongo
-  ansible.builtin.command:
-    cmd: pip3 install pymongo
+- name: Configure python3 alternative
+  community.general.alternatives:
+    name: python3
+    path: /usr/bin/python3.9
+    link: /usr/bin/python3
+
+- name: Create Python symlinks
+  ansible.builtin.import_role:
+    name: common
+    tasks_from: create-python39-symlinks

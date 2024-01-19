@@ -17,46 +17,21 @@
   ansible.builtin.package_facts:
     manager: auto
 
-- name: Install Platform dependent packages
-  ansible.builtin.yum:
-    name: "{{ platform_packages }}"
-    state: present
+- name: Install Platform packages
+  ansible.builtin.include_tasks:
+    file: install-platform-packages.yml
 
-# Install the mongodb repo if mongodb is not already installed. The platform role
-# will need mongo cmd line tools to import some initial data. It does not install
-# the database, just the cmd line tools and the mongo shell.
-- name: Install mongodb repo (for cmd line tools)
-  when: configure_iap | bool
-  ansible.builtin.yum_repository:
-    name: "mongodb"
-    description: MongoDB Repository
-    baseurl: "{{ mongodb_release_url[ansible_distribution_major_version] }}"
-    enabled: true
-    gpgcheck: true
-    gpgkey: "{{ mongodb_gpgkey_url[ansible_distribution_major_version] }}"
+- name: Install MongoDB tools
+  ansible.builtin.include_tasks:
+    file: install-mongodb-tools.yml
 
-# Install mongodb tools if they are not already installed
-- name: Install the MongoDB tools packages
-  when: configure_iap | bool
-  ansible.builtin.yum:
-    name: "{{ mongodb_tools_packages[ansible_distribution_major_version] }}"
-    state: present
-
-- name: Install nodejs
+- name: Install NodeJS
   ansible.builtin.include_tasks:
     file: install-nodejs.yml
 
-- name: Install python
+- name: Install Python
   ansible.builtin.include_tasks:
     file: install-python.yml
-
-- name: Install textfsm
-  ansible.builtin.include_tasks:
-    file: install-textfsm.yml
-
-- name: Install jinja2
-  ansible.builtin.include_tasks:
-    file: install-jinja2.yml
 
 - name: Create itential user
   ansible.builtin.include_tasks:
@@ -111,7 +86,7 @@
   ansible.builtin.include_tasks:
     file: configure-firewalld.yml
 
-- name: Configure vault
+- name: Configure Vault
   ansible.builtin.include_tasks:
     file: configure-vault.yml
   when: configure_vault | bool
@@ -128,5 +103,9 @@
 - name: Enable and start IAP
   ansible.builtin.systemd:
     name: automation-platform
-    enabled: yes
+    enabled: true
     state: restarted
+
+- name: Update release file
+  ansible.builtin.include_tasks:
+    file: update-release-file.yml

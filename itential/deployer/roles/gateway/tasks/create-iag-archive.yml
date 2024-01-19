@@ -1,0 +1,102 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+# The owner and group are intentially unset throughout in order to use the current user.
+#
+# From the Ansible documentation:
+# group - When left unspecified, it uses the current group of the current user unless you are root,
+# in which case it can preserve the previous ownership.
+# owner - When left unspecified, it uses the current user unless you are root, in which case it can
+# preserve the previous ownership.
+
+- name: Create temporary working directory
+  ansible.builtin.tempfile:
+    state: directory
+  register: iag_pkgs_temp_dir
+
+- name: Setup Python virtual environment
+  ansible.builtin.command:
+    chdir: "{{ iag_pkgs_temp_dir.path }}"
+    cmd: /usr/local/bin/python3 -m venv offline_install
+  changed_when: true
+
+# The shell module must be used here, not command.
+- name: Activate virtual environment
+  ansible.builtin.shell:  # noqa command-instead-of-shell
+    cmd: "source {{ iag_pkgs_temp_dir.path }}/offline_install/bin/activate"
+  changed_when: true
+
+- name: Install Python Dependencies
+  ansible.builtin.pip:
+    name: "{{ iag_python_dependencies }}"
+    state: present
+    virtualenv: "{{ iag_pkgs_temp_dir.path }}/offline_install"
+
+- name: Install Ansible
+  ansible.builtin.pip:
+    name: "{{ iag_ansible_version }}"
+    state: present
+    virtualenv: "{{ iag_pkgs_temp_dir.path }}/offline_install"
+  when: iag_enable_ansible | bool
+
+- name: Copy IAG wheel file to target node
+  ansible.builtin.copy:
+    src: "{{ iag_whl_file }}"
+    dest: "{{ iag_pkgs_temp_dir.path }}"
+    mode: '0644'
+
+- name: Install IAG
+  ansible.builtin.pip:
+    name: "{{ iag_pkgs_temp_dir.path }}/{{ iag_whl_file }}"
+    virtualenv: "{{ iag_pkgs_temp_dir.path }}/offline_install"
+
+- name: Uninstall IAG
+  ansible.builtin.pip:
+    name: "{{ iag_pkgs_temp_dir.path }}/{{ iag_whl_file }}"
+    state: absent
+    virtualenv: "{{ iag_pkgs_temp_dir.path }}/offline_install"
+
+- name: Create requirements file
+  ansible.builtin.shell:
+    chdir: "{{ iag_pkgs_temp_dir.path }}"
+    cmd: offline_install/bin/pip3 freeze > requirements.txt
+  changed_when: true
+
+- name: Create package directory
+  ansible.builtin.file:
+    name: "{{ iag_pkgs_temp_dir }}/iag_pkgs"
+    mode: '0775'
+    state: directory
+  changed_when: true
+
+- name: Download wheel files
+  ansible.builtin.command:
+    cmd: offline_install/bin/pip3 download -r requirements.txt -d iag_pkgs
+  args:
+    chdir: "{{ iag_pkgs_temp_dir.path }}"
+  changed_when: true
+
+- name: Copy requirements file to package directory
+  ansible.builtin.copy:
+    remote_src: true
+    src: "{{ iag_pkgs_temp_dir.path }}/requirements.txt"
+    dest: "{{ iag_pkgs_temp_dir.path }}/iag_pkgs"
+    mode: '0644'
+
+- name: Create download directory
+  ansible.builtin.file:
+    path: "{{ iag_pkgs_download_dir_target_node }}"
+    state: directory
+    mode: '0755'
+
+- name: Create IAG archive
+  community.general.archive:  # noqa risky-file-permissions
+    path: "{{ iag_pkgs_temp_dir.path }}/iag_pkgs/*"
+    dest: "{{ iag_pkgs_download_dir_target_node }}/iag_pkgs.tar.gz"
+    format: gz
+    force_archive: true
+
+- name: Remove temporary working directory
+  ansible.builtin.file:
+    path: "{{ iag_pkgs_temp_dir.path }}"
+    state: absent

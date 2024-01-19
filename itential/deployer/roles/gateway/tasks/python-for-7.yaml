@@ -1,6 +1,5 @@
 # Copyright (c) 2022, Itential, LLC
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
----
 
 - name: Check if openssl is already installed
   ansible.builtin.stat:
@@ -75,37 +74,9 @@
       with_items:
         - ./configure --enable-optimizations --with-openssl=/usr/local/ssl
         - make altinstall
+      changed_when: true
 
-    - name: Add python3 symlink
-      ansible.builtin.file:
-        state: link
-        src: /usr/local/bin/python3.9
-        path: /usr/local/bin/python3
-
-    - name: Capture python version
-      ansible.builtin.command:
-        cmd: /usr/local/bin/python3 -V
-      register: python_installed_version
-
-    - name: Update release file for python version
-      ansible.builtin.lineinfile:
-        path: "{{ itential_release_file }}"
-        line: "PYTHON={{ python_installed_version.stdout }}"
-        create: true
-
-    - name: Add pip3 symlink
-      ansible.builtin.file:
-        state: link
-        src: /usr/local/bin/pip3.9
-        path: /usr/local/bin/pip3
-
-    - name: Capture pip version
-      ansible.builtin.command:
-        cmd: /usr/local/bin/pip3 -V
-      register: pip_installed_version
-
-    - name: Update release file for pip version
-      ansible.builtin.lineinfile:
-        path: "{{ itential_release_file }}"
-        line: "PIP={{ pip_installed_version.stdout }}"
-        create: true
+    - name: Create Python symlinks
+      ansible.builtin.import_role:
+        name: common
+        tasks_from: create-python39-symlinks

@@ -1,0 +1,107 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+- name: Validate distribution major version
+  ansible.builtin.fail:
+    msg: Download not supported for version 7
+  when: ansible_distribution_major_version == "7"
+
+- name: Validate offline_install variable
+  ansible.builtin.fail:
+    msg: offline_install must be set to false for download
+  when:
+    - offline_install is defined
+    - offline_install
+
+- name: Include release vars
+  ansible.builtin.include_vars:
+    file: "{{ item }}"
+  with_first_found:
+    - "{{ iag_release }}-{{ ansible_distribution | lower }}-{{ ansible_distribution_major_version }}.yaml"
+    - "release-undefined.yaml"
+
+- name: Check for valid IAG release
+  ansible.builtin.fail:
+    msg: "missing or invalid iag_release"
+  when: iag_release == "UNDEFINED"
+
+- name: Install epel-release yum repo
+  ansible.builtin.yum:
+    name: "{{ epel_location }}"
+    update_cache: true
+    state: present
+    disable_gpg_check: true
+
+- name: Download Gateway OS rpms
+  ansible.builtin.import_role:
+    name: offline
+    tasks_from: download-rpms
+  vars:
+    download_method: yum_module
+    download_packages: "{{ gateway_packages }}"
+    download_dir: "{{ iag_rpms_download_dir_target_node }}"
+  tags: download_gateway_packages
+
+- name: Install Gateway rpms
+  ansible.builtin.yum:
+    name: "{{ item }}"
+    state: present
+  with_items: "{{ gateway_packages }}"
+  register: gateway_packages_installed
+  tags: install_gateway_packages
+
+- name: Download Python packages
+  ansible.builtin.include_tasks:
+    file: download-packages-python.yml
+
+- name: Create archives directory
+  ansible.builtin.file:
+    path: "{{ iag_archives_download_dir_target_node }}"
+    state: directory
+    mode: '0755'
+
+- name: Download Terraform archive
+  ansible.builtin.get_url:
+    url: "{{ iag_terraform_url }}"
+    dest: "{{ iag_archives_download_dir_target_node }}"
+    mode: "0644"
+  when: iag_enable_terraform | bool
+
+- name: Copy rpms to control node
+  ansible.builtin.import_role:
+    name: offline
+    tasks_from: fetch-packages
+  vars:
+    src_dir: "{{ iag_rpms_download_dir_target_node }}"
+    dest_dir: "{{ iag_rpms_download_dir_control_node }}"
+
+- name: Copy wheels to control node
+  ansible.builtin.import_role:
+    name: offline
+    tasks_from: fetch-packages
+  vars:
+    src_dir: "{{ iag_wheels_download_dir_target_node }}"
+    dest_dir: "{{ iag_wheels_download_dir_control_node }}"
+
+- name: Copy archives to control node
+  ansible.builtin.import_role:
+    name: offline
+    tasks_from: fetch-packages
+  vars:
+    src_dir: "{{ iag_archives_download_dir_target_node }}"
+    dest_dir: "{{ iag_archives_download_dir_control_node }}"
+
+- name: Copy IAG archive to control node
+  ansible.builtin.import_role:
+    name: offline
+    tasks_from: fetch-packages
+  vars:
+    src_dir: "{{ iag_pkgs_download_dir_target_node }}"
+    dest_dir: "{{ iag_pkgs_download_dir_control_node }}"
+
+- name: Uninstall Gateway packages
+  ansible.builtin.yum:
+    name: "{{ item }}"
+    state: absent
+    autoremove: true
+  with_items: "{{ gateway_packages_installed.results | selectattr('changed', 'equalto', true) | map(attribute='item') }}"

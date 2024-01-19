@@ -18,15 +18,17 @@
     # Install app-artifact into IAP
     # This should only be done in a development environment
     - role: platform_app_artifact
-      when:
-        - "'platform' in group_names"
-        - app_artifact | bool
+      when: app_artifact | bool
       tags:
         - platform
         - platform_app_artifact
 
-    # Install any listed apps and/or adapters
-    - role: platform_adapters
+  # Install any listed apps and/or adapters
+  tasks:
+    - name: Install adapters
+      ansible.builtin.import_role:
+        name: platform
+        tasks_from: install-adapters
       tags:
         - platform
         - platform_adapters

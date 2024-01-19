@@ -9,9 +9,9 @@
     - "release-undefined.yaml"
 
 - name: Check for valid Redis release
-  fail:
-    msg: "missing or invalid redis_release"
-  when: redis_release == "UNDEFINED"
+  ansible.builtin.fail:
+    msg: "missing or invalid redis_packages"
+  when: redis_packages == "UNDEFINED"
 
 - name: Include base OS updates
   ansible.builtin.include_role:
@@ -21,15 +21,23 @@
   ansible.builtin.include_role:
     name: selinux
 
-- name: Include tasks to install redis using YUM
-  ansible.builtin.include_tasks:
-    file: redis-using-yum.yaml
-  when: ansible_distribution_major_version | int == 7
+- name: Include tasks to install Redis (online)
+  when: not offline_install
+  block:
+    - name: Include tasks to install Redis using YUM (online)
+      ansible.builtin.include_tasks:
+        file: redis-using-yum.yaml
+      when: ansible_distribution_major_version | int == 7
 
-- name: Include tasks to install redis using DNF
+    - name: Include tasks to install Redis using DNF (online)
+      ansible.builtin.include_tasks:
+        file: redis-using-dnf.yaml
+      when: ansible_distribution_major_version | int >= 8
+
+- name: Include tasks to install Redis (offline)
   ansible.builtin.include_tasks:
-    file: redis-using-dnf.yaml
-  when: ansible_distribution_major_version | int >= 8
+    file: redis-offline.yml
+  when: offline_install
 
 - name: Ensure the directories for the config exists
   ansible.builtin.file:
@@ -54,10 +62,10 @@
 - name: Open Port on FirewallD Public Zone
   ansible.posix.firewalld:
     port: "{{ redis_port }}/tcp"
-    permanent: yes
+    permanent: true
     state: enabled
     zone: public
-    immediate: yes
+    immediate: true
   when:
     - ansible_facts.services["firewalld.service"] is defined
     - (ansible_facts.services["firewalld.service"].state == "running")
@@ -68,7 +76,7 @@
   throttle: 1
   ansible.builtin.systemd:
     name: redis
-    enabled: yes
+    enabled: true
     state: restarted
 
 - name: Determine redis version
@@ -85,6 +93,6 @@
 
 - name: Write redis release information
   ansible.builtin.lineinfile:
-    path: "/etc/iap-release"
+    path: "{{ itential_release_file }}"
     line: "REDIS={{ redis_server_version }}"
-    create: yes
+    create: true

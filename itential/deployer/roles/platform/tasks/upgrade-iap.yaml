@@ -135,3 +135,4 @@
 - name: Restart IAP
   ansible.builtin.command: /bin/true
   notify: "Restart IAP"
+  changed_when: true

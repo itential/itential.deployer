@@ -3,3 +3,12 @@
 
 # The default group that runs vault
 vault_group: vault
+
+vault_packages_path: "{{ itential_packages_path }}/{{ iap_release }}/vault"
+vault_rpms_path: "{{ vault_packages_path }}/rpms"
+
+vault_packages_download_dir_control_node: "{{ packages_download_root_control_node }}/{{ vault_packages_path }}"
+vault_rpms_download_dir_control_node: "{{ vault_packages_download_dir_control_node }}/rpms"
+
+vault_packages_download_dir_target_node: "{{ packages_download_root_target_node }}/{{ vault_packages_path }}"
+vault_rpms_download_dir_target_node: "{{ vault_packages_download_dir_target_node }}/rpms"

@@ -5,14 +5,8 @@
   ansible.builtin.include_vars:
     file: "{{ item }}"
   with_first_found:
-    - "release-{{ iag_release }}.yaml"
+    - "{{ iag_release }}-{{ ansible_distribution | lower }}-{{ ansible_distribution_major_version }}.yaml"
     - "release-undefined.yaml"
-
-- name: Include Redhat release vars
-  ansible.builtin.include_vars:
-    file: "{{ item }}"
-  with_first_found:
-    - "redhat-{{ ansible_distribution_major_version }}.yaml"
 
 - name: Check for valid IAG release
   ansible.builtin.fail:
@@ -22,23 +16,36 @@
 - name: Include base OS updates
   ansible.builtin.include_role:
     name: os
+  tags: base_os_updates
 
-- name: Install Gateway packages
+- name: Create temporary working directory
+  ansible.builtin.tempfile:
+    state: directory
+  register: workingdir
+
+- name: Install Gateway packages (online)
   ansible.builtin.yum:
     name: "{{ item }}"
     state: present
   with_items: "{{ gateway_packages }}"
+  when: not offline_install
+  tags: install_gateway_packages
+
+- name: Install Gateway packages (offline)
+  ansible.builtin.import_role:
+    name: offline
+    tasks_from: install-rpms
+  vars:
+    rpms_path: "{{ iag_rpms_path }}"
+  when: offline_install
+  tags: install_gateway_packages
 
 - name: Write IAG release file
   ansible.builtin.lineinfile:
     path: "{{ itential_release_file }}"
     line: "GATEWAY={{ iag_release }}"
     create: true
-
-- name: Create temporary working directory
-  ansible.builtin.tempfile:
-    state: directory
-  register: workingdir
+  changed_when: true
 
 - name: Create itential group
   ansible.builtin.group:
@@ -102,48 +109,89 @@
 # in order to support the documented version of python3. Dynamically include a
 # task file that can handle the steps to build from source when we detect that
 # this host is a version 7.
-- name: Include tasks to install python on version 7
+- name: Include tasks to install python on version 7 (online)
   ansible.builtin.include_tasks:
     file: "python-for-7.yaml"
   when:
     - ansible_distribution_major_version == "7"
     - not python_installed.stat.exists or not pip_installed.stat.exists
+    - not offline_install
 
 # Include a file for RHEL8 steps to install the appropriate version of python.
-- name: Include tasks to install python on version 8
+- name: Include tasks to install python on version 8 (online)
   ansible.builtin.include_tasks:
     file: "python-for-8.yaml"
   when:
     - ansible_distribution_major_version == "8"
     - not python_installed.stat.exists or not pip_installed.stat.exists
+    - not offline_install
+
+- name: Include tasks to install python on version 8 (offline)
+  ansible.builtin.include_tasks:
+    file: "python-for-8-offline.yml"
+  when:
+    - ansible_distribution_major_version == "8"
+    - offline_install
 
 # Include a file for RHEL9 steps to install the appropriate version of python.
-- name: Include tasks to install python on version 9
+- name: Include tasks to install python on version 9 (online)
   ansible.builtin.include_tasks:
     file: "python-for-9.yaml"
   when:
     - ansible_distribution_major_version == "9"
     - not python_installed.stat.exists or not pip_installed.stat.exists
+    - not offline_install
+
+- name: Include tasks to install python on version 9 (offline)
+  ansible.builtin.include_tasks:
+    file: "python-for-9-offline.yml"
+  when:
+    - ansible_distribution_major_version == "9"
+    - offline_install
 
 - name: Setup python virtual environment
   ansible.builtin.command:
     chdir: "{{ iag_install_dir }}"
     cmd: /usr/local/bin/python3 -m venv venv
+  changed_when: true
 
 - name: Activate the virtual environment for the current session
   ansible.builtin.shell:
     cmd: "source {{ iag_install_dir }}/venv/bin/activate"
+  changed_when: true
 
 - name: Include the virtual environment in default shell
   ansible.builtin.shell:
     cmd: echo source {{ iag_install_dir }}/venv/bin/activate > /etc/profile.d/venv.sh
+  changed_when: true
 
-- name: Install Python dependencies
+- name: Install Python dependencies (online)
   ansible.builtin.pip:
     name: "{{ item }}"
     virtualenv: "{{ iag_install_dir }}/venv"
-  with_items:
-    - "{{ iag_python_dependencies }}"
+  with_items: "{{ iag_python_dependencies }}"
+  when: not offline_install
+  tags: install_python_dependencies
+
+- name: Install Python dependencies (offline)
+  when: offline_install
+  block:
+    - name: Install Python dependencies (offline)
+      ansible.builtin.include_role:
+        name: offline
+        tasks_from: install-wheels
+      vars:
+        wheels_path: "{{ iag_wheels_download_dir_control_node }}"
+        virtual_env: "{{ iag_install_dir }}/venv"
+      tags: install_python_dependencies
+
+    - name: Install Python dependencies from IAG requirements file (offline)
+      ansible.builtin.include_role:
+        name: offline
+        tasks_from: install-wheels-archives
+      vars:
+        wheels_path: "{{ iag_pkgs_path }}"
+        virtual_env: "{{ iag_install_dir }}/venv"
 
 # Need to install ansible within the virtual environment
 - name: Install Ansible
@@ -153,6 +201,7 @@
       ansible.builtin.pip:
         name: "{{ iag_ansible_version }}"
         virtualenv: "{{ iag_install_dir }}/venv"
+      when: not offline_install
 
     - name: Create Ansible config file
       ansible.builtin.template:
@@ -181,6 +230,7 @@
         path: "{{ itential_release_file }}"
         line: "ANSIBLE={{ iag_ansible_version }}"
         create: true
+      changed_when: true
 
 - name: Install Terraform
   when: iag_enable_terraform | bool
@@ -190,18 +240,26 @@
         url: "{{ iag_terraform_url }}"
         dest: "{{ workingdir.path }}/{{ iag_terraform_url | basename }}"
         mode: "0644"
+      when: not offline_install
 
     - name: Extract Terraform
       ansible.builtin.unarchive:
         src: "{{ workingdir.path }}/{{ iag_terraform_url | basename }}"
         dest: /usr/local/bin
         remote_src: true
+      when: not offline_install
+
+    - name: Install Terraform (offline)
+      ansible.builtin.include_tasks:
+        file: terraform-offline.yml
+      when: offline_install
 
     - name: Update release file
       ansible.builtin.lineinfile:
         path: "{{ itential_release_file }}"
         line: "TERRAFORM=true"
         create: true
+      changed_when: true
 
 - name: Check if Automation Gateway is already installed
   ansible.builtin.stat:
@@ -222,16 +280,21 @@
         name: "{{ workingdir.path }}/{{ iag_whl_file | basename }}"
         virtualenv: "{{ iag_install_dir }}/venv"
 
+- name: Set ownership/permissions and create properties.yaml
+  when: not iag_installed.stat.exists
+  block:
     # Using chown and chmod is a faster way to enforce the file ownership and
     # permissions. The file module in ansible checks each and every file/dir
     # in the tree, 'chown -R ' does not, it just sets it.
     - name: Set appropriate ownership on all gateway files
       ansible.builtin.command:
         cmd: "chown -R {{ iag_user }}:{{ iag_group }} {{ iag_install_dir }}/venv"
+      changed_when: true
 
     - name: Set appropriate permissions on all gateway files
       ansible.builtin.command:
         cmd: "chmod -R 775 {{ iag_install_dir }}/venv"
+      changed_when: true
 
     - name: Create properties.yaml using template based on the version
       ansible.builtin.template:
@@ -269,6 +332,7 @@
         path: "{{ itential_release_file }}"
         line: "NORNIR=true"
         create: true
+      changed_when: true
 
 - name: Write automation-gateway.service to host
   ansible.builtin.template:
@@ -317,6 +381,10 @@
     enabled: true
     state: restarted
     daemon_reload: true
+
+- name: Update release file
+  ansible.builtin.include_tasks:
+    file: update-release-file.yaml
 
 - name: Remove temporary working directory
   ansible.builtin.file:
