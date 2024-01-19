@@ -1,0 +1,8 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+- name: Download Platform packages
+  import_playbook: download-packages-platform.yml
+
+- name: Download Gateway packages
+  import_playbook: download-packages-gateway.yml

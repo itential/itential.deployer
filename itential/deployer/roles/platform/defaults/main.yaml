@@ -51,3 +51,12 @@ mongo_backup: true
 
 # Flag to remove the IAP bin/tar file when complete
 remove_iap_source_file: true
+
+# Flag to remove the package-lock.json file before running the NPM install
+delete_package_lock_file: false
+
+# Flag to disable Git safe repo check
+disable_git_safe_repo_checks: false
+
+# Flag to prevent the NPM scripts from running when running the NPM install
+npm_ignore_scripts: false

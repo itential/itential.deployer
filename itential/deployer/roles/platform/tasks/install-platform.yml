@@ -76,7 +76,7 @@
   ansible.builtin.unarchive:
     src: "{{ iap_install_dir }}/{{ iap_tar_file }}"
     dest: "{{ iap_install_dir }}"
-    remote_src: yes
+    remote_src: true
   when: iap_tar_file is defined
 
 - name: Create the "current" symlink
@@ -100,10 +100,3 @@
   ansible.builtin.file:
     path: "{{ iap_install_dir }}/{{ iap_bin_file }}"
     state: absent
-
-- name: Write IAP release file
-  ansible.builtin.lineinfile:
-    path: "{{ itential_release_file }}"
-    line: "PLATFORM={{ iap_release }}"
-    mode: "0644"
-    create: true

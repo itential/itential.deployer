@@ -1,0 +1,33 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+platform_packages:
+  - bzip2-devel
+  - gcc
+  - glibc-common
+  - libffi-devel
+  - openldap
+  - openldap-clients
+  - openssl-devel
+  - zlib-devel
+
+iap_nodejs_package: "@nodejs:18"
+
+iap_python_packages:
+  - python3
+  - python3-pip
+
+iap_python_dependencies:
+  - textfsm==1.1.2
+  - jinja2==2.11.3
+  - markupsafe==2.0.1
+  - pymongo
+
+mongodb_release_url: https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/6.0/x86_64/
+mongodb_gpgkey_url: https://www.mongodb.org/static/pgp/server-6.0.asc
+
+mongodb_tools_packages:
+  - mongodb-database-tools
+  - mongodb-mongosh
+
+mongo_shell: mongosh

@@ -21,3 +21,17 @@ mongodb_packages:
     - mongodb-org-database
     - mongodb-org-server
     - mongodb-org-tools
+
+mongodb_python_packages:
+  "8":
+    - python39
+    - python39-pip
+  "9":
+    - python3
+    - python3-pip
+
+mongodb_python_dependencies:
+  "8":
+    - pymongo
+  "9":
+    - pymongo

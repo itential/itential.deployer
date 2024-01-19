@@ -1,0 +1,11 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+os_packages_path: "{{ itential_packages_path }}/{{ iap_release }}/os"
+os_rpms_path: "{{ os_packages_path }}/rpms"
+
+os_packages_download_dir_control_node: "{{ packages_download_root_control_node }}/{{ os_packages_path }}"
+os_rpms_download_dir_control_node: "{{ os_packages_download_dir_control_node }}/rpms"
+
+os_packages_download_dir_target_node: "{{ packages_download_root_target_node }}/{{ os_packages_path }}"
+os_rpms_download_dir_target_node: "{{ os_packages_download_dir_target_node }}/rpms"

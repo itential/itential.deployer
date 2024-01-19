@@ -5,3 +5,18 @@
 # This is ultimately stored in the mongo database to be read by IAP, therefore
 # this is the location as seen from the IAP host.
 itential_root_ca_file_destination: /opt/itential/keys/mongo-rootCA.pem
+
+iap_packages_path: "{{ itential_packages_path }}/{{ iap_release }}/iap"
+iap_rpms_path: "{{ iap_packages_path }}/rpms"
+iap_wheels_path: "{{ iap_packages_path }}/wheels"
+iap_adapters_path: "{{ iap_packages_path }}/adapters"
+
+iap_packages_download_dir_control_node: "{{ packages_download_root_control_node }}/{{ iap_packages_path }}"
+iap_rpms_download_dir_control_node: "{{ iap_packages_download_dir_control_node }}/rpms"
+iap_wheels_download_dir_control_node: "{{ iap_packages_download_dir_control_node }}/wheels"
+iap_adapters_download_dir_control_node: "{{ iap_packages_download_dir_control_node }}/adapters"
+
+iap_packages_download_dir_target_node: "{{ packages_download_root_target_node }}/{{ iap_packages_path }}"
+iap_rpms_download_dir_target_node: "{{ iap_packages_download_dir_target_node }}/rpms"
+iap_wheels_download_dir_target_node: "{{ iap_packages_download_dir_target_node }}/wheels"
+iap_adapters_download_dir_target_node: "{{ iap_packages_download_dir_target_node }}/adapters"

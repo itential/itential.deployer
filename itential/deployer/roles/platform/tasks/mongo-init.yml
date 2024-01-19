@@ -28,7 +28,7 @@
     - name: Determine if the Local_AAA profile document already exists
       ansible.builtin.command:
         argv:
-          - "{{ mongo_shell[ansible_distribution_major_version] }}"
+          - "{{ mongo_shell }}"
           - --quiet
           - --eval='EJSON.stringify(db.iap_profiles.find({"id":"Local_AAA"},{"_id":0,"services":1}).toArray());'
           - "{{ mongo_connection_string }}"
@@ -58,7 +58,7 @@
     - name: Determine if the LDAP profile document already exists
       ansible.builtin.command:
         argv:
-          - "{{ mongo_shell[ansible_distribution_major_version] }}"
+          - "{{ mongo_shell }}"
           - --quiet
           - --eval='EJSON.stringify(db.iap_profiles.find({"id":"LDAP"},{"_id":0,"services":1}).toArray());'
           - "{{ mongo_connection_string }}"
@@ -109,7 +109,7 @@
     - name: Determine if the Primary_Local_AAA profile document already exists
       ansible.builtin.command:
         argv:
-          - "{{ mongo_shell[ansible_distribution_major_version] }}"
+          - "{{ mongo_shell }}"
           - --quiet
           - --eval='EJSON.stringify(db.iap_profiles.find({"id":"Local_AAA"},{"_id":0,"services":1}).toArray());'
           - "{{ mongo_connection_string }}"
@@ -135,7 +135,7 @@
     - name: Determine if the Secondary_Local_AAA profile document already exists
       ansible.builtin.command:
         argv:
-          - "{{ mongo_shell[ansible_distribution_major_version] }}"
+          - "{{ mongo_shell }}"
           - --quiet
           - --eval='EJSON.stringify(db.iap_profiles.find({"id":"Secondary_Local_AAA"},{"_id":0,"services":1}).toArray());'
           - "{{ mongo_connection_string }}"
@@ -219,7 +219,14 @@
           - --file="{{ item.path }}"
       loop: "{{ found_sc_files.files }}"
 
+- name: Find all rendered template files in /tmp
+  ansible.builtin.find:
+    paths: /tmp
+    patterns: "itential_*.json"
+  register: find_results
+
 - name: Clean up all rendered template files in /tmp
   ansible.builtin.file:
-    path: "/tmp/itential_*.json"
+    path: "{{ item.path }}"
     state: absent
+  with_items: "{{ find_results.files }}"

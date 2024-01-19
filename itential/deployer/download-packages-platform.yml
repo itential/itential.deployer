@@ -1,0 +1,32 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+- name: Download OS packages
+  hosts: platform
+  become: true
+  vars:
+    offline_install: false
+  roles:
+    - role: common_vars
+  tasks:
+    - name: Download OS packages
+      ansible.builtin.import_role:
+        name: os
+        tasks_from: download-packages
+      run_once: true
+      tags: download_os_packages
+
+- name: Download Redis packages
+  import_playbook: download-packages-redis.yml
+
+- name: Download RabbitMQ packages
+  import_playbook: download-packages-rabbitmq.yml
+
+- name: Download MongoDB packages
+  import_playbook: download-packages-mongodb.yml
+
+- name: Download Vault packages
+  import_playbook: download-packages-vault.yml
+
+- name: Download IAP packages
+  import_playbook: download-packages-iap.yml

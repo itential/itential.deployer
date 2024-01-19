@@ -1,0 +1,57 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+- name: Validate download_dir is set
+  ansible.builtin.fail:
+    msg: "download_dir is not set"
+  when: not download_dir
+
+- name: Validate adapter is set
+  ansible.builtin.fail:
+    msg: "adapter is not set"
+  when: not adapter
+
+- name: Parse adapter name
+  ansible.builtin.set_fact:
+    adapter_name: "{{ adapter | basename | split('.') | first }}"
+
+- name: Git clone {{ adapter }}
+  ansible.builtin.git:
+    repo: "{{ adapter }}"
+    dest: "{{ download_dir }}/{{ adapter_name }}"
+    force: true
+
+- name: Install {{ adapter_name }}
+  ansible.builtin.command:
+    cmd: npm install
+  args:
+    chdir: "{{ download_dir }}/{{ adapter_name }}"
+  changed_when: true
+
+# The bundleDependencies defines an array of package names that will be bundled 
+# when publishing the package.  This really should be defined in the package.json
+# when it's downloaded.  If it is not already defined, set it to true.  A value of true 
+# will bundle all dependencies.
+- name: Check if bundleDependencies is already defined in package.json
+  ansible.builtin.lineinfile:
+    state: absent
+    path: "{{ download_dir }}/{{ adapter_name }}/package.json"
+    regexp: '"bundleDependencies":'
+  check_mode: true
+  changed_when: false
+  register: bundle_dependencies_check
+
+- name: Define bundleDependencies if undefined
+  ansible.builtin.lineinfile:
+    state: present
+    path: "{{ download_dir }}/{{ adapter_name }}/package.json"
+    line: '  "bundleDependencies": true,'
+    insertbefore: '"dependencies"'
+  when: bundle_dependencies_check.found == 0
+
+- name: Re-pack {{ adapter_name }}
+  ansible.builtin.command:
+    cmd: npm pack "{{ adapter_name }}/"
+  args:
+    chdir: "{{ download_dir }}"
+  changed_when: true

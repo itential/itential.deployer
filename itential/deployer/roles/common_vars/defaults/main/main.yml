@@ -6,3 +6,10 @@ itential_release_file: /etc/iap-release
 
 # By default, do not configure vault
 configure_vault: false
+
+offline_install: false
+packages_download_root_control_node: "{{ playbook_dir }}/files"
+packages_download_root_target_node: /var/tmp
+itential_packages_path: "itential_packages/{{ ansible_distribution | lower }}_{{ ansible_distribution_major_version }}"
+
+epel_location: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_distribution_major_version }}.noarch.rpm"

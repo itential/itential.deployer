@@ -1,40 +1,14 @@
 # Copyright (c) 2022, Itential, LLC
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
----
-- name: Install python3 with yum
+
+- name: Install Python packages
   ansible.builtin.yum:
-    name:
-      - python3
-      - python3-devel
+    name: "{{ item }}"
+    state: present
+  with_items: "{{ gateway_python_packages }}"
+  register: python_install_result
 
-- name: Add python3 symlink
-  ansible.builtin.file:
-    state: link
-    src: /usr/bin/python3
-    path: /usr/local/bin/python3
-
-- name: Capture python version
-  ansible.builtin.command:
-    cmd: /usr/local/bin/python3 -V
-  register: python_installed_version
-
-- name: Update release file for python version
-  ansible.builtin.lineinfile:
-    path: "{{ itential_release_file }}"
-    line: "PYTHON={{ python_installed_version.stdout }}"
-    create: true
-
-- name: Install pip3
-  ansible.builtin.command:
-    cmd: "python3 -m pip install pip=={{ iag_pip_version }}"
-
-- name: Capture pip3 version
-  ansible.builtin.command:
-    cmd: /usr/local/bin/pip3 -V
-  register: pip_installed_version
-
-- name: Update release file for pip version
-  ansible.builtin.lineinfile:
-    path: "{{ itential_release_file }}"
-    line: "PIP={{ pip_installed_version.stdout }}"
-    create: true
+- name: Create Python symlinks
+  ansible.builtin.import_role:
+    name: common
+    tasks_from: create-python3-symlinks

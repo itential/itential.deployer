@@ -1,6 +1,6 @@
 # Copyright (c) 2022, Itential, LLC
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
----
+
 - name: Make directory for app-artifacts
   ansible.builtin.file:
     path: "{{ iap_install_dir }}/current/custom/@itential/app-artifacts"
@@ -20,7 +20,7 @@
       - --strip-components=1
 
 - name: Run npm install
-  npm:
+  community.general.npm:
     path: "{{ iap_install_dir }}/current/custom/@itential/app-artifacts"
 
 # Using chown and chmod is a faster way to enforce the file ownership and

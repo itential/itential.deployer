@@ -1,0 +1,22 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+gateway_packages:
+  - make
+  - gcc-c++
+
+gateway_python_packages:
+  - python39
+  - python39-devel
+  - python-rpm-macros
+  - python3-pyparsing
+  - python3-rpm-generators
+  - python3-rpm-macros
+
+iag_python_dependencies:
+  - wheel
+  - setuptools==58.0.1
+
+iag_ansible_version: ansible==2.10.7
+
+iag_terraform_url: https://releases.hashicorp.com/terraform/0.12.31/terraform_0.12.31_linux_amd64.zip

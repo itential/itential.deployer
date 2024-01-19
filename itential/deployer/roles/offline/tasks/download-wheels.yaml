@@ -1,0 +1,40 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+- name: Validate download_dir is set
+  ansible.builtin.fail:
+    msg: "download_dir is not set"
+  when: not download_dir
+
+- name: Create download directory
+  ansible.builtin.file:
+    path: "{{ download_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: Upgrade Pip
+  ansible.builtin.command:
+    cmd: pip3 install pip --upgrade
+  changed_when: true
+
+# When the --no-deps option is used, package dependencies will not be downloaded.
+- name: Download wheel files (no deps)
+  ansible.builtin.command:
+    cmd: "pip3 download --no-deps {{ item }}"
+  args:
+    chdir: "{{ download_dir }}"
+  changed_when: true
+  with_items: "{{ wheel_files }}"
+  when: with_deps is not defined or not with_deps
+
+# Package dependencies will be downloaded.
+- name: Download wheel files (with deps)
+  ansible.builtin.command:
+    cmd: "pip3 download {{ item }}"
+  args:
+    chdir: "{{ download_dir }}"
+  changed_when: true
+  with_items: "{{ wheel_files }}"
+  when:
+    - with_deps is defined
+    - with_deps

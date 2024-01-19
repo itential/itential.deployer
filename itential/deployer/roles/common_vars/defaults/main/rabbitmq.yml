@@ -6,3 +6,12 @@ rabbitmq_vhost: iap
 
 # Default installation will not have RabbitMQ SSL configured
 rabbitmq_ssl: false
+
+rabbitmq_packages_path: "{{ itential_packages_path }}/{{ iap_release }}/rabbitmq"
+rabbitmq_rpms_path: "{{ rabbitmq_packages_path }}/rpms"
+
+rabbitmq_packages_download_dir_control_node: "{{ packages_download_root_control_node }}/{{ rabbitmq_packages_path }}"
+rabbitmq_rpms_download_dir_control_node: "{{ rabbitmq_packages_download_dir_control_node }}/rpms"
+
+rabbitmq_packages_download_dir_target_node: "{{ packages_download_root_target_node }}/{{ rabbitmq_packages_path }}"
+rabbitmq_rpms_download_dir_target_node: "{{ rabbitmq_packages_download_dir_target_node }}/rpms"

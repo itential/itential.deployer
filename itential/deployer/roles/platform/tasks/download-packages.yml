@@ -1,0 +1,55 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+- name: Validate distribution major version
+  ansible.builtin.fail:
+    msg: Download not supported for version 7
+  when: ansible_distribution_major_version == "7"
+
+- name: Validate offline_install variable
+  ansible.builtin.fail:
+    msg: offline_install must be set to false for download
+  when:
+    - offline_install is defined
+    - offline_install
+
+- name: Determine release vars
+  ansible.builtin.include_tasks:
+    file: determine-release-vars.yml
+
+- name: Download OS packages
+  ansible.builtin.include_tasks:
+    file: download-packages-os.yml
+
+- name: Download MongoDB packages
+  ansible.builtin.include_tasks:
+    file: download-packages-mongodb.yml
+
+- name: Download NodeJS packages
+  ansible.builtin.include_tasks:
+    file: download-packages-nodejs.yml
+
+- name: Download Python packages
+  ansible.builtin.include_tasks:
+    file: download-packages-python.yml
+
+- name: Download Adapter packages
+  ansible.builtin.include_tasks:
+    file: download-adapters.yml
+  when: itential_adapters is defined or custom_adapters is defined
+
+- name: Copy rpms to control node
+  ansible.builtin.import_role:
+    name: offline
+    tasks_from: fetch-packages
+  vars:
+    src_dir: "{{ iap_rpms_download_dir_target_node }}"
+    dest_dir: "{{ iap_rpms_download_dir_control_node }}"
+
+- name: Copy wheels to control node
+  ansible.builtin.import_role:
+    name: offline
+    tasks_from: fetch-packages
+  vars:
+    src_dir: "{{ iap_wheels_download_dir_target_node }}"
+    dest_dir: "{{ iap_wheels_download_dir_control_node }}"

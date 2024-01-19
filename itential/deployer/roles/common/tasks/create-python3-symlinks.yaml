@@ -1,0 +1,26 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+- name: Check if python3 symlink already exists
+  ansible.builtin.stat:
+    path: "/usr/local/bin/python3"
+  register: python_installed
+
+- name: Add python3 symlink
+  ansible.builtin.file:
+    state: link
+    src: /usr/bin/python3
+    path: /usr/local/bin/python3
+  when: not python_installed.stat.exists
+
+- name: Check if pip3 symlink already exists
+  ansible.builtin.stat:
+    path: "/usr/local/bin/pip3"
+  register: pip_installed
+
+- name: Add pip3 symlink
+  ansible.builtin.file:
+    state: link
+    src: /usr/bin/pip3
+    path: /usr/local/bin/pip3
+  when: not pip_installed.stat.exists

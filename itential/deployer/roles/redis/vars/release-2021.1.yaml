@@ -1,11 +1,13 @@
 # Copyright (c) 2022, Itential, LLC
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
-# The keys here in the redis_release and redis_repo_url objects are intended to represent the
+# The keys here in the redis_packages and redis_repo_url objects are intended to represent the
 # Redhat/Centos version
-redis_release:
-  "7": 6.2
-  "8": 6.2
+redis_packages:
+  "7":
+    - redis-6.2*
+  "8":
+    - "@redis:remi-6.2"
 
 redis_repo_url:
   "7": "http://rpms.remirepo.net/enterprise/remi-release-7.rpm"
