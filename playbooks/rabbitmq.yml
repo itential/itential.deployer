@@ -7,10 +7,10 @@
   become: true
   roles:
     # Pull in the common vars
-    - role: common_vars
+    - role: itential.deployer.common_vars
 
     # Perform a base installation of Rabbitmq
-    - role: rabbitmq
+    - role: itential.deployer.rabbitmq
       tags:
         - rabbitmq
         - rabbitmq_install
@@ -18,17 +18,15 @@
     # Add on any Rabbit features, HA, auth, etc...
     # Configure Rabbit in a cluster
     # https://www.rabbitmq.com/clustering.html
-    - role: rabbitmq_cluster
-      when:
-        - rabbitmq_cluster | bool
+    - role: itential.deployer.rabbitmq_cluster
+      when: rabbitmq_cluster | bool
       tags:
         - rabbitmq
         - rabbitmq_cluster
 
     # Configure rabbit to only accept SSL connections
-    - role: rabbitmq_ssl
-      when:
-        - rabbitmq_ssl | bool
+    - role: itential.deployer.rabbitmq_ssl
+      when: rabbitmq_ssl | bool
       tags:
         - rabbitmq
         - rabbitmq_ssl

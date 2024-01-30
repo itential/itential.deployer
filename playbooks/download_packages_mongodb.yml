@@ -1,16 +1,16 @@
 # Copyright (c) 2022, Itential, LLC
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
-- name: Download IAG packages
-  hosts: gateway
+- name: Download MongoDB packages
+  hosts: mongodb
   become: true
   vars:
     offline_install: false
   roles:
-    - role: common_vars
+    - role: itential.deployer.common_vars
   tasks:
-    - name: Download IAG packages
+    - name: Download MongoDB packages
       ansible.builtin.import_role:
-        name: gateway
+        name: itential.deployer.mongodb
         tasks_from: download-packages
       run_once: true

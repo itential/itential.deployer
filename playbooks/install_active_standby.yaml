@@ -7,25 +7,23 @@
   roles:
     ### REDIS
     # Perform a base installation of Redis
-    - role: redis
+    - role: itential.deployer.redis
       tags:
         - redis
         - redis_install
 
     # Perform installation of Redis Sentinel for Redis HA and replication
     # https://redis.io/docs/manual/sentinel/
-    - role: redis_replication
-      when:
-        - redis_replication | bool
+    - role: itential.deployer.redis_replication
+      when: redis_replication | bool
       tags:
         - redis
         - redis_replication
 
     # Configure Redis to require a username & password (authorization)
     # https://redis.io/docs/manual/security/acl/
-    - role: redis_auth
-      when:
-        - redis_auth | bool
+    - role: itential.deployer.redis_auth
+      when: redis_auth | bool
       tags:
         - redis
         - redis_auth
@@ -36,7 +34,7 @@
   roles:
     ### RABBITMQ
     # Perform a base installation of Rabbitmq
-    - role: rabbitmq
+    - role: itential.deployer.rabbitmq
       tags:
         - rabbitmq
         - rabbitmq_install
@@ -44,17 +42,15 @@
     # Add on any Rabbit features, HA, auth, etc...
     # Configure Rabbit in a cluster
     # https://www.rabbitmq.com/clustering.html
-    - role: rabbitmq_cluster
-      when:
-        - rabbitmq_cluster | bool
+    - role: itential.deployer.rabbitmq_cluster
+      when: rabbitmq_cluster | bool
       tags:
         - rabbitmq
         - rabbitmq_cluster
 
     # Configure rabbit to only accept SSL connections
-    - role: rabbitmq_ssl
-      when:
-        - rabbitmq_ssl | bool
+    - role: itential.deployer.rabbitmq_ssl
+      when: rabbitmq_ssl | bool
       tags:
         - rabbitmq
         - rabbitmq_ssl
@@ -67,41 +63,38 @@
     # Perform a base installation of MongoDB
     # Many of the other component's settings with regard to IAP are stored in MongoDB.
     # Run these tasks on any defined arbiters as well.
-    - role: mongodb
+    - role: itential.deployer.mongodb
       tags:
         - mongodb
         - mongodb_install
 
     # Insert some day zero data into the MongoDB, Itential users, profiles,
     # configure redis, configure rabbitmq, etc...
-    - role: mongodb_init
+    - role: itential.deployer.mongodb_init
       tags:
         - mongodb
         - mongodb_init
 
     # Enable MongoDB replication, configure replica set if required
     # https://www.mongodb.com/docs/manual/replication/
-    - role: mongodb_replication
-      when:
-        - mongodb_replication | bool
+    - role: itential.deployer.mongodb_replication
+      when: mongodb_replication | bool
       tags:
         - mongodb
         - mongodb_replication
 
     # Enable MongoDB authorization for stand alone and replica set if required
     # https://www.mongodb.com/docs/manual/core/authentication/
-    - role: mongodb_auth
-      when:
-        - mongodb_auth | bool
+    - role: itential.deployer.mongodb_auth
+      when: mongodb_auth | bool
       tags:
         - mongodb
         - mongodb_auth
 
     # Require TLS for all MongoDB connections for stand alone and replica set if required
     # https://www.mongodb.com/docs/manual/tutorial/configure-ssl/
-    - role: mongodb_tls
-      when:
-        - mongodb_tls | bool
+    - role: itential.deployer.mongodb_tls
+      when: mongodb_tls | bool
       tags:
         - mongodb
         - mongodb_tls
@@ -112,17 +105,15 @@
   roles:
     ## VAULT
     # Install and initialize Vault
-    - role: vault
-      when:
-        - vault_install | bool
+    - role: itential.deployer.vault
+      when: vault_install | bool
       tags:
         - vault
         - vault_install
 
     # Setup Vault (initialize server and unseal)
-    - role: vault_unseal
-      when:
-        - vault_setup | bool
+    - role: itential.deployer.vault_unseal
+      when: vault_setup | bool
       tags:
         - vault
         - vault_setup
@@ -133,15 +124,16 @@
   roles:
     ### IAP
     # Perform a base installation of IAP
-    - role: platform
+    - role: itential.deployer.platform
       tags:
         - platform
         - platform_install
 
     # Install any listed apps and/or adapters
-    - role: platform_adapters
+    - role: itential.deployer.platform_adapters
       tags:
         - platform
+        - platform_adapters
 
 - name: Install IAP
   hosts: platform
@@ -149,11 +141,11 @@
   roles:
     # Install app-artifact into IAP
     # This should only be done in a development environment
-    - role: platform_app_artifact
-      when:
-        - app_artifact | bool
+    - role: itential.deployer.platform_app_artifact
+      when: app_artifact | bool
       tags:
         - platform
+        - platform_app_artifact
 
 - name: Install IAG
   hosts: gateway
@@ -161,12 +153,13 @@
   roles:
     ### IAG
     # Perform a base installation of IAG
-    - role: gateway
+    - role: itential.deployer.gateway
       tags:
         - gateway
+        - gateway_install
 
-    - role: gateway_haproxy
-      when:
-        - iag_haproxy | bool
+    - role: itential.deployer.gateway_haproxy
+      when: iag_haproxy | bool
       tags:
         - gateway
+        - gateway_haproxy

@@ -7,28 +7,26 @@
   become: true
   roles:
     # Pull in the common vars
-    - role: common_vars
+    - role: itential.deployer.common_vars
 
     # Perform a base installation of Redis
-    - role: redis
+    - role: itential.deployer.redis
       tags:
         - redis
         - redis_install
 
     # Perform installation of Redis Sentinel for Redis HA and replication
     # https://redis.io/docs/manual/sentinel/
-    - role: redis_replication
-      when:
-        - redis_replication | bool
+    - role: itential.deployer.redis_replication
+      when: redis_replication | bool
       tags:
         - redis
         - redis_replication
 
     # Configure Redis to require a username & password (authorization)
     # https://redis.io/docs/manual/security/acl/
-    - role: redis_auth
-      when:
-        - redis_auth | bool
+    - role: itential.deployer.redis_auth
+      when: redis_auth | bool
       tags:
         - redis
         - redis_auth

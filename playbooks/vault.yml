@@ -7,10 +7,10 @@
   become: true
   roles:
     # Pull in the common vars
-    - role: common_vars
+    - role: itential.deployer.common_vars
 
     # Install and initialize Vault
-    - role: vault
+    - role: itential.deployer.vault
       when:
         - vault_install | bool
       tags:
@@ -18,7 +18,7 @@
         - vault_install
 
     # Setup Vault (initialize server and unseal)
-    - role: vault_unseal
+    - role: itential.deployer.vault_unseal
       when:
         - vault_setup | bool
       tags:

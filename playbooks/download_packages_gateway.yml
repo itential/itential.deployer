@@ -7,15 +7,15 @@
   vars:
     offline_install: false
   roles:
-    - role: common_vars
+    - role: itential.deployer.common_vars
   tasks:
     - name: Download OS packages
       ansible.builtin.import_role:
-        name: os
+        name: itential.deployer.os
         tasks_from: download-packages
       run_once: true
       tags: download_os_packages
 
 - name: Download IAG packages
-  import_playbook: download-packages-iag.yml
+  import_playbook: itential.deployer.download_packages_iag
   tags: download_iag_packages
