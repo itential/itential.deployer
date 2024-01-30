@@ -9,9 +9,9 @@
   hosts: gateway
   become: true
   roles:
-    - role: common_vars
+    - role: itential.deployer.common_vars
   tasks:
     - name: Patch IAP
       ansible.builtin.import_role:
-        name: gateway
+        name: itential.deployer.gateway
         tasks_from: upgrade-iag

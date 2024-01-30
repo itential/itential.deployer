@@ -7,17 +7,16 @@
   become: true
   roles:
     # Pull in the common vars
-    - role: common_vars
+    - role: itential.deployer.common_vars
 
     # Perform a base installation of IAG
-    - role: gateway
+    - role: itential.deployer.gateway
       tags:
         - gateway
         - gateway_install
 
-    - role: gateway_haproxy
-      when:
-        - iag_haproxy | bool
+    - role: itential.deployer.gateway_haproxy
+      when: iag_haproxy | bool
       tags:
         - gateway
         - gateway_haproxy

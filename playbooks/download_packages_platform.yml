@@ -7,26 +7,26 @@
   vars:
     offline_install: false
   roles:
-    - role: common_vars
+    - role: itential.deployer.common_vars
   tasks:
     - name: Download OS packages
       ansible.builtin.import_role:
-        name: os
+        name: itential.deployer.os
         tasks_from: download-packages
       run_once: true
       tags: download_os_packages
 
 - name: Download Redis packages
-  import_playbook: download-packages-redis.yml
+  import_playbook: itential.deployer.download_packages_redis
 
 - name: Download RabbitMQ packages
-  import_playbook: download-packages-rabbitmq.yml
+  import_playbook: itential.deployer.download_packages_rabbitmq
 
 - name: Download MongoDB packages
-  import_playbook: download-packages-mongodb.yml
+  import_playbook: itential.deployer.download_packages_mongodb
 
 - name: Download Vault packages
-  import_playbook: download-packages-vault.yml
+  import_playbook: itential.deployer.download_packages_vault
 
 - name: Download IAP packages
-  import_playbook: download-packages-iap.yml
+  import_playbook: itential.deployer.download_packages_iap

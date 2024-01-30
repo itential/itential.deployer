@@ -1,16 +1,16 @@
 # Copyright (c) 2022, Itential, LLC
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
-- name: Download Vault packages
-  hosts: vault
+- name: Download IAG packages
+  hosts: gateway
   become: true
   vars:
     offline_install: false
   roles:
-    - role: common_vars
+    - role: itential.deployer.common_vars
   tasks:
-    - name: Download Vault packages
+    - name: Download IAG packages
       ansible.builtin.import_role:
-        name: vault
+        name: itential.deployer.gateway
         tasks_from: download-packages
       run_once: true

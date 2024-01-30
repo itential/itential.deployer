@@ -2,12 +2,16 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 - name: Install and configure Redis
-  import_playbook: redis.yml
+  import_playbook: itential.deployer.redis
+
 - name: Install and configure RabbitMQ
-  import_playbook: rabbitmq.yml
+  import_playbook: itential.deployer.rabbitmq
+
 - name: Install and configure MongoDB
-  import_playbook: mongodb.yml
+  import_playbook: itential.deployer.mongodb
+
 - name: Install and configure Vault
-  import_playbook: vault.yml
+  import_playbook: itential.deployer.vault
+
 - name: Install and configure IAP
-  import_playbook: iap.yml
+  import_playbook: itential.deployer.iap
