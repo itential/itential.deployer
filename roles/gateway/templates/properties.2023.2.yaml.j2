@@ -250,13 +250,13 @@ inventory_file: "{{ iag_resources_dir }}/ansible/inventory/hosts"
 module_path:
   - "{{ iag_venv_dir }}/lib/python3.9/site-packages/ansible/modules/network"
   - "{{ iag_venv_dir }}/lib/python3.9/site-packages/ansible/modules"
-  - "{{ iag_venv_dir }}/lib/python3.9/site-packages/ansible_collections"
   - "{{ iag_resources_dir }}/ansible/modules"
 
 # Path(s) to the Ansible collections that should be discovered by Automation Gateway and exclusively used in Ansible's execution environment.
 # Due to differences in collections before/after Ansible 2.9, these will be the only paths relevant during discovery AND execution.
 collection_path:
   - "{{ iag_resources_dir }}/ansible/collections"
+  - "{{ iag_venv_dir }}/lib/python3.9/site-packages/ansible_collections"
 
 # Path(s) to the Ansible roles that should be discovered by Automation Gateway and appended to Ansible's execution environment.
 role_path:

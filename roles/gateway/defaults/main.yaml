@@ -14,11 +14,6 @@ iag_haproxy: false
 iag_enable_python_vir_env: true
 iag_enable_grpc: true
 
-# Starting after 23.2 release it is now required to install the dependencies
-# This flag is here to help older versions skip dependency install tasks. For
-# IAG 23.2 and above this will be overridden.
-install_dependencies: false
-
 # Location of IAG assets
 iag_install_dir: /opt/automation-gateway
 
