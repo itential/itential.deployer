@@ -1,0 +1,33 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+- name: Determine package name from the tar file name
+  ansible.builtin.set_fact:
+    iap_package_name: "{{ iap_tar_file.split('.linux.x86_64.tar.gz')[0] }}"
+  when:
+    - iap_package_name is not defined
+    - iap_tar_file is defined
+
+- name: Determine package name from the bin file name
+  ansible.builtin.set_fact:
+    iap_package_name: "{{ iap_bin_file.split('.linux.x86_64.bin')[0] }}"
+  when:
+    - iap_package_name is not defined
+    - iap_bin_file is defined
+
+- name: Determine release from the package name
+  ansible.builtin.set_fact:
+    iap_release: "{{ iap_package_name.split('_')[1] }}"
+  when: iap_release is not defined
+
+- name: Include release vars
+  ansible.builtin.include_vars:
+    file: "{{ item }}"
+  with_first_found:
+    - "{{ iap_release }}-{{ ansible_distribution | lower }}-{{ ansible_distribution_major_version }}.yml"
+    - "release-undefined.yaml"
+
+- name: Check for valid IAP release
+  ansible.builtin.fail:
+    msg: "missing or invalid iap_release"
+  when: iap_release == "UNDEFINED"

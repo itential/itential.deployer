@@ -1,0 +1,263 @@
+{# Set the correct express settings for HTTP or HTTPS #}
+{% set http_enable = true %}
+{% set https_enable = false %}
+{% if iap_https | bool %}
+  {% set http_enable = false %}
+  {% set https_enable = true %}
+{% endif %}
+{# Set the correct rabbitmq settings #}
+{% set rabbit_hosts = [] %}
+{% if rabbit_user is not defined %}
+  {% set rabbit_user = "itential" %}
+{% endif %}
+{% if rabbit_password is not defined %}
+  {% set rabbit_password = "itential" %}
+{% endif %}
+{% if rabbit_svc_url is defined %}
+  {{ rabbit_hosts.append(rabbit_svc_url) }}
+  {% set rabbit_port = 5671 %}
+  {% set rabbit_protocol = "amqps" %}
+  {% set rabbit_certPath = "" %}
+  {% set rabbit_keyPath = "" %}
+  {% set rabbit_passphrase = "guest" %}
+  {% set rabbit_caPath = "" %}
+{% else %}
+  {% set rabbit_port = 5672 %}
+  {% set rabbit_protocol = "amqp" %}
+  {% for rabbit in groups[vars.rabbit_group_name] %}
+    {{ rabbit_hosts.append( hostvars[ rabbit ].inventory_hostname ) }}
+  {% endfor %}
+  {% if rabbitmq_ssl | bool -%}
+    {% set rabbit_port = 5671 %}
+    {% set rabbit_protocol = "amqps" %}
+    {% set rabbit_certPath = "" %}
+    {% set rabbit_keyPath = "" %}
+    {% set rabbit_passphrase = "guest" %}
+    {% set rabbit_caPath = "" %}
+  {% endif %}
+{% endif %}
+{# Set the correct redis settings #}
+{% if redis_user is not defined %}
+  {% set redis_user = "" %}
+{% endif %}
+{% if redis_password is not defined %}
+  {% set redis_password = "" %}
+{% endif %}
+{% set sentinels = None %}
+{% set sentinel_user = None %}
+{% set sentinel_password = None %}
+{% if redis_svc_url is defined %}
+   {% set redis_host = redis_svc_url %}
+{% else %}
+  {% set redis_host = "" %}
+  {% set redis_host = hostvars[ groups[vars.redis_group_name][0] ].inventory_hostname %}
+  {% if redis_auth | bool -%}
+    {% set redis_user = "itential" %}
+    {% set redis_password = "itential" %}
+    {% set sentinel_user = "sentineluser" %}
+    {% set sentinel_password = "sentineluser" %}
+  {% endif %}
+  {% if redis_replication | bool %}
+    {% set redis_host = None %}
+    {% set sentinels = [] %}
+    {% for sentinel in groups[vars.redis_group_name] %}
+      {% set sentinel = dict(host = hostvars[ sentinel ].inventory_hostname, port = 26379) %}
+      {{ sentinels.append(sentinel) }}
+    {% endfor %}
+  {% endif %}
+{% endif %}
+{# Set the correct value for the login page #}
+{% set login_page = "node_modules/@itential/iap-ui/build/index.html" %}
+{% if iap_release == 2021.1 %}
+  {% set login_page = "node_modules/@itential/pronghorn-core/ui/views/login.pug" %}
+{% endif %}
+{# Set the correct services list #}
+{% set services = vars.default_services %}
+{% if discovered_services[0].services is defined %}
+  {% set services = discovered_services[0].services %}
+{% endif %}
+{% if configure_iag_adapters | bool and 'gateway' in groups %}
+  {% for iag in groups["gateway"] %}
+    {% set iagAdapterName = "IAG-" + iag %}
+    {# Add the name to the list ONLY if it is currently not present #}
+    {% if iagAdapterName not in services %}
+      {{ services.append(iagAdapterName) }}
+    {% endif %}
+  {% endfor %}
+{% endif %}
+{
+  "adapterStrategy": {
+    "device": {
+      "adapterTypes": [],
+      "exceptions": {
+        "runCommand": ""
+      }
+    }
+  },
+  "alarmProps": [
+    {
+      "community": "public",
+      "ip": "127.0.0.1",
+      "properties": {
+        "retries": 1,
+        "timeout": 5000,
+        "transport": "udp4",
+        "trapPort": 162,
+        "version": "v2c"
+      },
+      "type": "trap"
+    }
+  ],
+  "applicationProps": {
+    "directory": "./node_modules/"
+  },
+  "auditProps": {
+    "audit": true,
+    "brokerValidation": false,
+    "description": "Audit"
+  },
+  "authenticationProps": {
+    "admins": [
+      {
+        "group": "pronghorn_admin",
+        "provenance": "local_aaa"
+      }
+    ],
+    "brokerPrincipal": false,
+    "cookieName": "token",
+    "description": "Authentication",
+    "logoutTime": 60,
+    "uniqueSession": false
+  },
+  "description": "{{ vars.desc }}",
+  "expressProps": {
+    "access_control_allow_origin": "*",
+    "cacheControl": true,
+    "description": "Express Server",
+    "express_http": {
+      "enable": {{ http_enable | bool | to_json }},
+      "port": {{ iap_http_port }}
+    },
+    "express_https": {
+      "cert": "{{ iap_install_dir }}/keys/itential.cert",
+      "ciphers": "ECDHE-RSA-AES128-GCM-SHA256",
+      "client_reneg_limit": 1,
+      "client_reneg_window": 600,
+      "enable": {{ https_enable | bool | to_json }},
+      "key": "{{ iap_install_dir }}/keys/itential.key",
+      "passPhrase": "",
+      "port": {{ iap_https_port }},
+      "secureProtocol": "TLSv1_2_method"
+    },
+    "timeout": 600000
+  },
+  "id": "{{ vars.id }}",
+  "integrationProps": {
+    "threadCount": 5,
+    "timeout": 15000
+  },
+  "loggerProps": {
+    "console_level": "info",
+    "description": "Logging",
+    "log_directory": "{{ iap_log_dir }}",
+    "log_filename": "itential.log",
+    "log_level": "info",
+    "log_max_file_size": 10485760,
+    "log_max_files": 10,
+    "log_timezone_offset": 0,
+    "syslog": {
+      "app_name": "",
+      "eol": "",
+      "facility": "local0",
+      "host": "127.0.0.1",
+      "level": "warning",
+      "localhost": "",
+      "path": "",
+      "pid": "process.pid",
+      "port": 514,
+      "protocol": "udp4",
+      "type": "BSD"
+    },
+    "webserver": {
+      "log_directory": "{{ iap_log_dir }}",
+      "log_filename": "webserver.log"
+    }
+  },
+  "pathProps": {
+    "description": "File Path Variables",
+    "encrypted": true
+  },
+  "prebuiltProps": {
+    "repoConfigs": {
+      "@itentialopensource": {
+        "credentials": {},
+        "enabled": true,
+        "hostname": "gitlab.com",
+        "path": "itentialopensource/pre-built-automations",
+        "type": "gitlab"
+      }
+    }
+  },
+  "rabbitmq": {
+    "adminPort": 15672,
+    "caPath": "",
+    "certPath": "",
+    "frameMax": 0,
+    "heartbeat": 0,
+    "hosts": {{ rabbit_hosts | to_json }},
+    "keyPath": "",
+    "locale": "en_US",
+    "passphrase": "guest",
+    "password": "{{ rabbit_password }}",
+    "port": {{ rabbit_port }},
+    "protocol": "{{ rabbit_protocol }}",
+    "username": "{{ rabbit_user }}",
+    "vhost": "{{ rabbitmq_vhost }}"
+  },
+  "redisProps": {
+    "db" : 0,
+    "host": {{ redis_host | to_json }},
+    "maxHeartbeatWriteRetries" : 20,
+    "maxRetriesPerRequest" : 20,
+    "name" : "mymaster",
+    "password" : {{ redis_password | to_json }},
+    "port" : 6379,
+{% if redis_replication | bool %}
+    "sentinels" : {{ sentinels | to_json }},
+    "sentinelPassword" : {{ sentinel_password | to_json }},
+    "sentinelUsername" : {{ sentinel_user | to_json }},
+{% endif %}
+{% if redis_tls | bool %}
+    "tls": {},
+{% endif %}
+    "username" : {{ redis_user | to_json }}
+  },
+  "retryStrategy": {
+    "maxRetries": 10,
+    "retryResetTimer": 60000
+  },
+  "services": {{ services | to_json }},
+  "systemProps": {
+    "deadProcessCheck": false,
+    "deadProcessCheckInterval": 5,
+    "deadProcessMaxPeriod": 15,
+    "externalRequestTimeout": 5,
+    "launchDelay": 1,
+    "launchTimeout": 120,
+    "servicesBlacklist": [],
+    "shutdownTimeout": 3
+  },
+  "uiProps": {
+    "description": "UI",
+    "edit_user": "node_modules/@itential/pronghorn-core/ui/views/dialogs/edit_user.pug",
+    "fav_icon": "node_modules/@itential/pronghorn-core/ui/img/favicon.ico",
+    "group_config": "node_modules/@itential/pronghorn-core/ui/views/group_config.pug",
+    "home": "node_modules/@itential/iap-ui/build/index.html",
+    "layout": "node_modules/@itential/pronghorn-core/ui/views/layout.pug",
+    "login": "{{ login_page }}",
+    "new_group": "node_modules/@itential/pronghorn-core/ui/views/dialogs/new_group.pug",
+    "new_user": "node_modules/@itential/pronghorn-core/ui/views/dialogs/new_user.pug",
+    "profile" : "node_modules/@itential/pronghorn-core/ui/views/profile.pug",
+    "user_config": "node_modules/@itential/pronghorn-core/ui/views/user_config.pug"
+  }
+}

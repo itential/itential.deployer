@@ -1,8 +1,0 @@
-# Copyright (c) 2022, Itential, LLC
-# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
-
-# By default, do not configure vault
-configure_vault: false
-
-# The default group that runs vault
-vault_group: vault

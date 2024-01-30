@@ -1,0 +1,169 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+
+- name: Enable clustering in the RabbitMQ config file
+  ansible.builtin.lineinfile:
+    path: "{{ rabbitmq_config }}"
+    regexp: "# cluster_formation.peer_discovery_backend     = rabbit_peer_discovery_classic_config"
+    line: "cluster_formation.peer_discovery_backend = rabbit_peer_discovery_classic_config"
+
+- name: Write all RabbitMQ nodes to the hosts file
+  ansible.builtin.lineinfile:
+    path: "/etc/hosts"
+    line: "{{hostvars[item].ansible_default_ipv4.address}}  rabbit{{my_idx + 1}} {{hostvars[item].ansible_hostname}}"
+  loop: "{{lookup('inventory_hostnames', 'rabbitmq', wantlist=True) }}"
+  loop_control:
+    index_var: my_idx
+  when: inventory_hostname in groups['rabbitmq']
+
+- name: Write all RabbitMQ nodes to the hosts file for secondary DR
+  ansible.builtin.lineinfile:
+    path: "/etc/hosts"
+    line: "{{hostvars[item].ansible_default_ipv4.address}}  rabbit{{my_idx + 1}} {{hostvars[item].ansible_hostname}}"
+  loop: "{{lookup('inventory_hostnames', 'rabbitmq_secondary', wantlist=True) }}"
+  loop_control:
+    index_var: my_idx
+  when:
+    - groups['rabbitmq_secondary'] is defined
+    - inventory_hostname in groups['rabbitmq_secondary']
+
+- name: Write all RabbitMQ nodes to the config file
+  ansible.builtin.lineinfile:
+    path: "{{ rabbitmq_config }}"
+    insertafter: "cluster_formation.peer_discovery_backend = rabbit_peer_discovery_classic_config"
+    line: "cluster_formation.classic_config.nodes.{{my_idx + 1}} = rabbit@{{hostvars[item].ansible_hostname }}"
+  loop: "{{lookup('inventory_hostnames', 'rabbitmq', wantlist=True) }}"
+  loop_control:
+    index_var: my_idx
+  when: inventory_hostname in groups['rabbitmq']
+
+- name: Write all RabbitMQ nodes to the config file for secondary DR
+  ansible.builtin.lineinfile:
+    path: "{{ rabbitmq_config }}"
+    insertafter: "cluster_formation.peer_discovery_backend = rabbit_peer_discovery_classic_config"
+    line: "cluster_formation.classic_config.nodes.{{my_idx + 1}} = rabbit@{{hostvars[item].ansible_hostname }}"
+  loop: "{{lookup('inventory_hostnames', 'rabbitmq_secondary', wantlist=True) }}"
+  loop_control:
+    index_var: my_idx
+  when:
+    - groups['rabbitmq_secondary'] is defined
+    - inventory_hostname in groups['rabbitmq_secondary']
+
+- name: Edit config variable
+  ansible.builtin.lineinfile:
+    path: "/root/.bashrc"
+    line: "export RABBITMQ_CONFIG_FILE={{rabbitmq_config}}"
+    insertafter: "EOF"
+
+# RabbitMQ nodes and CLI tools (e.g. rabbitmqctl) use a cookie to determine
+# whether they are allowed to communicate with each other. For two nodes to be
+# able to communicate they must have the same shared secret called the Erlang
+# cookie. The cookie is just a string of alphanumeric characters up to 255
+# characters in size. It is usually stored in a local file. The file must be
+# only accessible to the owner (e.g. have UNIX permissions of 600 or similar).
+# Every cluster node must have the same cookie.
+#
+# The cookie is using a jinja template to generate a string by concatenating the
+# string "itential" with the current date (yyyy-mm-dd) and then converting that
+# into a UUID string. This should be good enough to create unique-ish cookies.
+- name: Create Erlang cookie file
+  ansible.builtin.template:
+    owner: "{{ rabbitmq_owner }}"
+    group: "{{ rabbitmq_group }}"
+    mode: "0600"
+    dest: "{{ rabbitmq_erlang_cookie }}"
+    src: erlang.cookie.j2
+
+# Check if firewalld is running, if it is then open the appropriate ports
+- name: Gather service facts
+  ansible.builtin.service_facts:
+
+- name: Open Ports on FirewallD Public Zone
+  ansible.posix.firewalld:
+    port: "{{ item }}"
+    permanent: yes
+    state: enabled
+    zone: public
+    immediate: yes
+  loop:
+    - "{{ rabbitmq_cluster_port }}/tcp"
+    - "{{ rabbitmq_epmd_port }}/tcp"
+  when:
+    - ansible_facts.services["firewalld.service"] is defined
+    - (ansible_facts.services["firewalld.service"].state == "running")
+    - (ansible_facts.services["firewalld.service"].status == "enabled")
+  ignore_errors: true
+
+- name: Restart rabbitmq server
+  ansible.builtin.systemd:
+    name: rabbitmq-server
+    enabled: yes
+    state: restarted
+
+# The first rabbit defined in the rabbitmq group is chosen as our primary that
+# the others will join a cluster with.  Run some additional tasks against the
+# non-primary members for them to join the cluster.
+- name: Stop rabbitmq
+  ansible.builtin.command: "rabbitmqctl stop_app"
+  when:
+    - inventory_hostname in groups['rabbitmq']
+    - hostvars[groups['rabbitmq'][0]].ansible_hostname != ansible_hostname
+
+- name: Stop rabbitmq for secondary
+  ansible.builtin.command: "rabbitmqctl stop_app"
+  when:
+    - groups['rabbitmq_secondary'] is defined
+    - inventory_hostname in groups['rabbitmq_secondary']
+    - hostvars[groups['rabbitmq_secondary'][0]].ansible_hostname != ansible_hostname
+
+- name: Reset node
+  ansible.builtin.command: "rabbitmqctl reset"
+  when:
+    - inventory_hostname in groups['rabbitmq']
+    - hostvars[groups['rabbitmq'][0]].ansible_hostname != ansible_hostname
+
+- name: Reset node for secondary
+  ansible.builtin.command: "rabbitmqctl reset"
+  when:
+    - groups['rabbitmq_secondary'] is defined
+    - inventory_hostname in groups['rabbitmq_secondary']
+    - hostvars[groups['rabbitmq_secondary'][0]].ansible_hostname != ansible_hostname
+
+- name: Join cluster
+  ansible.builtin.command: "rabbitmqctl join_cluster rabbit@{{ hostvars[groups['rabbitmq'][0]].ansible_hostname }}"
+  when:
+    - inventory_hostname in groups['rabbitmq']
+    - hostvars[groups['rabbitmq'][0]].ansible_hostname != ansible_hostname
+
+- name: Join cluster for secondary DR
+  ansible.builtin.command: "rabbitmqctl join_cluster rabbit@{{ hostvars[groups['rabbitmq_secondary'][0]].ansible_hostname }}"
+  when:
+    - groups['rabbitmq_secondary'] is defined
+    - inventory_hostname in groups['rabbitmq_secondary']
+    - hostvars[groups['rabbitmq_secondary'][0]].ansible_hostname != ansible_hostname
+
+- name: Restart rabbitmq server
+  ansible.builtin.systemd:
+    name: rabbitmq-server
+    enabled: yes
+    state: restarted
+  when:
+    - inventory_hostname in groups['rabbitmq']
+    - hostvars[groups['rabbitmq'][0]].ansible_hostname != ansible_hostname
+
+- name: Restart rabbitmq server for secondary
+  ansible.builtin.systemd:
+    name: rabbitmq-server
+    enabled: yes
+    state: restarted
+  when:
+    - groups['rabbitmq_secondary'] is defined
+    - inventory_hostname in groups['rabbitmq_secondary']
+    - hostvars[groups['rabbitmq_secondary'][0]].ansible_hostname != ansible_hostname
+
+# From the cmd line run this to set the proper HA policy on the iap vhost
+# rabbitmqctl set_policy ha-all -p iap ".*" '{"ha-mode":"all", "ha-promote-on-shutdown": "when-synced", "ha-sync-mode": "automatic"}'
+- name: Queue mirroring
+  ansible.builtin.command:
+    cmd: "rabbitmqctl set_policy ha-all -p {{ rabbitmq_vhost }} \".*\" '{\"ha-mode\":\"all\", \"ha-promote-on-shutdown\": \"when-synced\", \"ha-sync-mode\": \"automatic\"}'"

@@ -1,0 +1,44 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+- name: Include release vars
+  ansible.builtin.include_vars:
+    file: "{{ item }}"
+  with_first_found:
+    - "release-{{ iag_release }}.yaml"
+    - "release-undefined.yaml"
+
+- name: Check for valid IAG release
+  ansible.builtin.fail:
+    msg: "missing or invalid iag_release"
+  when: iag_release == "UNDEFINED"
+
+- name: Install HAProxy
+  ansible.builtin.package:
+    name: haproxy
+    state: present
+
+# Itential does not attempt to create any HTTPS certificates. These must be
+# created independently. When they are included in the appropriate location
+# the installer will ensure that they get uploaded to the correct location.
+- name: Copy IAG HTTPS certificates to the appropriate remote location
+  ansible.builtin.copy:
+    src: "{{ haproxy_ssl_cert_src }}"
+    dest: "{{ haproxy_ssl_cert_dest }}"
+    mode: '0400'
+    group: haproxy
+    owner: haproxy
+
+- name: Generate HAProxy config from template
+  ansible.builtin.template:
+    src: haproxy.cfg.j2
+    dest: "{{ haproxy_conf_file }}"
+    group: haproxy
+    owner: haproxy
+    mode: "0660"
+
+- name: Start HAProxy
+  ansible.builtin.service:
+    name: haproxy
+    enabled: false
+    state: restarted

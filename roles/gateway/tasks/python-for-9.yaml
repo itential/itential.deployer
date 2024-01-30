@@ -1,0 +1,14 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+- name: Install Python packages
+  ansible.builtin.yum:
+    name: "{{ item }}"
+    state: present
+  with_items: "{{ gateway_python_packages }}"
+  register: python_install_result
+
+- name: Create Python symlinks
+  ansible.builtin.import_role:
+    name: common
+    tasks_from: create-python3-symlinks

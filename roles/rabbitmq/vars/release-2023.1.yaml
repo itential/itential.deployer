@@ -1,0 +1,14 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+rabbitmq_packages:
+  "8":
+    - socat
+    - logrotate
+    # - erlang-25.3.2.7
+    - rabbitmq-server-3.11.23
+  "9":
+    - socat
+    - logrotate
+    # - erlang-25.3.2.7
+    - rabbitmq-server-3.11.23

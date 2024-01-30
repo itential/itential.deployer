@@ -1,0 +1,20 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+iag_packages_path: "{{ itential_packages_path }}/{{ iag_release }}/iag"
+iag_rpms_path: "{{ iag_packages_path }}/rpms"
+iag_wheels_path: "{{ iag_packages_path }}/wheels"
+iag_archives_path: "{{ iag_packages_path }}/archives"
+iag_pkgs_path: "{{ iag_packages_path }}/pkgs"
+
+iag_packages_download_dir_control_node: "{{ packages_download_root_control_node }}/{{ iag_packages_path }}"
+iag_rpms_download_dir_control_node: "{{ iag_packages_download_dir_control_node }}/rpms"
+iag_wheels_download_dir_control_node: "{{ iag_packages_download_dir_control_node }}/wheels"
+iag_archives_download_dir_control_node: "{{ iag_packages_download_dir_control_node }}/archives"
+iag_pkgs_download_dir_control_node: "{{ iag_packages_download_dir_control_node }}/pkgs"
+
+iag_packages_download_dir_target_node: "{{ packages_download_root_target_node }}/{{ iag_packages_path }}"
+iag_rpms_download_dir_target_node: "{{ iag_packages_download_dir_target_node }}/rpms"
+iag_wheels_download_dir_target_node: "{{ iag_packages_download_dir_target_node }}/wheels"
+iag_archives_download_dir_target_node: "{{ iag_packages_download_dir_target_node }}/archives"
+iag_pkgs_download_dir_target_node: "{{ iag_packages_download_dir_target_node }}/pkgs"

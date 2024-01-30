@@ -1,0 +1,9 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+- name: Install OS rpms
+  ansible.builtin.import_role:
+    name: offline
+    tasks_from: install-rpms
+  vars:
+    rpms_path: "{{ os_rpms_path }}"

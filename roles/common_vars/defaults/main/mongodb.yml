@@ -1,0 +1,44 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+# The TCP port on which the MongoDB instance listens for client connections.
+mongo_port: 27017
+
+# Default Itential database name in MongoDB
+mongo_itential_db_name: itential
+mongo_localaaa_db_name: LocalAAA
+
+# Feature flags that can be overriden in the hosts file
+# Essentially, a default installation will not have replication, authorization,
+# or TLS settings applied.
+mongodb_replication: false
+mongodb_auth: false
+mongodb_tls: false
+
+# Default mongo connection string. This can be overridden if a customer brings
+# their own mongo database.
+mongo_itential_connection_string: "mongodb://{{ mongo_host }}:{{ mongo_port }}/{{ mongo_itential_db_name }}"
+mongo_admin_connection_string: "mongodb://{{ mongo_host }}:{{ mongo_port }}/{{ mongo_admin_db_name }}"
+mongo_localaaa_connection_string: "mongodb://{{ mongo_host }}:{{ mongo_port }}/{{ mongo_localaaa_db_name }}"
+
+# Default mongo user passwords
+# These are meant to be changed by the customer. By default they are meant to
+# be predictable and simple.
+mongo_user_admin_password: admin
+mongo_user_itential_password: itential
+mongo_user_localaaa_password: localaaa
+
+# The name of the mongo replica set
+mongo_replset_name: rs0
+
+mongodb_packages_path: "{{ itential_packages_path }}/{{ iap_release }}/mongodb"
+mongodb_rpms_path: "{{ mongodb_packages_path }}/rpms"
+mongodb_wheels_path: "{{ mongodb_packages_path }}/wheels"
+
+mongodb_packages_download_dir_control_node: "{{ packages_download_root_control_node }}/{{ mongodb_packages_path }}"
+mongodb_rpms_download_dir_control_node: "{{ mongodb_packages_download_dir_control_node }}/rpms"
+mongodb_wheels_download_dir_control_node: "{{ mongodb_packages_download_dir_control_node }}/wheels"
+
+mongodb_packages_download_dir_target_node: "{{ packages_download_root_target_node }}/{{ mongodb_packages_path }}"
+mongodb_rpms_download_dir_target_node: "{{ mongodb_packages_download_dir_target_node }}/rpms"
+mongodb_wheels_download_dir_target_node: "{{ mongodb_packages_download_dir_target_node }}/wheels"

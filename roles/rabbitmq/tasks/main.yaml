@@ -1,0 +1,139 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+- name: Include release vars
+  ansible.builtin.include_vars:
+    file: "{{ item }}"
+  with_first_found:
+    - "release-{{ iap_release }}.yaml"
+    - "release-undefined.yaml"
+
+- name: Check for valid RabbitMQ release
+  ansible.builtin.fail:
+    msg: "missing or invalid rabbitmq_packages"
+  when: rabbitmq_packages == "UNDEFINED"
+
+- name: Include base OS updates
+  ansible.builtin.include_role:
+    name: os
+
+- name: Include tasks to install RabbitMQ (online)
+  ansible.builtin.include_tasks:
+    file: rabbitmq-online.yml
+  when: not offline_install
+
+- name: Include tasks to install RabbitMQ (offline)
+  ansible.builtin.include_tasks:
+    file: rabbitmq-offline.yml
+  when: offline_install
+
+- name: Create systemd dir
+  ansible.builtin.file:
+    name: /etc/systemd/system/rabbitmq-server.service.d
+    state: directory
+
+- name: Set rabbitmq filesystem limit
+  ansible.builtin.copy:
+    src: "{{ role_path }}/files/limits.conf"
+    dest: /etc/systemd/system/rabbitmq-server.service.d/limits.conf
+
+- name: Create rabbitmq config file
+  ansible.builtin.template:
+    src: rabbitmq.conf.j2
+    dest: "{{ rabbitmq_config }}"
+    owner: "{{ rabbitmq_owner }}"
+    group: "{{ rabbitmq_group }}"
+    mode: 0640
+
+# Check if firewalld is running, if it is then open the appropriate ports
+- name: Gather service facts
+  ansible.builtin.service_facts:
+
+- name: Open Port on FirewallD Public Zone
+  ansible.posix.firewalld:
+    port: "{{ item }}"
+    permanent: yes
+    state: enabled
+    zone: public
+    immediate: yes
+  loop:
+    - "{{ rabbitmq_port }}/tcp"
+    - "{{ rabbitmq_mgt_console_port }}/tcp"
+  when:
+    - ansible_facts.services["firewalld.service"] is defined
+    - (ansible_facts.services["firewalld.service"].state == "running")
+    - (ansible_facts.services["firewalld.service"].status == "enabled")
+  ignore_errors: true
+
+- name: Enable rabbitmq services
+  ansible.builtin.systemd:
+    name: rabbitmq-server
+    enabled: yes
+    daemon_reload: yes
+    state: restarted
+
+# Enables the rabbitmq UI available at 15672
+- name: Enable rabbitmq management console
+  ansible.builtin.command:
+    cmd: rabbitmq-plugins enable rabbitmq_management
+
+# Create & tag the required rabbitmq users
+- name: Create admin user
+  ansible.builtin.command:
+    cmd: "rabbitmqctl add_user {{ rabbitmq_admin_user }} {{ rabbitmq_admin_password }}"
+  register: result
+  failed_when:
+    - result.rc is defined
+    - result.rc > 0
+    - "'already exists' not in result.stderr"
+
+- name: Set administrator tag for admin user
+  ansible.builtin.command:
+    cmd:  "rabbitmqctl set_user_tags {{ rabbitmq_admin_user }} administrator"
+
+- name: Set permissions for admin user
+  ansible.builtin.command:
+    cmd: "rabbitmqctl set_permissions -p / {{ rabbitmq_admin_user }} \".*\" \".*\" \".*\""
+
+- name: Create iap vhost
+  ansible.builtin.command:
+    cmd: "rabbitmqctl add_vhost {{ rabbitmq_vhost }}"
+
+- name: Create itential user
+  ansible.builtin.command:
+    cmd: "rabbitmqctl add_user {{ rabbitmq_user }} {{ rabbitmq_password }}"
+  register: result
+  failed_when:
+    - result.rc is defined
+    - result.rc > 0
+    - "'already exists' not in result.stderr"
+
+# Required for event deduping
+- name: Set monitoring tag for itential user
+  ansible.builtin.command:
+    cmd:  "rabbitmqctl set_user_tags {{ rabbitmq_user }} monitoring"
+
+- name: Set permissions for itential user
+  ansible.builtin.command:
+    cmd: "rabbitmqctl set_permissions -p {{ rabbitmq_vhost }} {{ rabbitmq_user }} \".*\" \".*\" \".*\""
+
+- name: Get installed erlang version
+  ansible.builtin.command:
+    cmd: rabbitmq-diagnostics erlang_version
+  register: erlangVersion
+
+- name: Write erlang release information
+  ansible.builtin.lineinfile:
+    path: "/etc/iap-release"
+    line: "ERLANG={{ erlangVersion.stdout_lines[1] }}"
+    create: true
+
+- name: Get installed rabbitmq version
+  ansible.builtin.command:
+    cmd: rabbitmqctl version
+  register: rabbitmqVersion
+
+- name: Write rabbitmq release information
+  ansible.builtin.lineinfile:
+    path: "{{ itential_release_file }}"
+    line: "RABBITMQ={{ rabbitmqVersion.stdout }}"

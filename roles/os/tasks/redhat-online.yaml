@@ -1,0 +1,35 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+- name: Update the current yum packages
+  ansible.builtin.yum:
+    name: '*'
+    state: latest
+  when: yum_update | bool
+
+# Need to specify the remote location of the epel-release. This
+# is defined in the os/vars files
+- name: Install epel-release yum repo
+  ansible.builtin.yum:
+    name: "{{ epel_location }}"
+    update_cache: true
+    state: present
+    disable_gpg_check: true
+
+- name: Install OS Packages
+  ansible.builtin.yum:
+    name: "{{ os_packages }}"
+    state: present
+    validate_certs: false
+    skip_broken: true
+    update_cache: true
+
+- name: Install Security Packages
+  ansible.builtin.yum:
+    name: "{{ security_packages }}"
+    state: present
+
+- name: Install Operations Packages
+  ansible.builtin.yum:
+    name: "{{ operational_packages }}"
+    state: present

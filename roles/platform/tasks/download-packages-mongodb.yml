@@ -1,0 +1,23 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+- name: Download MongoDB rpms
+  when: configure_iap | bool
+  block:
+    - name: Install MongoDB repo
+      ansible.builtin.yum_repository:
+        name: "mongodb"
+        description: MongoDB Repository
+        baseurl: "{{ mongodb_release_url }}"
+        enabled: true
+        gpgcheck: true
+        gpgkey: "{{ mongodb_gpgkey_url }}"
+
+    - name: Download MongoDB rpms
+      ansible.builtin.import_role:
+        name: offline
+        tasks_from: download-rpms
+      vars:
+        download_method: yum_module
+        download_packages: "{{ mongodb_tools_packages }}"
+        download_dir: "{{ iap_rpms_download_dir_target_node }}"

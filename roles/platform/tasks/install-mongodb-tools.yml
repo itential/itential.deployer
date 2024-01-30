@@ -1,0 +1,26 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+# Install the mongodb repo if mongodb is not already installed. The platform role
+# will need mongo cmd line tools to import some initial data. It does not install
+# the database, just the cmd line tools and the mongo shell.
+
+- name: Install MongoDB tools (online)
+  when:
+    - configure_iap | bool
+    - not offline_install
+  block:
+    - name: Install mongodb repo (for cmd line tools)
+      ansible.builtin.yum_repository:
+        name: "mongodb"
+        description: MongoDB Repository
+        baseurl: "{{ mongodb_release_url }}"
+        enabled: true
+        gpgcheck: true
+        gpgkey: "{{ mongodb_gpgkey_url }}"
+
+    # Install mongodb tools if they are not already installed
+    - name: Install the MongoDB tools packages
+      ansible.builtin.yum:
+        name: "{{ mongodb_tools_packages }}"
+        state: present

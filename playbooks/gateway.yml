@@ -1,0 +1,22 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+### IAG
+- name: Install IAG
+  hosts: gateway
+  become: true
+  roles:
+    # Pull in the common vars
+    - role: itential.deployer.common_vars
+
+    # Perform a base installation of IAG
+    - role: itential.deployer.gateway
+      tags:
+        - gateway
+        - gateway_install
+
+    - role: itential.deployer.gateway_haproxy
+      when: iag_haproxy | bool
+      tags:
+        - gateway
+        - gateway_haproxy

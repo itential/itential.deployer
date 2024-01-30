@@ -1,0 +1,11 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+- name: Install Python packages
+  ansible.builtin.yum:
+    name: "{{ mongodb_python_packages[ansible_distribution_major_version] }}"
+
+- name: Install Python dependencies
+  ansible.builtin.pip:
+    name: "{{ mongodb_python_dependencies[ansible_distribution_major_version] }}"
+    executable: pip3

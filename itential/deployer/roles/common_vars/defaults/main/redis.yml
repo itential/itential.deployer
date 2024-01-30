@@ -1,7 +1,0 @@
-# Copyright (c) 2022, Itential, LLC
-# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
-
-# Feature flags that can be overriden in the hosts file
-# Essentially, a default installation will not have auth or replication
-redis_auth: false
-redis_replication: false

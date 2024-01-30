@@ -1,0 +1,14 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+# By default to not install/configure HAProxy
+iag_haproxy: false
+
+# Location of the HAProxy config file
+haproxy_conf_file: /etc/haproxy/haproxy.cfg
+
+# The SSL cert file name
+haproxy_ssl_cert_src: server.pem
+
+# The SSL cert destination
+haproxy_ssl_cert_dest: "/etc/ssl/certs/{{ haproxy_ssl_cert_src }}"
