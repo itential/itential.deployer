@@ -111,7 +111,7 @@
         argv:
           - "{{ mongo_shell }}"
           - --quiet
-          - --eval='EJSON.stringify(db.iap_profiles.find({"id":"Local_AAA"},{"_id":0,"services":1}).toArray());'
+          - --eval='EJSON.stringify(db.iap_profiles.find({"id":"Primary_Local_AAA"},{"_id":0,"services":1}).toArray());'
           - "{{ mongo_connection_string }}"
       register: primary_local_aaa_profile
 
@@ -126,7 +126,7 @@
         mode: "0644"
       vars:
         desc: A default IAP profile that is using the Local AAA adapter to login for the primary data center
-        id: primary_local_aaa_profile
+        id: Primary_Local_AAA
         default_services:
           - local_aaa
         redis_group_name: redis

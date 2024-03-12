@@ -54,6 +54,8 @@
   when:
     - inventory_hostname in groups.mongodb
     - groups.mongodb.index(inventory_hostname) == 0
+  vars:
+    ansible_python_interpreter: /usr/local/bin/python3
 
 - name: Ensure replicaset is stable before continuing
   community.mongodb.mongodb_status:
@@ -69,6 +71,8 @@
     - "'replicaset is in a converged state' not in rs.msg"
   when:
     - inventory_hostname in groups.mongodb
+  vars:
+    ansible_python_interpreter: /usr/local/bin/python3
 
 - name: Lookup PRIMARY replicaset member
   ansible.builtin.set_fact:
@@ -117,3 +121,5 @@
     - inventory_hostname == primary_server
     - groups.mongodb | length < 3
     - groups.mongodb_arbiter | default([]) | length > 0
+  vars:
+    ansible_python_interpreter: /usr/local/bin/python3
