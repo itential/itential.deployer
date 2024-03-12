@@ -60,3 +60,7 @@ disable_git_safe_repo_checks: false
 
 # Flag to prevent the NPM scripts from running when running the NPM install
 npm_ignore_scripts: false
+
+# Offline install settings
+# Refer to the offline variables in common_vars for additional settings
+packages_path: "{{ itential_packages_path }}/{{ iap_release }}/iap"

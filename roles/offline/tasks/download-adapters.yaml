@@ -4,7 +4,7 @@
 - name: Validate download_dir is set
   ansible.builtin.fail:
     msg: "download_dir is not set"
-  when: not download_dir
+  when: download_dir is not defined
 
 - name: Create download directory
   ansible.builtin.file:
@@ -13,7 +13,8 @@
     mode: '0755'
 
 - name: Download adapter
-  ansible.builtin.include_tasks: "download-adapter.yaml"
+  ansible.builtin.include_tasks:
+    file: download-adapter.yaml
   loop: "{{ adapters }}"
   loop_control:
     loop_var: adapter

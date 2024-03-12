@@ -39,7 +39,7 @@
   vars:
     download_method: yum_module
     download_packages: "{{ gateway_packages }}"
-    download_dir: "{{ iag_rpms_download_dir_target_node }}"
+    download_dir: "{{ rpms_download_dir_target_node }}"
   tags: download_gateway_packages
 
 - name: Install Gateway rpms
@@ -56,48 +56,32 @@
 
 - name: Create archives directory
   ansible.builtin.file:
-    path: "{{ iag_archives_download_dir_target_node }}"
+    path: "{{ archives_download_dir_target_node }}"
     state: directory
     mode: '0755'
 
 - name: Download Terraform archive
   ansible.builtin.get_url:
     url: "{{ iag_terraform_url }}"
-    dest: "{{ iag_archives_download_dir_target_node }}"
+    dest: "{{ archives_download_dir_target_node }}"
     mode: "0644"
   when: iag_enable_terraform | bool
-
-- name: Copy rpms to control node
-  ansible.builtin.import_role:
-    name: offline
-    tasks_from: fetch-packages
-  vars:
-    src_dir: "{{ iag_rpms_download_dir_target_node }}"
-    dest_dir: "{{ iag_rpms_download_dir_control_node }}"
-
-- name: Copy wheels to control node
-  ansible.builtin.import_role:
-    name: offline
-    tasks_from: fetch-packages
-  vars:
-    src_dir: "{{ iag_wheels_download_dir_target_node }}"
-    dest_dir: "{{ iag_wheels_download_dir_control_node }}"
 
 - name: Copy archives to control node
   ansible.builtin.import_role:
     name: offline
     tasks_from: fetch-packages
   vars:
-    src_dir: "{{ iag_archives_download_dir_target_node }}"
-    dest_dir: "{{ iag_archives_download_dir_control_node }}"
+    src_dir: "{{ archives_download_dir_target_node }}"
+    dest_dir: "{{ archives_download_dir_control_node }}"
 
-- name: Copy IAG archive to control node
+- name: Copy rpms to control node
   ansible.builtin.import_role:
     name: offline
     tasks_from: fetch-packages
   vars:
-    src_dir: "{{ iag_pkgs_download_dir_target_node }}"
-    dest_dir: "{{ iag_pkgs_download_dir_control_node }}"
+    src_dir: "{{ rpms_download_dir_target_node }}"
+    dest_dir: "{{ rpms_download_dir_control_node }}"
 
 - name: Uninstall Gateway packages
   ansible.builtin.yum:

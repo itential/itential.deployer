@@ -4,12 +4,12 @@
 - name: Validate src_adapters_path is set
   ansible.builtin.fail:
     msg: "src_adapters_path is not set"
-  when: not src_adapters_path
+  when: src_adapters_path is not defined
 
 - name: Validate dest_adapters_path is set
   ansible.builtin.fail:
     msg: "dest_adapters_path is not set"
-  when: not dest_adapters_path
+  when: dest_adapters_path is not defined
 
 - name: Create temporary working directory
   ansible.builtin.tempfile:

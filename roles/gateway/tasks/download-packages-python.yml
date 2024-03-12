@@ -7,31 +7,18 @@
     tasks_from: download-rpms
   vars:
     download_method: yum_module
-    download_packages: "{{ gateway_python_packages }}"
-    download_dir: "{{ iag_rpms_download_dir_target_node }}"
+    download_packages: "{{ python_packages }}"
+    download_dir: "{{ rpms_download_dir_target_node }}"
   tags: download_gateway_python_packages
 
-- name: Include tasks to install Python on version 8
-  ansible.builtin.include_tasks:
-    file: "python-for-8.yaml"
-  when: ansible_distribution_major_version == "8"
+- name: Install Python
+  ansible.builtin.include_role:
+    name: python
+  tags: install_python
 
-- name: Include tasks to install Python on version 9
+- name: Include tasks to download IAG dependencies
   ansible.builtin.include_tasks:
-    file: "python-for-9.yaml"
-  when: ansible_distribution_major_version == "9"
-
-- name: Download Python wheels
-  ansible.builtin.import_role:
-    name: offline
-    tasks_from: download-wheels
-  vars:
-    wheel_files: "{{ iag_python_dependencies }}"
-    download_dir: "{{ iag_wheels_download_dir_target_node }}"
-
-- name: Include tasks to create IAG archive
-  ansible.builtin.include_tasks:
-    file: create-iag-archive.yml
+    file: download-python-dependencies.yml
 
 - name: Uninstall Python rpms
   ansible.builtin.yum:

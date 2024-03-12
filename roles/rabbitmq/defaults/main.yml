@@ -39,3 +39,7 @@ rabbitmq_admin_password: admin
 # value is set to 4 GB, the node will believe it is running on a machine with 4 GB of RAM.
 # Default: undefined (not set or used).
 #rabbit_total_mem_available_override: 8GB
+
+# Offline install settings
+# Refer to the offline variables in common_vars for additional settings
+packages_path: "{{ itential_packages_path }}/{{ iap_release }}/rabbitmq"

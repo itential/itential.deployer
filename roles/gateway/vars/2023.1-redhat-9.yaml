@@ -1,20 +1,26 @@
 # Copyright (c) 2022, Itential, LLC
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
-
+---
 gateway_packages:
-  - make
   - gcc-c++
+  - make
 
-gateway_python_packages:
+python_version: 3.9
+python_executable: "/usr/bin/python{{ python_version }}"
+pip_executable: "/usr/bin/pip{{ python_version }}"
+
+python_packages:
   - python3
   - python3-pip
   - python3-devel
 
-iag_python_dependencies:
-  - ansible-pylibssh
-  - pip==23.3.2
+base_python_dependencies:
+  - pip==24.0
   - setuptools==69.0.3
   - wheel==0.42.0
+
+app_python_dependencies:
+  - ansible-pylibssh
 
 iag_ansible_version: ansible==7.7.0
 

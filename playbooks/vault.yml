@@ -8,19 +8,19 @@
   roles:
     # Pull in the common vars
     - role: itential.deployer.common_vars
+      tags:
+        - always
 
     # Install and initialize Vault
     - role: itential.deployer.vault
-      when:
-        - vault_install | bool
+      when: vault_install | bool
       tags:
         - vault
         - vault_install
 
     # Setup Vault (initialize server and unseal)
     - role: itential.deployer.vault_unseal
-      when:
-        - vault_setup | bool
+      when: vault_setup | bool
       tags:
         - vault
         - vault_unseal

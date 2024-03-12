@@ -15,3 +15,7 @@ vault_cluster_port: 8201
 
 # The default user that runs vault
 vault_user: vault
+
+# Offline install settings
+# Refer to the offline variables in common_vars for additional settings
+packages_path: "{{ itential_packages_path }}/{{ iap_release }}/vault"

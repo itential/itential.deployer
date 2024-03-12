@@ -8,6 +8,8 @@
   roles:
     # Pull in the common vars
     - role: itential.deployer.common_vars
+      tags:
+        - always
 
     # Perform a base installation of Redis
     - role: itential.deployer.redis

@@ -11,6 +11,4 @@
   ansible.builtin.include_role:
     name: offline
     tasks_from: install-rpms
-  vars:
-    rpms_path: "{{ iap_rpms_path }}"
   when: offline_install

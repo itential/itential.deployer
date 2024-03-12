@@ -6,7 +6,7 @@
     src: "{{ item }}"
     dest: "{{ workingdir.path }}/{{ item | basename }}"
     mode: '0644'
-  with_fileglob: "{{ iag_packages_path }}/terraform*.zip"
+  with_fileglob: "{{ archives_path }}/terraform*.zip"
 
 - name: Find Terraform archive
   ansible.builtin.find:

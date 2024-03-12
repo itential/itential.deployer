@@ -4,12 +4,12 @@
 - name: Validate download_dir is set
   ansible.builtin.fail:
     msg: "download_dir is not set"
-  when: not download_dir
+  when: download_dir is not defined
 
 - name: Validate adapter is set
   ansible.builtin.fail:
     msg: "adapter is not set"
-  when: not adapter
+  when: adapter is not defined
 
 - name: Parse adapter name
   ansible.builtin.set_fact:

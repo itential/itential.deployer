@@ -21,7 +21,7 @@
   {% set rabbit_keyPath = "" %}
   {% set rabbit_passphrase = "guest" %}
   {% set rabbit_caPath = "" %}
-{% else %}
+{% elif groups["rabbitmq"] is defined and groups["rabbitmq"] | length > 0 %}
   {% set rabbit_port = 5672 %}
   {% set rabbit_protocol = "amqp" %}
   {% for rabbit in groups[vars.rabbit_group_name] %}
@@ -198,6 +198,7 @@
       }
     }
   },
+{% if rabbit_hosts is defined and rabbit_hosts | length > 0 -%}
   "rabbitmq": {
     "adminPort": 15672,
     "caPath": "",
@@ -214,6 +215,7 @@
     "username": "{{ rabbit_user }}",
     "vhost": "{{ rabbitmq_vhost }}"
   },
+{% endif %}
   "redisProps": {
     "db" : 0,
     "host": {{ redis_host | to_json }},

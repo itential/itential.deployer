@@ -12,19 +12,15 @@ systemLog:
 storage:
   # The directory where the mongod instance stores its data.
   dbPath: {{ mongo_data_dir }}
-  
+
+{% if (mongodb_version is not defined) or (mongodb_version | float < 7.0) %}
   # Enable or disable the durability journal to ensure data files remain
   # valid and recoverable.
   journal:
     enabled: true
-  
+{% endif %}
   # The storage engine for the mongod database.
   engine: wiredTiger
-
-# How the process runs
-processManagement:
-  fork: true
-  pidFilePath: /var/run/mongodb/mongod.pid
 
 # Security
 security:

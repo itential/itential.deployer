@@ -4,7 +4,9 @@ require {
 	type sysctl_fs_t;
 	type mongod_t;
 	class dir search;
+	class file { open read };
 }
 
 #============= mongod_t ==============
 allow mongod_t sysctl_fs_t:dir search;
+allow mongod_t sysctl_fs_t:file { open read };

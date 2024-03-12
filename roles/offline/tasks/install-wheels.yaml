@@ -1,10 +1,17 @@
 # Copyright (c) 2022, Itential, LLC
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
-- name: Validate wheels_path is set
+- name: Validate pip_executable or python_venv is set
   ansible.builtin.fail:
-    msg: "wheels_path is not set"
-  when: not wheels_path
+    msg: "either pip_executable or python_venv must be set"
+  when:
+    - pip_executable is not defined
+    - python_venv is not defined
+
+- name: Validate wheels_dir is set
+  ansible.builtin.fail:
+    msg: "wheels_dir must be set"
+  when: wheels_dir is not defined
 
 - name: Create temporary working directory
   ansible.builtin.tempfile:
@@ -17,38 +24,8 @@
     dest: "{{ install_wheels_temp_dir.path }}/{{ item | basename }}"
     mode: '0644'
   with_fileglob:
-    - "{{ wheels_path }}/*.whl"
-    - "{{ wheels_path }}/*.tar.gz"
-
-- name: Find Pip wheel file on target node
-  ansible.builtin.find:
-    paths: "{{ install_wheels_temp_dir.path }}"
-    patterns:
-      - "pip*.whl"
-  register: pip_wheel_list
-
-- name: Install Pip wheel file
-  ansible.builtin.pip:
-    name: "{{ pip_wheel_list.files | map(attribute='path') | list | sort }}"
-    executable: "{{ virtual_env is defined | ternary(omit, 'pip3') }}"
-    virtualenv: "{{ virtual_env is defined | ternary(virtual_env, omit) }}"
-    extra_args: --no-index
-  when: pip_wheel_list.files | length > 0
-
-- name: Find Wheel wheel file on target node
-  ansible.builtin.find:
-    paths: "{{ install_wheels_temp_dir.path }}"
-    patterns:
-      - "wheel*.whl"
-  register: wheel_wheel_list
-
-- name: Install Wheel wheel file
-  ansible.builtin.pip:
-    name: "{{ wheel_wheel_list.files | map(attribute='path') | list | sort }}"
-    executable: "{{ virtual_env is defined | ternary(omit, 'pip3') }}"
-    virtualenv: "{{ virtual_env is defined | ternary(virtual_env, omit) }}"
-    extra_args: --no-index
-  when: wheel_wheel_list.files | length > 0
+    - "{{ wheels_dir }}/*.whl"
+    - "{{ wheels_dir }}/*.tar.gz"
 
 - name: Find wheel files on target node
   ansible.builtin.find:
@@ -56,17 +33,21 @@
     patterns:
       - "*.whl"
       - "*.tar.gz"
-    excludes:
-      - "pip*.whl"
-      - "wheel*.whl"
   register: wheel_list
 
-- name: Install wheel files
+- name: Install wheel files in virtual env
   ansible.builtin.pip:
     name: "{{ wheel_list.files | map(attribute='path') | list | sort }}"
-    executable: "{{ virtual_env is defined | ternary(omit, 'pip3') }}"
-    virtualenv: "{{ virtual_env is defined | ternary(virtual_env, omit) }}"
-    extra_args: --no-index --no-build-isolation
+    virtualenv: "{{ python_venv }}"
+    extra_args: --no-index
+  when: python_venv is defined
+
+- name: Install wheel files using pip executable
+  ansible.builtin.pip:
+    name: "{{ wheel_list.files | map(attribute='path') | list | sort }}"
+    executable: "{{ pip_executable }}"
+    extra_args: --no-index
+  when: python_venv is not defined
 
 - name: Remove temporary working directory
   ansible.builtin.file:
