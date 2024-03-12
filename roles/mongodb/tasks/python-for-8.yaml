@@ -9,6 +9,11 @@
   register: python_install_result
   when: not offline_install
 
+- name: Install Python dependencies
+  ansible.builtin.pip:
+    name: "{{ mongodb_python_dependencies[ansible_distribution_major_version] }}"
+    executable: pip3
+
 - name: Configure python3 alternative
   community.general.alternatives:
     name: python3
