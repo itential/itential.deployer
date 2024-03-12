@@ -41,3 +41,7 @@ redis_bind_addrs: 127.0.0.1
 iap_redis_packages:
   - redis
   - jemalloc
+
+# Offline install settings
+# Refer to the offline variables in common_vars for additional settings
+packages_path: "{{ itential_packages_path }}/{{ iap_release }}/redis"

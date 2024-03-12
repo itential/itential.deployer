@@ -7,27 +7,36 @@
     tasks_from: download-rpms
   vars:
     download_method: yum_module
-    download_packages: "{{ mongodb_python_packages[ansible_distribution_major_version] }}"
-    download_dir: "{{ mongodb_rpms_download_dir_target_node }}"
+    download_packages: "{{ python_packages }}"
+    download_dir: "{{ rpms_download_dir_target_node }}"
 
-- name: Include tasks to install python on version 8
-  ansible.builtin.include_tasks:
-    file: python-for-8.yaml
-  when: ansible_distribution_major_version == "8"
+- name: Install Python
+  ansible.builtin.include_role:
+    name: python
+  tags: install_python
 
-- name: Include tasks to install python on version 9
-  ansible.builtin.include_tasks:
-    file: python-for-9.yaml
-  when: ansible_distribution_major_version == "9"
+- name: Download base Python dependencies
+  ansible.builtin.import_role:
+    name: offline
+    tasks_from: download-wheels
+  vars:
+    wheel_files: "{{ base_python_dependencies }}"
+    download_dir: "{{ wheels_download_dir_target_node }}/base"
+  when:
+    - base_python_dependencies is defined
+    - base_python_dependencies | length > 0
 
-- name: Download Python wheels
+- name: Download MongoDB Python dependencies
   ansible.builtin.import_role:
     name: offline
     tasks_from: download-wheels
   vars:
     with_deps: true
-    wheel_files: "{{ mongodb_python_dependencies[ansible_distribution_major_version] }}"
-    download_dir: "{{ mongodb_wheels_download_dir_target_node }}"
+    wheel_files: "{{ app_python_dependencies }}"
+    download_dir: "{{ wheels_download_dir_target_node }}/app"
+  when:
+    - app_python_dependencies is defined
+    - app_python_dependencies | length > 0
 
 - name: Uninstall Python rpms
   ansible.builtin.yum:

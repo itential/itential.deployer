@@ -5,39 +5,49 @@
   ansible.builtin.include_vars:
     file: "{{ item }}"
   with_first_found:
-    - "release-{{ iap_release }}.yaml"
+    - "{{ iap_release }}-{{ ansible_distribution | lower }}-{{ ansible_distribution_major_version }}.yaml"
     - "release-undefined.yaml"
+  tags:
+    - always
 
 - name: Check for valid MongoDB release
   ansible.builtin.fail:
     msg: "missing or invalid mongodb_release_url"
   when: mongodb_release_url == "UNDEFINED"
+  tags:
+    - always
 
-- name: Include base OS updates
+- name: Install base OS packages
   ansible.builtin.include_role:
     name: os
+  tags: install_base_os_packages
 
 - name: Configure SELinux
   ansible.builtin.include_tasks:
     file: configure-selinux.yml
+  tags: configure_selinux
 
-- name: Get the list of installed packages
-  ansible.builtin.package_facts:
-    manager: "auto"
+- name: Install MongoDB packages
+  block:
+    - name: Get the list of installed packages
+      ansible.builtin.package_facts:
+        manager: "auto"
 
-- name: Install MongoDB packages (online)
-  ansible.builtin.include_tasks:
-    file: mongodb-online.yml
-  when: not offline_install
+    - name: Install MongoDB packages (online)
+      ansible.builtin.include_tasks:
+        file: mongodb-online.yml
+      when: not offline_install
 
-- name: Install MongoDB and Python packages (offline)
-  ansible.builtin.include_tasks:
-    file: mongodb-offline.yml
-  when: offline_install
+    - name: Install MongoDB packages (offline)
+      ansible.builtin.include_tasks:
+        file: mongodb-offline.yml
+      when: offline_install
+  tags: install_mongodb_packages
 
-- name: Install Python packages (online) and Python dependencies
+- name: Install Python
   ansible.builtin.include_tasks:
     file: install-python.yml
+  tags: install_python
 
 # Update yum config to prevent mongodb from getting updated by yum updates
 - name: Prevent yum from updating mongo
@@ -79,6 +89,8 @@
 
 - name: Enable tuned profile
   ansible.builtin.command: tuned-adm profile virtual-guest-no-thp
+  vars:
+    ansible_python_interpreter: "{{ python_venv }}/bin/python3"
   ignore_errors: true
 
 # Tune Kernel parameters
@@ -192,7 +204,7 @@
         update_password: on_create
         replica_set: "{{ mongodb_replication_enabled | ternary(mongo_replset_name, omit) }}"
       vars:
-        ansible_python_interpreter: /usr/local/bin/python3
+        ansible_python_interpreter: "{{ python_venv }}/bin/python3"
 
     # This creates the itential user that only has read & write access to the
     # itential database.  It is used by IAP to connect to the db.
@@ -210,7 +222,7 @@
         update_password: on_create
         replica_set: "{{ mongodb_replication_enabled | ternary(mongo_replset_name, omit) }}"
       vars:
-        ansible_python_interpreter: /usr/local/bin/python3
+        ansible_python_interpreter: "{{ python_venv }}/bin/python3"
 
     # This creates the localaaa user that only has read & write access to the
     # LocalAAA database.  It is used by the local AAA adapter to login to IAP.
@@ -228,7 +240,7 @@
         update_password: on_create
         replica_set: "{{ mongodb_replication_enabled | ternary(mongo_replset_name, omit) }}"
       vars:
-        ansible_python_interpreter: /usr/local/bin/python3
+        ansible_python_interpreter: "{{ python_venv }}/bin/python3"
 
 - name: Determine mongo version
   ansible.builtin.shell:

@@ -1,6 +1,9 @@
 # Copyright (c) 2022, Itential, LLC
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
+# The file containing the installed components and versions
+itential_release_file: /etc/iag-release
+
 # Default feature flags
 # Enable everything by default, override in the hosts file if required
 iag_enable_ansible: true
@@ -10,12 +13,14 @@ iag_enable_netmiko: true
 iag_enable_scripts: true
 iag_enable_netconf: true
 iag_enable_httpreq: true
+iag_enable_python_venv: true
+iag_enable_grpc: true
 
 # Location of IAG assets
 iag_install_dir: /opt/automation-gateway
 
 # Location of IAG data
-iag_data_dir: /opt/automation-gateway
+iag_data_dir: /var/lib/automation-gateway
 
 # Location of IAG logs
 iag_log_dir: /var/log/automation-gateway
@@ -41,3 +46,11 @@ iag_ssl_key_dest: "{{ iag_ssl_dir }}/{{ iag_ssl_key_src }}"
 iag_ssl_rootca_src: rootCA.crt
 iag_ssl_rootca_dest: "{{ iag_ssl_dir }}/{{ iag_ssl_rootca_src }}"
 iag_tlsv1_2: false
+
+# Python virtual environment settings
+iag_venv_name: venv
+python_venv: "{{ iag_install_dir }}/{{ iag_venv_name }}"
+
+# Offline install settings
+# Refer to the offline variables in common_vars for additional settings
+packages_path: "{{ itential_packages_path }}/{{ iag_release }}/iag"

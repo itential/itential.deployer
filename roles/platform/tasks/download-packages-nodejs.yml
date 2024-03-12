@@ -8,4 +8,4 @@
   vars:
     download_method: yum_module
     download_packages: "{{ iap_nodejs_package }}"
-    download_dir: "{{ iap_rpms_download_dir_target_node }}"
+    download_dir: "{{ rpms_download_dir_target_node }}"

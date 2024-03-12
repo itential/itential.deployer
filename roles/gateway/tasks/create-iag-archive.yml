@@ -20,12 +20,6 @@
     cmd: /usr/local/bin/python3 -m venv offline_install
   changed_when: true
 
-# The shell module must be used here, not command.
-- name: Activate virtual environment
-  ansible.builtin.shell:  # noqa command-instead-of-shell
-    cmd: "source {{ iag_pkgs_temp_dir.path }}/offline_install/bin/activate"
-  changed_when: true
-
 - name: Install Python Dependencies
   ansible.builtin.pip:
     name: "{{ iag_python_dependencies }}"

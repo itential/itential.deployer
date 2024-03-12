@@ -20,4 +20,4 @@
       vars:
         download_method: yum_module
         download_packages: "{{ mongodb_tools_packages }}"
-        download_dir: "{{ iap_rpms_download_dir_target_node }}"
+        download_dir: "{{ rpms_download_dir_target_node }}"

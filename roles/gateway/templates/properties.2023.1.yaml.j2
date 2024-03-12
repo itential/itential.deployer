@@ -118,7 +118,7 @@ server_ssl_ciphers: "{{ server_ssl_ciphers }}"
 #############
 
 # Path to the main Automation Gateway sqlite database file.
-data_file: "sqlite:///{{ iag_data_dir }}/data/automation-gateway.db"
+data_file: "sqlite:///{{ iag_data_dir }}/automation-gateway.db"
 
 # A flag which determines whether or not audit logging is enabled. (default=true if absent/misconfigured)
 audit: true
@@ -128,10 +128,10 @@ audit: true
 audit_retention_days: 30
 
 # Path to the auxillary Automation Gateway sqlite database file for audit logs.
-audit_db_file: "sqlite:///{{ iag_data_dir }}/data/automation-gateway_audit.db"
+audit_db_file: "sqlite:///{{ iag_data_dir }}/automation-gateway_audit.db"
 
 # Path to the auxillary Automation Gateway sqlite database file for execution logs.
-exec_history_db_file: "sqlite:///{{ iag_data_dir }}/data/automation-gateway_exec_history.db"
+exec_history_db_file: "sqlite:///{{ iag_data_dir }}/automation-gateway_exec_history.db"
 
 #######################
 # LDAP Authentication #

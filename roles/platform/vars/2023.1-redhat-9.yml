@@ -9,20 +9,24 @@ platform_packages:
 
 iap_nodejs_package: "@nodejs:18"
 
-iap_python_packages:
+python_version: 3.9
+python_executable: "/usr/bin/python{{ python_version }}"
+pip_executable: "/usr/bin/pip{{ python_version }}"
+
+python_packages:
   - python3
   - python3-pip
 
-iap_python_dependencies:
-  - dnspython
-  - future
+base_python_dependencies:
+  - pip
+  - setuptools
+  - wheel
+
+app_python_dependencies:
   - jinja2>=2.11.3,<2.12.0
   - markupsafe==2.0.1
   - pymongo
-  - setuptools
-  - six
   - textfsm>=1.1.2,<1.2.0
-  - wheel
 
 mongodb_release_url: https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/6.0/x86_64/
 mongodb_gpgkey_url: https://www.mongodb.org/static/pgp/server-6.0.asc

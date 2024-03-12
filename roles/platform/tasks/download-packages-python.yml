@@ -7,26 +7,33 @@
     tasks_from: download-rpms
   vars:
     download_method: yum_module
-    download_packages: "{{ iap_python_packages }}"
-    download_dir: "{{ iap_rpms_download_dir_target_node }}"
+    download_packages: "{{ python_packages }}"
+    download_dir: "{{ rpms_download_dir_target_node }}"
 
-- name: Include tasks to install python on version 8
+- name: Install Python
   ansible.builtin.include_tasks:
-    file: python-for-8.yaml
-  when: ansible_distribution_major_version == "8"
+    file: install-python.yml
+  tags: install_python
 
-- name: Include tasks to install python on version 9
-  ansible.builtin.include_tasks:
-    file: python-for-9.yaml
-  when: ansible_distribution_major_version == "9"
-
-- name: Download Python wheels
+- name: Download base Python dependencies
   ansible.builtin.import_role:
     name: offline
     tasks_from: download-wheels
   vars:
-    wheel_files: "{{ iap_python_dependencies }}"
-    download_dir: "{{ iap_wheels_download_dir_target_node }}"
+    wheel_files: "{{ base_python_dependencies }}"
+    download_dir: "{{ wheels_download_dir_target_node }}/base"
+  when:
+    - base_python_dependencies is defined
+    - base_python_dependencies | length > 0
+
+- name: Download IAP Python dependencies
+  ansible.builtin.import_role:
+    name: offline
+    tasks_from: download-wheels
+  vars:
+    with_deps: true
+    wheel_files: "{{ app_python_dependencies }}"
+    download_dir: "{{ wheels_download_dir_target_node }}/app"
 
 - name: Uninstall Python rpms
   ansible.builtin.yum:

@@ -4,7 +4,7 @@
 - name: Validate rpms_path is set
   ansible.builtin.fail:
     msg: "rpms_path is not set"
-  when: not rpms_path
+  when: rpms_path is not defined
 
 - name: Create temporary working directory
   ansible.builtin.tempfile:

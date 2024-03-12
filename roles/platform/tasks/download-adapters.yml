@@ -1,12 +1,6 @@
 # Copyright (c) 2022, Itential, LLC
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
-- name: Disable safe repository checks
-  ansible.builtin.command:
-    cmd: "git config --global --add safe.directory '*'"
-  when: disable_git_safe_repo_checks
-  changed_when: true
-
 - name: Install rpms required for download
   ansible.builtin.yum:
     name: "{{ item }}"
@@ -15,6 +9,12 @@
     - git
     - jq
   register: install_result
+
+- name: Disable safe repository checks
+  ansible.builtin.command:
+    cmd: "git config --global --add safe.directory '*'"
+  when: disable_git_safe_repo_checks
+  changed_when: true
 
 - name: Install NodeJS
   ansible.builtin.include_tasks:
@@ -32,22 +32,22 @@
         tasks_from: download-adapters
       vars:
         adapters: "{{ itential_adapters }}"
-        download_dir: "{{ iap_adapters_download_dir_target_node }}/opensource"
+        download_dir: "{{ adapters_download_dir_target_node }}/opensource"
 
     - name: Find all downloaded opensource adapters
       ansible.builtin.find:
-        paths: "{{ iap_adapters_download_dir_target_node }}/opensource"
+        paths: "{{ adapters_download_dir_target_node }}/opensource"
         patterns: "*.tgz"
       register: opensource_adapters
 
     - name: Copy opensource adapters to control node
       ansible.builtin.fetch:
         src: "{{ item.path }}"
-        dest: "{{ iap_adapters_download_dir_control_node }}/opensource/"
+        dest: "{{ adapters_download_dir_control_node }}/opensource/"
         flat: true
       with_items: "{{ opensource_adapters.files }}"
 
-- name: Download and fetch opensource adapters
+- name: Download and fetch custom adapters
   when:
     - custom_adapters is defined
     - custom_adapters is iterable
@@ -59,18 +59,18 @@
         tasks_from: download-adapters
       vars:
         adapters: "{{ custom_adapters }}"
-        download_dir: "{{ iap_adapters_download_dir_target_node }}/custom"
+        download_dir: "{{ adapters_download_dir_target_node }}/custom"
 
     - name: Find all downloaded custom adapters
       ansible.builtin.find:
-        paths: "{{ iap_adapters_download_dir_target_node }}/custom"
+        paths: "{{ adapters_download_dir_target_node }}/custom"
         patterns: "*.tgz"
       register: custom_adapters
 
     - name: Copy custom adapters to control node
       ansible.builtin.fetch:
         src: "{{ item.path }}"
-        dest: "{{ iap_adapters_download_dir_control_node }}/custom/"
+        dest: "{{ adapters_download_dir_control_node }}/custom/"
         flat: true
       with_items: "{{ custom_adapters.files }}"
 

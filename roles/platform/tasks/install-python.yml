@@ -1,37 +1,19 @@
 # Copyright (c) 2022, Itential, LLC
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
-
-# Installing python3 on RHEL7 & Centos7 requires building python from source
-# in order to support the documented version of python3. Dynamically include a
-# task file that can handle the steps to build from source when we detect that
-# this host is a version 7.
-- name: Include tasks to install python on version 7
-  ansible.builtin.include_tasks:
-    file: python-for-7.yaml
-  when: ansible_distribution_major_version == "7"
-
-# Include a file for RHEL8 steps to install the appropriate version of python.
-- name: Include tasks to install python on version 8
-  ansible.builtin.include_tasks:
-    file: python-for-8.yaml
-  when: ansible_distribution_major_version == "8"
-
-# Include a file for RHEL9 steps to install the appropriate version of python.
-- name: Include tasks to install python on version 9
-  ansible.builtin.include_tasks:
-    file: python-for-9.yaml
-  when: ansible_distribution_major_version == "9"
-
-- name: Install Python wheels (online)
-  ansible.builtin.pip:
-    name: "{{ iap_python_dependencies }}"
-    executable: pip3
-  when: not offline_install
-
-- name: Install Python wheels (offline)
+---
+- name: Install Python
   ansible.builtin.include_role:
-    name: offline
-    tasks_from: install-wheels
-  vars:
-    wheels_path: "{{ iap_wheels_path }}"
-  when: offline_install
+    name: python
+  tags: install_python
+
+- name: Create python3 symlinks
+  ansible.builtin.include_role:
+    name: python
+    tasks_from: create-symlinks
+  tags: install_python
+
+- name: Install Python dependencies
+  ansible.builtin.include_role:
+    name: python
+    tasks_from: install-dependencies
+  tags: install_python

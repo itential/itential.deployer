@@ -10,7 +10,7 @@
 
 - name: Capture Python version
   ansible.builtin.command:
-    cmd: /usr/local/bin/python3 -V
+    cmd: "{{ python_executable }} -V"
   register: python_installed_version
   changed_when: false
 
@@ -23,7 +23,7 @@
 
 - name: Capture Pip version
   ansible.builtin.command:
-    cmd: /usr/local/bin/pip3 -V
+    cmd: "{{ pip_executable }} -V"
   register: pip_installed_version
   changed_when: false
 
@@ -36,7 +36,7 @@
 
 - name: Capture Jinja2 version
   ansible.builtin.shell:
-    cmd: pip3 list --retries 1 --timeout 1 | grep -i jinja2 | awk '{print $2}'
+    cmd: "{{ pip_executable }} list --retries 1 --timeout 1 | grep -i jinja2 | awk '{print $2}'"
   register: jinja2_installed_version
   changed_when: false
 
@@ -49,7 +49,7 @@
 
 - name: Capture MarkupSafe version
   ansible.builtin.shell:
-    cmd: pip3 list --retries 1 --timeout 1 | grep -i markupsafe | awk '{print $2}'
+    cmd: "{{ pip_executable }} list --retries 1 --timeout 1 | grep -i markupsafe | awk '{print $2}'"
   register: markupsafe_installed_version
   changed_when: false
 
@@ -62,7 +62,7 @@
 
 - name: Capture TextFSM version
   ansible.builtin.shell:
-    cmd: pip3 list --retries 1 --timeout 1 | grep -i textfsm | awk '{print $2}'
+    cmd: "{{ pip_executable }} list --retries 1 --timeout 1 | grep -i textfsm | awk '{print $2}'"
   register: textfsm_installed_version
   changed_when: false
 
@@ -70,5 +70,18 @@
   ansible.builtin.lineinfile:
     path: "{{ itential_release_file }}"
     line: "TEXTFSM={{ textfsm_installed_version.stdout }}"
+    mode: "0644"
+    create: true
+
+- name: Capture NodeJS version
+  ansible.builtin.command:
+    cmd: node --version
+  register: nodejs_installed_version
+  changed_when: false
+
+- name: Update release file with NodeJS version
+  ansible.builtin.lineinfile:
+    path: "{{ itential_release_file }}"
+    line: "NODEJS={{ nodejs_installed_version.stdout }}"
     mode: "0644"
     create: true

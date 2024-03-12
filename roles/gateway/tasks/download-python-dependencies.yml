@@ -1,0 +1,113 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+# The owner and group are intentially unset throughout in order to use the current user.
+#
+# From the Ansible documentation:
+# group - When left unspecified, it uses the current group of the current user unless you are root,
+# in which case it can preserve the previous ownership.
+# owner - When left unspecified, it uses the current user unless you are root, in which case it can
+# preserve the previous ownership.
+
+- name: Download base Python wheels
+  ansible.builtin.import_role:
+    name: offline
+    tasks_from: download-wheels
+  vars:
+    wheel_files: "{{ base_python_dependencies }}"
+    download_dir: "{{ wheels_download_dir_target_node }}/base"
+  when:
+    - base_python_dependencies is defined
+    - base_python_dependencies | length > 0
+
+- name: Copy base Python dependencies to control node
+  ansible.builtin.import_role:
+    name: offline
+    tasks_from: fetch-packages
+  vars:
+    src_dir: "{{ wheels_download_dir_target_node }}/base"
+    dest_dir: "{{ wheels_download_dir_control_node }}/base"
+
+- name: Create temporary working directory
+  ansible.builtin.tempfile:
+    state: directory
+  register: iag_pkgs_temp_dir
+
+- name: Setup Python virtual environment
+  ansible.builtin.command:
+    chdir: "{{ iag_pkgs_temp_dir.path }}"
+    cmd: "{{ python_executable }} -m venv offline_install"
+  changed_when: true
+
+- name: Install base Python Dependencies
+  ansible.builtin.pip:
+    name: "{{ base_python_dependencies }}"
+    state: present
+    virtualenv: "{{ iag_pkgs_temp_dir.path }}/offline_install"
+    extra_args: --log /var/log/pip.log
+  when:
+    - base_python_dependencies is defined
+    - base_python_dependencies | length > 0
+
+- name: Install IAG Python Dependencies
+  ansible.builtin.pip:
+    name: "{{ app_python_dependencies }}"
+    state: present
+    virtualenv: "{{ iag_pkgs_temp_dir.path }}/offline_install"
+    extra_args: --log /var/log/pip.log
+  when:
+    - app_python_dependencies is defined
+    - app_python_dependencies | length > 0
+
+- name: Install Ansible
+  ansible.builtin.pip:
+    name: "{{ iag_ansible_version }}"
+    state: present
+    virtualenv: "{{ iag_pkgs_temp_dir.path }}/offline_install"
+    extra_args: --log /var/log/pip.log
+  when: iag_enable_ansible | bool
+
+- name: Copy IAG wheel file to target node
+  ansible.builtin.copy:
+    src: "{{ iag_whl_file }}"
+    dest: "{{ iag_pkgs_temp_dir.path }}"
+    mode: '0644'
+
+- name: Install IAG
+  ansible.builtin.pip:
+    name: "{{ iag_pkgs_temp_dir.path }}/{{ iag_whl_file }}"
+    virtualenv: "{{ iag_pkgs_temp_dir.path }}/offline_install"
+    extra_args: --log /var/log/pip.log
+
+- name: Uninstall IAG
+  ansible.builtin.pip:
+    name: "{{ iag_pkgs_temp_dir.path }}/{{ iag_whl_file }}"
+    state: absent
+    virtualenv: "{{ iag_pkgs_temp_dir.path }}/offline_install"
+    extra_args: --log /var/log/pip.log
+
+- name: Create requirements file
+  ansible.builtin.shell:
+    chdir: "{{ iag_pkgs_temp_dir.path }}"
+    cmd: offline_install/bin/pip3 freeze > requirements.txt
+  changed_when: true
+
+- name: Download wheel files
+  ansible.builtin.command:
+    cmd: offline_install/bin/pip3 download -r requirements.txt -d "{{ wheels_download_dir_target_node }}/app"
+  args:
+    chdir: "{{ iag_pkgs_temp_dir.path }}"
+  changed_when: true
+
+- name: Copy IAG Python dependencies to control node
+  ansible.builtin.import_role:
+    name: offline
+    tasks_from: fetch-packages
+  vars:
+    src_dir: "{{ wheels_download_dir_target_node }}/app"
+    dest_dir: "{{ wheels_download_dir_control_node }}/app"
+
+- name: Remove temporary working directory
+  ansible.builtin.file:
+    path: "{{ iag_pkgs_temp_dir.path }}"
+    state: absent

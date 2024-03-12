@@ -43,7 +43,7 @@
   vars:
     download_method: yum_module
     download_packages: "{{ os_packages }}"
-    download_dir: "{{ os_rpms_download_dir_target_node }}"
+    download_dir: "{{ rpms_download_dir_target_node }}"
 
 - name: Download security rpms
   ansible.builtin.import_role:
@@ -52,7 +52,7 @@
   vars:
     download_method: yum_module
     download_packages: "{{ security_packages }}"
-    download_dir: "{{ os_rpms_download_dir_target_node }}"
+    download_dir: "{{ rpms_download_dir_target_node }}"
 
 - name: Download operations rpms
   ansible.builtin.import_role:
@@ -61,15 +61,15 @@
   vars:
     download_method: yum_module
     download_packages: "{{ operational_packages }}"
-    download_dir: "{{ os_rpms_download_dir_target_node }}"
+    download_dir: "{{ rpms_download_dir_target_node }}"
 
 - name: Copy rpms to control node
   ansible.builtin.import_role:
     name: offline
     tasks_from: fetch-packages
   vars:
-    src_dir: "{{ os_rpms_download_dir_target_node }}"
-    dest_dir: "{{ os_rpms_download_dir_control_node }}"
+    src_dir: "{{ rpms_download_dir_target_node }}"
+    dest_dir: "{{ rpms_download_dir_control_node }}"
 
 - name: Set OS packages downloaded flag
   ansible.builtin.set_fact:

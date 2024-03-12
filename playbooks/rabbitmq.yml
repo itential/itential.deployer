@@ -8,25 +8,35 @@
   roles:
     # Pull in the common vars
     - role: itential.deployer.common_vars
-
-    # Perform a base installation of Rabbitmq
-    - role: itential.deployer.rabbitmq
       tags:
-        - rabbitmq
-        - rabbitmq_install
+        - always
+  tasks:
+    - name: Install RabbitMQ
+      when: iap_release | float < 2023.2
+      block:
+        - name: Include base RabbitMQ role
+          ansible.builtin.include_role:
+            name: itential.deployer.rabbitmq
+          tags:
+            - rabbitmq
+            - rabbitmq_install
 
-    # Add on any Rabbit features, HA, auth, etc...
-    # Configure Rabbit in a cluster
-    # https://www.rabbitmq.com/clustering.html
-    - role: itential.deployer.rabbitmq_cluster
-      when: rabbitmq_cluster | bool
-      tags:
-        - rabbitmq
-        - rabbitmq_cluster
+        - name: Include RabbitMQ cluster role
+          ansible.builtin.include_role:
+            name: itential.deployer.rabbitmq_cluster
+          when:
+            - rabbitmq_cluster is defined
+            - rabbitmq_cluster | bool
+          tags:
+            - rabbitmq
+            - rabbitmq_cluster
 
-    # Configure rabbit to only accept SSL connections
-    - role: itential.deployer.rabbitmq_ssl
-      when: rabbitmq_ssl | bool
-      tags:
-        - rabbitmq
-        - rabbitmq_ssl
+        - name: Include RabbitMQ SSL role
+          ansible.builtin.include_role:
+            name: itential.deployer.rabbitmq_ssl
+          when:
+            - rabbitmq_ssl is defined
+            - rabbitmq_ssl | bool
+          tags:
+            - rabbitmq
+            - rabbitmq_ssl

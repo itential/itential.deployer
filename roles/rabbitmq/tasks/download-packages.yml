@@ -81,12 +81,12 @@
   vars:
     download_method: yum_module
     download_packages: "{{ rabbitmq_packages[ansible_distribution_major_version] }}"
-    download_dir: "{{ rabbitmq_rpms_download_dir_target_node }}"
+    download_dir: "{{ rpms_download_dir_target_node }}"
 
 - name: Copy rpms to control node
   ansible.builtin.import_role:
     name: offline
     tasks_from: fetch-packages
   vars:
-    src_dir: "{{ rabbitmq_rpms_download_dir_target_node }}"
-    dest_dir: "{{ rabbitmq_rpms_download_dir_control_node }}"
+    src_dir: "{{ rpms_download_dir_target_node }}"
+    dest_dir: "{{ rpms_download_dir_control_node }}"

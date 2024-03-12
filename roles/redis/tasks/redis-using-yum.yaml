@@ -14,7 +14,7 @@
 # mapping of "versions" to RPM locations.
 - name: Install Redis RPM
   ansible.builtin.yum:
-    name: "{{ redis_packages[ansible_distribution_major_version] }}.*"
+    name: "{{ redis_packages[ansible_distribution_major_version] }}"
     state: present
     enablerepo: remi-modular
     allow_downgrade: true

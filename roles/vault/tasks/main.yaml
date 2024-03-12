@@ -1,9 +1,10 @@
 # Copyright (c) 2022, Itential, LLC
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
-- name: Include base OS updates
+- name: Install base OS packages
   ansible.builtin.include_role:
     name: os
+  tags: install_base_os_packages
 
 - name: Include tasks to install vault (online)
   ansible.builtin.include_tasks:

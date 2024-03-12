@@ -32,3 +32,19 @@ mongodb_bind_ipv6: true
 #
 # If mongodb_bind_ipv6 is set to true, '::1' will be added to mongodb_bind_addrs.
 mongodb_bind_addrs: 127.0.0.1
+
+# The mongodb role uses the system python3 executables.
+# MondoDB doesn't require Python or pymongo, but the community.mongodb.mongodb_user
+# role does. The pymongo wheel is defined in the mongodb_python_dependecies
+# variable in the vars directory.
+python_executable: /usr/bin/python3
+pip_executable: /usr/bin/pip3
+
+# To isolate Python, a virtual environment is used.
+mongodb_python_venv_root: /var/tmp
+mongodb_python_venv_name: mongodb_venv
+python_venv: "{{ mongodb_python_venv_root }}/{{ mongodb_python_venv_name }}"
+
+# Offline install settings
+# Refer to the offline variables in common_vars for additional settings
+packages_path: "{{ itential_packages_path }}/{{ iap_release }}/mongodb"

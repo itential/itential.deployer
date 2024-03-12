@@ -63,7 +63,7 @@
         name: offline
         tasks_from: install-adapter
       vars:
-        src_adapters_path: "{{ iap_adapters_download_dir_control_node }}/opensource"
+        src_adapters_path: "{{ adapters_download_dir_control_node }}/opensource"
         dest_adapters_path: "{{ iap_install_dir }}/current/custom/@itentialopensource"
       loop: "{{ adapter_names }}"
       loop_control:
@@ -140,7 +140,7 @@
     - name: Install custom adapters (online)
       when: not offline_install
       block:
-    # Git clone each of the provided adapters
+        # Git clone each of the provided adapters
         - name: Git clone all configured adapters
           ansible.builtin.git:
             repo: "{{ item }}"
@@ -162,7 +162,7 @@
         name: offline
         tasks_from: install-adapter
       vars:
-        src_adapters_path: "{{ iap_adapters_download_dir_control_node }}/custom"
+        src_adapters_path: "{{ adapters_download_dir_control_node }}/custom"
         dest_adapters_path: "{{ iap_install_dir }}/current/custom/{{ custom_location }}"
       loop: "{{ custom_names }}"
       loop_control:

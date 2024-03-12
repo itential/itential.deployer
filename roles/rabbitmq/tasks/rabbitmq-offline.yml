@@ -5,5 +5,3 @@
   ansible.builtin.import_role:
     name: offline
     tasks_from: install-rpms
-  vars:
-    rpms_path: "{{ rabbitmq_rpms_path }}"
