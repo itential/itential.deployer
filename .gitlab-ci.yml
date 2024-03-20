@@ -21,7 +21,7 @@ build-job:
 
   script:
     - echo "Determining new release"
-    - NEW_RELEASE=$(grep "^version" itential/deployer/galaxy.yml | cut -d " " -f 2)
+    - NEW_RELEASE=$(grep "^version" galaxy.yml | cut -d " " -f 2)
     - echo $NEW_RELEASE
 
     - echo "Determining new release tag and message"
