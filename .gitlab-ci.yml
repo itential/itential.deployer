@@ -36,7 +36,6 @@ build-job:
     - git push --tags --no-verify
 
     - echo "Creating artifact"
-    - cd itential/deployer
     - ansible-galaxy collection build
 
     - echo "Uploading artifact to Nexus"
@@ -50,6 +49,6 @@ build-job:
   artifacts:
     name: "$CI_PROJECT_NAME"
     paths:
-      - "itential/deployer/*.tar.gz"
+      - "*.tar.gz"
     expire_in: 90 days
 
