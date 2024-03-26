@@ -7,15 +7,6 @@
     state: latest
   when: yum_update | bool
 
-# Need to specify the remote location of the epel-release. This
-# is defined in the os/vars files
-- name: Install epel-release yum repo
-  ansible.builtin.yum:
-    name: "{{ epel_location }}"
-    update_cache: true
-    state: present
-    disable_gpg_check: true
-
 - name: Install OS Packages
   ansible.builtin.yum:
     name: "{{ os_packages }}"

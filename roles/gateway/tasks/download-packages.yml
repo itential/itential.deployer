@@ -25,13 +25,6 @@
     msg: "missing or invalid iag_release"
   when: iag_release == "UNDEFINED"
 
-- name: Install epel-release yum repo
-  ansible.builtin.yum:
-    name: "{{ epel_location }}"
-    update_cache: true
-    state: present
-    disable_gpg_check: true
-
 - name: Download Gateway OS rpms
   ansible.builtin.import_role:
     name: offline

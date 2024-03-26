@@ -27,7 +27,6 @@ operational_packages:
   - dos2unix
   - git
   - gzip
-  - jq
   - man
   - sysstat
   - tcpdump

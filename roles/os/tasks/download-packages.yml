@@ -27,14 +27,7 @@
 - name: Check supported OS
   ansible.builtin.fail:
     msg: "Unsupported OS version!"
-  when: epel_location is undefined
-
-- name: Install epel-release yum repo
-  ansible.builtin.yum:
-    name: "{{ epel_location }}"
-    state: present
-    update_cache: true
-    disable_gpg_check: true
+  when: os_packages is undefined
 
 - name: Download OS rpms
   ansible.builtin.import_role:
