@@ -21,11 +21,6 @@ rabbitmq_bind_ipv6: true
 # client connections.
 rabbitmq_bind_addr: 127.0.0.1
 
-rabbitmq_user: itential
-rabbitmq_password: itential
-rabbitmq_admin_user: admin
-rabbitmq_admin_password: admin
-
 # The largest allowed message payload size in bytes. Messages of larger size will be
 # rejected with a suitable channel exception. Default: 134217728, Max value: 536870912
 #rabbit_max_msg_size: 536870911
