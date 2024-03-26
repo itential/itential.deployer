@@ -6,13 +6,17 @@ redis_conf_path: /etc/redis
 redis_conf_file: "{{ redis_conf_path }}/redis.conf"
 
 # The location of the Redis log file
-redis_log: /var/log/redis/redis.log
+redis_log_dir: /var/log/redis
+redis_log: "{{ redis_log_dir }}/redis.log"
 
 # The name of the Redis data file
 redis_db_filename: dump.rdb
 
 # The location of the Redis data directory
 redis_data_dir: /var/lib/redis
+
+# The location of the Redis data directory
+redis_pid_dir: /var/run
 
 # Default redis port
 redis_port: 6379
@@ -45,3 +49,10 @@ iap_redis_packages:
 # Offline install settings
 # Refer to the offline variables in common_vars for additional settings
 packages_path: "{{ itential_packages_path }}/{{ iap_release }}/redis"
+
+# Redis install method - string.
+# The valid values are 'remi_repo' (default) or 'source'.
+redis_install_method: remi_repo
+
+# The EPEL repo is only required when the redis_install_method is set to 'remi_repo'
+epel_repo_url: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_distribution_major_version }}.noarch.rpm"

@@ -21,24 +21,29 @@
 - name: Install custom SELinux profiles
   ansible.builtin.include_role:
     name: selinux
+  tags: configure_selinux
 
-- name: Include tasks to install Redis (online)
-  when: not offline_install
+- name: Install Redis
   block:
-    - name: Include tasks to install Redis using YUM (online)
-      ansible.builtin.include_tasks:
-        file: redis-using-yum.yaml
-      when: ansible_distribution_major_version | int == 7
+    - name: Include tasks to install Redis (online)
+      when: not offline_install
+      block:
+        - name: Include tasks to install Redis using Remi repo (online)
+          ansible.builtin.include_tasks:
+            file: redis-using-remi-repo.yaml
+          when:
+            - redis_install_method == "remi_repo"
 
-    - name: Include tasks to install Redis using DNF (online)
-      ansible.builtin.include_tasks:
-        file: redis-using-dnf.yaml
-      when: ansible_distribution_major_version | int >= 8
+        - name: Include tasks to install Redis using source
+          ansible.builtin.include_tasks:
+            file: redis-using-source.yaml
+          when: redis_install_method == "source"
 
-- name: Include tasks to install Redis (offline)
-  ansible.builtin.include_tasks:
-    file: redis-offline.yml
-  when: offline_install
+    - name: Include tasks to install Redis (offline)
+      ansible.builtin.include_tasks:
+        file: redis-offline.yml
+      when: offline_install
+  tags: install_redis
 
 - name: Ensure the directories for the config exists
   ansible.builtin.file:
@@ -55,6 +60,7 @@
     owner: "{{ redis_owner }}"
     group: "{{ redis_group }}"
     mode: "0640"
+    backup: true
 
 # Check if firewalld is running, if it is then open the appropriate ports
 - name: Gather service facts
@@ -79,6 +85,7 @@
     name: redis
     enabled: true
     state: restarted
+    daemon_reload: true
 
 - name: Determine redis version
   ansible.builtin.shell:

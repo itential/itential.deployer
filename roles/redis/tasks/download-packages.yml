@@ -25,27 +25,62 @@
     msg: "missing or invalid redis_packages"
   when: redis_packages == "UNDEFINED"
 
-- name: Install epel-release yum repo
-  ansible.builtin.yum:
-    name: "{{ epel_location }}"
-    state: present
-    update_cache: true
-    disable_gpg_check: true
+- name: Download package from Remi repo
+  when: redis_install_method == "remi_repo"
+  block:
+    - name: Install EPEL repo
+      ansible.builtin.yum:
+        name: "{{ epel_repo_url }}"
+        state: present
+        update_cache: true
+        disable_gpg_check: true
 
-- name: Install Remi repo
-  ansible.builtin.yum:
-    name: "{{ redis_repo_url[ansible_distribution_major_version] }}"
-    state: present
-    disable_gpg_check: true
+    - name: Install Remi repo
+      ansible.builtin.yum:
+        name: "{{ redis_repo_url[ansible_distribution_major_version] }}"
+        state: present
+        disable_gpg_check: true
 
-- name: Download Redis rpms
-  ansible.builtin.import_role:
-    name: offline
-    tasks_from: download-rpms
-  vars:
-    download_method: yum_module
-    download_packages: "{{ redis_packages[ansible_distribution_major_version] }}"
-    download_dir: "{{ rpms_download_dir_target_node }}"
+    - name: Download Redis rpms
+      ansible.builtin.import_role:
+        name: offline
+        tasks_from: download-rpms
+      vars:
+        download_method: yum_module
+        download_packages: "{{ redis_packages[ansible_distribution_major_version] }}"
+        download_dir: "{{ rpms_download_dir_target_node }}"
+
+- name: Download source packages
+  when: redis_install_method == "source"
+  block:
+    - name: Create archives directory
+      ansible.builtin.file:
+        path: "{{ archives_download_dir_target_node }}"
+        state: directory
+        mode: '0755'
+
+    - name: Download Redis archive
+      ansible.builtin.get_url:
+        url: "{{ redis_source_url[ansible_distribution_major_version] }}"
+        dest: "{{ archives_download_dir_target_node }}"
+        mode: "0644"
+
+    - name: Copy Redis archive to control node
+      ansible.builtin.import_role:
+        name: offline
+        tasks_from: fetch-packages
+      vars:
+        src_dir: "{{ archives_download_dir_target_node }}"
+        dest_dir: "{{ archives_download_dir_control_node }}"
+
+    - name: Download Redis build rpms
+      ansible.builtin.import_role:
+        name: offline
+        tasks_from: download-rpms
+      vars:
+        download_method: yum_module
+        download_packages: "{{ redis_build_packages[ansible_distribution_major_version] }}"
+        download_dir: "{{ rpms_download_dir_target_node }}"
 
 - name: Copy rpms to control node
   ansible.builtin.import_role:
