@@ -6,3 +6,11 @@ rabbitmq_vhost: iap
 
 # Default installation will not have RabbitMQ SSL configured
 rabbitmq_ssl: false
+
+# Default rabbitmq user passwords
+# These are meant to be changed by the customer. By default they are meant to
+# be predictable and simple.
+rabbitmq_user: itential
+rabbitmq_password: itential
+rabbitmq_admin_user: admin
+rabbitmq_admin_password: admin

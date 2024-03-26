@@ -84,7 +84,7 @@ dir /tmp
 sentinel monitor mymaster {{ master_name }} 6379 2
 
 {% if redis_auth %}
-sentinel auth-pass mymaster sentineluser
+sentinel auth-pass mymaster {{ redis_user_sentineluser_password }}
 {% endif%}
 # sentinel auth-pass <master-name> <password>
 #
@@ -124,8 +124,8 @@ sentinel auth-user mymaster sentineluser
 # uncomment if using auth with Itential redis
 ###########################
 # user default off
-# user admin on >admin ~* &* +@all
-# user sentineluser on >sentineluser &* -@all +auth +client|getname +client|id +client|setname +command +hello +ping +role +sentinel|is-master-down-by-addr +sentinel|get-master-addr-by-name +sentinel|master +sentinel|myid +sentinel|replicas +sentinel|sentinels
+# user admin on >{{ redis_user_sentineladmin_password }} ~* &* +@all
+# user sentineluser on >{{ redis_user_sentineluser_password }} &* -@all +auth +client|getname +client|id +client|setname +command +hello +ping +role +sentinel|is-master-down-by-addr +sentinel|get-master-addr-by-name +sentinel|master +sentinel|myid +sentinel|replicas +sentinel|sentinels
 
 # sentinel down-after-milliseconds <master-name> <milliseconds>
 #
@@ -203,7 +203,7 @@ sentinel sentinel-user sentineluser
 # user name.
 
 {% if redis_auth %}
-sentinel sentinel-pass sentineluser
+sentinel sentinel-pass {{ redis_user_sentineluser_password }}
 {% endif %}
 # sentinel sentinel-pass <password>
 #

@@ -30,7 +30,7 @@
   ansible.builtin.lineinfile:
     path: "{{ redis_conf_file }}"
     regexp: "# masterauth <master-password>"
-    line: "masterauth repluser"
+    line: "masterauth {{ redis_user_repluser_password }}"
   when: redis_replication | bool
 
 - name: Restart Redis

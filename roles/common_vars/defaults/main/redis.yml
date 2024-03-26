@@ -6,3 +6,12 @@
 redis_auth: false
 redis_replication: false
 redis_tls: false
+
+# Default redis user passwords
+# These are meant to be changed by the customer. By default they are meant to
+# be predictable and simple.
+redis_user_admin_password: admin
+redis_user_itential_password: itential
+redis_user_repluser_password: repluser
+redis_user_sentineladmin_password: admin
+redis_user_sentineluser_password: sentineluser

@@ -7,12 +7,6 @@
 {% endif %}
 {# Set the correct rabbitmq settings #}
 {% set rabbit_hosts = [] %}
-{% if rabbit_user is not defined %}
-  {% set rabbit_user = "itential" %}
-{% endif %}
-{% if rabbit_password is not defined %}
-  {% set rabbit_password = "itential" %}
-{% endif %}
 {% if rabbit_svc_url is defined %}
   {{ rabbit_hosts.append(rabbit_svc_url) }}
   {% set rabbit_port = 5671 %}
@@ -53,9 +47,9 @@
   {% set redis_host = hostvars[ groups[vars.redis_group_name][0] ].inventory_hostname %}
   {% if redis_auth | bool -%}
     {% set redis_user = "itential" %}
-    {% set redis_password = "itential" %}
+    {% set redis_password = redis_user_itential_password %}
     {% set sentinel_user = "sentineluser" %}
-    {% set sentinel_password = "sentineluser" %}
+    {% set sentinel_password = redis_user_sentineluser_password %}
   {% endif %}
   {% if redis_replication | bool %}
     {% set redis_host = None %}
@@ -209,10 +203,10 @@
     "keyPath": "",
     "locale": "en_US",
     "passphrase": "guest",
-    "password": "{{ rabbit_password }}",
+    "password": "{{ rabbitmq_password }}",
     "port": {{ rabbit_port }},
     "protocol": "{{ rabbit_protocol }}",
-    "username": "{{ rabbit_user }}",
+    "username": "{{ rabbitmq_user }}",
     "vhost": "{{ rabbitmq_vhost }}"
   },
 {% endif %}

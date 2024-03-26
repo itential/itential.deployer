@@ -893,10 +893,10 @@ replica-announce-ip {{ inventory_hostname }}
 # uncomment if using auth with Itential redis
 ###########################
 # user default off
-# user admin on allkeys allchannels allcommands >admin
-# user itential on allkeys allchannels allcommands -asking -cluster -readonly -readwrite -bgrewriteaof -bgsave -failover -flushall -flushdb -psync -replconf -replicaof -save -shutdown -sync >itential
-# user repluser on allchannels +psync +replconf +ping >repluser
-# user sentineluser on allchannels +multi +slaveof +ping +exec +subscribe +config|rewrite +role +publish +info +client|setname +client|kill +script|kill >sentineluser
+# user admin on allkeys allchannels allcommands >{{ redis_user_admin_password }}
+# user itential on allkeys allchannels allcommands -asking -cluster -readonly -readwrite -bgrewriteaof -bgsave -failover -flushall -flushdb -psync -replconf -replicaof -save -shutdown -sync >{{ redis_user_itential_password }}
+# user repluser on allchannels +psync +replconf +ping >{{ redis_user_repluser_password }}
+# user sentineluser on allchannels +multi +slaveof +ping +exec +subscribe +config|rewrite +role +publish +info +client|setname +client|kill +script|kill >{{ redis_user_sentineluser_password }}
 
 
 # ACL LOG
