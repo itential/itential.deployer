@@ -18,10 +18,12 @@
     name: os
   tags: install_base_os_packages
 
-- name: Install custom SELinux profiles
-  ansible.builtin.include_role:
-    name: selinux
+- name: Configure SELinux
   tags: configure_selinux
+  block:
+    - name: Install custom SELinux profiles
+      ansible.builtin.include_role:
+        name: selinux
 
 - name: Install Redis
   block:

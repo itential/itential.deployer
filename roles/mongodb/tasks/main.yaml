@@ -7,25 +7,18 @@
   with_first_found:
     - "{{ iap_release }}-{{ ansible_distribution | lower }}-{{ ansible_distribution_major_version }}.yaml"
     - "release-undefined.yaml"
-  tags:
-    - always
+  tags: always
 
 - name: Check for valid MongoDB release
   ansible.builtin.fail:
     msg: "missing or invalid mongodb_release_url"
   when: mongodb_release_url == "UNDEFINED"
-  tags:
-    - always
+  tags: always
 
 - name: Install base OS packages
   ansible.builtin.include_role:
     name: os
   tags: install_base_os_packages
-
-- name: Configure SELinux
-  ansible.builtin.include_tasks:
-    file: configure-selinux.yml
-  tags: configure_selinux
 
 - name: Install MongoDB packages
   block:
@@ -136,6 +129,13 @@
     owner: "{{ mongo_owner }}"
     group: "{{ mongo_group }}"
 
+- name: Create log directory
+  ansible.builtin.file:
+    state: directory
+    path: "{{ mongo_log_dir }}"
+    owner: "{{ mongo_owner }}"
+    group: "{{ mongo_group }}"
+
 - name: Create pid directory
   ansible.builtin.file:
     state: directory
@@ -151,6 +151,11 @@
     owner: "{{ mongo_owner}}"
     group: "{{ mongo_group }}"
     mode: "0644"
+
+- name: Configure SELinux
+  ansible.builtin.include_tasks:
+    file: configure-selinux.yml
+  tags: configure_selinux
 
 # Check if firewalld is running, if it is then open the appropriate ports
 - name: Gather service facts
