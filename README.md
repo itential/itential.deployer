@@ -1,4 +1,42 @@
 # Ansible Collection - itential.deployer
+
+## Table of contents
+
+1. [Overview](#overview)
+2. [Supported Architectures](#supported-architectures)
+    1. [All-in-one Architecture](#all-in-one-architecture)
+    2. [Minimal Architecture](#minimal-architecture)
+    3. [Highly Available Architecture](#highly-available-architecture)
+    4. [Active/Standby Architecture](#activestandby-architecture)
+3. [Deployer Prerequisites](#deployer-prerequisites)
+    1. [Required Python, Ansible, and Ansible modules](#required-python-ansible-and-ansible-modules)
+    2. [Required Public Repositories](#required-public-repositories)
+    3. [Ports & Networking](#ports--networking)
+    4. [Certificates](#certificates)
+    5. [Passwords](#passwords)
+    6. [Obtaining the Itential Binaries](#obtaining-the-itential-binaries)
+4. [Installing and Upgrading the Depoloyer](#installing-and-upgrading-the-deployer)
+    1. [Online Installation](#online-installation)
+    2. [Offline Installation](#offline-installation)
+5. [Running the Deployer](#running-the-deployer)
+6. [Sample Inventories](#sample-inventories)
+    1. [All-in-one Architecture Inventory](#all-in-one-architecture-inventory)
+    2. [Minimal Architecture Inventory](#minimal-architecture-inventory)
+    3. [Highly Available Architecture Inventory](#highly-available-architecture-inventory)
+    4. [Active/Standby Architecture Inventory](#activestandby-architecture-inventory)
+7. [Component Guides](#component-guides)
+    1. [MongoDB](#mongodb)
+    2. [Redis](#redis)
+    3. [RabbitMQ](#rabbitmq)
+    4. [Hashicorp Vault](#hashicorp-vault)
+    5. [IAP](#iap)
+    6. [IAG](#iag)
+8. [Patching IAP and IAG](#patching-iap-and-iag)
+9. [Running the Deployer in Offline Mode](#running-the-deployer-in-offline-mode)
+10. [Appendix A - Definition of "Highly Available" dependencies](#appendix-a---definion-of-highly-available-dependencies)
+
+## Overview
+
 An Itential environment is composed of several applications working in conjunction with one another, including:
 
 - Itential Automation Platform (IAP)
@@ -11,7 +49,7 @@ In many environments, these applications are installed across multiple systems t
 
 The Itential deployer can deploy supported Itential architectures.
 
-## What are the supported architectures?
+## Supported Architectures
 
 - All-in-one
 - Minimal Architecture
@@ -19,10 +57,12 @@ The Itential deployer can deploy supported Itential architectures.
 - Active/Standby Architecture
 - Blue Green Architecture
 
-### All-in-one
+### All-in-one Architecture
+
 The All-In-One architecture is an architecture where all components are installed on the same instance.  This architecture lends itself well to development environments and “throw away” environments like those found in a CI/CD pipeline.  Security considerations are non-existent or use simple default passwords as the emphasis is placed on simplicity.
 
 ### Minimal Architecture
+
 A Minimal Architecture is an architecture where all or most components are single instances and can not gracefully tolerate failures. This architecture lends itself well to development environments. It favors the engineer with its simplicity and enables them to do their work with few restrictions. Security considerations should lean towards openness and ease of use but at the same time capture the spirit of the other higher environments. In this architecture, each of the required Itential components is a single instance.  This architecture will exercise the network connectivity between the components and can be advantageous to deploy as a development environment.
 
 The ideal minimal architecture will have 5 VM's with each hosting a single instance of the required components. An acceptable variation is to have 1 VM with everything hosted on it. The number of VM's and what is hosted where is less of a concern with the MA because the intent is simplicity and to enable engineers to build automations and not be a highly-available environment.
@@ -30,6 +70,7 @@ The ideal minimal architecture will have 5 VM's with each hosting a single insta
 Itential recommends applying security principles to ALL environments. In the MA, this would include configuring all components to use authentication. Optionally, we recommend using SSL when communicating with components on other VMs but recognize that this should be enabled at the discretion of the customer.
 
 ### Highly Available Architecture
+
 A Highly Available Architecture is an architecture where all or most components are redundant and can gracefully tolerate at least 1 catastrophic failure. This architecture is the recommended architecture for testing environments and simple production environments. The intent is to provide an environment that is as close to production as possible so that testing automations can provide confidence and expose potential problems sooner in the development lifecycle. Security considerations should mimic production requirements. In this architecture, each of the required Itential components is installed in clusters to provide stability, mimic production, and expose any issues with the clustering of the components. This could also serve as a production architecture.
 
 The ideal HA2 environment will have 12 VMs:
@@ -43,6 +84,7 @@ The ideal HA2 environment will have 12 VMs:
 Itential recommends applying sound security principles to ALL environments. This would include configuring all components to use authentication within the HA2. Additionally, we recommend using SSL when communicating with components on other VMs and across clusters.
 
 ### Active/Standby Architecture
+
 An Active/Standby Architecture (ASA) is an architecture (that is normally used for making HA2 architectures redundant) reserved for production environments where Disaster Recovery is required. It is not required that they be geographically redundant but they could be. The intent is to provide a standby environment that can be used in the event of a disaster on the active stack. The standby stack should be preconfigured to be quickly made into the active stack. Care needs to be taken that the same level of access to 3rd party systems existing in the standby stack matches those in the active stack. Security must be taken into account if this is used as a production environment.
 
 The ideal ASA architecture will appear as two HA2 stacks except for MongoDB. One or more of the MongoDB instances must be hosted in the standby location as a replica of the primary. Ideally, the MongoDB cluster will consist of 5 members: 4 data-bearing members and a MongoDB arbiter. This will allow for a cluster of three mongos in the worst-case disaster scenario.
@@ -57,27 +99,29 @@ This architecture is intended to reduce downtime as much as possible. It has the
 The caveat to this architecture is that your job history is not immediately available after performing a switch. It is important to know which color ran the job as that is the stack that will have the job history. The stack that runs a job is where the history of that job will exist unless effort is made to reconcile the historical data. -->
 
 ## Deployer Prerequisites
-The Itential Deployer is an ansible project and as such requires running on a control node. That node has its own set of dependencies.
+
+The Itential Deployer is an Ansible project and as such requires running on a control node. That node has its own set of dependencies.
 
 ### Required Python, Ansible, and Ansible modules
+
 - **Itential Galaxy Access**: The Itential Deployer is hosted on the Itential Galaxy repository. An account is required to access Itential Galaxy. If you do not have an account, contact your Itential Professional Services representative.
 - **Python Version**: The control node must be running Python 3.9 or later.
 - **Ansible Version**: The control node must be running Ansible version 2.11 or later. To see which Ansible version is currently installed, execute the `ansible --version` command as shown below.
 
-_Example: Confirming Ansible Version_
+  _Example: Confirming Ansible Version_
 
-```bash
-$ ansible --version
-  ansible [core 2.12.2]
-  config file = None
-  configured module search path = ['/var/home/yourname/.ansible/plugins/modules', '/usr/share/ansible/plugins/modules']
-  ansible python module location = /usr/local/lib/python3.9/site-packages/ansible
-  ansible collection location = /var/home/yourname/.ansible/collections:/usr/share/ansible/collections
-  executable location = /usr/local/bin/ansible
-  python version = 3.9.9 (main, Nov 19 2021, 00:00:00) [GCC 11.2.1 20210728 (Red Hat 11.2.1-1)]
-  jinja version = 3.0.3
-  libyaml = True
-```
+  ```bash
+  $ ansible --version
+    ansible [core 2.12.2]
+    config file = None
+    configured module search path = ['/var/home/yourname/.ansible/plugins/modules', '/usr/share/ansible/plugins/modules']
+    ansible python module location = /usr/local/lib/python3.9/site-packages/ansible
+    ansible collection location = /var/home/yourname/.ansible/collections:/usr/share/ansible/collections
+    executable location = /usr/local/bin/ansible
+    python version = 3.9.9 (main, Nov 19 2021, 00:00:00) [GCC 11.2.1 20210728 (Red Hat 11.2.1-1)]
+    jinja version = 3.0.3
+    libyaml = True
+  ```
 - **Required Ansible Modules**: The following ansible modules are required on the control node for the deployer to run.
   - 'ansible.posix': '>=0.0.1'
   - 'community.mongodb': '>=0.0.1'
@@ -85,9 +129,31 @@ $ ansible --version
 **&#9432; Note:**
 The Itential Deployer is an Ansible collection. As such, a familiarity with basic Ansible concepts is suggested before proceeding.
 
-### Required public repos
+### Required Public Repositories
+
+In general the Deployer will install packages using the standard YUM/DNF repositories on the target servers.  When packages are not available for the distribution, the Deployer will either install the required repository or download the packages.
+
+| Component | Hostname | Protocol | Notes |
+| :-------- | :------- | :------- | :---- |
+| Redis | rpms.remirepo.net | http | When installing Redis from the Remi repository<br>When installing on Redhat/CentOS 7 |
+| Redis | rpms.remirepo.net | https | When installing Redis from the Remi repository<br>When installing on Redhat/Rocky 8+ |
+| Redis | dl.fedoraproject.org | https | When installing Redis from the Remi repository |
+| Redis | github.com | https | When installing Redis from source |
+| RabbitMQ | packagecloud.io | https | |
+| MongoDB | repo.mongodb.org | https | |
+| MongoDB | www.mongodb.org | https | |
+| Vault | rpm.releases.hashicorp.com | https | |
+| IAP | repo.mongodb.org | https | |
+| IAP | www.mongodb.org | https | |
+| IAP | rpm.nodesource.com | https | When installing on Redhat/CentOS 7 |
+| IAP | www.python.org | https | When installing on Redhat/CentOS 7 |
+| IAP | www.openssl.org | https | When installing on Redhat/CentOS 7 |
+| IAG | releases.hashicorp.com | https | When Terraform is enabled |
+| IAG | www.python.org | https | When installing on Redhat/CentOS 7 |
+| IAG | www.openssl.org | https | When installing on Redhat/CentOS 7 |
 
 ### Ports & Networking
+
   In a clustered environment where components are installed on more than one host, the following network traffic flows need to be allowed.
 | Source | Destination | Port | Description |
 |---|---|---|---|
@@ -103,6 +169,7 @@ The Itential Deployer is an Ansible collection. As such, a familiarity with basi
 | Redis | Redis | 26379 | Each Redis uses Redis Sentinel to monitor the Redis processes for HA resiliency |
 
 ### Certificates
+
 The itential deployer is not responsible for creating any SSL certificates that may be used to further tighten security in the Itential ecosystem. However, if these certificates are provided it can upload and configure the platform to use them. The table below describes the certificates that can be used and what their purpose is.
 
 | Certificate | Description |
@@ -114,6 +181,7 @@ The itential deployer is not responsible for creating any SSL certificates that 
 | LDAP | Enables secure communications with LDAP server. |
 
 ### Passwords
+
 The deployer will create several user accounts in the dependent systems. It uses default passwords in all cases and those passwords can be overridden with the defined ansible variables. To override these variables just define the variable in the deployer host file.
 
 <table>
@@ -194,10 +262,14 @@ The deployer will create several user accounts in the dependent systems. It uses
   </tr>
 </table>
 
-### Obtaining the Itential binaries
+### Obtaining the Itential Binaries
+
 The IAP and IAG binary files are hosted on the Itential Nexus repository. An account is required to access Itential Nexus. If you do not have an account, contact your Itential Sales representative.
 
-## Installing the Deployer
+## Installing and Upgrading the Deployer
+
+### Online Installation
+
 The Itential Deployer can be installed via the `ansible-galaxy` utility. To do this, [configure Ansible][Ansible Configuration File] to use the Itential and Ansible Galaxy servers when installing collections. On your control node:
 
 1. Create a blank file named `ansible.cfg` in your working directory. This will be your new Ansible configuration file.
@@ -222,13 +294,18 @@ The Itential Deployer can be installed via the `ansible-galaxy` utility. To do t
     ansible-galaxy collection install itential.deployer
     ```
 
-#### Offline Installations
+When a new version of the Deployer is available, you can upgrade using the following command:
+
+```bash
+ansible-galaxy collection install itential.deployer --upgrade
+```
+
+### Offline Installation
 
 If your control node does not have Internet connectivity, the Itential Deployer and its dependencies can be downloaded via another system, copied to your control node, and installed manually.
 
 **&#9432; Note:**
 Some of the following collections may already be installed on your control node. To verify, use the `ansible-galaxy collection list` command.
-:::
 
 1. Download the following collections from the provided links:
 
@@ -245,9 +322,11 @@ Some of the following collections may already be installed on your control node.
     ```
 
 ## Running the Deployer
+
 Once you have have installed the Itential Deployer, run it to begin deploying Itential to your environment. This section details a basic deployment using required variables only.
 
 ### Step 0: Confirm requirements & gather host information
+
 Before running the deployer we must ensure the following:
 
 - **Compatible OS**: Any managed nodes to be configured by the Itential Deployer must use an operating system that is compatible with the target version of IAP (and, if applicable, IAG). For more information, refer to the [Itential Dependencies] page.
@@ -265,7 +344,6 @@ Download the IAP binary along with any desired IAP adapters (and, if applicable,
 
 **&#9432; Note:**
 If you are unsure which files should be downloaded for your environment, contact your Itential Professional Services representative.
-:::
 
 ### Step 2: Copy Installation Artifacts into the Files Directory
 
@@ -295,7 +373,9 @@ Next, copy the files downloaded in the previous step to the `files` subdirectory
 _Example: Copying to the Files Directory_
 
 ```bash
-cd <DEPLOYER-DIR>/files
+cd <DEPLOYER-DIR>
+mkdir files
+cd files
 cp ~/Downloads/itential-premium_2023.1.1.linux.x86_64.bin .
 cp ~/Downloads/automation_gateway-3.198.19+2023.1.0-py3-none-any.whl .
 ```
@@ -491,10 +571,12 @@ $ sudo systemctl status rabbitmq-server
              └─24311 /bin/sh -s rabbit_disk_monitor
 ```
 
-## Sample host files for supported architectures
+## Sample Inventories
+
 Below are simplified sample host files that describe the basic configurations to produce the supported architectures. These are intended to be starting points only.
 
-### All-in-one
+### All-in-one Architecture Inventory
+
 Simple environment. IAP and all of its dependencies all on one host.
 
 _Example: All-in-one Inventory File (YAML Format)_
@@ -531,7 +613,8 @@ all:
             iag_whl_file: automation_gateway-3.227.0+2023.1.9-py3-none-any.whl
 ```
 
-### Minimal Architecture
+### Minimal Architecture Inventory
+
 Similar to All-in-one but installs components on separate hosts.
 
 _Example: Minimal Architecture Inventory File (YAML Format)_
@@ -568,7 +651,8 @@ all:
             iag_whl_file: automation_gateway-3.227.0+2023.1.9-py3-none-any.whl
 ```
 
-### Highly Available Architecture
+### Highly Available Architecture Inventory
+
 Fault tolerant architecture.
 
 _Example: Highly Available Architecture Inventory File (YAML Format)_
@@ -616,8 +700,7 @@ all:
             iag_whl_file: automation_gateway-3.227.0+2023.1.9-py3-none-any.whl
 ```
 
-### Active/Standby Architecture
-
+### Active/Standby Architecture Inventory
 
 _Example: Active/Standby Architecture Inventory File (YAML Format)_
 
@@ -722,45 +805,54 @@ all:
 <!-- ### Available tags
 The ansible execution can be more finely controled by using the builtin ansible tags. The below table defines the available tags and describes what they can do. -->
 
-## Appendix A - Advanced Configuration Properities
+## Component Guides
 
-Each component installed by the Itential Deployer can be granularly configured by defining additional variables in the relevant inventory file. These additional variables are detailed in the following tables.
+In addition to the `itential.deployer.site` playbook, there are playbooks for each component.
 
-**_MongoDB Variables_**
+Each component installed by the Itential Deployer can be granularly configured by defining additional variables in the relevant inventory file. These additional playbooks, roles and their corresponding variables are detailed in the following guides.
 
-| Variable | Group | Type    | Description   | Example |
-| :-------- | :----: | :------ | :------------- | :------- |
-| `mongodb_replication`          | `all` | String  | Designates whether or not a MongoDB replica set is created from all managed nodes assigned to the `mongodb` group.  | `true` <br /> `false` |
-| `mongodb_auth`    | `all` | Boolean | Designates whether or not MongoDB servers require authentication via username and password for connections.  | `true` <br /> `false` |
-| `mongodb_tls`      | `all` | Boolean | Designates whether or not MongoDB servers secure their communications with TLS encryption.  | `true` <br /> `false` |
-| `mongo_user_itential_password` | `all` | String  | The password of the MongoDB `itential` user.   | |
-| `mongo_auth_keyfile_source`    | `all` | String  | The name of the `.pem` key file to be used for communication between members of the MongoDB replica set. This must be provided; it is not generated by the Itential Deployer. This is only required when `mongodb_replication` and `mongodb_auth` are set to `true`. | `mongo-replicaset-key.pem` |
-| `mongo_cert_keyfile_source`    | `all` | String  | The name of the `.pem` key file that contains the TLS certificate and key to be used on MongoDB servers. This must be provided; it is not generated by the Itential Deployer. This is only required when `mongodb_tls` is set to `true`.   | `mongodb.pem` |
-| `mongo_root_ca_file_source`    | `all` | String  | The name of the `.pem` key file obtained from a certificate authority that contains the root certificate chain. This must be provided; it is not generated by the Itential Deployer. This is only required when `mongodb_tls` is set to `true`.    | `rootCA.pem`  |
+### MongoDB
 
-</br>
+[MongoDB Guide](documents/mongodb_guide.md)
 
-**_Redis Variables_**
+### Redis
 
-| Variable | Group | Type    | Description   | Example |
-| :-------- | :----: | :------ | :------------- | :------- |
-| `redis_replication` | `all` | Boolean | Designates whether or not a Redis cluster is created from all managed nodes assigned to the `redis` group. If set to `true`, a cluster is created and Redis Sentinel is used to provide high availability (HA) monitoring. | `true` <br /> `false` |
-| `redis_auth`        | `all` | Boolean | Designates whether or not Redis servers require authentication via username and password for connections.   | `true` <br /> `false` |
+[Redis Guide](documents/redis_guide.md)
 
-</br>
+### RabbitMQ
 
-**_RabbitMQ Variables_**
+[RabbitMQ Guide](documents/rabbitmq_guide.md)
 
-| Variable | Group | Type    | Description   | Example |
-| :-------- | :----: | :------ | :------------- | :------- |
-| `rabbitmq_cluster` | `all` | Boolean | Designates whether or not a RabbitMQ cluster is created from all managed nodes assigned to the `rabbitmq` group. | `true` <br /> `false` |
-| `rabbitmq_ssl`     | `all` | Boolean | Designates whether or not RabbitMQ nodes secure their communications with TLS encryption.   | `true` <br /> `false` |
+### Hashicorp Vault
 
+[Hashicorp Vault Guide](documents/vault_guide.md)
 
-## Appendix B - Offline Installs
+### IAP
 
-## Appendix C - Definion of "Highly Available" dependencies
+[IAP Guide](documents/iap_guide.md)
+
+### IAG
+
+[IAG Guide](documents/iag_guide.md)
+
+## Patching IAP and IAG
+
+The Deployer supports patching IAP and IAG.  Refer to the following guide for instructions on running the patch playbooks.
+
+[Patch IAP Guide](documents/patch_iap_guide.md)
+
+[Patch IAG Guide](documents/patch_iag_guide.md)
+
+## Running the Deployer in Offline Mode
+
+The Deployer supports installations in air-gapped environments.  Refer to the following guide for instructions on running the Deployer in offline mode.
+
+[Offline Installation Guide](documents/offline_install_guide.md)
+
+## Appendix A - Definion of "Highly Available" dependencies
+
 ### Highly Available MongoDB
+
 MongoDB clusters operate a primary/secondary model where data written to the primary will replicate to the secondary. There is much literature on the internet about Mongo clusters. That will not be covered here. However, it's important to note that Itential’s preferred MongoDB cluster will assume the following requirements:
 
 - Authentication between the replica members done with either a shared key or X.509 certificate.
@@ -770,6 +862,7 @@ MongoDB clusters operate a primary/secondary model where data written to the pri
 Initial passwords are intended to be changed.
 
 ### Highly Available Redis
+
 Redis clusters operate a primary/secondary model where data written to the primary will replicate to the secondary. There is much literature on the internet about Redis clusters. That will not be covered here. However, it's important to note that Itential’s preferred Redis cluster will assume the following requirements:
 
 - Authentication between the replica members is done with users defined in the Redis config file.
@@ -782,6 +875,7 @@ Redis clusters operate a primary/secondary model where data written to the prima
 - Redis nodes maintain a low latency connection between nodes to avoid replication failures.
 
 ### Highly Available Rabbitmq
+
 Rabbitmq clusters operate independently of one another but they do require knowledge of one another. There is much literature on the internet about Rabbitmq clusters. That will not be covered here. However, it's important to note that Itential’s preferred Rabbitmq cluster will assume the following requirements:
 
 - Rabbitmq nodes depend on DNS resolution. Itential will be using host files to accomplish this.
