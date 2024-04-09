@@ -171,7 +171,7 @@ all:
 
 # Running the Playbook
 
-To execute all Platform roles, run the `itential.deployer.iap` playbook:
+To execute all Platform roles, run the `iap` playbook:
 
 ```
 ansible-playbook itential.deployer.iap -i <inventory>

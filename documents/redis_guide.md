@@ -70,16 +70,21 @@ The following table lists the default variables located in `roles/redis/defaults
 | :------- | :---- | :--- | :---------- | :------------
 | `redis_conf_path` | `redis` | String | The path to the Redis configuration file. | `/etc/redis`
 | `redis_conf_file` | `redis` | String | The location of the Redis configuration file. | `{{ redis_conf_path }}/redis.conf`
-| `redis_log` | `redis` | String | The location of the Redis log file. | `/var/log/redis/redis.log`
+| `redis_log_dir` | `redis` | String | The Redis log directory. | `/var/log/redis`
+| `redis_log` | `redis` | String | The location of the Redis log file. | `{{ redis_log_dir }}redis.log`
 | `redis_db_filename` | `redis` | String | The name of the Redis data file. | `dump.rdb`
 | `redis_data_dir` | `redis` | String | The location of the Redis data directory. | `/var/lib/redis`
+| `redis_pid_dir` | `redis` | String | The Redis PID directory. | `/var/run`
 | `redis_port` | `redis` | Integer | The Redis listen port. | `6379`
 | `redis_owner` | `redis` | String | The Redis Linux user. | `redis`
 | `redis_group` | `redis` | String | The Redis Linux group. | `redis`
 | `redis_bind_ipv6` | `redis` | Boolean | Flag to enable IPv6. | `true`
 | `redis_bind_addr_source` | `redis` | String | The bind address source. Will default to the Ansible `inventory_hostname` unless explicitly set to `default_ipv4_address`. | `inventory_hostname`
 | `redis_bind_addrs` | `redis` | String | A space-separated list of hostnames/IP addresses on which Redis listeners will be created.  If `redis_bind_ipv6` is set to `true`, `::1` will be added to the addresses.  The `redis_bind_addr_source` will also be added to the addresses. | `127.0.0.1`
-| `iap_redis_packages` | `redis` | List of Strings | The Linux packages to install. | `redis jemalloc`
+| `iap_redis_packages` | `redis` | List of Strings | The Linux packages to install. | `redis`<br>`jemalloc`
+| `redis_install_method` | `redis` | String | The method to use to install Redis.<br>Set to `remi_repo` to use the Remi repo.<br>Set to `source` to install from source. | `remi_repo`
+| `epel_repo_url` | `redis` | String | The URL of the EPEL repo RPM.<br>Note: this is only used when the `redis_install_method` is set to `remi_repo`. | `https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_distribution_major_version }}.noarch.rpm`
+
 
 ## Redis Auth Role Variables
 
@@ -93,7 +98,7 @@ The following table lists the default variables located in `roles/redis_replicat
 
 | Variable | Group | Type | Description | Default Value
 | :------- | :---- | :--- | :---------- | :------------
-| `redis_sentinel_conf_file` | `redis` | String | The location of the Redis Sentinel configuration file. | `"{{ redis_conf_path }}/sentinel.conf"`
+| `redis_sentinel_conf_file` | `redis` | String | The location of the Redis Sentinel configuration file. | `{{ redis_conf_path }}/sentinel.conf`
 | `redis_sentinel_port` | `redis` | Integer | The Redis Sentinel listen port | `26379`
 
 # SELinux
@@ -159,10 +164,10 @@ all:
 
 # Running the Playbook
 
-To execute all Redis roles, run the `redis.yml` playbook:
+To execute all Redis roles, run the `redis` playbook:
 
 ```
-ansible-playbook redis.yml -i <inventory>
+ansible-playbook itential.deployer.redis -i <inventory>
 ```
 
 You can also run select Redis roles by using the following tags:

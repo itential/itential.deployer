@@ -216,10 +216,10 @@ all:
 
 # Running the Playbook
 
-To execute all MongoDB roles, run the `mongodb.yml` playbook:
+To execute all MongoDB roles, run the `mongodb` playbook:
 
 ```
-ansible-playbook mongodb.yml -i <inventory>
+ansible-playbook itential.deployer.mongodb -i <inventory>
 ```
 
 You can also run select MongodDB roles by using the following tags:

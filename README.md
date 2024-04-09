@@ -11,7 +11,7 @@
 3. [Deployer Prerequisites](#deployer-prerequisites)
     1. [Required Python, Ansible, and Ansible modules](#required-python-ansible-and-ansible-modules)
     2. [Required Public Repositories](#required-public-repositories)
-    3. [Ports & Networking](#ports--networking)
+    3. [Ports and Networking](#ports-and-networking)
     4. [Certificates](#certificates)
     5. [Passwords](#passwords)
     6. [Obtaining the Itential Binaries](#obtaining-the-itential-binaries)
@@ -33,7 +33,7 @@
     6. [IAG](#iag)
 8. [Patching IAP and IAG](#patching-iap-and-iag)
 9. [Running the Deployer in Offline Mode](#running-the-deployer-in-offline-mode)
-10. [Appendix A - Definition of "Highly Available" dependencies](#appendix-a---definion-of-highly-available-dependencies)
+10. [Appendix A: Definition of "Highly Available" dependencies](#appendix-a-definition-of-highly-available-dependencies)
 
 ## Overview
 
@@ -51,7 +51,7 @@ The Itential deployer can deploy supported Itential architectures.
 
 ## Supported Architectures
 
-- All-in-one
+- All-in-one Architecture
 - Minimal Architecture
 - Highly Available Architecture
 - Active/Standby Architecture
@@ -152,7 +152,7 @@ In general the Deployer will install packages using the standard YUM/DNF reposit
 | IAG | www.python.org | https | When installing on Redhat/CentOS 7 |
 | IAG | www.openssl.org | https | When installing on Redhat/CentOS 7 |
 
-### Ports & Networking
+### Ports and Networking
 
   In a clustered environment where components are installed on more than one host, the following network traffic flows need to be allowed.
 | Source | Destination | Port | Description |
@@ -849,7 +849,7 @@ The Deployer supports installations in air-gapped environments.  Refer to the fo
 
 [Offline Installation Guide](documents/offline_install_guide.md)
 
-## Appendix A - Definion of "Highly Available" dependencies
+## Appendix A: Definition of "Highly Available" dependencies
 
 ### Highly Available MongoDB
 

@@ -52,13 +52,13 @@ The following table lists the default variables located in `roles/gateway/defaul
 | `iag_https` | `gateway` | Boolean | Flag to enable HTTPS. | `false`
 | `iag_https_port` | `gateway` | Integer | The IAG or HAProxy HTTPS listen port. | `8443`
 | `iag_ssl_copy_certs` | `gateway` | Boolean | Flag to enable copying the IAG SSL certificate. | `true`
-| `iag_ssl_dir` | `gateway` | String | The IAG SSL directory. | `"{{ iag_install_dir }}/conf/certs"`
+| `iag_ssl_dir` | `gateway` | String | The IAG SSL directory. | `{{ iag_install_dir }}/conf/certs`
 | `iag_ssl_cert_src` | `gateway` | String | The SSL cert file. | `server.crt`
-| `iag_ssl_cert_dest` | `gateway` | String | The SSL cert destination. | `"{{ iag_ssl_dir }}/{{ iag_ssl_cert_src }}"`
+| `iag_ssl_cert_dest` | `gateway` | String | The SSL cert destination. | `{{ iag_ssl_dir }}/{{ iag_ssl_cert_src }}`
 | `iag_ssl_key_src` | `gateway` | String | The SSL key file. | `server.key`
-| `iag_ssl_key_dest` | `gateway` | String | The SSL key file destination. | `"{{ iag_ssl_dir }}/{{ iag_ssl_key_src }}"`
+| `iag_ssl_key_dest` | `gateway` | String | The SSL key file destination. | `{{ iag_ssl_dir }}/{{ iag_ssl_key_src }}`
 | `iag_ssl_rootca_src` | `gateway` | String | The SSL root CA file. | `rootCA.crt`
-| `iag_ssl_rootca_dest` | `gateway` | String | The SSL root CA destination. | `"{{ iag_ssl_dir }}/{{ iag_ssl_rootca_src }}"`
+| `iag_ssl_rootca_dest` | `gateway` | String | The SSL root CA destination. | `{{ iag_ssl_dir }}/{{ iag_ssl_rootca_src }}`
 | `iag_tlsv1_2` | `gateway`  Boolean | Flag to enable TLS 1.2. | `false`
 
 ## Gateway HAProxy Role Variables
@@ -154,7 +154,7 @@ all:
 
 # Running the Playbook
 
-To execute all Gateway roles, run the `itential.deployer.gateway` playbook:
+To execute all Gateway roles, run the `gateway` playbook:
 
 ```
 ansible-playbook itential.deployer.gateway -i <inventory>
