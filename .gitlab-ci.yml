@@ -1,4 +1,4 @@
-build-job:  
+build-job:
   stage: build
   image: node:alpine
   variables:
@@ -34,6 +34,9 @@ build-job:
     - git remote set-url origin git@$CI_SERVER_HOST:$CI_PROJECT_PATH.git
     - git tag -a $NEW_RELEASE_TAG -m "$NEW_RELEASE_MESSAGE" -m "[skip ci]"
     - git push --tags --no-verify
+
+    - echo "Creating changelog"
+    - scripts/changelog.py > CHANGELOG.md
 
     - echo "Creating artifact"
     - ansible-galaxy collection build

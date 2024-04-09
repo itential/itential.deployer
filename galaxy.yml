@@ -70,12 +70,14 @@ build_ignore:
   - .gitignore
   - .gitlab-ci.yml
   - ansible.cfg
+  - '*.log'
   - '*.bin'
   - '*.whl'
   - '*.tgz'
   - '*.gz'
   - '*.pem'
   - '*.cert'
+  - scripts
 
 # A dict controlling use of manifest directives used in building the collection artifact. The key 'directives' is a
 # list of MANIFEST.in style
