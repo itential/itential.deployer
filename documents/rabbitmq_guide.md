@@ -23,13 +23,13 @@ The `rabbitmq` role performs a base install of RabbitMQ including any OS package
 
 The `rabbitmq_cluster` role performs the steps to run RabbitMQ as a cluster of nodes.  It assumes a cluster of 3 and that the first host defined in the inventory will be used as the primary. It will modify the RabbitMQ config file to enable the cluster. It will write the hostname to each RabbitMQ node’s host file (RabbitMQ clustering requires DNS resolution). It creates the required Erlang cookie used by the RabbitMQ nodes to join a cluster. It invokes each RabbitMQ node to join the cluster. It enables queue mirroring. It will restart the rabbitmq-server service when complete.
 
-More info on rabbit cluster: https://www.rabbitmq.com/clustering.html 
+More info on rabbit cluster: https://www.rabbitmq.com/clustering.html
 
 ## RabbitMQ SSL Role
 
 The `rabbitmq_ssl` performs the steps to require TLS when communicating with the RabbitMQ server. It uploads the certificates to the correct location. It is NOT responsible for making the certificates. It will make a number of edits to the RabbitMQ config to enable TLS. It will restart the rabbitmq-server service when complete.
 
-More info on rabbit TLS: https://www.rabbitmq.com/ssl.html 
+More info on rabbit TLS: https://www.rabbitmq.com/ssl.html
 
 # Variables
 
@@ -44,6 +44,7 @@ The variables in this section are configured in the inventory in the `all` group
 | Variable | Group | Type | Description | Default Value | Required?
 | :------- | :---- | :--- | :---------- | :------------ | :--------
 | `iap_release` | `all` | Fixed-point | Designates the IAP major version. | N/A | Yes
+| `rabbit_svc_url` | `all` | String | This variable defines the rabbit service url to use when connecting to an externally provided RabbitMQ cluster. It is intended to be used when the architecture demands that rabbit be hosted elsewhere such as when using AmazonMQ or if the demands of an organization require some other external rabbit solution, like a shared service. | N/A | No
 
 The `iap_release` must be defined in the inventory.  This variable, along with the OS major version, is used to determine the static variables.
 
