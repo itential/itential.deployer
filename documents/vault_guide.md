@@ -89,10 +89,10 @@ all:
 
 # Running the Playbook
 
-To execute all Vault roles, run the `vault.yml` playbook:
+To execute all Vault roles, run the `vault` playbook:
 
 ```
-ansible-playbook vault.yml -i <inventory>
+ansible-playbook itential.deployer.vault -i <inventory>
 ```
 
 You can also run select Vault roles by using the following tags:

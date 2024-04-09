@@ -157,62 +157,62 @@ In offline mode, the install playbooks will use the packages downloaded to the c
 | Variable                              | Group | Type    | Description                                      | Default |
 | :------------------------------------ | :---- | :------ | :----------------------------------------------- | :------ |
 | `offline_install`                     | `all` | Boolean | Flag to enable offline install mode.             | N/A |
-| `itential_packages_path`              | `all` | String  | Path appended to the root directory.             | `"itential_packages/{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"` |
-| `rpms_path`                           | `all` | String  | RPMs path.                                       | `"{{ packages_path }}/rpms"` |
-| `wheels_path`                         | `all` | String  | Wheels path.                                     | `"{{ packages_path }}/wheels"` |
-| `archives_path`                       | `all` | String  | Archives path.                                   | `"{{ packages_path }}/archives"` |
-| `adapters_path`                       | `all` | String  | Adapters path.                                   | `"{{ packages_path }}/adapters"` |
-| `packages_download_root_control_node` | `all` | String  | Root download directory on the control node.     | `"{{ playbook_dir }}/files"` |
-| `packages_download_dir_control_node`  | `all` | String  | Download directory on the control node.          | `"{{ packages_download_root_control_node }}/{{ packages_path }}"` |
-| `rpms_download_dir_control_node`      | `all` | String  | RPMs download directory on the control node.     | `"{{ packages_download_dir_control_node }}/rpms"` |
-| `wheels_download_dir_control_node`    | `all` | String  | Wheels download directory on the control node.   | `"{{ packages_download_dir_control_node }}/wheels"`  |
-| `archives_download_dir_control_node`  | `all` | String  | Archives download directory on the control node. | `"{{ packages_download_dir_control_node }}/archives"` |
-| `adapters_download_dir_control_node`  | `all` | String  | Adapters download directory on the control node. | `"{{ packages_download_dir_control_node }}/adapters"` |
+| `itential_packages_path`              | `all` | String  | Path appended to the root directory.             | `itential_packages/{{ ansible_distribution }}_{{ ansible_distribution_major_version }}` |
+| `rpms_path`                           | `all` | String  | RPMs path.                                       | `{{ packages_path }}/rpms` |
+| `wheels_path`                         | `all` | String  | Wheels path.                                     | `{{ packages_path }}/wheels` |
+| `archives_path`                       | `all` | String  | Archives path.                                   | `{{ packages_path }}/archives` |
+| `adapters_path`                       | `all` | String  | Adapters path.                                   | `{{ packages_path }}/adapters` |
+| `packages_download_root_control_node` | `all` | String  | Root download directory on the control node.     | `{{ playbook_dir }}/files` |
+| `packages_download_dir_control_node`  | `all` | String  | Download directory on the control node.          | `{{ packages_download_root_control_node }}/{{ packages_path }}` |
+| `rpms_download_dir_control_node`      | `all` | String  | RPMs download directory on the control node.     | `{{ packages_download_dir_control_node }}/rpms` |
+| `wheels_download_dir_control_node`    | `all` | String  | Wheels download directory on the control node.   | `{{ packages_download_dir_control_node }}/wheels`  |
+| `archives_download_dir_control_node`  | `all` | String  | Archives download directory on the control node. | `{{ packages_download_dir_control_node }}/archives` |
+| `adapters_download_dir_control_node`  | `all` | String  | Adapters download directory on the control node. | `{{ packages_download_dir_control_node }}/adapters` |
 | `packages_download_root_target_node`  | `all` | String  | Download directory on the target node.           | `/var/tmp` |
-| `packages_download_dir_target_node`   | `all` | String  | Root download directory on the target nodes.     | `"{{ packages_download_root_target_node }}/{{ packages_path }}"` |
-| `rpms_download_dir_target_node`       | `all` | String  | RPMs download directory on the target nodes.     | `"{{ packages_download_dir_target_node }}/rpms"` |
-| `wheels_download_dir_target_node`     | `all` | String  | Wheels download directory on the target nodes.   | `"{{ packages_download_dir_target_node }}/wheels"` |
-| `archives_download_dir_target_node`   | `all` | String  | Archives download directory on the target node.  | `"{{ packages_download_dir_target_node }}/archives"` |
-| `adapters_download_dir_target_node`   | `all` | String  | Adapters download directory on the target nodes. | `"{{ packages_download_dir_target_node }}/adapters"` |
+| `packages_download_dir_target_node`   | `all` | String  | Root download directory on the target nodes.     | `{{ packages_download_root_target_node }}/{{ packages_path }}` |
+| `rpms_download_dir_target_node`       | `all` | String  | RPMs download directory on the target nodes.     | `{{ packages_download_dir_target_node }}/rpms` |
+| `wheels_download_dir_target_node`     | `all` | String  | Wheels download directory on the target nodes.   | `{{ packages_download_dir_target_node }}/wheels` |
+| `archives_download_dir_target_node`   | `all` | String  | Archives download directory on the target node.  | `{{ packages_download_dir_target_node }}/archives` |
+| `adapters_download_dir_target_node`   | `all` | String  | Adapters download directory on the target nodes. | `{{ packages_download_dir_target_node }}/adapters` |
 
 ### IAP
 
 | Variable            | Group      | Type   | Description        | Default |
 | :------------------ | :--------- | :----- | :----------------- | :------ |
-| `iap_packages_path` | `platform` | String | IAP packages path. | `"{{ itential_packages_path }}/{{ iap_release }}/iap"` |
+| `iap_packages_path` | `platform` | String | IAP packages path. | `{{ itential_packages_path }}/{{ iap_release }}/iap` |
 
 ### IAG
 
 | Variable            | Group     | Type   | Description        | Default |
 | :------------------ | :-------- | :------| :----------------- | :------ |
-| `iag_packages_path` | `gateway` | String | IAG packages path. | `"{{ itential_packages_path }}/{{ iag_release }}/iag"` |
+| `iag_packages_path` | `gateway` | String | IAG packages path. | `{{ itential_packages_path }}/{{ iag_release }}/iag` |
 
 ### MongoDB
 
 | Variable                | Group     | Type   | Description            | Default |
 | :---------------------- | :-------- | :----- | :--------------------- | :------ |
-| `mongodb_packages_path` | `mongodb` | String | MongoDB packages path. | `"{{ itential_packages_path }}/{{ iap_release }}/mongodb"` |
+| `mongodb_packages_path` | `mongodb` | String | MongoDB packages path. | `{{ itential_packages_path }}/{{ iap_release }}/mongodb` |
 
 ### OS
 
 | Variable           | Group | Type   | Description       | Default |
 | :----------------- | :---- | :----- | :---------------- | :------ |
-| `os_packages_path` | `all` | String | OS packages path. | `"{{ itential_packages_path }}/{{ iap_release }}/os"` |
+| `os_packages_path` | `all` | String | OS packages path. | `{{ itential_packages_path }}/{{ iap_release }}/os` |
 
 ### RabbitMQ
 
 | Variable                 | Group | Type   | Description             | Default |
 | :----------------------- | :---- | :----- | :---------------------- | :------ |
-| `rabbitmq_packages_path` | `all` | String | RabbitMQ packages path. | `"{{ itential_packages_path }}/{{ iap_release }}/rabbitmq"` |
+| `rabbitmq_packages_path` | `all` | String | RabbitMQ packages path. | `{{ itential_packages_path }}/{{ iap_release }}/rabbitmq` |
 
 ### Redis
 
 | Variable              | Group | Type   | Description          | Default |
 | :-------------------- | :---- | :----- | :------------------- | :------ |
-| `redis_packages_path` | `all` | String | Redis packages path. | `"{{ itential_packages_path }}/{{ iap_release }}/redis"` |
+| `redis_packages_path` | `all` | String | Redis packages path. | `{{ itential_packages_path }}/{{ iap_release }}/redis` |
 
 ### Vault
 
 | Variable              | Group | Type   | Description          | Default |
 | :-------------------- | :---- | :----- | :------------------- | :------ |
-| `vault_packages_path` | `all` | String | Vault packages path. | `"{{ itential_packages_path }}/{{ iap_release }}/vault"` |
+| `vault_packages_path` | `all` | String | Vault packages path. | `{{ itential_packages_path }}/{{ iap_release }}/vault` |

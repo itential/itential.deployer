@@ -47,7 +47,7 @@ all:
 
 ## Run Patch IAP Playbook
 
-Finally, run the `itential.deployer.patch_iap` playbook.
+Finally, run the `patch_iap` playbook.
 
 ```bash
 $ ansible-playbook itential.deployer.patch_iap -i <inventory>

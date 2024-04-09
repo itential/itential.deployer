@@ -181,10 +181,10 @@ all:
 
 # Running the Playbook
 
-To execute all RabbitMQ roles, run the `rabbitmq.yml` playbook:
+To execute all RabbitMQ roles, run the `rabbitmq` playbook:
 
 ```
-ansible-playbook rabbitmq.yml -i <inventory>
+ansible-playbook itential.deployer.rabbitmq -i <inventory>
 ```
 
 You can also run select RabbitMQ roles by using the following tags:

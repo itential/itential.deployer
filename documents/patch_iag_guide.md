@@ -42,7 +42,7 @@ all:
 
 ## Run Patch IAG Playbook
 
-Finally, run the `itential.deployer.patch_iag` playbook.
+Finally, run the `patch_iag` playbook.
 
 ```bash
 $ ansible-playbook itential.deployer.patch_iag -i <inventory>
