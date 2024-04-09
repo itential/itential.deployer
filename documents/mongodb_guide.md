@@ -5,7 +5,7 @@ The playbook and roles in this section install and configure MongoDB for the Ite
 * `mongodb` – Installs MongoDB and performs a base configuration.
 * `mongodb_auth` – Configures MongoDB authentication.
 * `mongodb_replication` – Configures MongoDB as replica set.
-* `mongodb_tls` - Configures MongoDB SSL. 
+* `mongodb_tls` - Configures MongoDB SSL.
 
 # Roles
 
@@ -43,6 +43,8 @@ The variables in this section are configured in the inventory in the `all` group
 | :------- | :---- | :--- | :---------- | :------------ | :---------
 | `iap_release` | `all` | Fixed-point | Designates the IAP major version. | N/A | Yes
 | `mongo_root_ca_file_source` | `all` | String | The name of the MongoDB Root CA file.| N/A | No
+| `mongobdb_svc_url_itential` | `all` | String | This variable defines the mongodb connection string to use when connecting to the "itential" database. It is intended to be used when the architecture demands that mongo be hosted elsewhere such as when using Mongo Atlas or if the demands of an organization require some other external mongo solution, like a shared service. | N/A | No
+| `mongobdb_svc_url_localaaa` | `all` | String | This variable defines the mongodb connection string to use when connecting to the "LocalAAA" database. It is intended to be used when the architecture demands that mongo be hosted elsewhere such as when using Mongo Atlas or if the demands of an organization require some other external mongo solution, like a shared service. | N/A | No
 
 The `iap_release` must be defined in the inventory.  This variable, along with the OS major version, is used to determine the static variables.
 

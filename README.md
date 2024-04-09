@@ -91,6 +91,10 @@ The ideal ASA architecture will appear as two HA2 stacks except for MongoDB. One
 
 Itential recommends applying sound security principles to ALL environments. In the ASA, this would include configuring all components to use authentication and use SSL when communicating with components on other VMs and across clusters.
 
+### Alternative Architectures
+
+Its not unusual to "outsource" the management of the dependencies (Redis, RabbitMQ, MongoDB) to either other internal teams or to external vendors such as AWS. Itential provides a way to leverage these solutions simply by configuring them accordingly and as long as these solutions comply with the basic requirements. For example, if Elasticache is chosen to fulfill the Redis needs then it must use the "Redis" version and not "Memcache". Likewise for MongoDB, Mongo Atlas is supported but not DynamoDB which is not the same. See the examples for how to implement.
+
 <!-- ### Blue/Green Architecture
 This architecture requires two separate and complete Itential stacks. There is no constraint from a datacenter boundary, these stacks can exist in separate or the same datacenter. Control of the active environment is driven by the GTM load balancer. No configurations are shared between the stacks. No components are shared between the stacks. Any changes made to one will have zero impact on the other. The databases will need to be kept in sync so that when the inactive is made active it will have all the data. Switching from the active to inactive will require all users to login again.
 
@@ -698,6 +702,54 @@ all:
         vars:
             iag_release: 2023.1
             iag_whl_file: automation_gateway-3.227.0+2023.1.9-py3-none-any.whl
+```
+
+### Highly Available Architecture Inventory leveraging external dependencies
+
+Fault tolerant architecture using external dependencies.
+
+_Example: Highly Available Architecture Inventory File using external dependencies (YAML Format)_
+
+```yaml
+all:
+  vars:
+    iap_release: 2023.1
+    # Instructs deployer to use external dependencies.
+    # The replication for each of these should be set to false but the auth and
+    # tls properties may be utilised to suit your needs.
+    redis_replication: false
+    redis_auth: true
+    redis_tls: true
+    redis_svc_url: <The-FQDN-to-the-Redis-service>
+    redis_user: itential
+    redis_password: <The-Redis-password>
+    rabbitmq_cluster: false
+    rabbitmq_ssl: false
+    rabbit_user: itential
+    rabbit_password: <The-RabbitMQ-password>
+    rabbit_svc_url: <The-FQDN-to-the-RabbitMQ>
+    mongodb_replication: false
+    mongodb_auth: false
+    mongodb_tls: false
+    mongobdb_svc_url_itential: <The-connection-string-for-the-itential-database>
+    mongobdb_svc_url_localaaa: <The-connection-string-for-the-localaaa-database>
+  children:
+    redis:
+    rabbitmq:
+    mongodb:
+    platform:
+      hosts:
+        automation-platform1.host.com:
+        automation-platform2.host.com:
+      vars:
+        iap_bin_file: itential-premium_2023.1.1.linux.x86_64.bin
+
+    gateway:
+      hosts:
+        automation-gateway1.host.com:
+      vars:
+        iag_release: 2023.1
+        iag_whl_file: automation_gateway-3.227.0+2023.1.9-py3-none-any.whl
 ```
 
 ### Active/Standby Architecture Inventory
