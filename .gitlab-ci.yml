@@ -20,6 +20,9 @@ build-job:
     - git config --global user.name "GitLab CI/CD"
 
   script:
+    - echo "Fetching all tags"
+    - git fetch --all --tags
+
     - echo "Determining new release"
     - NEW_RELEASE=$(grep "^version" galaxy.yml | cut -d " " -f 2)
     - echo $NEW_RELEASE
