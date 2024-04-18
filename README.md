@@ -165,6 +165,7 @@ In general the Deployer will install packages using the standard YUM/DNF reposit
 | IAP | RabbitMQ | 5672/5671 | IAP connects to Rabbitmq for interprocess communication. 5671 is used for SSL if enabled. |
 | IAP | Redis | 6379 | IAP connects to Redis for session tokens |
 | IAP | Redis | 26379 | IAP connects to Redis Sentinel in a HA Redis set up |
+| IAP | IAG | 8083 | IAP connects to IAG |
 | MongoDB | MongoDB | 27017 | Each MongoDB talks to the other MongoDBs for replication of the database |
 | RabbitMQ | RabbitMQ | 5672/5671 | Each Rabbit talks to the other Rabbits for HA resiliency. 5671 is used for SSL if enabled. |
 | RabbitMQ | RabbitMQ | 25672 | Each Rabbit talks to the other Rabbits to form a cluster |
