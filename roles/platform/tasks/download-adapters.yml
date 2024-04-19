@@ -27,7 +27,7 @@
     - itential_adapters | length > 0
   block:
     - name: Download opensource adapters
-      ansible.builtin.import_role:
+      ansible.builtin.include_role:
         name: offline
         tasks_from: download-adapters
       vars:
@@ -38,14 +38,14 @@
       ansible.builtin.find:
         paths: "{{ adapters_download_dir_target_node }}/opensource"
         patterns: "*.tgz"
-      register: opensource_adapters
+      register: found_opensource_adapters
 
     - name: Copy opensource adapters to control node
       ansible.builtin.fetch:
         src: "{{ item.path }}"
         dest: "{{ adapters_download_dir_control_node }}/opensource/"
         flat: true
-      with_items: "{{ opensource_adapters.files }}"
+      with_items: "{{ found_opensource_adapters.files }}"
 
 - name: Download and fetch custom adapters
   when:
@@ -54,7 +54,7 @@
     - custom_adapters | length > 0
   block:
     - name: Download custom adapters
-      ansible.builtin.import_role:
+      ansible.builtin.include_role:
         name: offline
         tasks_from: download-adapters
       vars:
@@ -65,14 +65,14 @@
       ansible.builtin.find:
         paths: "{{ adapters_download_dir_target_node }}/custom"
         patterns: "*.tgz"
-      register: custom_adapters
+      register: found_custom_adapters
 
     - name: Copy custom adapters to control node
       ansible.builtin.fetch:
         src: "{{ item.path }}"
         dest: "{{ adapters_download_dir_control_node }}/custom/"
         flat: true
-      with_items: "{{ custom_adapters.files }}"
+      with_items: "{{ found_custom_adapters.files }}"
 
 - name: Uninstall rpms required for download
   ansible.builtin.yum:
