@@ -12,6 +12,7 @@
 - name: Create temporary working directory
   ansible.builtin.tempfile:
     state: directory
+  become_user: "{{ iag_user }}"
   register: iag_pkgs_temp_dir
 
 - name: Setup Python virtual environment
@@ -25,12 +26,14 @@
     name: "{{ iag_python_dependencies }}"
     state: present
     virtualenv: "{{ iag_pkgs_temp_dir.path }}/offline_install"
+  become_user: "{{ iag_user }}"
 
 - name: Install Ansible
   ansible.builtin.pip:
     name: "{{ iag_ansible_version }}"
     state: present
     virtualenv: "{{ iag_pkgs_temp_dir.path }}/offline_install"
+  become_user: "{{ iag_user }}"
   when: iag_enable_ansible | bool
 
 - name: Copy IAG wheel file to target node
@@ -43,12 +46,14 @@
   ansible.builtin.pip:
     name: "{{ iag_pkgs_temp_dir.path }}/{{ iag_whl_file }}"
     virtualenv: "{{ iag_pkgs_temp_dir.path }}/offline_install"
+  become_user: "{{ iag_user }}"
 
 - name: Uninstall IAG
   ansible.builtin.pip:
     name: "{{ iag_pkgs_temp_dir.path }}/{{ iag_whl_file }}"
     state: absent
     virtualenv: "{{ iag_pkgs_temp_dir.path }}/offline_install"
+  become_user: "{{ iag_user }}"
 
 - name: Create requirements file
   ansible.builtin.shell:

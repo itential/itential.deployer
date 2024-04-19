@@ -9,6 +9,7 @@
     - python_venv is not defined
 
 - name: Install Python dependencies (online)
+  become_user: "{{ python_install_user }}"
   when: not offline_install
   tags: install_python_dependencies
   block:
@@ -35,6 +36,8 @@
       when:
         - pip_executable is defined
         - python_venv is not defined
+      vars:
+        ansible_remote_tmp: /tmp
       block:
         - name: Install base Python dependencies using pip executable (online)
           ansible.builtin.pip:

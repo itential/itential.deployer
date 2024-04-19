@@ -6,31 +6,34 @@
     msg: "wheels_path is not set"
   when: not wheels_path
 
-- name: Create temporary working directory
-  ansible.builtin.tempfile:
-    state: directory
-  register: install_wheels_temp_dir
+- name: Install wheels archives
+  become_user: "{{ python_install_user }}"
+  block:
+    - name: Create temporary working directory
+      ansible.builtin.tempfile:
+        state: directory
+      register: install_wheels_temp_dir
 
-- name: Copy wheel archives to target node
-  ansible.builtin.copy:
-    src: "{{ item }}"
-    dest: "{{ install_wheels_temp_dir.path }}/{{ item | basename }}"
-    mode: '0644'
-  with_fileglob: "{{ wheels_path }}/*.tar.gz"
+    - name: Copy wheel archives to target node
+      ansible.builtin.copy:
+        src: "{{ item }}"
+        dest: "{{ install_wheels_temp_dir.path }}/{{ item | basename }}"
+        mode: '0644'
+      with_fileglob: "{{ wheels_path }}/*.tar.gz"
 
-- name: Find wheel archives on target node
-  ansible.builtin.find:
-    paths: "{{ install_wheels_temp_dir.path }}"
-    patterns: "*.tar.gz"
-  register: wheel_archive_list
+    - name: Find wheel archives on target node
+      ansible.builtin.find:
+        paths: "{{ install_wheels_temp_dir.path }}"
+        patterns: "*.tar.gz"
+      register: wheel_archive_list
 
-- name: Install wheel archive
-  ansible.builtin.include_tasks: "install-wheels-archive.yaml"
-  loop: "{{ wheel_archive_list.files }}"
-  loop_control:
-    loop_var: wheels_archive
+    - name: Install wheel archive
+      ansible.builtin.include_tasks: "install-wheels-archive.yaml"
+      loop: "{{ wheel_archive_list.files }}"
+      loop_control:
+        loop_var: wheels_archive
 
-- name: Remove temporary working directory
-  ansible.builtin.file:
-    path: "{{ install_wheels_temp_dir.path }}"
-    state: absent
+    - name: Remove temporary working directory
+      ansible.builtin.file:
+        path: "{{ install_wheels_temp_dir.path }}"
+        state: absent

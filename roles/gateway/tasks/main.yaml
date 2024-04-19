@@ -18,11 +18,6 @@
     name: os
   tags: install_base_os_packages
 
-- name: Create temporary working directory
-  ansible.builtin.tempfile:
-    state: directory
-  register: workingdir
-
 - name: Install Gateway packages (online)
   ansible.builtin.yum:
     name: "{{ item }}"
@@ -49,6 +44,12 @@
     groups: wheel
     generate_ssh_key: true
     state: present
+
+- name: Create temporary working directory
+  ansible.builtin.tempfile:
+    state: directory
+  become_user: "{{ iag_user }}"
+  register: workingdir
 
 - name: Create working directories
   ansible.builtin.file:
@@ -106,7 +107,8 @@
     - name: Install Ansible into the python virtual environment
       ansible.builtin.pip:
         name: "{{ iag_ansible_version }}"
-        virtualenv: "{{ iag_install_dir }}/venv"
+        virtualenv: "{{ python_venv }}"
+      become_user: "{{ iag_user }}"
       when: not offline_install
 
     - name: Create Ansible config file
@@ -156,7 +158,7 @@
 
 - name: Check if Automation Gateway is already installed
   ansible.builtin.stat:
-    path: "{{ iag_install_dir }}/venv/automation-gateway"
+    path: "{{ python_venv }}/automation-gateway"
   register: iag_installed
 
 - name: Install Automation Gateway
@@ -171,23 +173,8 @@
     - name: Install IAG
       ansible.builtin.pip:
         name: "{{ workingdir.path }}/{{ iag_whl_file | basename }}"
-        virtualenv: "{{ iag_install_dir }}/venv"
-
-- name: Set ownership/permissions and create properties.yaml
-  when: not iag_installed.stat.exists
-  block:
-    # Using chown and chmod is a faster way to enforce the file ownership and
-    # permissions. The file module in ansible checks each and every file/dir
-    # in the tree, 'chown -R ' does not, it just sets it.
-    - name: Set appropriate ownership on all gateway files
-      ansible.builtin.command:
-        cmd: "chown -R {{ iag_user }}:{{ iag_group }} {{ iag_install_dir }}/venv"
-      changed_when: true
-
-    - name: Set appropriate permissions on all gateway files
-      ansible.builtin.command:
-        cmd: "chmod -R 775 {{ iag_install_dir }}/venv"
-      changed_when: true
+        virtualenv: "{{ python_venv }}"
+      become_user: "{{ iag_user }}"
 
     - name: Create properties.yaml using template based on the version
       ansible.builtin.template:

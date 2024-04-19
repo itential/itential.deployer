@@ -9,16 +9,30 @@
 - name: Setup python virtual environment
   ansible.builtin.command:
     chdir: "{{ iag_install_dir }}"
-    cmd: "{{ python_executable }} -m venv venv"
+    cmd: "{{ python_executable }} -m venv {{ iag_venv_name }}"
+  become_user: "{{ iag_user }}"
   changed_when: true
 
-- name: Include the virtual environment in default shell
-  ansible.builtin.shell:
-    cmd: echo source {{ iag_install_dir }}/venv/bin/activate > /etc/profile.d/venv.sh
-  changed_when: true
+- name: Check if virtual environment is defaulted in shell for user {{ iag_user }}
+  lineinfile:
+    state: absent
+    path: "/home/{{ iag_user }}/.bash_profile"
+    regexp: "source {{ python_venv }}/bin/activate"
+  check_mode: true
+  changed_when: false
+  register: check
+
+- name: Include the virtual environment in default shell for user {{ iag_user }}
+  lineinfile:
+    state: present
+    path: "/home/{{ iag_user }}/.bash_profile"
+    line: "source {{ python_venv }}/bin/activate"
+  when: check.found == 0
 
 - name: Install Python dependencies
   ansible.builtin.include_role:
     name: python
     tasks_from: install-dependencies
+  vars:
+    python_install_user: "{{ iag_user }}"
   tags: install_python

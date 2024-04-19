@@ -17,6 +17,11 @@
   ansible.builtin.include_tasks:
     file: determine-release-vars.yml
 
+- name: Create itential user
+  ansible.builtin.include_tasks:
+    file: create-itential-user.yml
+  tags: create_itential_user
+
 - name: Download OS packages
   ansible.builtin.include_tasks:
     file: download-packages-os.yml
@@ -36,6 +41,7 @@
 - name: Download Adapter packages
   ansible.builtin.include_tasks:
     file: download-adapters.yml
+  tags: download_adapters
   when: itential_adapters is defined or custom_adapters is defined
 
 - name: Copy rpms to control node

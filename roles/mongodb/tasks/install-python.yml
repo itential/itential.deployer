@@ -17,4 +17,6 @@
   ansible.builtin.include_role:
     name: python
     tasks_from: install-dependencies
+  vars:
+    python_install_user: "{{ ansible_user }}"
   tags: install_python

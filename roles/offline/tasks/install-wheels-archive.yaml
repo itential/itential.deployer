@@ -6,25 +6,28 @@
     msg: "wheels_archive is not set"
   when: not wheels_archive
 
-- name: Create temporary working directory
-  ansible.builtin.tempfile:
-    state: directory
-  register: install_wheel_archive_temp_dir
+- name: Install wheels archive
+  become_user: "{{ python_install_user }}"
+  block:
+    - name: Create temporary working directory
+      ansible.builtin.tempfile:
+        state: directory
+      register: install_wheel_archive_temp_dir
 
-- name: Extract wheel archive
-  ansible.builtin.unarchive:
-    src: "{{ wheels_archive.path }}"
-    dest: "{{ install_wheel_archive_temp_dir.path }}"
-    remote_src: true
+    - name: Extract wheel archive
+      ansible.builtin.unarchive:
+        src: "{{ wheels_archive.path }}"
+        dest: "{{ install_wheel_archive_temp_dir.path }}"
+        remote_src: true
 
-- name: Install wheels using requirements file
-  ansible.builtin.pip:
-    executable: "{{ virtual_env is defined | ternary(omit, pip3) }}"
-    virtualenv: "{{ virtual_env is defined | ternary(virtual_env, omit) }}"
-    requirements: "{{ install_wheel_archive_temp_dir.path }}/requirements.txt"
-    extra_args: "--no-index --find-links=file:///{{ install_wheel_archive_temp_dir.path }}"
+    - name: Install wheels using requirements file
+      ansible.builtin.pip:
+        executable: "{{ virtual_env is defined | ternary(omit, pip3) }}"
+        virtualenv: "{{ virtual_env is defined | ternary(virtual_env, omit) }}"
+        requirements: "{{ install_wheel_archive_temp_dir.path }}/requirements.txt"
+        extra_args: "--no-index --find-links=file:///{{ install_wheel_archive_temp_dir.path }}"
 
-- name: Remove temporary working directory
-  ansible.builtin.file:
-    path: "{{ install_wheel_archive_temp_dir.path }}"
-    state: absent
+    - name: Remove temporary working directory
+      ansible.builtin.file:
+        path: "{{ install_wheel_archive_temp_dir.path }}"
+        state: absent

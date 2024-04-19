@@ -1,13 +1,16 @@
 # Copyright (c) 2022, Itential, LLC
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 
-- name: Validate vars
-  ansible.builtin.include_tasks:
-    file: validate-vars.yml
+- name: Handle release vars
+  tags: always
+  block:
+    - name: Validate vars
+      ansible.builtin.include_tasks:
+        file: validate-vars.yml
 
-- name: Determine release vars
-  ansible.builtin.include_tasks:
-    file: determine-release-vars.yml
+    - name: Determine release vars
+      ansible.builtin.include_tasks:
+        file: determine-release-vars.yml
 
 - name: Install base OS packages
   ansible.builtin.include_role:
@@ -31,14 +34,15 @@
     file: install-nodejs.yml
   tags: install_nodejs
 
+- name: Create itential user
+  ansible.builtin.include_tasks:
+    file: create-itential-user.yml
+  tags: create_itential_user
+
 - name: Install Python
   ansible.builtin.include_tasks:
     file: install-python.yml
   tags: install_python
-
-- name: Create itential user
-  ansible.builtin.include_tasks:
-    file: create-itential-user.yml
 
 - name: Create itential directories
   ansible.builtin.file:

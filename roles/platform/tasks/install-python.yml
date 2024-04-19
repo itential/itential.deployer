@@ -1,19 +1,21 @@
 # Copyright (c) 2022, Itential, LLC
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Install Python
-  ansible.builtin.include_role:
-    name: python
+- name: Installl Python
   tags: install_python
+  block:
+    - name: Install Python
+      ansible.builtin.include_role:
+        name: python
 
-- name: Create python3 symlinks
-  ansible.builtin.include_role:
-    name: python
-    tasks_from: create-symlinks
-  tags: install_python
+    - name: Create python3 symlinks
+      ansible.builtin.include_role:
+        name: python
+        tasks_from: create-symlinks
 
-- name: Install Python dependencies
-  ansible.builtin.include_role:
-    name: python
-    tasks_from: install-dependencies
-  tags: install_python
+    - name: Install Python dependencies
+      ansible.builtin.include_role:
+        name: python
+        tasks_from: install-dependencies
+      vars:
+        python_install_user: "{{ iap_user }}"
