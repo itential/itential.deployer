@@ -17,13 +17,13 @@ The `mongodb` role performs a base install of MongoDB including any OS packages 
 
 The `mongodb_auth` role is designed to enable authorization on the MongoDB.  It will modify the MongoDB config file to enable authentication for a single database or a replica set.  When MongoDB is configured as a replica set it requires a key for the members of the replica set to talk to one another.  This key file is uploaded to the appropriate location.  It will restart the mongod service when complete.
 
-More info on the key file: https://www.mongodb.com/docs/v4.2/tutorial/deploy-replica-set-with-keyfile-access-control/
+More info on the key file: https://www.mongodb.com/docs/manual/tutorial/deploy-replica-set-with-keyfile-access-control/
 
 ## MongoDB Replication
 
 The `mongodb_replication` role is responsible for configuring MongoDB as a replica set.  It uses the first host defined in the `mongodb` group in the inventory as the initial primary.  It updates the MongoDB configuration file with the replica set name and enables replication.  It initializes the replica set on the initial primary and then joins the remaining MongoDB nodes to the replica set. It will restart the mongod service when complete.
 
-More info on replication: https://www.mongodb.com/docs/v4.2/replication/
+More info on replication: https://www.mongodb.com/docs/manual/replication/
 
 ## MongoDB TLS
 
