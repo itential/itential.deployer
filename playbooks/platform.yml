@@ -6,6 +6,7 @@
 
 - name: Install and configure RabbitMQ
   import_playbook: itential.deployer.rabbitmq
+  when: iap_release < 2023.2
 
 - name: Install and configure MongoDB
   import_playbook: itential.deployer.mongodb
