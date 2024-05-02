@@ -19,6 +19,15 @@
     1. [Online Installation](#online-installation)
     2. [Offline Installation](#offline-installation)
 5. [Running the Deployer](#running-the-deployer)
+    1. [Confirm Requirements](#confirm-requirements)
+    2. [Determine the Working and Deployer Directories](#determine-the-working-and-deployer-directories)
+    3. [Create the Files and Inventories Directories](#create-the-files-and-inventories-directories)
+    4. [Download Installation Artifacts](#download-installation-artifacts)
+    5. [Copy Installation Artifacts into the Files Directory](#copy-installation-artifacts-into-the-files-directory)
+    6. [Create a Symlink to the Files Directory](#create-a-symlink-to-the-files-directory)
+    7. [Create the Inventory File](#create-the-inventory-file)
+    8. [Run the Itential Deployer](#run-the-itential-deployer)
+    9. [Confirm Successful Installation](#confirm-successful-installation)
 6. [Sample Inventories](#sample-inventories)
     1. [All-in-one Architecture Inventory](#all-in-one-architecture-inventory)
     2. [Minimal Architecture Inventory](#minimal-architecture-inventory)
@@ -33,7 +42,7 @@
     6. [IAG](#iag)
 8. [Patching IAP and IAG](#patching-iap-and-iag)
 9. [Running the Deployer in Offline Mode](#running-the-deployer-in-offline-mode)
-10. [Appendix A: Definition of "Highly Available" dependencies](#appendix-a-definition-of-highly-available-dependencies)
+10. [Appendix A: Definition of "Highly Available" Dependencies](#appendix-a-definition-of-highly-available-dependencies)
 
 ## Overview
 
@@ -330,7 +339,7 @@ Some of the following collections may already be installed on your control node.
 
 Once you have have installed the Itential Deployer, run it to begin deploying Itential to your environment. This section details a basic deployment using required variables only.
 
-### Step 0: Confirm requirements & gather host information
+### Confirm Requirements
 
 Before running the deployer we must ensure the following:
 
@@ -343,16 +352,13 @@ Before running the deployer we must ensure the following:
 **&#9432; Note:**
 Although the Itential Deployer can be used to configure nodes that use any supported operating system, it is optimized for RHEL 8 and 9.
 
-### Step 1: Download Installation Artifacts
+### Determine the Working and Deployer Directories
 
-Download the IAP binary along with any desired IAP adapters (and, if applicable, the IAG binary) from the [Itential Nexus Repository] to local storage.
+The Itential Deployer will be installed into the user's collection directory.  Because the Deployer collection will be overwritten when it is upgraded, users should not store any inventory files, binaries or artifacts in the Deployer collection directory.  Instead, users should create a working directory to store those files.  
 
-**&#9432; Note:**
-If you are unsure which files should be downloaded for your environment, contact your Itential Professional Services representative.
+The working directory can be any directory on the control node and will be referred to as the `WORKING-DIR` in this guide.  
 
-### Step 2: Copy Installation Artifacts into the Files Directory
-
-First, determine what directory the Itential Deployer is installed to by using the `ansible-galaxy collection list` command. In the following example, the Deployer directory is `/Users/<USER>/.ansible/collections/ansible_collections/itential/deployer`.
+Determine what directory the Itential Deployer is installed to by using the `ansible-galaxy collection list` command. In the following example, the Deployer directory is `/Users/<USER>/.ansible/collections/ansible_collections/itential/deployer`.
 
 _Example: Determining the Deployer Directory_
 
@@ -373,19 +379,46 @@ community.mongodb 1.6.1
 itential.deployer 1.0.0
 ```
 
+The Deployer directory will be referred to as the `DEPLOYER-DIR` in this guide.
+
+### Create the Files and Inventories Directories
+
+The files and inventories directories should be sub-directories of the working directory.  The files directory will contain the Itential binaries and artifacts.  The inventories directory will contain the hosts files.
+
+```base
+% cd <WORKING-DIR>
+% mkdir files inventories
+```
+
+### Download Installation Artifacts
+
+Download the IAP binary along with any desired IAP adapters (and, if applicable, the IAG binary) from the [Itential Nexus Repository] to local storage.
+
+**&#9432; Note:**
+If you are unsure which files should be downloaded for your environment, contact your Itential Professional Services representative.
+
+### Copy Installation Artifacts into the Files Directory
+
 Next, copy the files downloaded in the previous step to the `files` subdirectory.
 
 _Example: Copying to the Files Directory_
 
 ```bash
-cd <DEPLOYER-DIR>
-mkdir files
-cd files
+cd <WORKING-DIR>/files
 cp ~/Downloads/itential-premium_2023.1.1.linux.x86_64.bin .
 cp ~/Downloads/automation_gateway-3.198.19+2023.1.0-py3-none-any.whl .
 ```
 
-### Step 3: Create the Inventory File
+### Create a Symlink to the Files Directory
+
+Navigate to the playbooks directory in the Deployer directory and create a symlink to the files directory in the working directory.
+
+```bash
+cd <DEPLOYER-DIR>/playbooks
+ln -s <WORKING-DIR>/files .
+```
+
+### Create the Inventory File
 
 Using a text editor, create an inventory file that defines your deployment environment. To do this, assign your managed nodes to the relevant groups according to what components you would like to install on them. In the following example:
 
@@ -399,8 +432,9 @@ Itential recommends that all inventories follow the best practices outlined in t
 _Example: Creating the Inventory File_
 
 ```bash
-mkdir -p ~/itential-inventories/dev
-vi ~/itential-inventories/dev/hosts
+cd <WORKING-DIR>
+mkdir -p inventories/dev
+vi inventories/dev/hosts
 ```
 
 </br>
@@ -439,17 +473,18 @@ all:
             iag_whl_file: automation_gateway-3.227.0+2023.1.9-py3-none-any.whl
 ```
 
-### Step 4: Run the Itential Deployer
+### Run the Itential Deployer
 
-Navigate to the Deployer directory and execute the following run command.
+Navigate to the working directory and execute the following run command.
 
 _Example: Running the Itential Deployer_
 
 ```bash
-ansible-playbook itential.deployer.site -i ~/itential-inventories/dev -v
+cd <WORKING-DIR>
+ansible-playbook itential.deployer.site -i inventories/dev -v
 ```
 
-### Step 5: Confirm Successful Installation
+### Confirm Successful Installation
 
 After the Itential Deployer is finished running, perform the following checks on each component to confirm successful installation.
 
@@ -902,7 +937,7 @@ The Deployer supports installations in air-gapped environments.  Refer to the fo
 
 [Offline Installation Guide](documents/offline_install_guide.md)
 
-## Appendix A: Definition of "Highly Available" dependencies
+## Appendix A: Definition of "Highly Available" Dependencies
 
 ### Highly Available MongoDB
 
