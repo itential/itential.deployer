@@ -11,8 +11,8 @@
 
 - name: Check for valid MongoDB release
   ansible.builtin.fail:
-    msg: "missing or invalid mongodb_release_url"
-  when: mongodb_release_url == "UNDEFINED"
+    msg: "missing or invalid mongodb_version"
+  when: mongodb_version == "UNDEFINED"
   tags: always
 
 - name: Install base OS packages
