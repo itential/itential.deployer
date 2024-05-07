@@ -28,8 +28,7 @@ app_python_dependencies:
   - pymongo
   - textfsm==1.1.3
 
-mongodb_release_url: https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/7.0/x86_64/
-mongodb_gpgkey_url: https://www.mongodb.org/static/pgp/server-7.0.asc
+mongodb_version: 7.0
 
 mongodb_tools_packages:
   - mongodb-database-tools
