@@ -10,7 +10,8 @@
 - name: Install any configured opensource adapters
   when:
     - itential_adapters is defined
-    - itential_adapters | length > 0
+    - itential_adapters is iterable
+    - (itential_adapters | default([], true)) | length > 0
   block:
     # Create the @itentialopensource directory if it is missing
     - name: Ensure @itentialopensource directory exists
@@ -26,33 +27,41 @@
     # symlinks.
     - name: Make a list of the adapter names
       ansible.builtin.set_fact:
-        adapter_names: "{{ adapter_names + [item | regex_replace('^.*\\/(.*?)\\.git$', '\\1')] }}"
-      loop: "{{ itential_adapters }}"
+        adapter_names: "{{ adapter_names + [item | basename | split('.') | first ]}}"
+      loop: "{{ itential_adapters | default([], true) }}"
       vars:
         adapter_names: []
 
     - name: Install opensource adapters (online)
       when: not offline_install
       block:
-        # Git clone each of the provided adapters
         - name: Git clone opensource adapters (online)
           ansible.builtin.git:
             repo: "{{ item }}"
             dest: "{{ iap_install_dir }}/current/custom/@itentialopensource/{{ adapter_names[i] }}"
             force: true
-          loop: "{{ itential_adapters }}"
+          loop: "{{ itential_adapters | default([], true) }}"
           loop_control:
             index_var: i
-          when: not offline_install
+          when: (item | basename | split('.') | last) == "git"
 
-        - name: Delete package-lock.json file
+        - name: Unzip opensource adapter archive (online)
+          ansible.builtin.unarchive:
+            src: "{{ item }}"
+            dest: "{{ iap_install_dir }}/current/custom/@itentialopensource"
+          loop: "{{ itential_adapters | default([], true) }}"
+          loop_control:
+            index_var: i
+          when: (item | basename | split('.') | last) == "zip"
+
+        - name: Delete package-lock.json file (online)
           ansible.builtin.file:
             path: "{{ iap_install_dir }}/current/custom/@itentialopensource/{{ item }}/package-lock.json"
             state: absent
           loop: "{{ adapter_names }}"
           when: delete_package_lock_file
 
-        - name: Run npm install
+        - name: Run npm install (online)
           community.general.npm:
             path: "{{ iap_install_dir }}/current/custom/@itentialopensource/{{ item }}"
             ignore_scripts: "{{ npm_ignore_scripts }}"
@@ -109,7 +118,8 @@
 - name: Install any custom applications and/or adapters
   when:
     - custom_adapters is defined
-    - custom_adapters | length > 0
+    - custom_adapters is iterable
+    - (custom_adapters | default([], true)) | length > 0
   block:
     - name: Ensure defined custom directory exists
       ansible.builtin.file:
@@ -132,26 +142,34 @@
     # symlinks.
     - name: Make a list of the custom adapter names
       ansible.builtin.set_fact:
-        custom_names: "{{ custom_names + [item | regex_replace('^.*\\/(.*?)\\.git$', '\\1')] }}"
-      loop: "{{ custom_adapters }}"
+        custom_names: "{{ custom_names + [item | basename | split('.') | first ]}}"
+      loop: "{{ custom_adapters | default([], true) }}"
       vars:
         custom_names: []
 
     - name: Install custom adapters (online)
       when: not offline_install
       block:
-        # Git clone each of the provided adapters
-        - name: Git clone all configured adapters
+        - name: Git clone all custom adapters (online)
           ansible.builtin.git:
             repo: "{{ item }}"
             dest: "{{ iap_install_dir }}/current/custom/{{ custom_location }}/{{ custom_names[i] }}"
             force: true
-          loop: "{{ custom_adapters }}"
+          loop: "{{ custom_adapters | default([], true) }}"
           loop_control:
             index_var: i
-          when: not offline_install
+          when: (item | basename | split('.') | last) == "git"
 
-        - name: Run npm install
+        - name: Unzip custom adapter archive (online)
+          ansible.builtin.unarchive:
+            src: "{{ item }}"
+            dest: "{{ iap_install_dir }}/current/custom/{{ custom_location }}"
+          loop: "{{ custom_adapters | default([], true) }}"
+          loop_control:
+            index_var: i
+          when: (item | basename | split('.') | last) == "zip"
+
+        - name: Run npm install (online)
           community.general.npm:
             path: "{{ iap_install_dir }}/current/custom/{{ custom_location }}/{{ item }}"
           loop: "{{ custom_names }}"
@@ -206,5 +224,7 @@
 - name: Restart IAP
   ansible.builtin.command: /bin/true
   notify: Restart IAP
-  when: (custom_adapters is defined and custom_adapters | length > 0) or (itential_adapters is defined and itential_adapters | length > 0)
+  when: > 
+    (custom_adapters is defined and (custom_adapters | default([], true)) | length > 0) or
+    (itential_adapters is defined and (itential_adapters | default([], true)) | length > 0)
   changed_when: true
