@@ -20,6 +20,13 @@
     repo: "{{ adapter }}"
     dest: "{{ download_dir }}/{{ adapter_name }}"
     force: true
+  when: (adapter | basename | split('.') | last) == "git"
+
+- name: Unzip {{ adapter }}
+  ansible.builtin.unarchive:
+    src: "{{ adapter }}"
+    dest: "{{ download_dir }}"
+  when: (adapter | basename | split('.') | last) == "zip"
 
 - name: Install {{ adapter_name }}
   ansible.builtin.command:
