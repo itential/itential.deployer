@@ -151,6 +151,7 @@
     owner: "{{ mongo_owner}}"
     group: "{{ mongo_group }}"
     mode: "0644"
+  tags: configure_mongo
 
 - name: Configure SELinux
   ansible.builtin.include_tasks:
