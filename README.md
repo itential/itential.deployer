@@ -354,6 +354,11 @@ Although the Itential Deployer can be used to configure nodes that use any suppo
 
 ### Determine the Working and Deployer Directories
 
+Quick examples:
+WORKING_DIR=/Users/<USER>/Desktop/pssup/artifacts/deployer
+DEPLOYER_DIR=/Users/<USER>/Desktop/pssup/repos/itential-deployer
+COLL_DIR=/Users/<USER>/.ansible/collections/ansible_collections/itential/deployer
+
 The Itential Deployer will be installed into the user's collection directory.  Because the Deployer collection will be overwritten when it is upgraded, users should not store any inventory files, binaries or artifacts in the Deployer collection directory.  Instead, users should create a working directory to store those files.  
 
 The working directory can be any directory on the control node and will be referred to as the `WORKING-DIR` in this guide.  
