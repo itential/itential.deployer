@@ -119,6 +119,8 @@ The Itential Deployer is an Ansible project and as such requires running on a co
 
 - **Itential Galaxy Access**: The Itential Deployer is hosted on the Itential Galaxy repository. An account is required to access Itential Galaxy. If you do not have an account, contact your Itential Professional Services representative.
 - **Python Version**: The control node must be running Python 3.9 or later.
+- **Required Python Modules**: The following Python modules are required on the **Ansible Control Node** for the deployer to run.
+  - jmespath
 - **Ansible Version**: The control node must be running Ansible version 2.11 or later. To see which Ansible version is currently installed, execute the `ansible --version` command as shown below.
 
   _Example: Confirming Ansible Version_
