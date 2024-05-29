@@ -2,6 +2,10 @@
 
 The Itential Deployer supports patch upgrades for IAP.  These are also referred to as monthly releases.  For example, if IAP version 2023.1.1 is currently installed, it could be upgraded to any 2023.1.X version.  The patch upgrade playbook **DOES NOT** support major upgrades.  For major upgrades, please work with your Itential Professional Services representative.
 
+# Requirements
+
+In order to run the Patch IAP playbook, the `jmespath` Python module must be installed on the **Ansible Control Node**.
+
 # Procedure
 
 ## Download the IAP Artifact
