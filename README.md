@@ -87,7 +87,7 @@ The ideal HA2 environment will have 12 VMs:
 - 2 VMs hosting IAP.
 - 3 VMs hosting MongoDB configured as a replica set.
 - 3 VMs hosting Redis configured as a highly available replica set using Redis Sentinel.
-- 3 VMs hosting Rabbitmq configured as a rabbit cluster.
+- 3 VMs hosting Rabbitmq configured as a rabbit cluster (when installing IAP version 23.1 and older).
 - 1 VM hosting IAG.
 
 Itential recommends applying sound security principles to ALL environments. This would include configuring all components to use authentication within the HA2. Additionally, we recommend using SSL when communicating with components on other VMs and across clusters.
@@ -154,7 +154,7 @@ In general the Deployer will install packages using the standard YUM/DNF reposit
 | Redis | rpms.remirepo.net | https | When installing Redis from the Remi repository<br>When installing on Redhat/Rocky 8+ |
 | Redis | dl.fedoraproject.org | https | When installing Redis from the Remi repository |
 | Redis | github.com | https | When installing Redis from source |
-| RabbitMQ | packagecloud.io | https | |
+| RabbitMQ | packagecloud.io | https | When installing IAP version 23.1 and older |
 | MongoDB | repo.mongodb.org | https | |
 | MongoDB | www.mongodb.org | https | |
 | Vault | rpm.releases.hashicorp.com | https | |
@@ -173,14 +173,14 @@ In general the Deployer will install packages using the standard YUM/DNF reposit
 | Source | Destination | Port | Description |
 |---|---|---|---|
 | IAP | MongoDB | 27017 | IAP connects to MongoDB |
-| IAP | RabbitMQ | 5672/5671 | IAP connects to Rabbitmq for interprocess communication. 5671 is used for SSL if enabled. |
+| IAP | RabbitMQ | 5672/5671 | IAP connects to Rabbitmq for interprocess communication. 5671 is used for SSL if enabled.<br>When installing IAP version 23.1 and older. |
 | IAP | Redis | 6379 | IAP connects to Redis for session tokens |
 | IAP | Redis | 26379 | IAP connects to Redis Sentinel in a HA Redis set up |
 | IAP | IAG | 8083 | IAP connects to IAG |
 | MongoDB | MongoDB | 27017 | Each MongoDB talks to the other MongoDBs for replication of the database |
-| RabbitMQ | RabbitMQ | 5672/5671 | Each Rabbit talks to the other Rabbits for HA resiliency. 5671 is used for SSL if enabled. |
-| RabbitMQ | RabbitMQ | 25672 | Each Rabbit talks to the other Rabbits to form a cluster |
-| RabbitMQ | RabbitMQ | 4369 | epmd (Erlang Port Mapping Daemon) is a small additional daemon that runs alongside every RabbitMQ node and is used to discover what port a particular node listens on for inter-node communication |
+| RabbitMQ | RabbitMQ | 5672/5671 | Each Rabbit talks to the other Rabbits for HA resiliency. 5671 is used for SSL if enabled.<br>When installing IAP version 23.1 and older. |
+| RabbitMQ | RabbitMQ | 25672 | Each Rabbit talks to the other Rabbits to form a cluster.<br>When installing IAP version 23.1 and older. |
+| RabbitMQ | RabbitMQ | 4369 | epmd (Erlang Port Mapping Daemon) is a small additional daemon that runs alongside every RabbitMQ node and is used to discover what port a particular node listens on for inter-node communication.<br>When installing IAP version 23.1 and older. |
 | Redis | Redis | 6379 | Each Redis talks to the other Redis’s for replication |
 | Redis | Redis | 26379 | Each Redis uses Redis Sentinel to monitor the Redis processes for HA resiliency |
 
@@ -262,7 +262,7 @@ The deployer will create several user accounts in the dependent systems. It uses
     <td>Has access to the minimum set of commands to perform sentinel monitoring: multi, slaveof, ping, exec, subscribe, config|rewrite, role, publish, info, client|setname, client|kill, script|kill.</td>
   </tr>
   <tr>
-    <th colspan="4" style="background-color: grey;">RabbitMQ</th>
+    <th colspan="4" style="background-color: grey;">RabbitMQ (When installing IAP version 23.1 and older)</th>
   </tr>
   <tr>
     <td>admin</td>
@@ -443,6 +443,9 @@ vi inventories/dev/hosts
 
 _Example: Inventory File (YAML Format)_
 
+**&#9432; Note:**
+There will not be a `rabbitmq` group or variables when installing IAP version 2023.2 and newer.
+
 ```yaml
 all:
   vars:
@@ -593,6 +596,9 @@ $ sudo systemctl status redis
 
 _Example Output: RabbitMQ Status_
 
+**&#9432; Note:**
+Valid only when installing IAP version 2023.1 and older.
+
 ```bash
 $ sudo systemctl status rabbitmq-server
 ● rabbitmq-server.service - RabbitMQ broker
@@ -622,6 +628,9 @@ Below are simplified sample host files that describe the basic configurations to
 Simple environment. IAP and all of its dependencies all on one host.
 
 _Example: All-in-one Inventory File (YAML Format)_
+
+**&#9432; Note:**
+There will not be a `rabbitmq` group or variables when installing IAP version 2023.2 and newer.
 
 ```yaml
 all:
@@ -661,6 +670,9 @@ Similar to All-in-one but installs components on separate hosts.
 
 _Example: Minimal Architecture Inventory File (YAML Format)_
 
+**&#9432; Note:**
+There will not be a `rabbitmq` group or variables when installing IAP version 2023.2 and newer.
+
 ```yaml
 all:
   vars:
@@ -698,6 +710,9 @@ all:
 Fault tolerant architecture.
 
 _Example: Highly Available Architecture Inventory File (YAML Format)_
+
+**&#9432; Note:**
+There will not be a `rabbitmq` group or variables when installing IAP version 2023.2 and newer.
 
 ```yaml
 all:
@@ -748,6 +763,9 @@ Fault tolerant architecture using external dependencies.
 
 _Example: Highly Available Architecture Inventory File using external dependencies (YAML Format)_
 
+**&#9432; Note:**
+There will not be a `rabbitmq` group or variables when installing IAP version 2023.2 and newer.
+
 ```yaml
 all:
   vars:
@@ -793,6 +811,9 @@ all:
 ### Active/Standby Architecture Inventory
 
 _Example: Active/Standby Architecture Inventory File (YAML Format)_
+
+**&#9432; Note:**
+There will not be a `rabbitmq` group or variables when installing IAP version 2023.2 and newer.
 
 ```yaml
 all:
@@ -910,6 +931,9 @@ Each component installed by the Itential Deployer can be granularly configured b
 [Redis Guide](documents/redis_guide.md)
 
 ### RabbitMQ
+
+**&#9432; Note:**
+Valid only when installing IAP version 2023.1 and older.
 
 [RabbitMQ Guide](documents/rabbitmq_guide.md)
 
