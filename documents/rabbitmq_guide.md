@@ -6,6 +6,9 @@ The playbook and roles in this section install and configure RabbitMQ for the It
 * `rabbitmq_cluster` – Configures RabbitMQ clustering.
 * `rabbitmq_ssl` – Configures RabbitMQ SSL.
 
+**&#9432; Note:**
+This role is used when installing IAP version 2023.1 and older.
+
 # Roles
 
 ## RabbitMQ Role
