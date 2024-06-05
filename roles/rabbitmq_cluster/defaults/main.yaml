@@ -1,0 +1,12 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+# Feature flags that can be overriden in the hosts file
+# Essentially, a default installation will not have clustering
+rabbitmq_cluster: false
+
+# The location of the Erlang cookie file
+rabbitmq_erlang_cookie: /var/lib/rabbitmq/.erlang.cookie
+
+rabbitmq_cluster_port: 25672
+rabbitmq_epmd_port: 4369

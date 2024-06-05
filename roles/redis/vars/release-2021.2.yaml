@@ -1,0 +1,41 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+# The keys here are intended to represent the Redhat/Rocky/Centos major version
+
+# The redis_packages and redis_repo_url are used when the 
+# redis_install_method is set to 'remi_repo'
+redis_packages:
+  "7":
+    - redis-6.2*
+  "8":
+    - "@redis:remi-6.2"
+
+redis_repo_url:
+  "7": "http://rpms.remirepo.net/enterprise/remi-release-7.rpm"
+  "8": "https://rpms.remirepo.net/enterprise/remi-release-8.rpm"
+  "9": "https://rpms.remirepo.net/enterprise/remi-release-9.rpm"
+
+# The redis_source_url and redis_build_packages are used when the
+# redis_install_method is set to 'source'
+redis_source_url:
+  "7": "https://github.com/redis/redis/archive/6.2.14.tar.gz"
+  "8": "https://github.com/redis/redis/archive/6.2.14.tar.gz"
+  "9": "https://github.com/redis/redis/archive/6.2.14.tar.gz"
+
+redis_build_packages:
+  "7":
+    - gcc
+    - gcc-c++
+    - make
+    - systemd-devel
+  "8":
+    - gcc
+    - gcc-c++
+    - make
+    - systemd-devel
+  "9":
+    - gcc
+    - gcc-c++
+    - make
+    - systemd-devel

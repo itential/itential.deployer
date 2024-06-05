@@ -1,0 +1,59 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+- name: Check whether SELinux is enabled
+  ansible.builtin.command: /usr/sbin/selinuxenabled
+  changed_when: false
+  register: selinux_status
+  failed_when: selinux_status.rc > 1
+
+- name: Update SELinux
+  when: selinux_status.rc == 0
+  tags: configure_selinux
+  block:
+    - name: Create temporary working directory
+      ansible.builtin.tempfile:
+        state: directory
+      register: workingdir
+
+    - name: SELinux - Copy the custom policy files
+      ansible.builtin.copy:
+        src: "{{ item }}"
+        dest: "{{ workingdir.path }}/{{ item | basename }}"
+      with_fileglob:
+        - "{{ ansible_parent_role_paths | first }}/files/*.te"
+
+    - name: SELinux - Find the custom policy files
+      ansible.builtin.find:
+        paths: "{{ workingdir.path }}"
+        patterns: "*.te"
+      register: selinux_policies
+
+    - name: SELinux - Compile the modules
+      ansible.builtin.command:
+        cmd: "checkmodule -M -m -o {{ workingdir.path }}/{{ item.path | basename | splitext | first }}.mod {{ item.path }}"
+      with_items:
+        - "{{ selinux_policies.files }}"
+
+    - name: SELinux - Find the compiled modules
+      ansible.builtin.find:
+        paths: "{{ workingdir.path }}"
+        patterns: "*.mod"
+      register: compiled_modules
+
+    - name: SELinux - Package the modules
+      ansible.builtin.command:
+        cmd: "semodule_package -o {{ workingdir.path }}/{{ item.path | basename | splitext | first }}.pp -m {{ item.path }}"
+      with_items:
+        - "{{ compiled_modules.files }}"
+
+    - name: SELinux - Install the modules
+      ansible.builtin.shell: semodule -i *.pp
+      args:
+        executable: /bin/bash
+        chdir: "{{ workingdir.path }}"
+
+    - name: Remove temporary working directory
+      ansible.builtin.file:
+        path: "{{ workingdir.path }}"
+        state: absent

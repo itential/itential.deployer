@@ -1,0 +1,232 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+- name: Determine release vars
+  ansible.builtin.include_tasks:
+    file: determine-release-vars.yml
+
+- name: Determine the primary server
+  ansible.builtin.include_role:
+    name: mongodb_common
+    tasks_from: determine-primary-server.yml
+  when: mongobdb_svc_url_itential is not defined
+
+# This task will use a jinja template to build the appropriate mongo connection
+# string.
+- name: Set connection string as a fact
+  ansible.builtin.set_fact:
+    mongo_connection_string: "{{ lookup('ansible.builtin.template', 'mongo-connection-string.j2', lstrip_blocks=true) | trim }}"
+
+- name: Create default profile documents for standard non-production environments
+  when:
+    - inventory_hostname == groups.platform[0]
+    - groups["redis_secondary"] | default([]) | length == 0
+    - groups["rabbitmq_secondary"] | default([]) | length == 0
+  block:
+
+    # Determine if the Local_AAA profile is already in the database
+    - name: Determine if the Local_AAA profile document already exists
+      ansible.builtin.command:
+        argv:
+          - "{{ mongo_shell }}"
+          - --quiet
+          - --eval='EJSON.stringify(db.iap_profiles.find({"id":"Local_AAA"},{"_id":0,"services":1}).toArray());'
+          - "{{ mongo_connection_string }}"
+      register: local_aaa_profile
+
+    - name: Set discovered services list for Local_AAA
+      ansible.builtin.set_fact:
+        discovered_services: "{{ local_aaa_profile.stdout }}"
+
+    # Create a default profile document in the itential database. This template
+    # contains the logic to modify various properties based on the vars set in
+    # install.yaml. For example, it will correctly configure a Redis HA cluster
+    # using Redis Sentinel and also other settings.
+    - name: Create Local AAA profile document for standard non-production environments
+      ansible.builtin.template:
+        src: profile.j2
+        dest: /tmp/itential_local_aaa_profile.json
+        mode: "0644"
+      vars:
+        desc: A default IAP profile that is using the Local AAA adapter to login
+        id: Local_AAA
+        default_services:
+          - local_aaa
+        redis_group_name: redis
+        rabbit_group_name: rabbitmq
+
+    - name: Determine if the LDAP profile document already exists
+      ansible.builtin.command:
+        argv:
+          - "{{ mongo_shell }}"
+          - --quiet
+          - --eval='EJSON.stringify(db.iap_profiles.find({"id":"LDAP"},{"_id":0,"services":1}).toArray());'
+          - "{{ mongo_connection_string }}"
+      register: ldap_profile
+
+    - name: Set discovered services list for LDAP
+      ansible.builtin.set_fact:
+        discovered_services: "{{ ldap_profile.stdout }}"
+
+    # Create a second profile document that is configured to use the LDAP adapter.
+    # This still requires the admins to correctly configure the LDAP adapter to
+    # communicate with the AAA server. It is a convenience feature to save some time
+    # for our users. This is not the active profile.
+    - name: Create the LDAP profile for standard non-production environments (non-active profile)
+      ansible.builtin.template:
+        src: profile.j2
+        dest: /tmp/itential_ldap_profile.json
+        mode: "0644"
+      vars:
+        desc: An IAP profile that is using the LDAP adapter to login
+        id: LDAP
+        default_services:
+          - LDAP
+        redis_group_name: redis
+        rabbit_group_name: rabbitmq
+
+    - name: Insert profile docs into MongoDB standard non-production
+      ansible.builtin.command:
+        argv:
+          - mongoimport
+          - --uri="{{ mongo_connection_string }}"
+          - --collection=iap_profiles
+          - --mode=upsert
+          - --upsertFields=id
+          - --file="{{ item }}"
+      loop:
+        - /tmp/itential_local_aaa_profile.json
+        - /tmp/itential_ldap_profile.json
+      changed_when: true
+
+- name: Create advanced profile documents for non-default production environments
+  when:
+    - inventory_hostname == groups.platform[0]
+    - groups["redis_secondary"] | default([]) | length > 0
+    - groups["rabbitmq_secondary"] | default([]) | length > 0
+  block:
+    # Determine if the Local_AAA profile is already in the database
+    - name: Determine if the Primary_Local_AAA profile document already exists
+      ansible.builtin.command:
+        argv:
+          - "{{ mongo_shell }}"
+          - --quiet
+          - --eval='EJSON.stringify(db.iap_profiles.find({"id":"Primary_Local_AAA"},{"_id":0,"services":1}).toArray());'
+          - "{{ mongo_connection_string }}"
+      register: primary_local_aaa_profile
+
+    - name: Set discovered services list for Primary_Local_AAA
+      ansible.builtin.set_fact:
+        discovered_services: "{{ primary_local_aaa_profile.stdout }}"
+
+    - name: Create Primary Local AAA profile document non-default production environments
+      ansible.builtin.template:
+        src: profile.j2
+        dest: /tmp/itential_primary_local_aaa_profile.json
+        mode: "0644"
+      vars:
+        desc: A default IAP profile that is using the Local AAA adapter to login for the primary data center
+        id: Primary_Local_AAA
+        default_services:
+          - local_aaa
+        redis_group_name: redis
+        rabbit_group_name: rabbitmq
+
+    - name: Determine if the Secondary_Local_AAA profile document already exists
+      ansible.builtin.command:
+        argv:
+          - "{{ mongo_shell }}"
+          - --quiet
+          - --eval='EJSON.stringify(db.iap_profiles.find({"id":"Secondary_Local_AAA"},{"_id":0,"services":1}).toArray());'
+          - "{{ mongo_connection_string }}"
+      register: secondary_local_aaa_profile
+
+    - name: Set discovered services list for Secondary_Local_AAA
+      ansible.builtin.set_fact:
+        discovered_services: "{{ secondary_local_aaa_profile.stdout }}"
+
+    - name: Create Secondary Local AAA profile document non-default production environments
+      ansible.builtin.template:
+        src: profile.j2
+        dest: /tmp/itential_secondary_local_aaa_profile.json
+        mode: "0644"
+      vars:
+        desc: A default IAP profile that is using the Local AAA adapter to login for the primary data center
+        id: Secondary_Local_AAA
+        default_services:
+          - local_aaa
+        redis_group_name: redis_secondary
+        rabbit_group_name: rabbitmq_secondary
+
+    - name: Insert profile docs into MongoDB non-default production
+      ansible.builtin.command:
+        argv:
+          - mongoimport
+          - --uri="{{ mongo_connection_string }}"
+          - --collection=iap_profiles
+          - --mode=upsert
+          - --upsertFields=id
+          - --file="{{ item }}"
+      loop:
+        - /tmp/itential_primary_local_aaa_profile.json
+        - /tmp/itential_secondary_local_aaa_profile.json
+      changed_when: true
+
+# For each unique service config use a template to generate a JSON file with a
+# prefix of "itential_sc". In a later task, all of the generated files matching
+# the itential_sc* pattern will be imported into MongoDB using a mongoimport
+# command. Delete all of these files at the end.
+- name: Create service configs
+  when: inventory_hostname == groups.platform[0]
+  block:
+    - name: Create the default local_aaa adapter config
+      ansible.builtin.template:
+        src: local_aaa_service_config.j2
+        dest: /tmp/itential_sc_local_aaa.json
+        mode: "0644"
+
+    - name: Create the default LDAP adapter config
+      ansible.builtin.template:
+        src: ldap_adapter_service_config.j2
+        dest: /tmp/itential_sc_ldap_adapter.json
+        mode: "0644"
+
+    - name: Create adapter configs for all defined gateways
+      when:
+        - configure_iag_adapters | bool
+        - groups["gateway"] | default([]) | length > 0
+      ansible.builtin.template:
+        src: iag_adapter_service_config.j2
+        dest: "/tmp/itential_sc_{{ item }}_adapter.json"
+        mode: "0644"
+      loop: "{{ groups['gateway'] }}"
+
+    - name: Find all rendered service config templates
+      ansible.builtin.find:
+        paths: /tmp
+        patterns: 'itential_sc_*.json'
+      register: found_sc_files
+
+    # Import all of the service configs that were generated
+    - name: Insert service configs into MongoDB
+      ansible.builtin.command:
+        argv:
+          - mongoimport
+          - --uri="{{ mongo_connection_string }}"
+          - --collection=service_configs
+          - --mode=upsert
+          - --upsertFields=name
+          - --file="{{ item.path }}"
+      loop: "{{ found_sc_files.files }}"
+
+- name: Find all rendered template files in /tmp
+  ansible.builtin.find:
+    paths: /tmp
+    patterns: "itential_*.json"
+  register: find_results
+
+- name: Clean up all rendered template files in /tmp
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  with_items: "{{ find_results.files }}"

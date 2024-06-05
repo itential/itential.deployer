@@ -1,0 +1,72 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+- name: Stop mongod on the secondaries
+  ansible.builtin.systemd:
+    name: mongod
+    state: stopped
+  when:
+    - inventory_hostname in groups.mongodb
+    - groups.mongodb.index(inventory_hostname) > 0
+
+- name: Stop mongod on the arbiter
+  ansible.builtin.systemd:
+    name: mongod
+    state: stopped
+  when:
+    - groups.mongodb_arbiter is defined
+    - inventory_hostname in groups.mongodb_arbiter
+
+- name: Restart mongo on the primary
+  ansible.builtin.systemd:
+    name: mongod
+    state: restarted
+  when:
+    - inventory_hostname in groups.mongodb
+    - groups.mongodb.index(inventory_hostname) == 0
+
+- name: Wait for mongod service on the primary
+  ansible.builtin.service_facts:
+  register: mongod_service_result
+  until: mongod_service_result.ansible_facts.services['mongod.service'].state == 'running'
+  retries: 10
+  delay: 5
+  when:
+    - inventory_hostname in groups.mongodb
+    - groups.mongodb.index(inventory_hostname) == 0
+
+- name: Start mongo on the secondaries
+  ansible.builtin.systemd:
+    name: mongod
+    state: started
+  when:
+    - inventory_hostname in groups.mongodb
+    - groups.mongodb.index(inventory_hostname) > 0
+
+- name: Wait for mongod service on the secondaries
+  ansible.builtin.service_facts:
+  register: mongod_service_result
+  until: mongod_service_result.ansible_facts.services['mongod.service'].state == 'running'
+  retries: 10
+  delay: 5
+  when:
+    - inventory_hostname in groups.mongodb
+    - groups.mongodb.index(inventory_hostname) > 0
+
+- name: Start mongo on the arbiter
+  ansible.builtin.systemd:
+    name: mongod
+    state: started
+  when:
+    - groups.mongodb_arbiter is defined
+    - inventory_hostname in groups.mongodb_arbiter
+
+- name: Wait for mongod service on the arbiter
+  ansible.builtin.service_facts:
+  register: mongod_service_result
+  until: mongod_service_result.ansible_facts.services['mongod.service'].state == 'running'
+  retries: 10
+  delay: 5
+  when:
+    - groups.mongodb_arbiter is defined
+    - inventory_hostname in groups.mongodb_arbiter

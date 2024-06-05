@@ -1,0 +1,17 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+- name: Download RabbitMQ packages
+  hosts: rabbitmq
+  become: true
+  vars:
+    offline_install: false
+  roles:
+    - role: itential.deployer.common_vars
+  tasks:
+    - name: Download RabbitMQ packages
+      ansible.builtin.import_role:
+        name: itential.deployer.rabbitmq
+        tasks_from: download-packages
+      when: iap_release | float < 2023.2
+      run_once: true

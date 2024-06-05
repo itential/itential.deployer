@@ -1,0 +1,46 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+- name: Download Python rpms
+  ansible.builtin.import_role:
+    name: offline
+    tasks_from: download-rpms
+  vars:
+    download_method: yum_module
+    download_packages: "{{ python_packages }}"
+    download_dir: "{{ rpms_download_dir_target_node }}"
+
+- name: Install Python
+  ansible.builtin.include_role:
+    name: python
+  tags: install_python
+
+- name: Download base Python dependencies
+  ansible.builtin.import_role:
+    name: offline
+    tasks_from: download-wheels
+  vars:
+    wheel_files: "{{ base_python_dependencies }}"
+    download_dir: "{{ wheels_download_dir_target_node }}/base"
+  when:
+    - base_python_dependencies is defined
+    - base_python_dependencies | length > 0
+
+- name: Download MongoDB Python dependencies
+  ansible.builtin.import_role:
+    name: offline
+    tasks_from: download-wheels
+  vars:
+    with_deps: true
+    wheel_files: "{{ app_python_dependencies }}"
+    download_dir: "{{ wheels_download_dir_target_node }}/app"
+  when:
+    - app_python_dependencies is defined
+    - app_python_dependencies | length > 0
+
+- name: Uninstall Python rpms
+  ansible.builtin.yum:
+    name: "{{ item }}"
+    state: absent
+    autoremove: true
+  with_items: "{{ python_install_result.results | selectattr('changed', 'equalto', true) | map(attribute='item') }}"

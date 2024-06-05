@@ -1,0 +1,40 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+- name: Create temporary working directory
+  ansible.builtin.tempfile:
+    state: directory
+  register: workingdir
+
+- name: Copy IAG to host
+  ansible.builtin.copy:
+    src: "{{ iag_whl_file }}"
+    dest: "{{ workingdir.path }}/{{ iag_whl_file | basename }}"
+    mode: '0644'
+
+- name: Upgrade IAG
+  ansible.builtin.pip:
+    name: "{{ workingdir.path }}/{{ iag_whl_file | basename }}"
+    virtualenv: "{{ iag_install_dir }}/venv"
+
+# Using chown and chmod is a faster way to enforce the file ownership and
+# permissions. The file module in ansible checks each and every file/dir
+# in the tree, 'chown -R ' does not, it just sets it.
+- name: Set appropriate ownership on all gateway files
+  ansible.builtin.command:
+    cmd: "chown -R {{ iag_user }}:{{ iag_group }} {{ iag_install_dir }}/venv"
+
+- name: Set appropriate permissions on all gateway files
+  ansible.builtin.command:
+    cmd: "chmod -R 775 {{ iag_install_dir }}/venv"
+
+- name: Start Automation Gateway service
+  ansible.builtin.service:
+    name: automation-gateway
+    enabled: true
+    state: restarted
+
+- name: Remove temporary working directory
+  ansible.builtin.file:
+    path: "{{ workingdir.path }}"
+    state: absent

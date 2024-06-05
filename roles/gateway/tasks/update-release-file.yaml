@@ -1,0 +1,59 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+- name: Update release file with IAG version
+  ansible.builtin.lineinfile:
+    path: "{{ itential_release_file }}"
+    line: "GATEWAY={{ iag_release }}"
+    create: true
+  changed_when: true
+
+- name: Capture Python version
+  ansible.builtin.command:
+    cmd: "{{ python_venv }}/bin/python3 -V"
+  register: python_installed_version
+  changed_when: false
+
+- name: Update release file with Python version
+  ansible.builtin.lineinfile:
+    path: "{{ itential_release_file }}"
+    line: "PYTHON={{ python_installed_version.stdout }}"
+    create: true
+  changed_when: true
+
+- name: Capture Pip version
+  ansible.builtin.command:
+    cmd: "{{ python_venv }}/bin/pip3 -V"
+  register: pip_installed_version
+  changed_when: false
+
+- name: Update release file with Pip version
+  ansible.builtin.lineinfile:
+    path: "{{ itential_release_file }}"
+    line: "PIP={{ pip_installed_version.stdout }}"
+    create: true
+  changed_when: true
+
+- name: Update release file with Ansible version
+  ansible.builtin.lineinfile:
+    path: "{{ itential_release_file }}"
+    line: "ANSIBLE={{ iag_ansible_version }}"
+    create: true
+  when: iag_enable_ansible | bool
+  changed_when: true
+
+- name: Update release file with Terraform version
+  ansible.builtin.lineinfile:
+    path: "{{ itential_release_file }}"
+    line: "TERRAFORM=true"
+    create: true
+  when: iag_enable_terraform | bool
+  changed_when: true
+
+- name: Update release file with Nornir version
+  ansible.builtin.lineinfile:
+    path: "{{ itential_release_file }}"
+    line: "NORNIR=true"
+    create: true
+  when: iag_enable_nornir | bool
+  changed_when: true

@@ -1,0 +1,36 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+platform_packages:
+  - bzip2-devel
+  - gcc
+  - glibc-common
+  - libffi-devel
+  - openldap
+  - openldap-clients
+  - openssl-devel
+  - zlib-devel
+
+iap_nodejs_url: https://rpm.nodesource.com/setup_14.x
+
+python_version: 3.9
+python_executable: "/usr/local/bin/python{{ python_version }}"
+pip_executable: "/usr/local/bin/pip{{ python_version }}"
+
+python_src_version: 3.9.5
+python_src_url: "https://www.python.org/ftp/python/{{ python_src_version }}/Python-{{ python_src_version }}.tgz"
+openssl_url: https://www.openssl.org/source/openssl-1.0.2q.tar.gz
+
+app_python_dependencies:
+  - textfsm==1.1.0
+  - jinja2==2.11.3
+  - markupsafe==2.0.1
+  - pymongo
+
+mongodb_version: 4.2
+
+mongodb_tools_packages:
+  - mongodb-org-tools
+  - mongodb-org-shell
+
+mongo_shell: mongo

@@ -1,0 +1,60 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+- name: Validate src_adapters_path is set
+  ansible.builtin.fail:
+    msg: "src_adapters_path is not set"
+  when: src_adapters_path is not defined
+
+- name: Validate dest_adapters_path is set
+  ansible.builtin.fail:
+    msg: "dest_adapters_path is not set"
+  when: dest_adapters_path is not defined
+
+- name: Create temporary working directory
+  ansible.builtin.tempfile:
+    state: directory
+  register: install_adapters_temp_dir
+
+- name: Copy adapter to target node
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ install_adapters_temp_dir.path }}"
+    mode: '0644'
+  with_fileglob: "{{ src_adapters_path }}/*{{ adapter_name }}*.tgz"
+
+- name: Find adapter on target node
+  ansible.builtin.find:
+    paths: "{{ install_adapters_temp_dir.path }}"
+    patterns: "*{{ adapter_name }}*.tgz"
+  register: adapter_list
+
+- name: Validate adapter exists
+  ansible.builtin.fail:
+    msg: "{{ adapter_name }} does not exist in {{ src_adapters_path }}, re-run download"
+  when: adapter_list.files | length == 0
+
+- name: Create adapter destination
+  ansible.builtin.file:
+    name: "{{ dest_adapters_path }}/{{ adapter_name }}"
+    owner: "{{ iap_user }}"
+    group: "{{ iap_group }}"
+    mode: '0775'
+    state: directory
+
+# The --transform option will transform (rename) files and directories.
+# In our case, we need to rename the root directory of the adapter from
+# 'package' to the name of the adapter name.
+- name: Extract adapter
+  ansible.builtin.unarchive:
+    src: "{{ adapter_list.files[0].path }}"
+    dest: "{{ dest_adapters_path }}/"
+    remote_src: true
+    extra_opts:
+      - --transform
+      - "s/^package/{{ adapter_name }}/"
+
+- name: Remove temporary working directory
+  ansible.builtin.file:
+    path: "{{ install_adapters_temp_dir.path }}"
+    state: absent

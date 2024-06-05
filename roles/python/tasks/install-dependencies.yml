@@ -1,0 +1,72 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Validate pip_executable or python_venv is set
+  ansible.builtin.fail:
+    msg: "either pip_executable or python_venv must be set"
+  when:
+    - pip_executable is not defined
+    - python_venv is not defined
+
+- name: Install Python dependencies (online)
+  when: not offline_install
+  tags: install_python_dependencies
+  block:
+    - name: Use Python virtual env
+      when: python_venv is defined
+      block:
+        - name: Install base Python dependencies in virtual env (online)
+          ansible.builtin.pip:
+            name: "{{ base_python_dependencies }}"
+            virtualenv: "{{ python_venv }}"
+          when:
+            - base_python_dependencies is defined
+            - base_python_dependencies | length > 0
+
+        - name: Install application Python dependencies in virtual env (online)
+          ansible.builtin.pip:
+            name: "{{ app_python_dependencies }}"
+            virtualenv: "{{ python_venv }}"
+          when:
+            - app_python_dependencies is defined
+            - app_python_dependencies | length > 0
+
+    - name: Use Python executable
+      when:
+        - pip_executable is defined
+        - python_venv is not defined
+      block:
+        - name: Install base Python dependencies using pip executable (online)
+          ansible.builtin.pip:
+            name: "{{ base_python_dependencies }}"
+            # state: latest
+            executable: "{{ pip_executable }}"
+          when:
+            - base_python_dependencies is defined
+            - base_python_dependencies | length > 0
+
+        - name: Install application Python dependencies using pip executable (online)
+          ansible.builtin.pip:
+            name: "{{ app_python_dependencies }}"
+            executable: "{{ pip_executable }}"
+          when:
+            - app_python_dependencies is defined
+            - app_python_dependencies | length > 0
+
+- name: Install Python dependencies (offline)
+  when: offline_install
+  tags: install_python_dependencies
+  block:
+    - name: Install base Python dependencies (offline)
+      ansible.builtin.include_role:
+        name: offline
+        tasks_from: install-wheels
+      vars:
+        wheels_dir: "{{ wheels_download_dir_control_node }}/base"
+
+    - name: Install application Python dependencies (offline)
+      ansible.builtin.include_role:
+        name: offline
+        tasks_from: install-wheels
+      vars:
+        wheels_dir: "{{ wheels_download_dir_control_node }}/app"

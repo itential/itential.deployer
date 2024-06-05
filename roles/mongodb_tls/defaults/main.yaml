@@ -1,0 +1,8 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+# Destination location of the certificate key file used for TLS connections
+mongo_cert_keyfile_destination: /etc/ssl/mongo-certificate.pem
+
+# Destination location of the CA root file used for TLS connections
+mongo_root_ca_file_destination: /etc/ssl/mongo-rootCA.pem

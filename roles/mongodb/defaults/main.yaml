@@ -1,0 +1,50 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+# Location of mongo conf file
+mongo_conf_file: /etc/mongod.conf
+
+# Directory that stores mongodb data files
+mongo_data_dir: /var/lib/mongo
+
+# Target path for writing mongodb log files
+mongo_log_dir: /var/log/mongodb
+
+# Directory that stores the mongodb pid file
+mongo_pid_dir: /var/run/mongodb
+
+# The Mongo user and group
+mongo_owner: mongod
+mongo_group: mongod
+
+# The default admin database name
+mongo_admin_db_name: admin
+
+# Flag to enable/disable IPv6
+mongodb_bind_ipv6: true
+
+# The hostnames and/or IP addresses and/or full Unix domain socket paths on
+# which mongos or mongod should listen for client connections. You may attach
+# mongos or mongod to any interface. To bind to multiple addresses, enter a
+# list of comma-separated values.
+#
+# The inventory_hostname will be automatically added to mongodb_bind_addrs.
+#
+# If mongodb_bind_ipv6 is set to true, '::1' will be added to mongodb_bind_addrs.
+mongodb_bind_addrs: 127.0.0.1
+
+# The mongodb role uses the system python3 executables.
+# MondoDB doesn't require Python or pymongo, but the community.mongodb.mongodb_user
+# role does. The pymongo wheel is defined in the mongodb_python_dependecies
+# variable in the vars directory.
+python_executable: /usr/bin/python3
+pip_executable: /usr/bin/pip3
+
+# To isolate Python, a virtual environment is used.
+mongodb_python_venv_root: /var/tmp
+mongodb_python_venv_name: mongodb_venv
+python_venv: "{{ mongodb_python_venv_root }}/{{ mongodb_python_venv_name }}"
+
+# Offline install settings
+# Refer to the offline variables in common_vars for additional settings
+packages_path: "{{ itential_packages_path }}/{{ iap_release }}/mongodb"

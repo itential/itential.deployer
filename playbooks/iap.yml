@@ -1,0 +1,36 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+### IAP
+- name: Install IAP
+  hosts: platform, platform_secondary
+  become: true
+  roles:
+    # Pull in the common vars
+    - role: itential.deployer.common_vars
+      tags:
+        - always
+
+    # Perform a base installation of IAP
+    - role: itential.deployer.platform
+      tags:
+        - platform
+        - platform_install
+
+    # Install app-artifact into IAP
+    # This should only be done in a development environment
+    - role: itential.deployer.platform_app_artifact
+      when: app_artifact | bool
+      tags:
+        - platform
+        - platform_app_artifact
+
+  # Install any listed apps and/or adapters
+  tasks:
+    - name: Install adapters
+      ansible.builtin.import_role:
+        name: itential.deployer.platform
+        tasks_from: install-adapters
+      tags:
+        - platform
+        - platform_adapters

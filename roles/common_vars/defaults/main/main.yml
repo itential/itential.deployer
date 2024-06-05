@@ -1,0 +1,32 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+# The file containing the installed components and versions
+itential_release_file: /etc/iap-release
+
+# By default, do not configure vault
+configure_vault: false
+
+# Offline install variables
+offline_install: false
+
+# Note that the packages_path is set in the defaults for each role
+itential_packages_path: "itential_packages/{{ ansible_distribution | lower }}_{{ ansible_distribution_major_version }}"
+rpms_path: "{{ packages_path }}/rpms"
+wheels_path: "{{ packages_path }}/wheels"
+archives_path: "{{ packages_path }}/archives"
+adapters_path: "{{ packages_path }}/adapters"
+
+packages_download_root_control_node: "{{ playbook_dir }}/files"
+packages_download_dir_control_node: "{{ packages_download_root_control_node }}/{{ packages_path }}"
+rpms_download_dir_control_node: "{{ packages_download_dir_control_node }}/rpms"
+wheels_download_dir_control_node: "{{ packages_download_dir_control_node }}/wheels"
+archives_download_dir_control_node: "{{ packages_download_dir_control_node }}/archives"
+adapters_download_dir_control_node: "{{ packages_download_dir_control_node }}/adapters"
+
+packages_download_root_target_node: /var/tmp
+packages_download_dir_target_node: "{{ packages_download_root_target_node }}/{{ packages_path }}"
+rpms_download_dir_target_node: "{{ packages_download_dir_target_node }}/rpms"
+wheels_download_dir_target_node: "{{ packages_download_dir_target_node }}/wheels"
+archives_download_dir_target_node: "{{ packages_download_dir_target_node }}/archives"
+adapters_download_dir_target_node: "{{ packages_download_dir_target_node }}/adapters"

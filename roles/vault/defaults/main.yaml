@@ -1,0 +1,21 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+# The default behavior for installing vault
+vault_install: false
+
+# The default directory to store vault data and other config data
+vault_dir: /opt/vault
+
+# The default port of the vault server
+vault_port: 8200
+
+# The default port used by vault clusters to communicate with eachother
+vault_cluster_port: 8201
+
+# The default user that runs vault
+vault_user: vault
+
+# Offline install settings
+# Refer to the offline variables in common_vars for additional settings
+packages_path: "{{ itential_packages_path }}/{{ iap_release }}/vault"

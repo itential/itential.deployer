@@ -1,0 +1,7 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+# Destination as referenced by itential user when connecting from itential host.
+# This is ultimately stored in the mongo database to be read by IAP, therefore
+# this is the location as seen from the IAP host.
+itential_root_ca_file_destination: /opt/itential/keys/mongo-rootCA.pem

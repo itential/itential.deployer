@@ -1,0 +1,69 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+- name: Validate distribution major version
+  ansible.builtin.fail:
+    msg: Download not supported for version 7
+  when: ansible_distribution_major_version == "7"
+
+- name: Validate offline_install variable
+  ansible.builtin.fail:
+    msg: offline_install must be set to false for download
+  when:
+    - offline_install is defined
+    - offline_install
+
+- name: Check for supported OS family
+  ansible.builtin.fail:
+    msg: "itential.installer does not support distribution '{{ ansible_os_family.lower() }}'"
+  when: ansible_os_family.lower() not in ('redhat',)
+
+- name: Include release vars
+  ansible.builtin.include_vars:
+    file: "{{ item }}"
+  with_first_found:
+    - "release-{{ ansible_distribution_major_version }}.yaml"
+
+- name: Check supported OS
+  ansible.builtin.fail:
+    msg: "Unsupported OS version!"
+  when: os_packages is undefined
+
+- name: Download OS rpms
+  ansible.builtin.import_role:
+    name: offline
+    tasks_from: download-rpms
+  vars:
+    download_method: yum_module
+    download_packages: "{{ os_packages }}"
+    download_dir: "{{ rpms_download_dir_target_node }}"
+
+- name: Download security rpms
+  ansible.builtin.import_role:
+    name: offline
+    tasks_from: download-rpms
+  vars:
+    download_method: yum_module
+    download_packages: "{{ security_packages }}"
+    download_dir: "{{ rpms_download_dir_target_node }}"
+
+- name: Download operations rpms
+  ansible.builtin.import_role:
+    name: offline
+    tasks_from: download-rpms
+  vars:
+    download_method: yum_module
+    download_packages: "{{ operational_packages }}"
+    download_dir: "{{ rpms_download_dir_target_node }}"
+
+- name: Copy rpms to control node
+  ansible.builtin.import_role:
+    name: offline
+    tasks_from: fetch-packages
+  vars:
+    src_dir: "{{ rpms_download_dir_target_node }}"
+    dest_dir: "{{ rpms_download_dir_control_node }}"
+
+- name: Set OS packages downloaded flag
+  ansible.builtin.set_fact:
+    os_packages_downloaded: true

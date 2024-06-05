@@ -1,0 +1,12 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Include tasks to install Python from source
+  ansible.builtin.include_tasks:
+    file: "python-from-source.yml"
+  when: python_src_url is defined
+
+- name: Include tasks to install Python from packages
+  ansible.builtin.include_tasks:
+    file: "python-from-packages.yml"
+  when: python_packages is defined

@@ -1,0 +1,22 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+mongodb_version: 5.0
+
+mongodb_packages:
+  - mongodb-org
+  - mongodb-org-database
+  - mongodb-org-server
+  - mongodb-org-shell
+  - mongodb-org-mongos
+  - mongodb-org-tools
+
+python_packages:
+  - python39
+  - python39-pip
+
+base_python_dependencies:
+  - pip
+
+app_python_dependencies:
+  - pymongo

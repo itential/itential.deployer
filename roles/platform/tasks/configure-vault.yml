@@ -1,0 +1,31 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+- name: Make the directory to store vault token.txt
+  ansible.builtin.file:
+    path: "{{ vault_install_dir }}"
+    state: directory
+    owner: "{{ iap_user }}"
+    group: "{{ iap_group }}"
+    mode: "0770"
+
+- name: Copy vault token file to IAP server
+  ansible.builtin.copy:
+    src: ./token.txt
+    dest: "{{ vault_install_dir }}/token.txt"
+    mode: "0600"
+    owner: "{{ iap_user }}"
+    group: "{{ iap_group }}"
+
+- name: Add itential user to vault group
+  ansible.builtin.user:
+    name: "{{ iap_user }}"
+    groups: "{{ vault_group }}"
+    append: true
+
+- name: Delete token file off control machine
+  ansible.builtin.file:
+    path: ./token.txt
+    state: absent
+  delegate_to: localhost
+  ignore_errors: true

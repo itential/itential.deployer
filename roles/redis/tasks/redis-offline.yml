@@ -1,0 +1,15 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+- name: Install Redis rpms
+  block:
+    - name: Install Redis rpms
+      ansible.builtin.import_role:
+        name: offline
+        tasks_from: install-rpms
+  tags: offline_install_rpms
+
+- name: Include tasks to install Redis from source
+  ansible.builtin.include_tasks:
+    file: redis-using-source.yaml
+  when: redis_install_method == "source"

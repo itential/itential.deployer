@@ -1,0 +1,34 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+### Redis
+- name: Install Redis
+  hosts: redis, redis_secondary
+  become: true
+  roles:
+    # Pull in the common vars
+    - role: itential.deployer.common_vars
+      tags:
+        - always
+
+    # Perform a base installation of Redis
+    - role: itential.deployer.redis
+      tags:
+        - redis
+        - redis_install
+
+    # Perform installation of Redis Sentinel for Redis HA and replication
+    # https://redis.io/docs/manual/sentinel/
+    - role: itential.deployer.redis_replication
+      when: redis_replication | bool
+      tags:
+        - redis
+        - redis_replication
+
+    # Configure Redis to require a username & password (authorization)
+    # https://redis.io/docs/manual/security/acl/
+    - role: itential.deployer.redis_auth
+      when: redis_auth | bool
+      tags:
+        - redis
+        - redis_auth

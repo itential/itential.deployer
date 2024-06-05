@@ -1,0 +1,87 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+- name: Update release file with IAP version
+  ansible.builtin.lineinfile:
+    path: "{{ itential_release_file }}"
+    line: "PLATFORM={{ iap_release }}"
+    mode: "0644"
+    create: true
+
+- name: Capture Python version
+  ansible.builtin.command:
+    cmd: "{{ python_executable }} -V"
+  register: python_installed_version
+  changed_when: false
+
+- name: Update release file with Python version
+  ansible.builtin.lineinfile:
+    path: "{{ itential_release_file }}"
+    line: "PYTHON={{ python_installed_version.stdout }}"
+    mode: "0644"
+    create: true
+
+- name: Capture Pip version
+  ansible.builtin.command:
+    cmd: "{{ pip_executable }} -V"
+  register: pip_installed_version
+  changed_when: false
+
+- name: Update release file with Pip version
+  ansible.builtin.lineinfile:
+    path: "{{ itential_release_file }}"
+    line: "PIP={{ pip_installed_version.stdout }}"
+    mode: "0644"
+    create: true
+
+- name: Capture Jinja2 version
+  ansible.builtin.shell:
+    cmd: "{{ pip_executable }} list --retries 1 --timeout 1 | grep -i jinja2 | awk '{print $2}'"
+  register: jinja2_installed_version
+  changed_when: false
+
+- name: Update release file with Jinja2 version
+  ansible.builtin.lineinfile:
+    path: "{{ itential_release_file }}"
+    line: "JINJA2={{ jinja2_installed_version.stdout }}"
+    mode: "0644"
+    create: true
+
+- name: Capture MarkupSafe version
+  ansible.builtin.shell:
+    cmd: "{{ pip_executable }} list --retries 1 --timeout 1 | grep -i markupsafe | awk '{print $2}'"
+  register: markupsafe_installed_version
+  changed_when: false
+
+- name: Update release file with MarkupSafe version
+  ansible.builtin.lineinfile:
+    path: "{{ itential_release_file }}"
+    line: "MARKUPSAFE={{ markupsafe_installed_version.stdout }}"
+    mode: "0644"
+    create: true
+
+- name: Capture TextFSM version
+  ansible.builtin.shell:
+    cmd: "{{ pip_executable }} list --retries 1 --timeout 1 | grep -i textfsm | awk '{print $2}'"
+  register: textfsm_installed_version
+  changed_when: false
+
+- name: Update release file with TextFMS version
+  ansible.builtin.lineinfile:
+    path: "{{ itential_release_file }}"
+    line: "TEXTFSM={{ textfsm_installed_version.stdout }}"
+    mode: "0644"
+    create: true
+
+- name: Capture NodeJS version
+  ansible.builtin.command:
+    cmd: node --version
+  register: nodejs_installed_version
+  changed_when: false
+
+- name: Update release file with NodeJS version
+  ansible.builtin.lineinfile:
+    path: "{{ itential_release_file }}"
+    line: "NODEJS={{ nodejs_installed_version.stdout }}"
+    mode: "0644"
+    create: true

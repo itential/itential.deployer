@@ -1,0 +1,92 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+# Installing python3 on RHEL7 & Centos7 requires building python from source
+# in order to support the documented version of python3. Dynamically include a
+# task file that can handle the steps to build from source when we detect that
+# this host is a version 7.
+
+- name: Create temporary working directory
+  ansible.builtin.tempfile:
+    state: directory
+  register: python_build_dir
+
+- name: Check if openssl is already installed
+  ansible.builtin.stat:
+    path: "/usr/bin/openssl"
+  register: openssl_installed
+
+- name: Install openssl
+  when: not openssl_installed.stat.exists
+  block:
+    - name: Download openssl Source
+      ansible.builtin.get_url:
+        url: "{{ openssl_url }}"
+        dest: "{{ python_build_dir.path }}/{{ openssl_url | basename }}"
+        mode: "0755"
+        validate_certs: false
+
+    - name: Get openssl Source
+      ansible.builtin.unarchive:
+        src: "{{ python_build_dir.path }}/{{ openssl_url | basename }}"
+        dest: "{{ python_build_dir.path }}"
+        remote_src: true
+
+    - name: Configure and build openssl
+      ansible.builtin.command:
+        cmd: "{{ item }}"
+        chdir: "{{ python_build_dir.path }}/{{ openssl_url.split('/')[-1].replace('.tar.gz', '') }}"
+      with_items:
+        - ./config
+        - make
+        - make install
+
+- name: Check if Python is already installed
+  ansible.builtin.stat:
+    path: "{{ python_executable }}"
+  register: python_installed
+
+- name: Install Python
+  when: not python_installed.stat.exists
+  block:
+    - name: Download Python Source
+      ansible.builtin.get_url:
+        url: "{{ python_src_url }}"
+        dest: "{{ python_build_dir.path }}/{{ python_src_url | basename }}"
+        mode: "0755"
+
+    - name: Get Python source
+      ansible.builtin.unarchive:
+        src: "{{ python_build_dir.path }}/{{ python_src_url | basename }}"
+        dest: "{{ python_build_dir.path }}"
+        remote_src: true
+
+    # Modify many lines on the config file for the SSL settings
+    - name: Modify SSL setup lines (1)
+      ansible.builtin.lineinfile:
+        path: "{{ python_build_dir.path }}/Python-{{ python_src_version }}/Modules/Setup"
+        regexp: ^#SSL=/usr/local/ssl$
+        line: "SSL=/usr/local/ssl"
+        insertafter: ^#SSL=/usr/local/ssl$
+        firstmatch: true
+
+    - name: Modify SSL setup lines (2)
+      ansible.builtin.lineinfile:
+        path: "{{ python_build_dir.path }}/Python-{{ python_src_version }}/Modules/Setup"
+        line: "_ssl _ssl.c -DUSE_SSL -I$(SSL)/include -I$(SSL)/include/openssl -L$(SSL)/lib -lssl -lcrypto"
+        insertafter: ^SSL=/usr/local/ssl$
+        firstmatch: true
+
+    - name: Configure and install Python from source
+      ansible.builtin.command:
+        cmd: "{{ item }}"
+        chdir: "{{ python_build_dir.path }}/Python-{{ python_src_version }}"
+      with_items:
+        - ./configure --enable-optimizations --with-openssl=/usr/local/ssl
+        - make altinstall
+      changed_when: true
+
+- name: Remove temporary working directory
+  ansible.builtin.file:
+    path: "{{ python_build_dir.path }}"
+    state: absent

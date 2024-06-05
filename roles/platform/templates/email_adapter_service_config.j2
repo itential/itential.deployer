@@ -1,0 +1,64 @@
+{
+  "isEncrypted": true,
+  "loggerProps": {
+    "console_level": "info",
+    "description": "Logging",
+    "log_directory": "{{ iap_log_dir }}",
+    "log_filename": "email_adapter.log",
+    "log_level": "info",
+    "log_max_file_size": 10485760,
+    "log_max_files": 10,
+    "log_timezone_offset": 0,
+    "syslog": {
+      "app_name": "",
+      "eol": "",
+      "facility": "local0",
+      "host": "127.0.0.1",
+      "level": "warning",
+      "localhost": "",
+      "path": "",
+      "pid": "process.pid",
+      "port": 514,
+      "protocol": "udp4",
+      "type": "BSD"
+    }
+  },
+  "model": "@itential/adapter-email",
+  "name": "Email",
+  "properties": {
+    "brokers": [
+      "notification"
+    ],
+    "groups": [],
+    "id": "Email",
+    "properties": {
+      "auth": {
+        "pass": "itential",
+        "user": "itential"
+      },
+      "authMethod": "PLAIN",
+      "connectionTimeout": 300000,
+      "greetingTimeout": 300000,
+      "host": "localhost",
+      "ignoreTLS": false,
+      "incomingEmailSizeLimit": 10000,
+      "localAddress": "",
+      "name": "",
+      "port": 587,
+      "requireTLS": false,
+      "secure": false,
+      "service": "",
+      "socketTimeout": 300000,
+      "subscriptions": [],
+      "tls": {
+        "isServer": false,
+        "rejectUnauthorized": true,
+        "requestCert": false,
+        "requestOCSP": false
+      }
+    },
+    "type": "Email"
+  },
+  "type": "Adapter",
+  "virtual": false
+}

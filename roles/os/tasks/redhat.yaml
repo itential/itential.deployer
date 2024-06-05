@@ -1,0 +1,25 @@
+# Copyright (c) 2022, Itential, LLC
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+- name: Include release vars
+  ansible.builtin.include_vars:
+    file: "{{ item }}"
+  with_first_found:
+    - "release-{{ ansible_distribution_major_version }}.yaml"
+
+- name: Check supported OS
+  ansible.builtin.fail:
+    msg: "Unsupported OS version!"
+  when: os_packages is undefined
+
+- name: Include OS specific tasks (online)
+  ansible.builtin.include_tasks: "{{ ansible_os_family.lower() }}-online.yaml"
+  when:
+    - not release_file.stat.exists
+    - not offline_install
+
+- name: Include OS specific tasks (offline)
+  ansible.builtin.include_tasks: "{{ ansible_os_family.lower() }}-offline.yaml"
+  when:
+    - not release_file.stat.exists
+    - offline_install
