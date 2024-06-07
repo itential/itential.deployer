@@ -77,8 +77,6 @@
     - "{{ iag_install_dir }}/nornir/inventory"
     - "{{ iag_install_dir }}/nornir/modules"
     - "{{ iag_install_dir }}/scripts"
-    - "{{ iag_install_dir }}/terraform"
-    - "{{ iag_install_dir }}/terraform/scripts"
 
 - name: Create Python venv directory
   ansible.builtin.file:
@@ -130,29 +128,6 @@
         group: "{{ iag_group }}"
         mode: "0400"
         state: touch
-
-- name: Install Terraform
-  when: iag_enable_terraform | bool
-  block:
-    - name: Install Terraform (online)
-      when: not offline_install
-      block:
-        - name: Download Terraform
-          ansible.builtin.get_url:
-            url: "{{ iag_terraform_url }}"
-            dest: "{{ workingdir.path }}/{{ iag_terraform_url | basename }}"
-            mode: "0644"
-
-        - name: Extract Terraform
-          ansible.builtin.unarchive:
-            src: "{{ workingdir.path }}/{{ iag_terraform_url | basename }}"
-            dest: /usr/local/bin
-            remote_src: true
-
-    - name: Install Terraform (offline)
-      ansible.builtin.include_tasks:
-        file: terraform-offline.yml
-      when: offline_install
 
 - name: Check if Automation Gateway is already installed
   ansible.builtin.stat:

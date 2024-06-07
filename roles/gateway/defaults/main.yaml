@@ -7,7 +7,6 @@ itential_release_file: /etc/iag-release
 # Default feature flags
 # Enable everything by default, override in the hosts file if required
 iag_enable_ansible: true
-iag_enable_terraform: true
 iag_enable_nornir: true
 iag_enable_netmiko: true
 iag_enable_scripts: true
