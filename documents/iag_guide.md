@@ -98,6 +98,10 @@ To configure HTTPS via HAProxy:
   - Do not configure `iag_https` in the inventory so IAG Native HTTPS does not get configured.
 * Optional
   - Set the `haproxy_ssl_cert_src` and `haproxy_ssl_cert_dest` variables in the inventory.
+  
+ Itential does not attempt to create any HTTPS certificates. These must be
+ created independently. When they are included in the appropriate location
+ the installer will ensure that they get uploaded to the correct location.
 
 # Building the Inventory
 
