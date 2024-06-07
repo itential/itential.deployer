@@ -25,5 +25,3 @@ base_python_dependencies:
   - wheel==0.42.0
 
 iag_ansible_version: ansible==7.7.0
-
-iag_terraform_url: https://releases.hashicorp.com/terraform/0.12.31/terraform_0.12.31_linux_amd64.zip

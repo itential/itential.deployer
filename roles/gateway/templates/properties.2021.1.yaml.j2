@@ -198,18 +198,19 @@ script_path:
 #############
 # Terraform #
 #############
+# Terraform was removed due to HashiCorp adopting the 
+# Business Source License (BSL) for their core products
 
 # A boolean flag that enables Terraform support (default=false if absent/misconfigured).
-terraform_enabled: {{ iag_enable_terraform }}
+terraform_enabled: false
 
 # Discovery behavior for Terraform modules. Determines whether or not to
 # recursively search the directories found in the 'terraform_path' parameter, or
 # to only search those directories and no deeper. (default=true if absent/misconfigured)
-terraform_recursive: true
+terraform_recursive: false
 
 # Path(s) to the Terraform modules that should be discovered by Automation Gateway.
 terraform_path:
-  - "{{ iag_install_dir }}/terraform/scripts"
 
 ###################
 # Hashicorp Vault #

@@ -163,7 +163,6 @@ In general the Deployer will install packages using the standard YUM/DNF reposit
 | IAP | rpm.nodesource.com | https | When installing on Redhat/CentOS 7 |
 | IAP | www.python.org | https | When installing on Redhat/CentOS 7 |
 | IAP | www.openssl.org | https | When installing on Redhat/CentOS 7 |
-| IAG | releases.hashicorp.com | https | When Terraform is enabled |
 | IAG | www.python.org | https | When installing on Redhat/CentOS 7 |
 | IAG | www.openssl.org | https | When installing on Redhat/CentOS 7 |
 

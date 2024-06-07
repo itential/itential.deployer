@@ -9,7 +9,7 @@ The playbook and roles in this section install and configure the Itential Automa
 
 ## Gateway Role
 
-The `gateway` role performs a base install of IAG including any OS packages required. It includes the appropriate versions of Python, Pip, Ansible, and Terraform. It creates the appropriate Linux users, directories, log files, and systemd services. It will start the automation-gateway service when complete.
+The `gateway` role performs a base install of IAG including any OS packages required. It includes the appropriate versions of Python, Pip, and Ansible. It creates the appropriate Linux users, directories, log files, and systemd services. It will start the automation-gateway service when complete.
 
 ## Gateway HAProxy Role
 
@@ -37,7 +37,6 @@ The following table lists the default variables located in `roles/gateway/defaul
 | Variable | Group | Type | Description | Default Value
 | :------- | :---- | :--- | :---------- | :------------
 | `iag_enable_ansible` | `gateway` | Boolean | Flag to enable Ansible. | `true`
-| `iag_enable_terraform` | `gateway` | Boolean | Flag to enable Terraform. | `true`
 | `iag_enable_nornir` | `gateway` | Boolean | Flag to enable Nornir. | `true`
 | `iag_enable_netmiko` | `gateway` | Boolean | Flag to enable Netmiko. | `true`
 | `iag_enable_scripts` | `gateway` | Boolean | Flag to enable scripts. | `true`

@@ -28,5 +28,3 @@ python_src_url: "https://www.python.org/ftp/python/{{ python_src_version }}/Pyth
 openssl_url: https://www.openssl.org/source/openssl-1.0.2q.tar.gz
 
 iag_ansible_version: ansible==2.10.0
-
-iag_terraform_url: https://releases.hashicorp.com/terraform/0.12.31/terraform_0.12.31_linux_amd64.zip

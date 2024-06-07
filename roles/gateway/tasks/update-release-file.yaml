@@ -42,14 +42,6 @@
   when: iag_enable_ansible | bool
   changed_when: true
 
-- name: Update release file with Terraform version
-  ansible.builtin.lineinfile:
-    path: "{{ itential_release_file }}"
-    line: "TERRAFORM=true"
-    create: true
-  when: iag_enable_terraform | bool
-  changed_when: true
-
 - name: Update release file with Nornir version
   ansible.builtin.lineinfile:
     path: "{{ itential_release_file }}"
