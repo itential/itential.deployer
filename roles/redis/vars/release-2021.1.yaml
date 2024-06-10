@@ -1,6 +1,6 @@
-# Copyright (c) 2022, Itential, LLC
+# Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
-
+---
 # The keys here are intended to represent the Redhat/Rocky/Centos major version
 
 # The redis_packages and redis_repo_url are used when the 
