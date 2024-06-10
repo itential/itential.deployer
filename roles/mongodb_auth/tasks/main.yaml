@@ -1,6 +1,6 @@
-# Copyright (c) 2022, Itential, LLC
+# Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
-
+---
 # When authorization is enabled in mongo using a replica set, the members of
 # the set will be required to authenticate too. This is accomplished with a
 # keyFile or x509 certificate. It is assumed that this keyFile already exists.

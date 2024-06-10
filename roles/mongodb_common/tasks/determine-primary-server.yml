@@ -1,6 +1,6 @@
-# Copyright (c) 2022, Itential, LLC
+# Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
-
+---
 - name: Default the primary server to the first server in the mongodb group
   ansible.builtin.set_fact:
     primary_server: "{{ groups['mongodb'][0] }}"
