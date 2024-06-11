@@ -923,44 +923,44 @@ Each component installed by the Itential Deployer can be granularly configured b
 
 ### MongoDB
 
-[MongoDB Guide](documents/mongodb_guide.md)
+[MongoDB Guide](docs/mongodb_guide.md)
 
 ### Redis
 
-[Redis Guide](documents/redis_guide.md)
+[Redis Guide](docs/redis_guide.md)
 
 ### RabbitMQ
 
 **&#9432; Note:**
 Valid only when installing IAP version 2023.1 and older.
 
-[RabbitMQ Guide](documents/rabbitmq_guide.md)
+[RabbitMQ Guide](docs/rabbitmq_guide.md)
 
 ### Hashicorp Vault
 
-[Hashicorp Vault Guide](documents/vault_guide.md)
+[Hashicorp Vault Guide](docs/vault_guide.md)
 
 ### IAP
 
-[IAP Guide](documents/iap_guide.md)
+[IAP Guide](docs/iap_guide.md)
 
 ### IAG
 
-[IAG Guide](documents/iag_guide.md)
+[IAG Guide](docs/iag_guide.md)
 
 ## Patching IAP and IAG
 
 The Deployer supports patching IAP and IAG.  Refer to the following guide for instructions on running the patch playbooks.
 
-[Patch IAP Guide](documents/patch_iap_guide.md)
+[Patch IAP Guide](docs/patch_iap_guide.md)
 
-[Patch IAG Guide](documents/patch_iag_guide.md)
+[Patch IAG Guide](docs/patch_iag_guide.md)
 
 ## Running the Deployer in Offline Mode
 
 The Deployer supports installations in air-gapped environments.  Refer to the following guide for instructions on running the Deployer in offline mode.
 
-[Offline Installation Guide](documents/offline_install_guide.md)
+[Offline Installation Guide](docs/offline_install_guide.md)
 
 ## Appendix A: Definition of "Highly Available" Dependencies
 
