@@ -48,13 +48,13 @@ defaults
     option forwardfor       except 127.0.0.0/8
     option                  redispatch
     retries                 3
-    timeout http-request    10s
-    timeout queue           1m
-    timeout connect         10s
-    timeout client          1m
-    timeout server          1m
-    timeout http-keep-alive 10s
-    timeout check           10s
+    timeout http-request    10s   # maximum allowed time to wait for a complete HTTP request from the client
+    timeout queue           1m    # maximum time to wait in the queue for a connection slot to be free
+    timeout connect         10s   # maximum time to wait for a connection attempt to a server to succeed
+    timeout client          1m    # maximum inactivity time on the client side
+    timeout server          1m    # maximum inactivity time on the server side.
+    timeout http-keep-alive 10s   # maximum allowed time to wait for a new HTTP request to appear
+    timeout check           10s   # additional check timeout, but only after a connection has been already established.
     maxconn                 3000
 
 #---------------------------------------------------------------------
