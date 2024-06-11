@@ -51,8 +51,8 @@ defaults
     timeout http-request    10s   # maximum allowed time to wait for a complete HTTP request from the client
     timeout queue           1m    # maximum time to wait in the queue for a connection slot to be free
     timeout connect         10s   # maximum time to wait for a connection attempt to a server to succeed
-    timeout client          1m    # maximum inactivity time on the client side
-    timeout server          1m    # maximum inactivity time on the server side.
+    timeout client          10m    # maximum inactivity time on the client side
+    timeout server          10m    # maximum inactivity time on the server side.
     timeout http-keep-alive 10s   # maximum allowed time to wait for a new HTTP request to appear
     timeout check           10s   # additional check timeout, but only after a connection has been already established.
     maxconn                 3000
