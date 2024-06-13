@@ -1,0 +1,30 @@
+name: Run changelog Script
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  updateChangelog:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout repo content
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: setup python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.8 #install the python needed
+      - name: Install dependencies
+        run: |
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      - name: execute py script
+        run: |
+          python scripts/changelog.py > CHANGELOG.md
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add .
+          git commit -m "Update CHANGELOG.md"
+          git push origin HEAD:main
