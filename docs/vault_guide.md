@@ -38,6 +38,7 @@ The following table lists the default variables that are shared between the Vaul
 | Variable | Group | Type | Description | Default Value
 | :------- | :---- | :--- | :---------- | :------------
 | `vault_group` | `all` | String | The Vault Linux group. | `vault`
+| `vault_port` | `all` | Integer | The Vault listen port. | `8200`
 
 
 ## Vault Role Variables
@@ -50,7 +51,6 @@ The following table lists the default variables located in `roles/vault/defaults
 | :------- | :---- | :--- | :---------- | :------------
 | `vault_install` | `vault` | Boolean | Flag to enable Vault installation. | `false`
 | `vault_dir` | `vault` | String | The Vault data directory. | `/opt/vault`
-| `vault_port` | `all` | Integer | The Vault listen port. | `8200`
 | `vault_cluster_port` | `vault` | Integer | The Vault cluster communication port. | `8201`
 | `vault_user` | `all` | String |The Vault Linux user. | `vault`
 
