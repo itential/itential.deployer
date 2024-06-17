@@ -148,7 +148,7 @@
   ansible.builtin.template:
     src: mongod.conf.j2
     dest: "{{ mongo_conf_file }}"
-    owner: "{{ mongo_owner}}"
+    owner: "{{ mongo_owner }}"
     group: "{{ mongo_group }}"
     mode: "0644"
   tags: configure_mongo
