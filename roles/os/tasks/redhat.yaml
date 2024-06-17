@@ -10,8 +10,8 @@
 
 - name: Check supported OS
   ansible.builtin.fail:
-    msg: "Deployer installer does not support installing on OS version {{ ansible_distribution_major_version }}!"
-  when: valid_release_version is defined
+    msg: "Deployer does not support installing on OS version {{ ansible_distribution_major_version }}!"
+  when: invalid_os_release is defined
 
 - name: Include OS specific tasks (online)
   ansible.builtin.include_tasks: "{{ ansible_os_family.lower() }}-online.yaml"

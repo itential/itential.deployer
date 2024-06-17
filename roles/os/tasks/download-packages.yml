@@ -27,8 +27,8 @@
 
 - name: Check supported OS
   ansible.builtin.fail:
-    msg: "Deployer installer does not support installing on OS version {{ ansible_distribution_major_version }}!"
-  when: valid_release_version is defined
+    msg: "Deployer does not support installing on {{ ansible_distribution }} {{ ansible_distribution_major_version }}!"
+  when: invalid_os_release is defined
 
 - name: Download OS rpms
   ansible.builtin.import_role:

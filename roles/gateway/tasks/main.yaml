@@ -10,8 +10,8 @@
 
 - name: Check for valid IAG release
   ansible.builtin.fail:
-    msg: "Deployer installer does not support installing Gateway version {{ iag_release }} on {{ ansible_distribution | lower }}-{{ ansible_distribution_major_version }}"
-  when: valid_iag_release is defined
+    msg: "Deployer does not support installing Gateway version {{ iag_release }} on {{ ansible_distribution }}-{{ ansible_distribution_major_version }}"
+  when: invalid_iag_release is defined
 
 - name: Install base OS packages
   ansible.builtin.include_role:

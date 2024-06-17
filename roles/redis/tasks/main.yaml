@@ -10,8 +10,8 @@
 
 - name: Check for valid Redis release
   ansible.builtin.fail:
-    msg: "Deployer installer does not support installing Redis on IAP version {{ iap_release }}"
-  when: valid_redis_packages is defined
+    msg: "Deployer does not support installing Redis on IAP version {{ iap_release }}"
+  when: invalid_redis_release is defined
 
 - name: Install base OS packages
   ansible.builtin.include_role:
