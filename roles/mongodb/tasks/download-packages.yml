@@ -22,8 +22,8 @@
 
 - name: Check for valid MongoDB release
   ansible.builtin.fail:
-    msg: "missing or invalid mongodb_release_url"
-  when: mongodb_release_url == "UNDEFINED"
+    msg: "Deployer installer does not support installing MongoDB for IAP version {{ iap_release }} on {{ ansible_distribution | lower }}-{{ ansible_distribution_major_version }}"
+  when: valid_mongodb_version is defined
 
 - name: Install MongoDB repo
   ansible.builtin.yum_repository:

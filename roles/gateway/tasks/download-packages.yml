@@ -23,8 +23,8 @@
 
 - name: Check for valid IAG release
   ansible.builtin.fail:
-    msg: "missing or invalid iag_release"
-  when: iag_release == "UNDEFINED"
+    msg: "Deployer installer does not support installing Gateway version {{iag_release}} on {{ ansible_distribution | lower }}-{{ ansible_distribution_major_version }}"
+  when: valid_iag_release is defined
 
 - name: Download Gateway OS rpms
   ansible.builtin.import_role:
