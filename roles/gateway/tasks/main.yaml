@@ -58,25 +58,25 @@
     mode: "0775"
     state: directory
   with_items:
-  - /etc/ansible
-  - "{{ iag_log_dir }}"
-  - "{{ iag_properties_location }}"
-  - "{{ iag_data_dir }}"
-  - "{{ iag_install_dir }}"
-  - "{{ iag_install_dir }}/ansible/collections"
-  - "{{ iag_install_dir }}/ansible/inventory"
-  - "{{ iag_install_dir }}/ansible/modules"
-  - "{{ iag_install_dir }}/ansible/roles"
-  - "{{ iag_install_dir }}/ansible/collections"
-  - "{{ iag_install_dir }}/ansible/playbooks"
-  - "{{ iag_install_dir }}/ansible/plugins/modules"
-  - "{{ iag_install_dir }}/ansible/scripts"
-  - "{{ iag_install_dir }}/conf"
-  - "{{ iag_install_dir }}/conf/certs"
-  - "{{ iag_install_dir }}/nornir/conf"
-  - "{{ iag_install_dir }}/nornir/inventory"
-  - "{{ iag_install_dir }}/nornir/modules"
-  - "{{ iag_install_dir }}/scripts"
+    - /etc/ansible
+    - "{{ iag_log_dir }}"
+    - "{{ iag_properties_location }}"
+    - "{{ iag_data_dir }}"
+    - "{{ iag_install_dir }}"
+    - "{{ iag_install_dir }}/ansible/collections"
+    - "{{ iag_install_dir }}/ansible/inventory"
+    - "{{ iag_install_dir }}/ansible/modules"
+    - "{{ iag_install_dir }}/ansible/roles"
+    - "{{ iag_install_dir }}/ansible/collections"
+    - "{{ iag_install_dir }}/ansible/playbooks"
+    - "{{ iag_install_dir }}/ansible/plugins/modules"
+    - "{{ iag_install_dir }}/ansible/scripts"
+    - "{{ iag_install_dir }}/conf"
+    - "{{ iag_install_dir }}/conf/certs"
+    - "{{ iag_install_dir }}/nornir/conf"
+    - "{{ iag_install_dir }}/nornir/inventory"
+    - "{{ iag_install_dir }}/nornir/modules"
+    - "{{ iag_install_dir }}/scripts"
 
 - name: Create Python venv directory
   ansible.builtin.file:
@@ -101,33 +101,33 @@
 - name: Install Ansible
   when: iag_enable_ansible | bool
   block:
-  - name: Install Ansible into the python virtual environment
-    ansible.builtin.pip:
-      name: "{{ iag_ansible_version }}"
-      virtualenv: "{{ iag_install_dir }}/venv"
-    when: not offline_install
+    - name: Install Ansible into the python virtual environment
+      ansible.builtin.pip:
+        name: "{{ iag_ansible_version }}"
+        virtualenv: "{{ iag_install_dir }}/venv"
+      when: not offline_install
 
-  - name: Create Ansible config file
-    ansible.builtin.template:
-      src: ansible.cfg.j2
-      dest: /etc/ansible/ansible.cfg
-      backup: true
+    - name: Create Ansible config file
+      ansible.builtin.template:
+        src: ansible.cfg.j2
+        dest: /etc/ansible/ansible.cfg
+        backup: true
 
-  - name: Create empty ansible inventory files
-    ansible.builtin.file:
-      name: "{{ iag_install_dir }}/ansible/inventory/hosts"
-      owner: "{{ iag_user }}"
-      group: "{{ iag_group }}"
-      mode: "0660"
-      state: touch
+    - name: Create empty ansible inventory files
+      ansible.builtin.file:
+        name: "{{ iag_install_dir }}/ansible/inventory/hosts"
+        owner: "{{ iag_user }}"
+        group: "{{ iag_group }}"
+        mode: "0660"
+        state: touch
 
-  - name: Create empty ansible vault file
-    ansible.builtin.file:
-      name: "{{ iag_install_dir }}/conf/.vault_password_file"
-      owner: "{{ iag_user }}"
-      group: "{{ iag_group }}"
-      mode: "0400"
-      state: touch
+    - name: Create empty ansible vault file
+      ansible.builtin.file:
+        name: "{{ iag_install_dir }}/conf/.vault_password_file"
+        owner: "{{ iag_user }}"
+        group: "{{ iag_group }}"
+        mode: "0400"
+        state: touch
 
 - name: Check if Automation Gateway is already installed
   ansible.builtin.stat:
@@ -151,49 +151,49 @@
 - name: Set ownership/permissions and create properties.yaml
   when: not iag_installed.stat.exists
   block:
-  # Using chown and chmod is a faster way to enforce the file ownership and
-  # permissions. The file module in ansible checks each and every file/dir
-  # in the tree, 'chown -R ' does not, it just sets it.
-  - name: Set appropriate ownership on all gateway files
-    ansible.builtin.command:
-      cmd: "chown -R {{ iag_user }}:{{ iag_group }} {{ iag_install_dir }}/venv"
-    changed_when: true
+    # Using chown and chmod is a faster way to enforce the file ownership and
+    # permissions. The file module in ansible checks each and every file/dir
+    # in the tree, 'chown -R ' does not, it just sets it.
+    - name: Set appropriate ownership on all gateway files
+      ansible.builtin.command:
+        cmd: "chown -R {{ iag_user }}:{{ iag_group }} {{ iag_install_dir }}/venv"
+      changed_when: true
 
-  - name: Set appropriate permissions on all gateway files
-    ansible.builtin.command:
-      cmd: "chmod -R 775 {{ iag_install_dir }}/venv"
-    changed_when: true
+    - name: Set appropriate permissions on all gateway files
+      ansible.builtin.command:
+        cmd: "chmod -R 775 {{ iag_install_dir }}/venv"
+      changed_when: true
 
-  - name: Create properties.yaml using template based on the version
-    ansible.builtin.template:
-      src: "properties.{{ iag_release }}.yaml.j2"
-      dest: "{{ iag_properties_location }}/properties.yaml"
-      owner: "{{ iag_user }}"
-      group: "{{ iag_group }}"
-      mode: "0660"
+    - name: Create properties.yaml using template based on the version
+      ansible.builtin.template:
+        src: "properties.{{ iag_release }}.yaml.j2"
+        dest: "{{ iag_properties_location }}/properties.yaml"
+        owner: "{{ iag_user }}"
+        group: "{{ iag_group }}"
+        mode: "0660"
 
 - name: Create Nornir files
   when: iag_enable_nornir | bool
   block:
-  - name: Create Nornir inventory files (empty)
-    ansible.builtin.file:
-      name: "{{ item }}"
-      owner: "{{ iag_user }}"
-      group: "{{ iag_group }}"
-      mode: "0660"
-      state: touch
-    with_items:
-    - "{{ iag_install_dir }}/nornir/inventory/defaults.yaml"
-    - "{{ iag_install_dir }}/nornir/inventory/groups.yaml"
-    - "{{ iag_install_dir }}/nornir/inventory/hosts.yaml"
+    - name: Create Nornir inventory files (empty)
+      ansible.builtin.file:
+        name: "{{ item }}"
+        owner: "{{ iag_user }}"
+        group: "{{ iag_group }}"
+        mode: "0660"
+        state: touch
+      with_items:
+      - "{{ iag_install_dir }}/nornir/inventory/defaults.yaml"
+      - "{{ iag_install_dir }}/nornir/inventory/groups.yaml"
+      - "{{ iag_install_dir }}/nornir/inventory/hosts.yaml"
 
-  - name: Create Nornir config file
-    ansible.builtin.template:
-      src: nornir.config.yaml.j2
-      dest: "{{ iag_install_dir }}/nornir/config.yaml"
-      owner: "{{ iag_user }}"
-      group: "{{ iag_group }}"
-      mode: "0660"
+    - name: Create Nornir config file
+      ansible.builtin.template:
+        src: nornir.config.yaml.j2
+        dest: "{{ iag_install_dir }}/nornir/config.yaml"
+        owner: "{{ iag_user }}"
+        group: "{{ iag_group }}"
+        mode: "0660"
 
 - name: Write automation-gateway.service to host
   ansible.builtin.template:
@@ -213,9 +213,9 @@
     zone: public
     immediate: true
   when:
-  - ansible_facts.services["firewalld.service"] is defined
-  - ansible_facts.services["firewalld.service"].state == "running"
-  - ansible_facts.services["firewalld.service"].status == "enabled"
+    - ansible_facts.services["firewalld.service"] is defined
+    - ansible_facts.services["firewalld.service"].state == "running"
+    - ansible_facts.services["firewalld.service"].status == "enabled"
 
 - name: Configure HTTPS Port on FirewallD Public Zone
   ansible.posix.firewalld:
@@ -225,9 +225,9 @@
     zone: public
     immediate: true
   when:
-  - ansible_facts.services["firewalld.service"] is defined
-  - ansible_facts.services["firewalld.service"].state == "running"
-  - ansible_facts.services["firewalld.service"].status == "enabled"
+    - ansible_facts.services["firewalld.service"] is defined
+    - ansible_facts.services["firewalld.service"].state == "running"
+    - ansible_facts.services["firewalld.service"].status == "enabled"
 
 - name: Allow IAG to listen on tcp port {{ iag_port }}
   community.general.seport:
