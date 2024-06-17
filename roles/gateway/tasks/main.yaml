@@ -137,16 +137,16 @@
 - name: Install Automation Gateway
   when: not iag_installed.stat.exists
   block:
-  - name: Copy IAG to host
-    ansible.builtin.copy:
-      src: "{{ iag_whl_file }}"
-      dest: "{{ workingdir.path }}/{{ iag_whl_file | basename }}"
-      mode: '0644'
+    - name: Copy IAG to host
+      ansible.builtin.copy:
+        src: "{{ iag_whl_file }}"
+        dest: "{{ workingdir.path }}/{{ iag_whl_file | basename }}"
+        mode: '0644'
 
-  - name: Install IAG
-    ansible.builtin.pip:
-      name: "{{ workingdir.path }}/{{ iag_whl_file | basename }}"
-      virtualenv: "{{ iag_install_dir }}/venv"
+    - name: Install IAG
+      ansible.builtin.pip:
+        name: "{{ workingdir.path }}/{{ iag_whl_file | basename }}"
+        virtualenv: "{{ iag_install_dir }}/venv"
 
 - name: Set ownership/permissions and create properties.yaml
   when: not iag_installed.stat.exists
@@ -183,9 +183,9 @@
         mode: "0660"
         state: touch
       with_items:
-      - "{{ iag_install_dir }}/nornir/inventory/defaults.yaml"
-      - "{{ iag_install_dir }}/nornir/inventory/groups.yaml"
-      - "{{ iag_install_dir }}/nornir/inventory/hosts.yaml"
+        - "{{ iag_install_dir }}/nornir/inventory/defaults.yaml"
+        - "{{ iag_install_dir }}/nornir/inventory/groups.yaml"
+        - "{{ iag_install_dir }}/nornir/inventory/hosts.yaml"
 
     - name: Create Nornir config file
       ansible.builtin.template:
