@@ -28,6 +28,19 @@ The variables in this section may be overridden in the inventory in the `all` gr
 | Variable | Group | Type | Description | Default Value
 | :------- | :---- | :--- | :---------- | :------------
 | `configure_vault` | `all` | Boolean | Flag to configure Vault. When set to to `true`, the Vault Unseal role will be executed. | `false`
+| `vault_read_only` | `all` | Boolean | Flag to manage how secret data is written to Vault with IAP version 2021.2 and later. | `false`
+
+
+Beginning with the 2021.2 release, a `readOnly` property was added to vaultProps in the properties.json file. This property allows developers to denote fields that contain sensitive data and manage how secret data is written to Vault. This configurable property defaults to false.
+
+When set as readOnly: true, the following will occur:
+
+ - Masking in the UI will be disabled (turned off).
+ - Clear text will be shown.
+ - All custom user decorations will be ignored.
+ - IAP will not write data to Vault.
+
+⚠ WARNING: If there are passwords stored within Vault and the readOnly property is initially set to false, and then later changed to true, all passwords will be lost and have to be set manually.
 
 ## Common Variables
 
