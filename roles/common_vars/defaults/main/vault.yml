@@ -1,5 +1,7 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
----
 # The default group that runs vault
 vault_group: vault
+
+# The default port of the vault server
+vault_port: 8200

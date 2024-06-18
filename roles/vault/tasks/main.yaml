@@ -71,10 +71,10 @@
     group: root
     mode: "0644"
 
-- name: Enable and start vault
+- name: Enable and restart vault
   ansible.builtin.systemd:
     name: vault
-    state: started
+    state: restarted
     enabled: true
     daemon_reload: true
 
