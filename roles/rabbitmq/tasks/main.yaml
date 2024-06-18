@@ -11,7 +11,7 @@
 - name: Check for valid RabbitMQ release
   ansible.builtin.fail:
     msg: "Deployer installer does not support installing RabbitMQ on IAP version {{ iap_release }}"
-  when: valid_rabbitmq_packages is defined
+  when: invalid_rabbitmq_packages is defined
 
 - name: Install base OS packages
   ansible.builtin.include_role:

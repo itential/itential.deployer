@@ -30,4 +30,4 @@
 - name: Check for valid IAP release
   ansible.builtin.fail:
     msg: "Deployer installer does not support installing IAP version {{ iap_release }} on {{ ansible_distribution | lower }}-{{ ansible_distribution_major_version }}"
-  when: valid_iap_release is defined
+  when: invalid_iap_release is defined
