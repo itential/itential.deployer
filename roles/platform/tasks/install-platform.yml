@@ -79,24 +79,18 @@
     remote_src: true
   when: iap_tar_file is defined
 
-- name: Create the "current" symlink
-  ansible.builtin.file:
-    path: "{{ iap_install_dir }}/current"
-    src: "{{ iap_install_dir }}/{{ iap_package_name }}"
-    owner: "{{ iap_user }}"
-    group: "{{ iap_group }}"
-    state: link
-
-- name: Create systemd file
-  ansible.builtin.template:
-    src: automation-platform.service.j2
-    dest: /usr/lib/systemd/system/automation-platform.service
-    mode: "0644"
-
-- name: Remove Itential source file
+- name: Remove the bin file
   when:
-    - (remove_iap_source_file | bool)
+    - remove_iap_source_file | bool
     - iap_bin_file is defined
   ansible.builtin.file:
     path: "{{ iap_install_dir }}/{{ iap_bin_file }}"
+    state: absent
+
+- name: Remove the tar file
+  when:
+    - remove_iap_source_file | bool
+    - iap_tar_file is defined
+  ansible.builtin.file:
+    path: "{{ iap_install_dir }}/{{ iap_tar_file }}"
     state: absent

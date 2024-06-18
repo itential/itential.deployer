@@ -1,0 +1,14 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+### IAP
+- name: Finalize Patch IAP
+  hosts: platform
+  become: true
+  roles:
+    - role: itential.deployer.common_vars
+  tasks:
+    - name: Finalize Patch IAP
+      ansible.builtin.import_role:
+        name: itential.deployer.platform
+        tasks_from: finalize-upgrade

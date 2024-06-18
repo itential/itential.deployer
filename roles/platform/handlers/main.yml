@@ -3,5 +3,5 @@
 ---
 - name: Restart IAP
   ansible.builtin.systemd:
-    name: automation-platform
+    name: "{{ iap_service_name }}"
     state: restarted

@@ -1,0 +1,21 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Determine release vars
+  ansible.builtin.include_tasks:
+    file: determine-release-vars.yml
+
+- name: Create the "current" symlink
+  ansible.builtin.file:
+    path: "{{ iap_install_dir }}/current"
+    src: "{{ iap_install_dir }}/{{ iap_package_name }}"
+    owner: "{{ iap_user }}"
+    group: "{{ iap_group }}"
+    state: link
+    follow: false
+
+- name: Restart IAP
+  ansible.builtin.command: /bin/true
+  notify: "Restart IAP"
+  changed_when: true
+  tags: restart_iap

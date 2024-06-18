@@ -66,6 +66,15 @@
   ansible.builtin.include_tasks:
     file: install-platform.yml
 
+- name: Create the "current" symlink
+  ansible.builtin.file:
+    path: "{{ iap_install_dir }}/current"
+    src: "{{ iap_install_dir }}/{{ iap_package_name }}"
+    owner: "{{ iap_user }}"
+    group: "{{ iap_group }}"
+    state: link
+    follow: false
+
 - name: Create properties.json file
   ansible.builtin.include_tasks:
     file: create-properties-file.yml
@@ -106,9 +115,15 @@
       when: configure_iap | bool
   tags: mongo_init
 
+- name: Create systemd file
+  ansible.builtin.template:
+    src: automation-platform.service.j2
+    dest: "/usr/lib/systemd/system/{{ iap_service_name }}.service"
+    mode: "0644"
+
 - name: Enable and start IAP
   ansible.builtin.systemd:
-    name: automation-platform
+    name: "{{ iap_service_name }}"
     enabled: true
     state: restarted
 
