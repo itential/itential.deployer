@@ -18,6 +18,7 @@
         enabled: true
         gpgcheck: true
         gpgkey: "{{ mongodb_gpgkey_url }}"
+      when: install_yum_repos | bool
 
     # Install mongodb tools if they are not already installed
     - name: Install the MongoDB tools packages
