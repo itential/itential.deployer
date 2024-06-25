@@ -70,6 +70,7 @@ The following table lists the default variables located in `roles/platform/defau
 | `iap_https_port` | `platform` | Integer | The IAP HTTPS listen port. | `3443`
 | `configure_iap` | `platform` | Boolean | Flag to enabled adding default configurations in MongoDB. | `true`
 | `configure_iag_adapters` | `platform` | String | Flag to enable automatically configuring IAG adapters. | `true`
+| `iap_iag_adapter_token_timeout` | `platform` | String | IAG adapter authentication token timeout.<br>Defines how long a token is valid in milliseconds. | `3600000`
 | `iap_user` | `platform` | String | The IAP Linux user. | `itential`
 | `iap_group` | `platform` | String | The IAP Linux group. | `itential`
 | `vault_install_dir` | `platform` | String | The location of the Vault installation directory. | `/opt/vault`

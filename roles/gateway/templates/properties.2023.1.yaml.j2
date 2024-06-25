@@ -34,7 +34,7 @@ bind_address: {{ inventory_hostname }}
 
 # The number of http server threads for handling requests.
 # A good starting point is 2-4 x NUM_CORES then adjust based on observed workload.
-#http_server_threads: 8
+http_server_threads: {{ iag_http_server_threads }}
 
 # A flag that determines whether authentication is disabled or not.
 # Warning: only disable authentication for temporary, non production testing.
