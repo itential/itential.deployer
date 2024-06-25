@@ -41,8 +41,9 @@
     5. [IAP](#iap)
     6. [IAG](#iag)
 8. [Patching IAP and IAG](#patching-iap-and-iag)
-9. [Running the Deployer in Offline Mode](#running-the-deployer-in-offline-mode)
-10. [Appendix A: Definition of "Highly Available" Dependencies](#appendix-a-definition-of-highly-available-dependencies)
+9. [Using Internal YUM Repositories](#using-internal-yum-repositories)
+10. [Running the Deployer in Offline Mode](#running-the-deployer-in-offline-mode)
+11. [Appendix A: Definition of "Highly Available" Dependencies](#appendix-a-definition-of-highly-available-dependencies)
 
 ## Overview
 
@@ -146,7 +147,7 @@ The Itential Deployer is an Ansible collection. As such, a familiarity with basi
 
 ### Required Public Repositories
 
-In general the Deployer will install packages using the standard YUM/DNF repositories on the target servers.  When packages are not available for the distribution, the Deployer will either install the required repository or download the packages.
+In general the Deployer will install packages using the standard YUM repositories on the target servers.  When packages are not available for the distribution, the Deployer will either install the required repository or download the packages.
 
 | Component | Hostname | Protocol | Notes |
 | :-------- | :------- | :------- | :---- |
@@ -165,6 +166,8 @@ In general the Deployer will install packages using the standard YUM/DNF reposit
 | IAP | www.openssl.org | https | When installing on Redhat/CentOS 7 |
 | IAG | www.python.org | https | When installing on Redhat/CentOS 7 |
 | IAG | www.openssl.org | https | When installing on Redhat/CentOS 7 |
+
+If internal YUM repositories are used, refer to the [Using Internal YUM Repositories](#using-internal-yum-repositories) section.
 
 ### Ports and Networking
 
@@ -955,6 +958,21 @@ The Deployer supports patching IAP and IAG.  Refer to the following guide for in
 [Patch IAP Guide](docs/patch_iap_guide.md)
 
 [Patch IAG Guide](docs/patch_iag_guide.md)
+
+## Using Internal YUM Repositories
+
+By default the Deployer will install YUM repositories which point to external URLs.  If the customer hosts repositories internally, the Deployer can be configured to skip installing the repositories.
+
+**&#9432; Note:**
+The customer will be reposible for configuring the repo files in `/etc/yum.repos.d`.
+
+To use internal repositories, set `install_yum_repos` to `false` in the `all` vars section.  For example:
+
+```yaml
+all:
+    vars:
+        install_yum_repos: false
+```
 
 ## Running the Deployer in Offline Mode
 

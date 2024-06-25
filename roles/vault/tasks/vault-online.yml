@@ -14,6 +14,7 @@
     baseurl: https://rpm.releases.hashicorp.com/RHEL/$releasever/$basearch/stable
     state: present
     gpgcheck: false
+  when: install_yum_repos | bool
 
 - name: Install vault
   ansible.builtin.yum:

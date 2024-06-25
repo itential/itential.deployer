@@ -5,6 +5,13 @@
 # The file containing the installed components and versions
 itential_release_file: /etc/iap-release
 
+# Flag to toggle the installation of yum repositories.
+# If set to true (default), repositories will be installed in /etc/yum.repos.d.
+# If set to false, repositories will not be installed and customers will be
+# required to configure them.  This will allow customers to use internal
+# repositories.
+install_yum_repos: true
+
 # By default, do not configure vault
 configure_vault: false
 
