@@ -28,7 +28,7 @@
         "token_result_field": "token",
         "token_URI_path": "/api/v2.0/login",
         "invalid_token_error": 401,
-        "token_timeout": 6000,
+        "token_timeout": {{ iap_iag_adapter_token_timeout }},
         "token_cache": "local",
         "auth_field": "header.headers.Authorization",
         "auth_field_format": "{token}"

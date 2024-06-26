@@ -28,6 +28,10 @@ configure_iap: true
 # them into the mongo database.
 configure_iag_adapters: true
 
+# If the IAG adapters are configured, set the token timeout. The
+# default value is 3600000 milliseconds (60 minutes).
+iap_iag_adapter_token_timeout: 3600000
+
 # The default user that runs the server process
 iap_user: itential
 

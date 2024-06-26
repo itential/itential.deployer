@@ -58,7 +58,8 @@ The following table lists the default variables located in `roles/gateway/defaul
 | `iag_ssl_key_dest` | `gateway` | String | The SSL key file destination. | `{{ iag_ssl_dir }}/{{ iag_ssl_key_src }}`
 | `iag_ssl_rootca_src` | `gateway` | String | The SSL root CA file. | `rootCA.crt`
 | `iag_ssl_rootca_dest` | `gateway` | String | The SSL root CA destination. | `{{ iag_ssl_dir }}/{{ iag_ssl_rootca_src }}`
-| `iag_tlsv1_2` | `gateway`  Boolean | Flag to enable TLS 1.2. | `false`
+| `iag_tlsv1_2` | `gateway` | Boolean | Flag to enable TLS 1.2. | `false`
+| `iag_http_server_threads` | `gateway` | Integer | The number of http server threads for handling requests. | `{{ ansible_processor_cores * 4 }}`
 
 ## Gateway HAProxy Role Variables
 
