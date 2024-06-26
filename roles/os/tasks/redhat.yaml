@@ -6,11 +6,12 @@
     file: "{{ item }}"
   with_first_found:
     - "release-{{ ansible_distribution_major_version }}.yaml"
+    - "release-undefined.yaml"
 
 - name: Check supported OS
   ansible.builtin.fail:
-    msg: "Unsupported OS version!"
-  when: os_packages is undefined
+    msg: "Deployer does not support installing on OS version {{ ansible_distribution_major_version }}!"
+  when: invalid_os_release is defined
 
 - name: Include OS specific tasks (online)
   ansible.builtin.include_tasks: "{{ ansible_os_family.lower() }}-online.yaml"

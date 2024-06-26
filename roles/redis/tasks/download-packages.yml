@@ -22,8 +22,8 @@
 
 - name: Check for valid Redis release
   ansible.builtin.fail:
-    msg: "missing or invalid redis_packages"
-  when: redis_packages == "UNDEFINED"
+    msg: "Deployer does not support installing Redis on IAP version {{ iap_release }}"
+  when: invalid_redis_release is defined
 
 - name: Download package from Remi repo
   when: redis_install_method == "remi_repo"

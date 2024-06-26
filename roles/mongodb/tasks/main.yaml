@@ -11,8 +11,8 @@
 
 - name: Check for valid MongoDB release
   ansible.builtin.fail:
-    msg: "missing or invalid mongodb_version"
-  when: mongodb_version == "UNDEFINED"
+    msg: "Deployer does not support installing MongoDB for IAP version {{ iap_release }} on {{ ansible_distribution }}-{{ ansible_distribution_major_version }}"
+  when: invalid_iag_release is defined
   tags: always
 
 - name: Install base OS packages
@@ -148,7 +148,7 @@
   ansible.builtin.template:
     src: mongod.conf.j2
     dest: "{{ mongo_conf_file }}"
-    owner: "{{ mongo_owner}}"
+    owner: "{{ mongo_owner }}"
     group: "{{ mongo_group }}"
     mode: "0644"
   tags: configure_mongo
