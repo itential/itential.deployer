@@ -29,7 +29,13 @@ jobs:
           echo "Updating version to ${{env.GALAXY_VERSION}} in galaxy.yml"
           sed -i 's/\(version:\) .*/\1 ${{env.GALAXY_VERSION}}/g' galaxy.yml
           git add galaxy.yml
-          git commit -m "Update galaxy version"
+      - name: Update changelog
+        run: |
+          python scripts/changelog.py > CHANGELOG.md
+          git add CHANGELOG.md
+      - name: Commit changes
+        run: |
+          git commit -m "Update galaxy version and changelog for release ${{env.GALAXY_VERSION}}"
           git push origin HEAD:main
       - name: Build collection
         run: ansible-galaxy collection build
