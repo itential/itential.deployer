@@ -172,19 +172,38 @@ If internal YUM repositories are used, refer to the [Using Internal YUM Reposito
 ### Ports and Networking
 
   In a clustered environment where components are installed on more than one host, the following network traffic flows need to be allowed.
-| Source | Destination | Port | Description |
-|---|---|---|---|
-| IAP | MongoDB | 27017 | IAP connects to MongoDB |
-| IAP | RabbitMQ | 5672/5671 | IAP connects to Rabbitmq for interprocess communication. 5671 is used for SSL if enabled.<br>When installing IAP version 23.1 and older. |
-| IAP | Redis | 6379 | IAP connects to Redis for session tokens |
-| IAP | Redis | 26379 | IAP connects to Redis Sentinel in a HA Redis set up |
-| IAP | IAG | 8083 | IAP connects to IAG |
-| MongoDB | MongoDB | 27017 | Each MongoDB talks to the other MongoDBs for replication of the database |
-| RabbitMQ | RabbitMQ | 5672/5671 | Each Rabbit talks to the other Rabbits for HA resiliency. 5671 is used for SSL if enabled.<br>When installing IAP version 23.1 and older. |
-| RabbitMQ | RabbitMQ | 25672 | Each Rabbit talks to the other Rabbits to form a cluster.<br>When installing IAP version 23.1 and older. |
-| RabbitMQ | RabbitMQ | 4369 | epmd (Erlang Port Mapping Daemon) is a small additional daemon that runs alongside every RabbitMQ node and is used to discover what port a particular node listens on for inter-node communication.<br>When installing IAP version 23.1 and older. |
-| Redis | Redis | 6379 | Each Redis talks to the other Redis’s for replication |
-| Redis | Redis | 26379 | Each Redis uses Redis Sentinel to monitor the Redis processes for HA resiliency |
+| Source | Destination | Port | Protocol | Description |
+| ------ | ----------- | ---- | -------- | ----------- |
+| Desktop Devices | IAP | 3000 | TCP | Web browser connections to IAP over HTTP |
+| Desktop Devices | IAP | 3443 | TCP | Web browser connections to IAP over HTTPS |
+| Desktop Devices | IAG | 8083 | TCP | Web browser connections to IAG over HTTP |
+| Desktop Devices | IAG | 8443 | TCP | Web browser connections to IAG over HTTPS  |
+| Desktop Devices | Vault | 8200 | TCP | Web browser connections to Hashicorp Vault |
+| IAP | MongoDB | 27017 | TCP | IAP connections to MongoDB |
+| IAP | RabbitMQ | 5672 | TCP | IAP connections to RabbitMQ |
+| IAP | RabbitMQ | 5671 | TCP | IAP connections to RabbitMQ with TLS |
+| IAP | Redis | 6379 | TCP | IAP connections to Redis |
+| IAP | Redis | 26379 | TCP | IAP connections to Redis Sentinel |
+| IAP | IAG | 8083 | TCP | IAP connections to IAG over HTTP |
+| IAP | IAG | 8443 | TCP | IAP connections to IAG over HTTPS |
+| IAP | Vault | 8200 | TCP | IAP connections to Hashicorp Vault |
+| IAP | LDAP | 389 | TCP | IAP connections to LDAP<br>When LDAP adapter is used for authentication |
+| IAP | LDAP | 636 | TCP | IAP connections to LDAP with TLS<br>When LDAP adapter is used for authentication |
+| IAP | RADIUS | 1812 | UDP | IAP connections to RADIUS<br>When RADIUS adapter is used for authentication |
+| MongoDB | MongoDB | 27017 | TCP | MongoDB replication |
+| RabbitMQ | RabbitMQ | 5672 | TCP | RabbitMQ AMQP for HA |
+| RabbitMQ | RabbitMQ | 5671 | TCP | RabbitMQ AMQP for HA with TLS |
+| RabbitMQ | RabbitMQ | 25672 | TCP | RabbitMQ inter-node and CLI tools communication |
+| RabbitMQ | RabbitMQ | 4369 | TCP | RabbitMQ epmd, a peer discovery service used by RabbitMQ nodes and CLI tools |
+| RabbitMQ | RabbitMQ | 15672 | TCP | RabbitMQ HTTP API clients, management UI and rabbitmqadmin |
+| RabbitMQ | RabbitMQ | 15671 | TCP | RabbitMQ HTTP API clients, management UI and rabbitmqadmin with TLS |
+| Redis | Redis | 6379 | TCP | Redis replication |
+| Redis | Redis | 26379 | TCP | Redis Sentinel for HA |
+
+Notes
+* Not all ports will need to be open for every supported architecture
+* Secure ports are only required when explicitly configured in the inventory
+* RabbitMQ ports are only required when installing IAP version 2023.1 and older
 
 ### Certificates
 
