@@ -111,6 +111,7 @@
       ansible.builtin.template:
         src: ansible.cfg.j2
         dest: /etc/ansible/ansible.cfg
+        mode: "0644"
         backup: true
 
     - name: Create empty ansible inventory files
@@ -199,6 +200,7 @@
   ansible.builtin.template:
     src: automation-gateway.service.j2
     dest: /etc/systemd/system/automation-gateway.service
+    mode: "0644"
     backup: true
 
 # Check if firewalld is running, if it is then open the appropriate ports
