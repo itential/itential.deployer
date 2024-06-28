@@ -1,6 +1,7 @@
 ---
 # .ansible-lint
 
+# Exclude these files from the linter
 exclude_paths:
   - .gitlab
 
