@@ -1,0 +1,10 @@
+---
+# .ansible-lint
+
+exclude_paths:
+  - .gitlab
+
+# Rules that we feel should not be errors but warnings
+warn_list:
+  - yaml[line-length]
+  - var-naming[no-role-prefix]
