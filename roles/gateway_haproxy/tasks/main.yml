@@ -11,7 +11,7 @@
 - name: Check for valid IAG release
   ansible.builtin.fail:
     msg: "Deployer does not support installing HAProxy on {{ iag_release }}"
-  when: invalid_iag_release is defined  
+  when: invalid_iag_release is defined
 
 - name: Install HAProxy
   ansible.builtin.package:

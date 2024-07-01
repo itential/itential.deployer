@@ -23,10 +23,16 @@
 - name: Set appropriate ownership on all gateway files
   ansible.builtin.command:
     cmd: "chown -R {{ iag_user }}:{{ iag_group }} {{ iag_install_dir }}/venv"
+  register: chown_output
+  changed_when: chown_output.rc == 0
+  failed_when: chown_output.rc != 0
 
 - name: Set appropriate permissions on all gateway files
   ansible.builtin.command:
     cmd: "chmod -R 775 {{ iag_install_dir }}/venv"
+  register: chmod_output
+  changed_when: chmod_output.rc == 0
+  failed_when: chmod_output.rc != 0
 
 - name: Start Automation Gateway service
   ansible.builtin.service:

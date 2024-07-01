@@ -5,6 +5,7 @@
   ansible.builtin.lineinfile:
     path: "{{ itential_release_file }}"
     line: "GATEWAY={{ iag_release }}"
+    mode: "0666"
     create: true
   changed_when: true
 
@@ -18,6 +19,7 @@
   ansible.builtin.lineinfile:
     path: "{{ itential_release_file }}"
     line: "PYTHON={{ python_installed_version.stdout }}"
+    mode: "0666"
     create: true
   changed_when: true
 
@@ -31,6 +33,7 @@
   ansible.builtin.lineinfile:
     path: "{{ itential_release_file }}"
     line: "PIP={{ pip_installed_version.stdout }}"
+    mode: "0666"
     create: true
   changed_when: true
 
@@ -38,6 +41,7 @@
   ansible.builtin.lineinfile:
     path: "{{ itential_release_file }}"
     line: "ANSIBLE={{ iag_ansible_version }}"
+    mode: "0666"
     create: true
   when: iag_enable_ansible | bool
   changed_when: true
@@ -46,6 +50,7 @@
   ansible.builtin.lineinfile:
     path: "{{ itential_release_file }}"
     line: "NORNIR=true"
+    mode: "0666"
     create: true
   when: iag_enable_nornir | bool
   changed_when: true
