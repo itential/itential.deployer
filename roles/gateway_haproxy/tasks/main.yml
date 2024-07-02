@@ -5,8 +5,8 @@
   ansible.builtin.include_vars:
     file: "{{ item }}"
   with_first_found:
-    - "release-{{ iag_release }}.yaml"
-    - "release-undefined.yaml"
+    - "release-{{ iag_release }}.yml"
+    - "release-undefined.yml"
 
 - name: Check for valid IAG release
   ansible.builtin.fail:
