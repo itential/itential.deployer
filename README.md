@@ -116,6 +116,16 @@ The caveat to this architecture is that your job history is not immediately avai
 
 The Itential Deployer is an Ansible project and as such requires running on a control node. That node has its own set of dependencies.
 
+### Control Node Specifications
+Itential recommends using a dedicated node running the requirements listed below as the ansible control node for the deployer project. That node should meet or exceed the following specifications:
+
+| Component | Value                |
+|-----------|----------------------|
+| OS        | RHEL8/9 or Rocky 8/9 |
+| RAM       | 4 GB                 |
+| CPUs      | 2                    |
+| Disk      | 20 GB                |
+
 ### Required Python, Ansible, and Ansible modules
 
 - **Itential Galaxy Access**: The Itential Deployer is hosted on the Itential Galaxy repository. An account is required to access Itential Galaxy. If you do not have an account, contact your Itential Professional Services representative.
