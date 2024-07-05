@@ -88,32 +88,25 @@
     cmd: tuned-adm profile virtual-guest-no-thp
   vars:
     ansible_python_interpreter: "{{ python_venv }}/bin/python3"
-  ignore_errors: true
-  # register: result
-  # changed_when: result.rc == 0
-  # failed_when: result.rc > 0
+  register: result
+  changed_when: result.rc == 0
+  failed_when: result.rc > 0
 
 # Tune Kernel parameters
 - name: Adjust keepalive
   ansible.posix.sysctl:
     name: net.ipv4.tcp_keepalive_time
     value: 300
-  failed_when: false
-  changed_when: false
 
 - name: Disable zone reclaim mode
   ansible.posix.sysctl:
     name: vm.zone_reclaim_mode
     value: 0
-  failed_when: false
-  changed_when: false
 
 - name: Increase throughput settings
   ansible.posix.sysctl:
     name: net.core.somaxconn
     value: 65535
-  failed_when: false
-  changed_when: false
 
 # Set Soft User Limits
 - name: Set number of procs
@@ -122,8 +115,6 @@
     limit_type: soft
     limit_item: nproc
     value: 32000
-  failed_when: false
-  changed_when: false
 
 - name: Set number of files
   community.general.pam_limits:
@@ -131,8 +122,6 @@
     limit_type: soft
     limit_item: nofile
     value: 64000
-  failed_when: false
-  changed_when: false
 
 - name: Create data directory
   ansible.builtin.file:
