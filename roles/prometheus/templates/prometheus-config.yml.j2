@@ -1,0 +1,64 @@
+
+{% set platform_hosts = [] %}
+{% for platform in groups['platform'] %}
+  {% set platform_uri = platform + ":3000" %}
+  {{ platform_hosts.append( platform_uri ) }}
+{% endfor %}
+
+{% set all_hosts = [] %}
+{% for hosts in groups['platform'] %}
+  {% set platform_uri = hosts + ":" + prometheus_node_exporter_port %}
+  {{ all_hosts.append( platform_uri ) }}
+{% endfor %}
+
+{% set mongo_hosts = [] %}
+{% for hosts in groups['mongodb'] %}
+  {% set mongo_uri = hosts + ":" + prometheus_mongo_exporter_port %}
+  {{ mongo_hosts.append( mongo_uri ) }}
+{% endfor %}
+
+{% set redis_hosts = [] %}
+{% for hosts in groups['redis'] %}
+  {% set redis_uri = hosts + ":" + prometheus_redis_exporter_port %}
+  {{ redis_hosts.append( redis_uri ) }}
+{% endfor %}
+
+# my global config
+global:
+  scrape_interval: {{ prometheus_scrape_interval }} # Set the scrape interval to every 15 seconds. Default is every 1 minute.
+  evaluation_interval: {{ prometheus_evaluation_interval }} # Evaluate rules every 15 seconds. The default is every 1 minute.
+  # scrape_timeout is set to the global default (10s).
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          # - alertmanager:9093
+
+# Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
+rule_files:
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+# A scrape configuration containing exactly one endpoint to scrape:
+# Here it's Prometheus itself.
+scrape_configs:
+  # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
+  
+  - job_name: node_exporter
+    static_configs:
+      - targets: {{ all_hosts | to_json }}
+
+  - job_name: iap_exporter
+    metrics_path: "/prometheus_metrics"
+    static_configs:
+      - targets: {{ platform_hosts | to_json }}
+  
+  - job_name: redis_exporter
+    static_configs:
+      - targets: {{ redis_hosts | to_json }}
+
+  - job_name: mongo_exporter
+    static_configs:
+      - targets: {{ mongo_hosts | to_json }}

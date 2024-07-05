@@ -1,0 +1,50 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Install base OS packages
+  ansible.builtin.include_role:
+    name: os
+  tags: install_base_os_packages
+
+- name: Create prometheus group
+  ansible.builtin.group:
+    name: "{{ prometheus_group }}"
+    state: present
+
+- name: Create prometheus user
+  ansible.builtin.user:
+    name: "{{ prometheus_user }}"
+    group: "{{ prometheus_group }}"
+    state: present
+
+- name: Create a directory if it does not exist
+  ansible.builtin.file:
+    path: /opt/prometheus
+    state: directory
+    owner: "{{ prometheus_user }}"
+    group: "{{ prometheus_group }}"
+    mode: "0755"
+
+# Install prometheus on its on server
+- name: Install Prometheus server
+  ansible.builtin.include_tasks:
+    file: install_prometheus.yml
+  when: inventory_hostname in groups['prometheus']
+
+# Install the node exporter on all servers
+- name: Install node exporter on all hosts
+  ansible.builtin.include_tasks:
+    file: install_node_exporter.yml
+  when: inventory_hostname not in groups['prometheus']
+
+# Install the mongo exporter on the mongo servers
+- name: Install Mongo exporter only on Mongo hosts
+  ansible.builtin.include_tasks:
+    file: install_mongo_exporter.yml
+  when: inventory_hostname in groups['mongodb']
+
+# Install the Redis exporter on the redis servers
+- name: Install Redis exporter only on Redis hosts
+  ansible.builtin.include_tasks:
+    file: install_redis_exporter.yml
+  when: inventory_hostname in groups['redis']

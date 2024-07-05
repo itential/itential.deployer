@@ -1,0 +1,45 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Download prometheus node-exporter
+  ansible.builtin.uri:
+    creates: /opt/prometheus/node-exporter.tar.gz
+    dest: /opt/prometheus/node-exporter.tar.gz
+    owner: "{{ prometheus_user }}"
+    group: "{{ prometheus_group }}"
+    mode: "0755"
+    url: "{{ prometheus_node_exporter_download_url }}"
+
+- name: Untar node exporter    
+  ansible.builtin.unarchive:
+    src: /opt/prometheus/node-exporter.tar.gz
+    dest: /opt/prometheus
+    remote_src: true
+    owner: "{{ prometheus_user }}"
+    group: "{{ prometheus_group }}"
+    mode: "0755"
+    extra_opts:
+      - --strip-components=1
+
+- name: Create node exporter systemd file
+  ansible.builtin.template:    
+    src: node_exporter.service.j2
+    dest: /usr/lib/systemd/system/node_exporter.service
+    owner: "{{ prometheus_user }}"
+    group: "{{ prometheus_group }}"
+    mode: "0644"
+    lstrip_blocks: true
+    
+- name: Start the node expoter as a systemd service
+  ansible.builtin.systemd:
+    name: node_exporter
+    enabled: true
+    daemon_reload: true
+    state: restarted
+
+# - name: Start the node exporter
+#   ansible.builtin.command:
+#     cmd: /opt/prometheus/node_exporter
+#   register: result
+#   changed_when: result.rc == 0
+#   failed_when: result.rc > 0
