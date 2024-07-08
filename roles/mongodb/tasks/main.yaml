@@ -176,9 +176,6 @@
     - ansible_facts.services["firewalld.service"] is defined
     - (ansible_facts.services["firewalld.service"].state == "running")
     - (ansible_facts.services["firewalld.service"].status == "enabled")
-  register: result
-  changed_when: result.rc == 0
-  failed_when: result.rc > 0
 
 - name: Start mongo
   ansible.builtin.systemd:
