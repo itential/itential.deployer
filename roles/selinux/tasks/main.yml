@@ -20,6 +20,7 @@
       ansible.builtin.copy:
         src: "{{ item }}"
         dest: "{{ workingdir.path }}/{{ item | basename }}"
+        mode: "0644"
       with_fileglob:
         - "{{ ansible_parent_role_paths | first }}/files/*.te"
 
@@ -34,6 +35,9 @@
         cmd: "checkmodule -M -m -o {{ workingdir.path }}/{{ item.path | basename | splitext | first }}.mod {{ item.path }}"
       with_items:
         - "{{ selinux_policies.files }}"
+      register: result
+      changed_when: result.rc == 0
+      failed_when: result.rc > 0
 
     - name: SELinux - Find the compiled modules
       ansible.builtin.find:
@@ -46,12 +50,18 @@
         cmd: "semodule_package -o {{ workingdir.path }}/{{ item.path | basename | splitext | first }}.pp -m {{ item.path }}"
       with_items:
         - "{{ compiled_modules.files }}"
+      register: result
+      changed_when: result.rc == 0
+      failed_when: result.rc > 0
 
     - name: SELinux - Install the modules
       ansible.builtin.shell: semodule -i *.pp
       args:
         executable: /bin/bash
         chdir: "{{ workingdir.path }}"
+      register: result
+      changed_when: result.rc == 0
+      failed_when: result.rc > 0
 
     - name: Remove temporary working directory
       ansible.builtin.file:
