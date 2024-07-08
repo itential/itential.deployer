@@ -1,0 +1,36 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Create grafana group
+  ansible.builtin.group:
+    name: "{{ prometheus_grafana_group }}"
+    state: present
+
+- name: Create grafana user
+  ansible.builtin.user:
+    name: "{{ prometheus_grafana_user }}"
+    group: "{{ prometheus_grafana_group }}"
+    state: present
+
+- name: Install Grafana repo
+  ansible.builtin.yum_repository:
+    name: "grafana"
+    description: Grafana Repository
+    baseurl: "{{ prometheus_grafana_repo_url }}"
+    enabled: true
+    gpgcheck: true
+    gpgkey: "{{ prometheus_grafana_gpg_key }}"
+  when:
+    - install_yum_repos | bool
+
+# Install mongodb if mongodb is not already installed
+- name: Install Grafana
+  ansible.builtin.yum:
+    name: grafana
+    state: present
+
+- name: Start Grafana
+  ansible.builtin.systemd:
+    name: grafana-server
+    state: restarted
+    enabled: true

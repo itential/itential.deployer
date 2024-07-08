@@ -18,3 +18,9 @@ prometheus_redis_exporter_download_url: https://github.com/oliver006/redis_expor
 prometheus_redis_exporter_port: "9121"
 prometheus_mongo_exporter_download_url: https://github.com/percona/mongodb_exporter/releases/download/v0.40.0/mongodb_exporter-0.40.0.linux-amd64.tar.gz
 prometheus_mongo_exporter_port: "9216"
+
+# Grafana
+prometheus_grafana_user: grafana
+prometheus_grafana_group: grafana
+prometheus_grafana_repo_url: https://rpm.grafana.com
+prometheus_grafana_gpg_key: https://rpm.grafana.com/gpg.key

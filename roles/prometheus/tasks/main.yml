@@ -48,3 +48,11 @@
   ansible.builtin.include_tasks:
     file: install_redis_exporter.yml
   when: inventory_hostname in groups['redis']
+
+# Install grafana on the prometheus server
+- name: Install Grafana
+  ansible.builtin.include_tasks:
+    file: install_grafana.yml
+  when: 
+    - grafana | bool
+    - inventory_hostname in groups['prometheus']
