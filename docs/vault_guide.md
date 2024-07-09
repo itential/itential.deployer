@@ -27,9 +27,7 @@ The variables in this section may be overridden in the inventory in the `all` gr
 
 | Variable | Group | Type | Description | Default Value
 | :------- | :---- | :--- | :---------- | :------------
-| `configure_vault` | `all` | Boolean | Flag to configure Vault. When set to to `true`, the Vault Unseal role will be executed. | `false`
 | `vault_read_only` | `all` | Boolean | Flag to manage how secret data is written to Vault with IAP version 2021.2 and later. | `false`
-
 
 Beginning with the 2021.2 release, a `readOnly` property was added to vaultProps in the properties.json file. This property allows developers to denote fields that contain sensitive data and manage how secret data is written to Vault. This configurable property defaults to false.
 
@@ -52,7 +50,7 @@ The following table lists the default variables that are shared between the Vaul
 | :------- | :---- | :--- | :---------- | :------------
 | `vault_group` | `all` | String | The Vault Linux group. | `vault`
 | `vault_port` | `all` | Integer | The Vault listen port. | `8200`
-
+| `vault_root_key_dir` | `all` | String | The Vault root key directory. | `/opt/vault/keys/root_key`
 
 ## Vault Role Variables
 
@@ -76,20 +74,16 @@ The following table lists the default variables located in `roles/vault_unseal/d
 | Variable | Group | Type | Description | Default Value
 | :------- | :---- | :--- | :---------- | :------------
 | `vault_setup` | `vault` | Boolean | Flag to enable Vault setup. | `false`
-| `unseal_keys_dir` | `vault` | String | The Vault unseal keys directory. | `/opt/vault/keys/unseal_keys`
-| `root_key_dir` | `vault` | String | The Vault root key directory. | `/opt/vault/keys/root_key`
+| `vault_unseal_keys_dir` | `vault` | String | The Vault unseal keys directory. | `/opt/vault/keys/unseal_keys`
 
 # Building Your Inventory
 
-To install and configure Vault, add a `vault` group and host to your inventory and configure the `configure_vault`, `vault_install` and `vault_setup` variables.  The following inventory shows a basic Vault configuration with a single Vault node.
+To install and unseal Vault, add a `vault` group and host to your inventory and configure the `vault_install` and `vault_setup` variables.  The following inventory shows a basic Vault configuration with a single Vault node.
 
 ## Example Inventory - Single Vault Node
 
 ```
 all:
-    vars:
-        configure_vault: true
-
     children:
         vault:
             hosts:
@@ -99,6 +93,9 @@ all:
                 vault_install: true
                 vault_setup: true
 ```
+
+**&#9432; Note:**
+In order to use Vault in IAP, the `configure_vault` variable will need to be set in the `platform` group and the `itential.deployer.iap` playbook will need to be executed.  Refer to the [IAP Guide](iap_guide.md).
 
 # Running the Playbook
 
