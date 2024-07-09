@@ -38,8 +38,11 @@ iap_user: itential
 # The default group that runs the server process
 iap_group: itential
 
+# By default, do not configure vault
+configure_vault: false
+
 # The directory to store the vault root key in
-vault_install_dir: /opt/vault
+iap_vault_token_dir: "{{ iap_install_dir }}/vault"
 
 # By default, IAP should be configured to process tasks on start
 process_tasks_on_start: true

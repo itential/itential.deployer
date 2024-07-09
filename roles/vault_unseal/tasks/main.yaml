@@ -4,7 +4,7 @@
 # Saving unseal keys to a directory (may remove this later for security)
 - name: Create directory to store unseal keys
   ansible.builtin.file:
-    path: "{{ unseal_keys_dir }}"
+    path: "{{ vault_unseal_keys_dir }}"
     state: directory
     owner: "{{ vault_user }}"
     group: "{{ vault_group }}"
@@ -12,7 +12,7 @@
 
 - name: Create directory to store root key
   ansible.builtin.file:
-    path: "{{ root_key_dir }}"
+    path: "{{ vault_root_key_dir }}"
     state: directory
     owner: "{{ vault_user }}"
     group: "{{ vault_group }}"
@@ -48,7 +48,7 @@
 
 - name: Write unseal keys to files
   ansible.builtin.copy:
-    dest: "{{ unseal_keys_dir }}/unseal_key_{{ item.0 }}"
+    dest: "{{ vault_unseal_keys_dir }}/unseal_key_{{ item.0 }}"
     content: "{{ item.1 }}"
     owner: "{{ vault_user }}"
     group: "{{ vault_group }}"
@@ -60,23 +60,15 @@
 - name: Write root token to file
   ansible.builtin.copy:
     content: "{{ vault_init_parsed.root_token }}"
-    dest: "{{ root_key_dir }}/token.txt"
+    dest: "{{ vault_root_key_dir }}/token.txt"
     owner: "{{ vault_user }}"
     group: "{{ vault_group }}"
     mode: "0660"
   when: not vault_status_parsed.initialized
 
-- name: Fetch root token
-  ansible.builtin.fetch: 
-    src: "{{ root_key_dir }}/token.txt"
-    dest: ./token.txt
-    flat: yes
-  when: configure_vault | bool
-  run_once: true
-
 - name: Get path to unseal keys
   ansible.builtin.find:
-    paths: "{{ unseal_keys_dir }}"
+    paths: "{{ vault_unseal_keys_dir }}"
   register: unseal_key_files
   when: vault_status_parsed.sealed
 
@@ -100,7 +92,7 @@
 
 - name: Get root key
   ansible.builtin.slurp:
-    src: '{{ root_key_dir }}/token.txt'
+    src: '{{ vault_root_key_dir }}/token.txt'
   register: root_key
 
 # Check if kv-v2 engine exists
