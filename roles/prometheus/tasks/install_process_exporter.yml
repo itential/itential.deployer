@@ -1,0 +1,53 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Download prometheus process-exporter
+  ansible.builtin.uri:
+    creates: /opt/prometheus/process-exporter.tar.gz
+    dest: /opt/prometheus/process-exporter.tar.gz
+    owner: "{{ prometheus_user }}"
+    group: "{{ prometheus_group }}"
+    mode: "0755"
+    url: "{{ prometheus_process_exporter_download_url }}"
+
+- name: Untar process exporter    
+  ansible.builtin.unarchive:
+    src: /opt/prometheus/process-exporter.tar.gz
+    dest: /opt/prometheus
+    remote_src: true
+    owner: "{{ prometheus_user }}"
+    group: "{{ prometheus_group }}"
+    mode: "0755"
+    extra_opts:
+      - --strip-components=1
+
+- name: Create process exporter config file from template
+  ansible.builtin.template:    
+    src: process_exporter_config.yml.j2
+    dest: /opt/prometheus/process_exporter_config.yml
+    owner: "{{ prometheus_user }}"
+    group: "{{ prometheus_group }}"
+    mode: "0644"
+    lstrip_blocks: true
+
+- name: Create process exporter systemd file from template
+  ansible.builtin.template:    
+    src: process_exporter.service.j2
+    dest: /usr/lib/systemd/system/process_exporter.service
+    owner: "{{ prometheus_user }}"
+    group: "{{ prometheus_group }}"
+    mode: "0644"
+    lstrip_blocks: true
+    
+- name: Start the process expoter as a systemd service
+  ansible.builtin.systemd:
+    name: process_exporter
+    enabled: true
+    daemon_reload: true
+    state: restarted
+
+- name: Remove the downloaded tar file
+  ansible.builtin.file:
+    path: /opt/prometheus/process-exporter.tar.gz
+    state: absent
+  

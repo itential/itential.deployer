@@ -37,9 +37,7 @@
     daemon_reload: true
     state: restarted
 
-# - name: Start the node exporter
-#   ansible.builtin.command:
-#     cmd: /opt/prometheus/node_exporter
-#   register: result
-#   changed_when: result.rc == 0
-#   failed_when: result.rc > 0
+- name: Remove the downloaded tar file
+  ansible.builtin.file:
+    path: /opt/prometheus/node-exporter.tar.gz
+    state: absent

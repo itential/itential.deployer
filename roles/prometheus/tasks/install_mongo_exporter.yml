@@ -36,3 +36,8 @@
     enabled: true
     daemon_reload: true
     state: restarted
+
+- name: Remove the downloaded tar file
+  ansible.builtin.file:
+    path: /opt/prometheus/mongo-exporter.tar.gz
+    state: absent

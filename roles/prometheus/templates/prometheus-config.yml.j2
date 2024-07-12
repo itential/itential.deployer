@@ -4,26 +4,27 @@
   {% set platform_uri = platform + ":3000" %}
   {{ platform_hosts.append( platform_uri ) }}
 {% endfor %}
-
+{% set platform_proc_hosts = [] %}
+{% for platform in groups['platform'] %}
+  {% set platform_proc_uri = platform + ":" + prometheus_process_exporter_port %}
+  {{ platform_proc_hosts.append( platform_proc_uri ) }}
+{% endfor %}
 {% set all_hosts = [] %}
 {% for hosts in groups['platform'] %}
   {% set platform_uri = hosts + ":" + prometheus_node_exporter_port %}
   {{ all_hosts.append( platform_uri ) }}
 {% endfor %}
-
 {% set mongo_hosts = [] %}
 {% for hosts in groups['mongodb'] %}
   {% set mongo_uri = hosts + ":" + prometheus_mongo_exporter_port %}
   {{ mongo_hosts.append( mongo_uri ) }}
 {% endfor %}
-
 {% set redis_hosts = [] %}
 {% for hosts in groups['redis'] %}
   {% set redis_uri = hosts + ":" + prometheus_redis_exporter_port %}
   {{ redis_hosts.append( redis_uri ) }}
 {% endfor %}
-
-# my global config
+# global config
 global:
   scrape_interval: {{ prometheus_scrape_interval }} # Set the scrape interval to every 15 seconds. Default is every 1 minute.
   evaluation_interval: {{ prometheus_evaluation_interval }} # Evaluate rules every 15 seconds. The default is every 1 minute.
@@ -49,6 +50,10 @@ scrape_configs:
   - job_name: node_exporter
     static_configs:
       - targets: {{ all_hosts | to_json }}
+
+  - job_name: process_exporter
+    static_configs:
+      - targets: {{ platform_proc_hosts | to_json }}
 
   - job_name: iap_exporter
     metrics_path: "/prometheus_metrics"

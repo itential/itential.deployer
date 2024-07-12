@@ -37,6 +37,12 @@
     file: install_node_exporter.yml
   when: inventory_hostname not in groups['prometheus']
 
+# Install the process exporter on platform servers
+- name: Install process exporter on platform hosts
+  ansible.builtin.include_tasks:
+    file: install_process_exporter.yml
+  when: inventory_hostname in groups['platform']
+
 # Install the mongo exporter on the mongo servers
 - name: Install Mongo exporter only on Mongo hosts
   ansible.builtin.include_tasks:
