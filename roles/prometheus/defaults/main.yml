@@ -6,7 +6,8 @@ prometheus_group: prometheus
 
 # Prometheus server settings
 prometheus_download_url: https://github.com/prometheus/prometheus/releases/download/v2.53.0/prometheus-2.53.0.linux-amd64.tar.gz
-prometheus_db_path: /opt/prometheus/data
+prometheus_dir: /opt/prometheus
+prometheus_db_path: "{{ prometheus_dir }}/data"
 prometheus_db_retention: 30d
 prometheus_scrape_interval: 15s
 prometheus_evaluation_interval: 15s
@@ -27,3 +28,5 @@ prometheus_grafana_group: grafana
 prometheus_grafana_repo_url: https://rpm.grafana.com
 prometheus_grafana_gpg_key: https://rpm.grafana.com/gpg.key
 prometheus_grafana_install_dir: /etc/grafana
+prometheus_grafana_dashboard_dir: "{{ prometheus_grafana_install_dir }}/provisioning/dashboards"
+prometheus_grafana_allowUiUpdates: false

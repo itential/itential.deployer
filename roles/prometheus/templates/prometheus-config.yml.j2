@@ -1,28 +1,33 @@
 
 {% set platform_hosts = [] %}
+{% set all_hosts = [] %}
 {% for platform in groups['platform'] %}
   {% set platform_uri = platform + ":3000" %}
   {{ platform_hosts.append( platform_uri ) }}
+  {{ all_hosts.append( platform + ":" + prometheus_node_exporter_port ) }}
 {% endfor %}
 {% set platform_proc_hosts = [] %}
 {% for platform in groups['platform'] %}
   {% set platform_proc_uri = platform + ":" + prometheus_process_exporter_port %}
   {{ platform_proc_hosts.append( platform_proc_uri ) }}
 {% endfor %}
-{% set all_hosts = [] %}
-{% for hosts in groups['platform'] %}
-  {% set platform_uri = hosts + ":" + prometheus_node_exporter_port %}
-  {{ all_hosts.append( platform_uri ) }}
-{% endfor %}
 {% set mongo_hosts = [] %}
 {% for hosts in groups['mongodb'] %}
   {% set mongo_uri = hosts + ":" + prometheus_mongo_exporter_port %}
   {{ mongo_hosts.append( mongo_uri ) }}
+  {{ all_hosts.append( hosts + ":" + prometheus_node_exporter_port ) }}
 {% endfor %}
 {% set redis_hosts = [] %}
 {% for hosts in groups['redis'] %}
   {% set redis_uri = hosts + ":" + prometheus_redis_exporter_port %}
   {{ redis_hosts.append( redis_uri ) }}
+  {{ all_hosts.append( hosts + ":" + prometheus_node_exporter_port ) }}
+{% endfor %}
+{% set rabbit_hosts = [] %}
+{% for hosts in groups['rabbitmq'] %}
+  {% set rabbit_uri = hosts + ":15692" %}
+  {{ rabbit_hosts.append( rabbit_uri ) }}
+  {{ all_hosts.append( hosts + ":" + prometheus_node_exporter_port ) }}
 {% endfor %}
 # global config
 global:
@@ -46,7 +51,7 @@ rule_files:
 # Here it's Prometheus itself.
 scrape_configs:
   # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
-  
+
   - job_name: node_exporter
     static_configs:
       - targets: {{ all_hosts | to_json }}
@@ -59,7 +64,7 @@ scrape_configs:
     metrics_path: "/prometheus_metrics"
     static_configs:
       - targets: {{ platform_hosts | to_json }}
-  
+
   - job_name: redis_exporter
     static_configs:
       - targets: {{ redis_hosts | to_json }}
@@ -67,3 +72,7 @@ scrape_configs:
   - job_name: mongo_exporter
     static_configs:
       - targets: {{ mongo_hosts | to_json }}
+
+  - job_name: rabbitmq_exporter
+    static_configs:
+      - targets: {{ rabbit_hosts | to_json }}
