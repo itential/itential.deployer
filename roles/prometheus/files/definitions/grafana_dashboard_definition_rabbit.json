@@ -8099,7 +8099,7 @@
   "schemaVersion": 34,
   "style": "dark",
   "tags": [
-    "rabbitmq-prometheus"
+    "RabbitMQ"
   ],
   "templating": {
     "list": [

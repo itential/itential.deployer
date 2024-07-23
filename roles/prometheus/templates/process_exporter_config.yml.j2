@@ -1,20 +1,7 @@
+# process names to collect metrics on.
+# ps -eo pid,comm=Name,exe=EXE,args=Comm
 process_names:
-  - comm:
-    - Pronghorn core
-    - Pronghorn AGMan
-    - Pronghorn Autom
-    - Pronghorn Confi
-    - Pronghorn FormB
-    - Pronghorn JsonF
-    - Pronghorn Jst A
-    - Pronghorn Lifec
-    - Pronghorn MOP A
-    - Pronghorn NSOMa
-    - Pronghorn Opera
-    - Pronghorn Searc
-    - Pronghorn Servi
-    - Pronghorn Tags
-    - Pronghorn Templ
-    - Pronghorn WorkF
-    - Pronghorn Workf
-    - Pronghorn local
+  - cmdline:
+    - Pronghorn
+  - cmdline:
+    - python3

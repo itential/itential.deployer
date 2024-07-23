@@ -1538,8 +1538,7 @@
   "refresh": "",
   "schemaVersion": 39,
   "tags": [
-    "prometheus",
-    "redis"
+    "Redis"
   ],
   "templating": {
     "list": [

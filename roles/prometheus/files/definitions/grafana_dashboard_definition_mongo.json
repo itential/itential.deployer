@@ -2654,7 +2654,7 @@
   "refresh": "",
   "schemaVersion": 36,
   "style": "dark",
-  "tags": [],
+  "tags": ["MongoDB"],
   "templating": {
     "list": [
       {

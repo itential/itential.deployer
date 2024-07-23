@@ -11,7 +11,10 @@ Type=simple
 Restart=on-failure
 ExecStart=/opt/prometheus/process-exporter \
   --config.path /opt/prometheus/process_exporter_config.yml \
-  --web.listen-address=:9256
+  --web.listen-address=:9256 \
+  --children=false \
+  --recheck=true \
+  --threads=false
 
 [Install]
 WantedBy=multi-user.target
