@@ -24,6 +24,7 @@
             - chcon -Rv -u system_u -t mongod_var_lib_t '{{ mongo_data_dir }}'
             - restorecon -R -v '{{ mongo_data_dir }}'
           register: result
+          changed_when: result.rc == 0
           failed_when:
             - result.rc is defined
             - result.rc > 0
@@ -36,6 +37,8 @@
             - semanage fcontext -a -t mongod_log_t '{{ mongo_log_dir }}'
             - chcon -Rv -u system_u -t mongod_log_t '{{ mongo_log_dir }}'
             - restorecon -R -v '{{ mongo_log_dir }}'
+          register: result
+          changed_when: result.rc == 0
           failed_when:
             - result.rc is defined
             - result.rc > 0

@@ -21,6 +21,7 @@
   tags: install_base_os_packages
 
 - name: Install MongoDB packages
+  tags: install_mongodb_packages
   block:
     - name: Get the list of installed packages
       ansible.builtin.package_facts:
@@ -35,7 +36,6 @@
       ansible.builtin.include_tasks:
         file: mongodb-offline.yml
       when: offline_install
-  tags: install_mongodb_packages
 
 - name: Install Python
   ansible.builtin.include_tasks:
@@ -53,6 +53,7 @@
   ansible.builtin.template:
     src: thp.service.j2
     dest: "/etc/systemd/system/disable-transparent-huge-pages.service"
+    mode: "0644"
 
 - name: Reload systemd unit files
   ansible.builtin.systemd:
@@ -74,36 +75,38 @@
     path: "/etc/tuned/virtual-guest-no-thp"
     owner: root
     group: root
+    mode: "0755"
 
 - name: Ensure tuned does not re-enable THP
   ansible.builtin.template:
     src: tuned.conf.j2
     dest: "/etc/tuned/virtual-guest-no-thp/tuned.conf"
+    mode: "0644"
 
 - name: Enable tuned profile
-  ansible.builtin.command: tuned-adm profile virtual-guest-no-thp
+  ansible.builtin.command:
+    cmd: tuned-adm profile virtual-guest-no-thp
   vars:
     ansible_python_interpreter: "{{ python_venv }}/bin/python3"
-  ignore_errors: true
+  register: result
+  changed_when: result.rc == 0
+  failed_when: result.rc > 0
 
 # Tune Kernel parameters
 - name: Adjust keepalive
   ansible.posix.sysctl:
     name: net.ipv4.tcp_keepalive_time
     value: 300
-  ignore_errors: true
 
 - name: Disable zone reclaim mode
   ansible.posix.sysctl:
     name: vm.zone_reclaim_mode
     value: 0
-  ignore_errors: true
 
 - name: Increase throughput settings
   ansible.posix.sysctl:
     name: net.core.somaxconn
     value: 65535
-  ignore_errors: true
 
 # Set Soft User Limits
 - name: Set number of procs
@@ -112,7 +115,6 @@
     limit_type: soft
     limit_item: nproc
     value: 32000
-  ignore_errors: true
 
 - name: Set number of files
   community.general.pam_limits:
@@ -120,7 +122,6 @@
     limit_type: soft
     limit_item: nofile
     value: 64000
-  ignore_errors: true
 
 - name: Create data directory
   ansible.builtin.file:
@@ -128,6 +129,7 @@
     path: "{{ mongo_data_dir }}"
     owner: "{{ mongo_owner }}"
     group: "{{ mongo_group }}"
+    mode: "0755"
 
 - name: Create log directory
   ansible.builtin.file:
@@ -135,6 +137,7 @@
     path: "{{ mongo_log_dir }}"
     owner: "{{ mongo_owner }}"
     group: "{{ mongo_group }}"
+    mode: "0755"
 
 - name: Create pid directory
   ansible.builtin.file:
@@ -165,15 +168,14 @@
 - name: Open Port on FirewallD Public Zone
   ansible.posix.firewalld:
     port: "{{ mongo_port }}/tcp"
-    permanent: yes
+    permanent: true
     state: enabled
     zone: public
-    immediate: yes
+    immediate: true
   when:
     - ansible_facts.services["firewalld.service"] is defined
     - (ansible_facts.services["firewalld.service"].state == "running")
     - (ansible_facts.services["firewalld.service"].status == "enabled")
-  ignore_errors: true
 
 - name: Start mongo
   ansible.builtin.systemd:
@@ -250,7 +252,7 @@
 
 - name: Determine mongo version
   ansible.builtin.shell:
-    cmd: mongod --version | grep "db version" | cut -d" " -f3
+    cmd: set -o pipefail && mongod --version | grep "db version" | cut -d" " -f3
   register: result
   check_mode: false
   changed_when: false
@@ -267,3 +269,4 @@
     regexp: '^MONGODB='
     line: "MONGODB={{ mongodb_release }}"
     create: true
+    mode: "0644"

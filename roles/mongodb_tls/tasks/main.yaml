@@ -8,7 +8,7 @@
   ansible.builtin.copy:
     src: "{{ mongo_cert_keyfile_source }}"
     dest: "{{ mongo_cert_keyfile_destination }}"
-    mode: 0400
+    mode: "0400"
     group: "{{ mongo_group }}"
     owner: "{{ mongo_owner }}"
 
@@ -17,7 +17,7 @@
   ansible.builtin.copy:
     src: "{{ mongo_root_ca_file_source }}"
     dest: "{{ mongo_root_ca_file_destination }}"
-    mode: 0400
+    mode: "0400"
     group: "{{ mongo_group }}"
     owner: "{{ mongo_owner }}"
 

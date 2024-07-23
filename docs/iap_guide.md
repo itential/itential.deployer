@@ -58,7 +58,6 @@ The variables in this section may be overridden in the inventory in the `platfor
 
 Either `iap_bin_file` or `iap_tar_file` must be defined in the inventory, but not both.
 
-
 The following table lists the default variables located in `roles/platform/defaults/main.yml`.
 
 | Variable | Group | Type | Description | Default Value
@@ -73,7 +72,8 @@ The following table lists the default variables located in `roles/platform/defau
 | `iap_iag_adapter_token_timeout` | `platform` | String | IAG adapter authentication token timeout.<br>Defines how long a token is valid in milliseconds. | `3600000`
 | `iap_user` | `platform` | String | The IAP Linux user. | `itential`
 | `iap_group` | `platform` | String | The IAP Linux group. | `itential`
-| `vault_install_dir` | `platform` | String | The location of the Vault installation directory. | `/opt/vault`
+| `configure_vault` | `platform` | Boolean | Flag to configure Vault. When set to to `true`, IAP will use Hashicorp Vault. | `false`
+| `iap_vault_token_dir` | `platform` | String | The directory where the Vault token is stored. | `{{ iap_install_dir }}/vault`
 | `process_tasks_on_start` | `platform` | Boolean | Flag to enable processing tasks on startup. | `true`
 | `process_jobs_on_start` | `platform` | Boolean | Flag to enable processing jobs on startup. | `true`
 | `upload_using_rsync` | `platform` | Boolean | Flag to enable using rsync to upload artifacts.  <br>When set to `true`, rsync will be used.  <br>When set to `false`, secure copy will be used. | `false`
@@ -177,6 +177,22 @@ all:
                 iap_bin_file: <bin-file>
                 app_artifact: true
                 app_artifact_source_file: <archive1>
+```
+
+## Example Inventory - Use Hashicorp Vault
+
+```
+all:
+    vars:
+        iap_release: 2023.1
+
+    children:
+        platform:
+            hosts:
+                <host1>:
+                    ansible_host: <addr1>
+            vars:
+                configure_vault: true
 ```
 
 # Running the Playbook

@@ -12,9 +12,6 @@ itential_release_file: /etc/iap-release
 # repositories.
 install_yum_repos: true
 
-# By default, do not configure vault
-configure_vault: false
-
 # Offline install variables
 offline_install: false
 
