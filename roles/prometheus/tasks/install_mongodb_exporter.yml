@@ -3,17 +3,17 @@
 ---
 - name: Download prometheus mongo-exporter
   ansible.builtin.uri:
-    creates: /opt/prometheus/mongo-exporter.tar.gz
-    dest: /opt/prometheus/mongo-exporter.tar.gz
+    creates: "{{ prometheus_dir }}/mongo-exporter.tar.gz"
+    dest: "{{ prometheus_dir }}/mongo-exporter.tar.gz"
     owner: "{{ prometheus_user }}"
     group: "{{ prometheus_group }}"
     mode: "0755"
     url: "{{ prometheus_mongo_exporter_download_url }}"
 
-- name: Untar mongo exporter   
+- name: Untar mongo exporter
   ansible.builtin.unarchive:
-    src: /opt/prometheus/mongo-exporter.tar.gz
-    dest: /opt/prometheus
+    src: "{{ prometheus_dir }}/mongo-exporter.tar.gz"
+    dest: "{{ prometheus_dir }}"
     remote_src: true
     owner: "{{ prometheus_user }}"
     group: "{{ prometheus_group }}"
@@ -22,14 +22,14 @@
       - --strip-components=1
 
 - name: Create mongo exporter systemd file
-  ansible.builtin.template:    
+  ansible.builtin.template:
     src: mongo_exporter.service.j2
     dest: /usr/lib/systemd/system/mongo_exporter.service
     owner: "{{ prometheus_user }}"
     group: "{{ prometheus_group }}"
     mode: "0644"
     lstrip_blocks: true
-    
+
 - name: Start the mongo expoter as a systemd service
   ansible.builtin.systemd:
     name: mongo_exporter
@@ -39,5 +39,5 @@
 
 - name: Remove the downloaded tar file
   ansible.builtin.file:
-    path: /opt/prometheus/mongo-exporter.tar.gz
+    path: "{{ prometheus_dir }}/mongo-exporter.tar.gz"
     state: absent

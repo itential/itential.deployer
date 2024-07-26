@@ -3,17 +3,17 @@
 ---
 - name: Download prometheus redis-exporter
   ansible.builtin.uri:
-    creates: /opt/prometheus/redis-exporter.tar.gz
-    dest: /opt/prometheus/redis-exporter.tar.gz
+    creates: "{{ prometheus_dir }}/redis-exporter.tar.gz"
+    dest: "{{ prometheus_dir }}/redis-exporter.tar.gz"
     owner: "{{ prometheus_user }}"
     group: "{{ prometheus_group }}"
     mode: "0755"
     url: "{{ prometheus_redis_exporter_download_url }}"
 
-- name: Untar redis exporter    
+- name: Untar redis exporter
   ansible.builtin.unarchive:
-    src: /opt/prometheus/redis-exporter.tar.gz
-    dest: /opt/prometheus
+    src: "{{ prometheus_dir }}/redis-exporter.tar.gz"
+    dest: "{{ prometheus_dir }}"
     remote_src: true
     owner: "{{ prometheus_user }}"
     group: "{{ prometheus_group }}"
@@ -22,14 +22,14 @@
       - --strip-components=1
 
 - name: Create redis exporter systemd file
-  ansible.builtin.template:    
+  ansible.builtin.template:
     src: redis_exporter.service.j2
     dest: /usr/lib/systemd/system/redis_exporter.service
     owner: "{{ prometheus_user }}"
     group: "{{ prometheus_group }}"
     mode: "0644"
     lstrip_blocks: true
-    
+
 - name: Start the redis expoter as a systemd service
   ansible.builtin.systemd:
     name: redis_exporter
@@ -39,5 +39,5 @@
 
 - name: Remove the downloaded tar file
   ansible.builtin.file:
-    path: /opt/prometheus/redis-exporter.tar.gz
+    path: "{{ prometheus_dir }}/redis-exporter.tar.gz"
     state: absent

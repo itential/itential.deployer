@@ -17,9 +17,9 @@
     group: "{{ prometheus_group }}"
     state: present
 
-- name: Create a directory if it does not exist
+- name: Create the prometheus directory if it does not exist
   ansible.builtin.file:
-    path: /opt/prometheus
+    path: "{{ prometheus_dir }}"
     state: directory
     owner: "{{ prometheus_user }}"
     group: "{{ prometheus_group }}"

@@ -9,9 +9,9 @@ User={{ prometheus_user }}
 Group={{ prometheus_group }}
 Type=simple
 Restart=on-failure
-ExecStart=/opt/prometheus/process-exporter \
-  --config.path /opt/prometheus/process_exporter_config.yml \
-  --web.listen-address=:9256 \
+ExecStart={{ prometheus_dir }}/process-exporter \
+  --config.path {{ prometheus_dir }}/process_exporter_config.yml \
+  --web.listen-address=:{{ prometheus_process_exporter_port }} \
   --children=false \
   --recheck=true \
   --threads=false

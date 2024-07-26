@@ -39,15 +39,6 @@
     mode: "0644"
     lstrip_blocks: true
 
-# Add default dashboards
-# - name: Upload grafana dashboard config
-#   ansible.builtin.copy:
-#     dest: "{{ prometheus_grafana_install_dir }}/provisioning/dashboards/"
-#     directory_mode: "0755"
-#     group: "{{ prometheus_grafana_group }}"
-#     owner: "{{ prometheus_grafana_user }}"
-#     mode: "0644"
-#     src: files/grafana_dashboard_config_iap.yml
 - name: Upload grafana dashboard config
   ansible.builtin.template:
     src: grafana_dashboard_config_iap.yml.j2
@@ -58,12 +49,12 @@
 
 - name: Upload grafana dashboard definitions
   ansible.builtin.copy:
+    src: definitions/
     dest: "{{ prometheus_grafana_install_dir }}/provisioning/dashboards/definitions/"
     directory_mode: "0755"
     group: "{{ prometheus_grafana_group }}"
     owner: "{{ prometheus_grafana_user }}"
     mode: "0644"
-    src: definitions/
 
 - name: Start Grafana
   ansible.builtin.systemd:

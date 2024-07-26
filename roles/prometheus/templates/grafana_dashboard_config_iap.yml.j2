@@ -17,9 +17,9 @@ providers:
     # <int> how often Grafana will scan for changed dashboards
     updateIntervalSeconds: 10
     # <bool> allow updating provisioned dashboards from the UI
-    allowUiUpdates: {{ prometheus_grafana_allowUiUpdates }}
+    allowUiUpdates: {{ prometheus_grafana_allow_ui_updates }}
     options:
       # <string, required> path to dashboard files on disk. Required when using the 'file' type
       path: {{ prometheus_grafana_dashboard_dir }}
       # <bool> use folder names from filesystem to create folders in Grafana
-      foldersFromFilesStructure: true
+      foldersFromFilesStructure: false

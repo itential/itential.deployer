@@ -29,4 +29,4 @@ prometheus_grafana_repo_url: https://rpm.grafana.com
 prometheus_grafana_gpg_key: https://rpm.grafana.com/gpg.key
 prometheus_grafana_install_dir: /etc/grafana
 prometheus_grafana_dashboard_dir: "{{ prometheus_grafana_install_dir }}/provisioning/dashboards"
-prometheus_grafana_allowUiUpdates: false
+prometheus_grafana_allow_ui_updates: false

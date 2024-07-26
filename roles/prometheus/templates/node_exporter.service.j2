@@ -6,7 +6,7 @@ After=network.target
 User={{ prometheus_user }}
 Group={{ prometheus_group }}
 Type=simple
-ExecStart=/opt/prometheus/node_exporter
+ExecStart={{ prometheus_dir }}/node_exporter
 
 [Install]
 WantedBy=multi-user.target

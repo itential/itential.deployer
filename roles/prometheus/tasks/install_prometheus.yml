@@ -4,17 +4,17 @@
 
 - name: Download Prometheus
   ansible.builtin.uri:
-    creates: /opt/prometheus/prometheus.tar.gz
-    dest: /opt/prometheus/prometheus.tar.gz
+    creates: "{{ prometheus_dir }}/prometheus.tar.gz"
+    dest: "{{ prometheus_dir }}/prometheus.tar.gz"
     owner: "{{ prometheus_user }}"
     group: "{{ prometheus_group }}"
     mode: "0755"
     url: "{{ prometheus_download_url }}"
 
-- name: Untar prometheus    
+- name: Untar prometheus
   ansible.builtin.unarchive:
-    src: /opt/prometheus/prometheus.tar.gz
-    dest: /opt/prometheus
+    src: "{{ prometheus_dir }}/prometheus.tar.gz"
+    dest: "{{ prometheus_dir }}"
     remote_src: true
     owner: "{{ prometheus_user }}"
     group: "{{ prometheus_group }}"
@@ -25,7 +25,7 @@
 - name: Create prometheus config file
   ansible.builtin.template:
     src: prometheus-config.yml.j2
-    dest: /opt/prometheus/prometheus-config.yml
+    dest: "{{ prometheus_dir }}/prometheus-config.yml"
     owner: "{{ prometheus_user }}"
     group: "{{ prometheus_group }}"
     mode: "0644"
@@ -44,3 +44,8 @@
     enabled: true
     daemon_reload: true
     state: restarted
+
+- name: Remove the downloaded tar file
+  ansible.builtin.file:
+    path: "{{ prometheus_dir }}/prometheus.tar.gz"
+    state: absent

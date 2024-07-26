@@ -7,7 +7,11 @@ After=network-online.target
 User={{ prometheus_user }}
 Group={{ prometheus_group }}
 Type=simple
-ExecStart=/opt/prometheus/mongodb_exporter --mongodb.uri="mongodb://localhost:27017/admin" --web.listen-address=":{{ prometheus_mongo_exporter_port }}" --web.telemetry-path="/metrics" --collect-all
+ExecStart={{ prometheus_dir }}/mongodb_exporter \
+  --mongodb.uri="mongodb://localhost:27017/admin" \
+  --web.listen-address=":{{ prometheus_mongo_exporter_port }}" \
+  --web.telemetry-path="/metrics" \
+  --collect-all
 
 [Install]
 WantedBy=multi-user.target
