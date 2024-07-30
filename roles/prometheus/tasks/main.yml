@@ -65,7 +65,7 @@
 - name: Enable RabbitMQ metrics
   tags: rabbitmq_metrics
   ansible.builtin.import_tasks:
-    file: enable-rabbit-prometheus-plugin.yml
+    file: enable_rabbit_prometheus_plugin.yml
   when:
     - inventory_hostname in groups['rabbitmq']
     - iap_release < 2023.2
