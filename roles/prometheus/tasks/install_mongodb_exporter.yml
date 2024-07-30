@@ -30,6 +30,18 @@
     mode: "0644"
     lstrip_blocks: true
 
+- name: Open Port on FirewallD Public Zone
+  ansible.posix.firewalld:
+    port: "{{ prometheus_mongo_exporter_port }}/tcp"
+    permanent: true
+    state: enabled
+    zone: public
+    immediate: true
+  when:
+    - ansible_facts.services["firewalld.service"] is defined
+    - (ansible_facts.services["firewalld.service"].state == "running")
+    - (ansible_facts.services["firewalld.service"].status == "enabled")
+
 - name: Start the mongo expoter as a systemd service
   ansible.builtin.systemd:
     name: mongo_exporter

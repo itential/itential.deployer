@@ -5,6 +5,7 @@ prometheus_user: prometheus
 prometheus_group: prometheus
 
 # Prometheus server settings
+prometheus_port: 9090
 prometheus_download_url: https://github.com/prometheus/prometheus/releases/download/v2.53.0/prometheus-2.53.0.linux-amd64.tar.gz
 prometheus_dir: /opt/prometheus
 prometheus_db_path: "{{ prometheus_dir }}/data"
@@ -25,6 +26,7 @@ prometheus_mongo_exporter_port: "9216"
 # Grafana
 prometheus_grafana_user: grafana
 prometheus_grafana_group: grafana
+prometheus_grafana_port: 3000
 prometheus_grafana_repo_url: https://rpm.grafana.com
 prometheus_grafana_gpg_key: https://rpm.grafana.com/gpg.key
 prometheus_grafana_install_dir: /etc/grafana

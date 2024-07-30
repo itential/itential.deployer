@@ -56,6 +56,18 @@
     owner: "{{ prometheus_grafana_user }}"
     mode: "0644"
 
+- name: Open Port on FirewallD Public Zone
+  ansible.posix.firewalld:
+    port: "{{ prometheus_grafana_port }}/tcp"
+    permanent: true
+    state: enabled
+    zone: public
+    immediate: true
+  when:
+    - ansible_facts.services["firewalld.service"] is defined
+    - (ansible_facts.services["firewalld.service"].state == "running")
+    - (ansible_facts.services["firewalld.service"].status == "enabled")
+
 - name: Start Grafana
   ansible.builtin.systemd:
     name: grafana-server

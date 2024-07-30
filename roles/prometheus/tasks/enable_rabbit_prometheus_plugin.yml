@@ -6,5 +6,5 @@
 - name: Enable the RabbitMQ Prometheus plugin
   ansible.builtin.command:
     cmd: rabbitmq-plugins enable rabbitmq_prometheus
-    register: cmdoutput
-    changed_when: cmdoutput.rc != 0
+  register: cmdoutput
+  changed_when: cmdoutput.rc != 0
