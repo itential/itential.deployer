@@ -38,6 +38,9 @@
     mode: "0644"
     lstrip_blocks: true
 
+- name: Gather service facts
+  ansible.builtin.service_facts:
+
 - name: Open Port on FirewallD Public Zone
   ansible.posix.firewalld:
     port: "{{ prometheus_port }}/tcp"
