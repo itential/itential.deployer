@@ -25,7 +25,7 @@
     group: "{{ prometheus_group }}"
     mode: "0755"
 
-# Install prometheus on its on server
+# Install prometheus on its own server
 - name: Install Prometheus server
   tags: prometheus_server
   ansible.builtin.import_tasks:
