@@ -76,5 +76,5 @@
   ansible.builtin.import_tasks:
     file: install_grafana.yml
   when:
-    - grafana | bool
+    - prometheus_grafana | bool
     - inventory_hostname in groups['prometheus']
