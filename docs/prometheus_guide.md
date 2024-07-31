@@ -23,12 +23,7 @@ The Grafana installation will include some basic dashboards that can immediately
 # Variables
 
 ## Global Variables
-The variables in this section are configured in the inventory in the `all` group vars.
-
-| Variable | Group | Type | Description | Default Value | Required?
-| :------- | :---- | :--- | :---------- | :------------ | :--------
-| `prometheus` | `all` | boolean | Instructs the roles to perform the installation of Prometheus or not. Must be set to `true` for installation to run. | false | No |
-| `grafana` | `all` | boolean | Instructs the roles to perform the installation of Grafana or not. Must be set to `true` for installation to run. | false | No |
+This role has no global variables. They must all be set with the `prometheus` device group.
 
 ## Prometheus Role Variables
 
@@ -51,6 +46,7 @@ The variables in this section are configured in the inventory in the `all` group
 | `prometheus_redis_exporter_port` | `prometheus` | Integer | The port that the exporter will use to expose its metrics. | 9121 | No |
 | `prometheus_mongo_exporter_download_url` | `prometheus` | string | The public URL where this exporter can be downloaded from. | `https://github.com/percona/mongodb_exporter/releases/download/v0.40.0/mongodb_exporter-0.40.0.linux-amd64.tar.gz` | No |
 | `prometheus_mongo_exporter_port` | `prometheus` | Integer | The port that the exporter will use to expose its metrics. | 9216 | No |
+| `prometheus_grafana` | `prometheus` | boolean | Instructs the roles to perform the installation of Grafana or not. Must be set to `true` for installation to run. | false | No |
 | `prometheus_grafana_user` | `prometheus` | string | The Grafana linux user. | `grafana` | No |
 | `prometheus_grafana_group` | `prometheus` | string | The Grafana linux group. | `grafana` | No |
 | `prometheus_grafana_port` | `prometheus` | Integer | The Grafana port that is used by the application. | 3000 | No |
@@ -65,14 +61,16 @@ To install and configure Prometheus and Grafana, add a `prometheus` group and ho
 ## Example Inventory
 ```
 all:
-    vars:
-        iap_release: 2023.1
+  vars:
+    iap_release: 2023.1
 
-    children:
-        prometheus:
-            hosts:
-                <host1>:
-                    ansible_host: <addr1>
+  children:
+    prometheus:
+      hosts:
+        <host1>:
+          ansible_host: <addr1>
+      vars:
+        grafana: true
 ```
 # Running the Playbook
 To execute the installation of Prometheus and Grafana, run the `prometheus` playbook:
