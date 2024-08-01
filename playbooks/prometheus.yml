@@ -1,0 +1,16 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Install Prometheus Clients
+  hosts: all
+  become: true
+  roles:
+
+    # Pull in the common vars
+    - role: itential.deployer.common_vars
+      tags:
+        - always
+        
+    - role: itential.deployer.prometheus
+      tags:
+        - prometheus_install

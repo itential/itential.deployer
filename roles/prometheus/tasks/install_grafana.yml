@@ -1,0 +1,75 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Create grafana group
+  ansible.builtin.group:
+    name: "{{ prometheus_grafana_group }}"
+    state: present
+
+- name: Create grafana user
+  ansible.builtin.user:
+    name: "{{ prometheus_grafana_user }}"
+    group: "{{ prometheus_grafana_group }}"
+    state: present
+
+- name: Install Grafana repo
+  ansible.builtin.yum_repository:
+    name: "grafana"
+    description: Grafana Repository
+    baseurl: "{{ prometheus_grafana_repo_url }}"
+    enabled: true
+    gpgcheck: true
+    gpgkey: "{{ prometheus_grafana_gpg_key }}"
+  when:
+    - install_yum_repos | bool
+
+# Install grafana with yum
+- name: Install Grafana
+  ansible.builtin.yum:
+    name: grafana
+    state: present
+
+# Add default datasources
+- name: Create grafana datasources file
+  ansible.builtin.template:
+    src: grafana_datasources.yml.j2
+    dest: "{{ prometheus_grafana_install_dir }}/provisioning/datasources/datasources.yml"
+    owner: "{{ prometheus_grafana_user }}"
+    group: "{{ prometheus_grafana_group }}"
+    mode: "0644"
+    lstrip_blocks: true
+
+- name: Upload grafana dashboard config
+  ansible.builtin.template:
+    src: grafana_dashboard_config_iap.yml.j2
+    dest: "{{ prometheus_grafana_install_dir }}/provisioning/dashboards/grafana_dashboard_config_iap.yml"
+    group: "{{ prometheus_grafana_group }}"
+    owner: "{{ prometheus_grafana_user }}"
+    mode: "0644"
+
+- name: Upload grafana dashboard definitions
+  ansible.builtin.copy:
+    src: definitions/
+    dest: "{{ prometheus_grafana_install_dir }}/provisioning/dashboards/definitions/"
+    directory_mode: "0755"
+    group: "{{ prometheus_grafana_group }}"
+    owner: "{{ prometheus_grafana_user }}"
+    mode: "0644"
+
+- name: Open Port on FirewallD Public Zone
+  ansible.posix.firewalld:
+    port: "{{ prometheus_grafana_port }}/tcp"
+    permanent: true
+    state: enabled
+    zone: public
+    immediate: true
+  when:
+    - ansible_facts.services["firewalld.service"] is defined
+    - (ansible_facts.services["firewalld.service"].state == "running")
+    - (ansible_facts.services["firewalld.service"].status == "enabled")
+
+- name: Start Grafana
+  ansible.builtin.systemd:
+    name: grafana-server
+    state: restarted
+    enabled: true

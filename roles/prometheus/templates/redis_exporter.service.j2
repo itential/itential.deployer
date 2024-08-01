@@ -1,0 +1,13 @@
+[Unit]
+Description=Redis Exporter
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User={{ prometheus_user }}
+Group={{ prometheus_group }}
+Type=simple
+ExecStart={{ prometheus_dir }}/redis_exporter
+
+[Install]
+WantedBy=multi-user.target
