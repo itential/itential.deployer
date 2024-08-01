@@ -70,7 +70,7 @@ all:
         <host1>:
           ansible_host: <addr1>
       vars:
-        grafana: true
+        prometheus_grafana: true
 ```
 # Running the Playbook
 To execute the installation of Prometheus and Grafana, run the `prometheus` playbook:
