@@ -317,25 +317,9 @@ The IAP and IAG binary files are hosted on the Itential Nexus repository. An acc
 
 ### Online Installation
 
-The Itential Deployer can be installed via the `ansible-galaxy` utility. To do this, [configure Ansible][Ansible Configuration File] to use the Itential and Ansible Galaxy servers when installing collections. On your control node:
+The Itential Deployer can be installed via the `ansible-galaxy` utility.
 
-1. Create a blank file named `ansible.cfg` in your working directory. This will be your new Ansible configuration file.
-2. Open `ansible.cfg` in a text editor and add the following. Be sure to supply the proper credentials where relevant.
-
-    ```ini
-    [galaxy]
-    server_list = itential_galaxy, release_galaxy
-
-    [galaxy_server.itential_galaxy]
-    url=https://registry.aws.itential.com/repository/ansible-galaxy/
-    username=<USERNAME>
-    password=<PASSWORD>
-
-    [galaxy_server.release_galaxy]
-    url=https://galaxy.ansible.com/
-    ```
-
-3. Execute the following command to install the Itential Deployer:
+On your control node, execute the following command to install the Itential Deployer:
 
     ```bash
     ansible-galaxy collection install itential.deployer
@@ -356,10 +340,10 @@ Some of the following collections may already be installed on your control node.
 
 1. Download the following collections from the provided links:
 
-    - [Itential Deployer]
-    - [Community General]
-    - [Community MongoDB]
-    - [Ansible POSIX]
+    - [Itential Deployer](https://galaxy.ansible.com/ui/repo/published/itential/deployer/)
+    - [Community General](https://galaxy.ansible.com/ui/repo/published/community/general/)
+    - [Community MongoDB](https://galaxy.ansible.com/ui/repo/published/community/mongodb/)
+    - [Ansible POSIX](https://galaxy.ansible.com/ui/repo/published/ansible/posix/)
 
 2. Copy the downloaded collections to your control node.
 3. Install the collections using the following command:
