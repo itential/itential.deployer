@@ -36,7 +36,7 @@ jobs:
           git add CHANGELOG.md
       - name: Commit changes
         run: |
-          git commit -m "Update galaxy version and changelog for release ${{env.GALAXY_VERSION}}"
+          git commit -m "Update galaxy version and changelog for release ${{ env.GALAXY_VERSION }} [skip ci]"
           git push origin HEAD:main
       - name: Update release tag
         run: |
