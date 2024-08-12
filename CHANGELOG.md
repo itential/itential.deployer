@@ -1,5 +1,51 @@
 # Changelog
 
+## v2.2.0 (August 12, 2024)
+
+* 232 rhel/rocky8 support for platform and mongo   https://github.com/itential/nickAtest/pull/15
+* Add Code of conduct and contributing guidelines  https://github.com/itential/nickAtest/pull/5
+* Add flag to disable installation of YUM repositories  https://github.com/itential/nickAtest/pull/12
+* Add jmespath requirement to docs
+* Add license file  https://github.com/itential/nickAtest/pull/4
+* Add notes to docs about RabbitMQ not being required for IAP 2023.2 and newer
+* Add processManagement section to mongod.conf template
+* Add specs for control node to README  https://github.com/itential/nickAtest/pull/19
+* Add support for installing adapters from zip archive
+* Add variables for http server threads (IAG) and IAG adapter token timeout (IAP)  https://github.com/itential/nickAtest/pull/14
+* Added conditional to prevent RabbitMQ install when iap_release is less than 2023.2
+* Correct lint issues  https://github.com/itential/nickAtest/pull/17
+* Create ansible-lint.yml
+* Create publish_ansible_collection.yml
+* Create updateChangelog.yml
+* Fix IAG adapter service config base_path
+* Fix IAP Vault token location and permissions  https://github.com/itential/nickAtest/pull/23
+* Fix MongoDB tools package list for IAP v2021.1 installs
+* Fix iag_http_server_threads syntax issue in IAG properties template  https://github.com/itential/nickAtest/pull/27
+* HAProxy timeout settings update  https://github.com/itential/nickAtest/pull/7
+* Hashicorp read only support  https://github.com/itential/nickAtest/pull/11
+* Improve logging  https://github.com/itential/nickAtest/pull/10
+* Lint issues  https://github.com/itential/nickAtest/pull/18
+* Lint issues  https://github.com/itential/nickAtest/pull/20
+* Lint issues  https://github.com/itential/nickAtest/pull/22
+* Prometheus  https://github.com/itential/nickAtest/pull/24
+* Re-factor Running the Deployer section of README
+* Rename documents to docs  https://github.com/itential/nickAtest/pull/6
+* Support MongoDB installs on aarch64 servers
+* Update CHANGELOG.md
+* Update Ports and Networking section in README  https://github.com/itential/nickAtest/pull/16
+* Update README to remove instructions for installing from Itential Ansible Galaxy  https://github.com/itential/nickAtest/pull/26
+* Update publish_ansible_collection.yml
+* addded support for 23.2 on RHEL 8 for Gateway install  https://github.com/itential/nickAtest/pull/13
+* added license to galaxy file  https://github.com/itential/nickAtest/pull/8
+* delete file
+* moved vault_port to common_vars  https://github.com/itential/nickAtest/pull/9
+* removed Terraform
+* update changelog script
+* updated iag_guide.md
+
+Full Changelog: https://github.com/itential/nickAtest/compare/v2.1.2...v2.2.0 
+
+
 ## v2.1.2 (April 22, 2024)
 
 * Create release v2.1.2
