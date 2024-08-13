@@ -5,8 +5,8 @@
   ansible.builtin.include_vars:
     file: "{{ item }}"
   with_first_found:
-    - "release-{{ iap_release }}.yaml"
-    - "release-undefined.yaml"
+    - "release-{{ iap_release }}.yml"
+    - "release-undefined.yml"
 
 - name: Check for valid Redis release
   ansible.builtin.fail:
@@ -32,13 +32,13 @@
       block:
         - name: Include tasks to install Redis using Remi repo (online)
           ansible.builtin.include_tasks:
-            file: redis-using-remi-repo.yaml
+            file: redis-using-remi-repo.yml
           when:
             - redis_install_method == "remi_repo"
 
         - name: Include tasks to install Redis using source
           ansible.builtin.include_tasks:
-            file: redis-using-source.yaml
+            file: redis-using-source.yml
           when: redis_install_method == "source"
 
     - name: Include tasks to install Redis (offline)

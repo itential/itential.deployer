@@ -6,7 +6,7 @@ After=network.target
 User=itential
 Restart=always
 Type=simple
-ExecStart={{ python_venv }}/bin/automation-gateway --properties-file={{ iag_properties_location }}/properties.yaml
+ExecStart={{ python_venv }}/bin/automation-gateway --properties-file={{ iag_properties_location }}/properties.yml
 WorkingDirectory=/tmp
 Environment=MAX_EVENT_RES=15000000
 Environment=PATH={{ python_venv }}/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin

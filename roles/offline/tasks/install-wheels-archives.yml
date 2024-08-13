@@ -25,7 +25,7 @@
   register: wheel_archive_list
 
 - name: Install wheel archive
-  ansible.builtin.include_tasks: "install-wheels-archive.yaml"
+  ansible.builtin.include_tasks: "install-wheels-archive.yml"
   loop: "{{ wheel_archive_list.files }}"
   loop_control:
     loop_var: wheels_archive

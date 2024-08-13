@@ -3,7 +3,7 @@
 #
 # While many customizations can be made based on your environment and which integrations you
 # would like enabled, this file is meant to mimic the installation process found at
-# https://docs.itential.io/ as closely as possible so the user can use as many defaults as possible.
+# https://docs.itential.com/ as closely as possible so the user can use as many defaults as possible.
 #
 # This configuration file accepts any valid YAML syntax including the bash-like syntax for lists, etc.
 
@@ -43,7 +43,7 @@ authentication_max_sessions: 5000
 authentication_idle_timeout: 600
 
 # A boolean flag that enables password reset support (default=false if absent/misconfigured).
-password_reset_enabled: true
+password_reset_enabled: false
 
 # NOTE: Log levels for Automation Gateway Server are as follows.
 # In order of ascending severity: DEBUG, INFO, WARNING, ERROR, or CRITICAL.
@@ -59,9 +59,8 @@ logging_level: INFO
 http_logging_level: INFO
 
 # A flag that enables/disables parameter schema validation for content decorations.
-# Generally enabled when using multiple types per parameter, or when testing decorations.
-# Example: "commands" could be a literal list of commands, or a string representing a jinja
-#          variable from your host's variables "commands", etc.
+# This must remain true for testing, production but may be disabled if it is
+# helpful while still developing/decorating custom content.
 strict_args: true
 
 #############
@@ -71,7 +70,7 @@ strict_args: true
 # Path to the main Automation Gateway sqlite database file.
 data_file: "sqlite:///{{ iag_data_dir }}/automation-gateway.db"
 
-# A flag which determines whether or not audit logging is enabled. (default=true if absent/misconfigured)
+# A flag which determines whether or not audit logging is enabled.
 audit: true
 
 # The number of days (days >= 0) worth of data to retain in the audit log database
@@ -84,16 +83,6 @@ audit_db_file: "sqlite:///{{ iag_data_dir }}/automation-gateway_audit.db"
 # Path to the auxillary Automation Gateway sqlite database file for execution logs.
 exec_history_db_file: "sqlite:///{{ iag_data_dir }}/automation-gateway_exec_history.db"
 
-#########
-# Repos #
-#########
-
-# A boolean flag that enables Git repository (repos) support (default=true if absent/misconfigured).
-repos_enabled: true
-
-# Path to the location where repository clones should be stored for use by Automation Gateway.
-repos_path: "{{ iag_install_dir }}/repos"
-
 ###########
 # Ansible #
 ###########
@@ -101,7 +90,6 @@ repos_path: "{{ iag_install_dir }}/repos"
 # A boolean flag that enables Ansible support (default=true if absent/misconfigured).
 ansible_enabled: {{ iag_enable_ansible }}
 
-# A boolean which logs additional debug messages when executing Ansible modules, roles, or playbooks.
 # Set the ansible_debug property to true to log additional debug messages when
 # executing Ansible modules, roles, or playbooks. (default=false if absent/misconfigured)
 ansible_debug: false
@@ -117,7 +105,7 @@ no_cleanup: false
 
 # Path to the Ansible external inventory file (folders not valid).
 # A valid file will disable Ansible Internal inventory and instead use only this Ansible External inventory.
-inventory_file: "{{ iag_install_dir }}/ansible/inventory/hosts"
+#inventory_file: "{{ iag_install_dir }}/ansible/inventory/hosts"
 
 # Path(s) to the Ansible modules that should be discovered by Automation Gateway and appended to Ansible's execution environment.
 # All non-collection paths (see Ansible 2.10 notes below) known to Ansible are already included and do not need to be specified.
@@ -139,11 +127,6 @@ collection_path:
 # Path(s) to the Ansible roles that should be discovered by Automation Gateway and appended to Ansible's execution environment.
 role_path:
   - "{{ iag_install_dir }}/venv/lib/python3.9/site-packages/automation_gateway/integrations/roles"
-
-# Path(s) to customized roles that extend device support of the Itential roles found in the release, i.e., itential_cli, itential_get_config.
-#extended_device_role_path:
-  #This is a sample path to roles that extend device support
-  #- "{{ iag_install_dir }}/venv/lib/python3.9/site-packages/automation_gateway/integrations/extensible_device_roles"
 
 # Discovery behavior for Ansible playbooks. Determines whether or not to
 # recursively search the directories found in the 'playbook_path' parameter, or
@@ -184,7 +167,7 @@ nornir_enabled: {{ iag_enable_nornir }}
 
 # Path to the Nornir configuration file.
 # A valid file will allows the use of Nornir External inventory.
-nornir_config_file: "{{ iag_install_dir }}/nornir/config.yaml"
+#nornir_config_file: "{{ iag_install_dir }}/nornir/config.yml"
 
 # Discovery behavior for Nornir modules. Determines whether or not to
 # recursively search the directories found in the 'nornir_module_path' parameter, or
@@ -215,7 +198,7 @@ script_path:
 #############
 # Terraform #
 #############
-# Terraform was removed due to HashiCorp adopting the 
+# Terraform was removed due to HashiCorp adopting the
 # Business Source License (BSL) for their core products
 
 # A boolean flag that enables Terraform support (default=false if absent/misconfigured).
@@ -247,8 +230,8 @@ vault_enabled: false
 #vault_access_token: "{{ iag_install_dir }}/conf/.vault_token_file"
 
 # A flag that enables TLS certificate verification when sending reqests to the Hashicorp
-# Vault Server. (default=false if absent/misconfigured)
-#vault_cert_verification: false
+# Vault Server. (default=true if absent/misconfigured)
+#vault_cert_verification: true
 
 # The path to a CA (Certificate Authority) file.  This file is used to perform TLS certificate
 # verification when sending requests to a Hashicorp Vault Server configured with a self-signed

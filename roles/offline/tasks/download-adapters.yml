@@ -14,7 +14,7 @@
 
 - name: Download adapter
   ansible.builtin.include_tasks:
-    file: download-adapter.yaml
+    file: download-adapter.yml
   loop: "{{ adapters }}"
   loop_control:
     loop_var: adapter

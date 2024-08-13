@@ -12,5 +12,5 @@
   when: ansible_os_family.lower() not in ('redhat',)
 
 - name: Include OS specific tasks
-  ansible.builtin.include_tasks: "{{ ansible_os_family.lower() }}.yaml"
+  ansible.builtin.include_tasks: "{{ ansible_os_family.lower() }}.yml"
   when: not release_file.stat.exists
