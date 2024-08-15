@@ -171,8 +171,11 @@
       ansible.builtin.template:
         src: "properties.{{ iag_release }}.yml.j2"
 <<<<<<< Updated upstream:roles/gateway/tasks/main.yml
+<<<<<<< Updated upstream:roles/gateway/tasks/main.yml
         dest: "{{ iag_properties_location }}/properties.yml"
 =======
+=======
+>>>>>>> Stashed changes:roles/gateway/tasks/main.yaml
         dest: "{{ iag_properties_location }}/properties.yaml"
 >>>>>>> Stashed changes:roles/gateway/tasks/main.yaml
         owner: "{{ iag_user }}"
