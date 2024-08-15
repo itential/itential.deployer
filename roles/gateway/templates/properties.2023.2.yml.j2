@@ -3,7 +3,7 @@
 #
 # While many customizations can be made based on your environment and which integrations you
 # would like enabled, this file is meant to mimic the installation process found at
-# https://docs.itential.com/ as closely as possible so the user can use as many defaults as possible.
+# https://docs.itential.io/ as closely as possible so the user can use as many defaults as possible.
 #
 # This configuration file accepts any valid YAML syntax including the bash-like syntax for lists, etc.
 
@@ -13,7 +13,11 @@
 
 # The port on which Automation Gateway server will listen for requests.
 # Mutually exclusive with bind_list
+{% if iag_https %}
+port: {{ iag_https_port }}
+{% else %}
 port: {{ iag_port }}
+{% endif %}
 
 # The IP addresses to bind the web application to.
 # For ipv4 only use "0.0.0.0", for ipv6 and ipv4 use "[::]"
@@ -43,7 +47,14 @@ authentication_max_sessions: 5000
 authentication_idle_timeout: 600
 
 # A boolean flag that enables password reset support (default=false if absent/misconfigured).
-password_reset_enabled: false
+password_reset_enabled: true
+
+# Directory to write global log files to
+global_log_directory: '{{ iag_log_dir }}'
+
+# Maximum log files kept in rotation
+# Valid range of values is 1-100. If value is set to 1, log file will not be limited in size.
+max_log_files: 5
 
 # NOTE: Log levels for Automation Gateway Server are as follows.
 # In order of ascending severity: DEBUG, INFO, WARNING, ERROR, or CRITICAL.
@@ -59,9 +70,48 @@ logging_level: INFO
 http_logging_level: INFO
 
 # A flag that enables/disables parameter schema validation for content decorations.
-# This must remain true for testing, production but may be disabled if it is
-# helpful while still developing/decorating custom content.
+# Generally enabled when using multiple types per parameter, or when testing decorations.
+# Example: "commands" could be a literal list of commands, or a string representing a jinja
+#          variable from your host's variables "commands", etc.
 strict_args: true
+
+################
+# SSL Settings #
+################
+
+# To start the server using SSL/TLS please fill out the following properties.
+{% if iag_https %}
+server_certfile: "{{ iag_ssl_cert_dest }}"
+
+# Note: gunicorn does not currently support encrypted key files.
+server_keyfile: "{{ iag_ssl_key_dest }}"
+
+server_cabundle: "{{ iag_ssl_rootca_dest }}"
+{% else %}
+#server_certfile: "{{ iag_ssl_cert_dest }}"
+
+# Note: gunicorn does not currently support encrypted key files.
+#server_keyfile: "{{ iag_ssl_key_dest }}"
+
+# server_cabundle: "{{ iag_ssl_rootca_dest }}"
+{% endif %}
+
+# TLSv1_2
+{% if iag_https and iag_tlsv1_2 %}
+server_ssl_version: "TLSv1_2"
+{% else %}
+#server_ssl_version: "TLSv1_2"
+{% endif %}
+
+# You may also set custom SSL Ciphers.
+#
+# https://docs.gunicorn.org/en/20.x/settings.html#ciphers
+#
+{% if server_ssl_ciphers is defined %}
+server_ssl_ciphers: "{{ server_ssl_ciphers }}"
+{% else %}
+# server_ssl_ciphers: "ECDHE-ECDSA-AES128-GCM-SHA256:...""
+{% endif %}
 
 #############
 # Databases #
@@ -70,7 +120,7 @@ strict_args: true
 # Path to the main Automation Gateway sqlite database file.
 data_file: "sqlite:///{{ iag_data_dir }}/automation-gateway.db"
 
-# A flag which determines whether or not audit logging is enabled.
+# A flag which determines whether or not audit logging is enabled. (default=true if absent/misconfigured)
 audit: true
 
 # The number of days (days >= 0) worth of data to retain in the audit log database
@@ -83,6 +133,88 @@ audit_db_file: "sqlite:///{{ iag_data_dir }}/automation-gateway_audit.db"
 # Path to the auxillary Automation Gateway sqlite database file for execution logs.
 exec_history_db_file: "sqlite:///{{ iag_data_dir }}/automation-gateway_exec_history.db"
 
+#######################
+# LDAP Authentication #
+#######################
+
+#
+# LDAP Basic SETTINGS
+#
+
+# Enable LDAP authentication globally
+ldap_auth_enabled: False
+
+# LDAP server hostname or IP address
+ldap_server: 'ldap.example.com'
+
+# LDAP BASE DN
+ldap_base_dn: 'DC=example,DC=com'
+
+# LDAP BIND Username
+ldap_bind_user_dn: 'CN=admin,CN=users,DC=example,DC=com'
+
+# LDAP BIND Password
+ldap_bind_user_password: '<password>'
+
+#
+# LDAP Securitry
+#
+
+# Enable LDAPS
+ldap_secure_enabled: False
+
+# Validate the servers TLS certificate
+ldap_secure_validation_enabled: True
+
+# TLS version to use when connection to LDAP server (default: TLSv1.2)
+# Options ["1", "1.1", "1.2"]
+ldap_secure_validation_tls_version: '1.2'
+
+# Location of local CA certificate file for server validation
+ldap_ca_certs_file: '/etc/ssl/certs/ca.crt'
+
+#
+# LDAP User Search
+#
+
+# Search LDAP for the username before doing a bind
+ldap_always_search_bind: True
+
+# LDAP user search filter
+ldap_user_search_filter: '(objectclass=person)'
+
+# LDAP user search scope
+# Options "LEVEL" or "SUBTREE"
+ldap_user_search_scope: 'SUBTREE'
+
+# User login attribute
+ldap_user_login_attr: 'sAMAccountName'
+
+# User login RDN (relative directory name) attribute
+# uid=testuser,ou=users,dc=example,dc=com = 'uid'
+# cn=testuser,ou=users,dc=example,dc=com = 'cn'
+ldap_user_rdn_attr: 'cn'
+
+# LDAP user DN used to be prepended to the base DN to limit the scope when searching for users
+ldap_user_dn : '' # OU=users
+
+#
+# LDAP GROUP OPTIONS
+#
+
+# Group search filter
+ldap_group_search_filter: '(objectClass=group)'
+
+# Group search scope
+# Options "LEVEL" or "SUBTREE"
+ldap_group_search_scope: 'SUBTREE'
+
+# Group members attribute
+ldap_group_members_attr: 'member'
+
+# LDAP group DN used to be prepended to the base DN to limit the scope when searching for groups
+ldap_group_dn : '' # OU=groups
+
 ###########
 # Ansible #
 ###########
@@ -90,6 +222,7 @@ exec_history_db_file: "sqlite:///{{ iag_data_dir }}/automation-gateway_exec_hist
 # A boolean flag that enables Ansible support (default=true if absent/misconfigured).
 ansible_enabled: {{ iag_enable_ansible }}
 
+# A boolean which logs additional debug messages when executing Ansible modules, roles, or playbooks.
 # Set the ansible_debug property to true to log additional debug messages when
 # executing Ansible modules, roles, or playbooks. (default=false if absent/misconfigured)
 ansible_debug: false
@@ -105,7 +238,7 @@ no_cleanup: false
 
 # Path to the Ansible external inventory file (folders not valid).
 # A valid file will disable Ansible Internal inventory and instead use only this Ansible External inventory.
-#inventory_file: "{{ iag_install_dir }}/ansible/inventory/hosts"
+inventory_file: "{{ iag_install_dir }}/ansible/inventory/hosts"
 
 # Path(s) to the Ansible modules that should be discovered by Automation Gateway and appended to Ansible's execution environment.
 # All non-collection paths (see Ansible 2.10 notes below) known to Ansible are already included and do not need to be specified.
@@ -115,18 +248,23 @@ no_cleanup: false
 # NOTE: Use only the site-packages paths you need for your installation to avoid
 #       cross environment issues in the case where multiple of these paths exist
 module_path:
-  - "{{ iag_install_dir }}/venv/lib/python3.9/site-packages/ansible/modules/network"
-  - "{{ iag_install_dir }}/venv/lib/python3.9/site-packages/ansible/modules"
+  - "{{ iag_install_dir }}/venv/lib/python{{ python_version }}/site-packages/ansible/modules/network"
+  - "{{ iag_install_dir }}/venv/lib/python{{ python_version }}/site-packages/ansible/modules"
 
 # Path(s) to the Ansible collections that should be discovered by Automation Gateway and exclusively used in Ansible's execution environment.
 # Due to differences in collections before/after Ansible 2.9, these will be the only paths relevant during discovery AND execution.
 collection_path:
   - "{{ iag_install_dir }}/ansible/collections"
-  - "{{ iag_install_dir }}/venv/lib/python3.9/site-packages/ansible_collections"
+  - "{{ iag_install_dir }}/venv/lib/python{{ python_version }}/site-packages/ansible_collections"
 
 # Path(s) to the Ansible roles that should be discovered by Automation Gateway and appended to Ansible's execution environment.
 role_path:
-  - "{{ iag_install_dir }}/venv/lib/python3.9/site-packages/automation_gateway/integrations/roles"
+  - "{{ iag_install_dir }}/venv/lib/python{{ python_version }}/site-packages/automation_gateway/integrations/roles"
+
+# Path(s) to customized roles that extend device support of the Itential roles found in the release, i.e., itential_cli, itential_get_config.
+#extended_device_role_path:
+  #This is a sample path to roles that extend device support
+  #- "{{ iag_install_dir }}/venv/lib/python{{ python_version }}/site-packages/automation_gateway/integrations/extensible_device_roles"
 
 # Discovery behavior for Ansible playbooks. Determines whether or not to
 # recursively search the directories found in the 'playbook_path' parameter, or
@@ -135,7 +273,7 @@ playbook_recursive: true
 
 # Path(s) to the Ansible playbooks that should be discovered by Automation Gateway and appended to Ansible's execution environment.
 playbook_path:
-  - "{{ iag_install_dir }}/venv/lib/python3.9/site-packages/automation_gateway/integrations/playbooks"
+  - "{{ iag_install_dir }}/venv/lib/python{{ python_version }}/site-packages/automation_gateway/integrations/playbooks"
 
 #################
 # HTTP_Requests #
@@ -167,7 +305,7 @@ nornir_enabled: {{ iag_enable_nornir }}
 
 # Path to the Nornir configuration file.
 # A valid file will allows the use of Nornir External inventory.
-#nornir_config_file: "{{ iag_install_dir }}/nornir/config.yaml"
+nornir_config_file: "{{ iag_install_dir }}/nornir/config.yml"
 
 # Discovery behavior for Nornir modules. Determines whether or not to
 # recursively search the directories found in the 'nornir_module_path' parameter, or
@@ -195,10 +333,28 @@ script_recursive: true
 script_path:
   - "{{ iag_install_dir }}/scripts"
 
+################
+# Python Venvs #
+################
+
+# Enable python venv support
+python_venv_enabled: {{ iag_enable_python_venv }}
+
+# Paths to python venvs for use in scripts
+python_venv_paths:
+  - "{{ iag_install_dir }}/python-venvs/"
+
+##################
+# GRPC gNMI/gNOI #
+##################
+
+# Grpc requires grpcio and pygnmi to be installed
+grpc_enabled: {{ iag_enable_grpc }}
+
 #############
 # Terraform #
 #############
-# Terraform was removed due to HashiCorp adopting the 
+# Terraform was removed due to HashiCorp adopting the
 # Business Source License (BSL) for their core products
 
 # A boolean flag that enables Terraform support (default=false if absent/misconfigured).
@@ -230,8 +386,8 @@ vault_enabled: false
 #vault_access_token: "{{ iag_install_dir }}/conf/.vault_token_file"
 
 # A flag that enables TLS certificate verification when sending reqests to the Hashicorp
-# Vault Server. (default=true if absent/misconfigured)
-#vault_cert_verification: true
+# Vault Server. (default=false if absent/misconfigured)
+#vault_cert_verification: false
 
 # The path to a CA (Certificate Authority) file.  This file is used to perform TLS certificate
 # verification when sending requests to a Hashicorp Vault Server configured with a self-signed

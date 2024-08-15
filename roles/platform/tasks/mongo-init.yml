@@ -40,7 +40,7 @@
 
     # Create a default profile document in the itential database. This template
     # contains the logic to modify various properties based on the vars set in
-    # install.yaml. For example, it will correctly configure a Redis HA cluster
+    # install.yml. For example, it will correctly configure a Redis HA cluster
     # using Redis Sentinel and also other settings.
     - name: Create Local AAA profile document for standard non-production environments
       ansible.builtin.template:

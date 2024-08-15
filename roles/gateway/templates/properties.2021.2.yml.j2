@@ -13,11 +13,7 @@
 
 # The port on which Automation Gateway server will listen for requests.
 # Mutually exclusive with bind_list
-{% if iag_https %}
-port: {{ iag_https_port }}
-{% else %}
 port: {{ iag_port }}
-{% endif %}
 
 # The IP addresses to bind the web application to.
 # For ipv4 only use "0.0.0.0", for ipv6 and ipv4 use "[::]"
@@ -49,13 +45,6 @@ authentication_idle_timeout: 600
 # A boolean flag that enables password reset support (default=false if absent/misconfigured).
 password_reset_enabled: true
 
-# Directory to write global log files to
-global_log_directory: '{{ iag_log_dir }}'
-
-# Maximum log files kept in rotation
-# Valid range of values is 1-100. If value is set to 1, log file will not be limited in size.
-max_log_files: 5
-
 # NOTE: Log levels for Automation Gateway Server are as follows.
 # In order of ascending severity: DEBUG, INFO, WARNING, ERROR, or CRITICAL.
 # Log messages of equal and greater severity will be displayed in the relevant log.
@@ -74,44 +63,6 @@ http_logging_level: INFO
 # Example: "commands" could be a literal list of commands, or a string representing a jinja
 #          variable from your host's variables "commands", etc.
 strict_args: true
-
-################
-# SSL Settings #
-################
-
-# To start the server using SSL/TLS please fill out the following properties.
-{% if iag_https %}
-server_certfile: "{{ iag_ssl_cert_dest }}"
-
-# Note: gunicorn does not currently support encrypted key files.
-server_keyfile: "{{ iag_ssl_key_dest }}"
-
-server_cabundle: "{{ iag_ssl_rootca_dest }}"
-{% else %}
-#server_certfile: "{{ iag_ssl_cert_dest }}"
-
-# Note: gunicorn does not currently support encrypted key files.
-#server_keyfile: "{{ iag_ssl_key_dest }}"
-
-# server_cabundle: "{{ iag_ssl_rootca_dest }}"
-{% endif %}
-
-# TLSv1_2
-{% if iag_https and iag_tlsv1_2 %}
-server_ssl_version: "TLSv1_2"
-{% else %}
-#server_ssl_version: "TLSv1_2"
-{% endif %}
-
-# You may also set custom SSL Ciphers.
-#
-# https://docs.gunicorn.org/en/20.x/settings.html#ciphers
-#
-{% if server_ssl_ciphers is defined %}
-server_ssl_ciphers: "{{ server_ssl_ciphers }}"
-{% else %}
-# server_ssl_ciphers: "ECDHE-ECDSA-AES128-GCM-SHA256:...""
-{% endif %}
 
 #############
 # Databases #
@@ -133,87 +84,15 @@ audit_db_file: "sqlite:///{{ iag_data_dir }}/automation-gateway_audit.db"
 # Path to the auxillary Automation Gateway sqlite database file for execution logs.
 exec_history_db_file: "sqlite:///{{ iag_data_dir }}/automation-gateway_exec_history.db"
 
-#######################
-# LDAP Authentication #
-#######################
+#########
+# Repos #
+#########
 
-#
-# LDAP Basic SETTINGS
-#
+# A boolean flag that enables Git repository (repos) support (default=true if absent/misconfigured).
+repos_enabled: true
 
-# Enable LDAP authentication globally
-ldap_auth_enabled: False
-
-# LDAP server hostname or IP address
-ldap_server: 'ldap.example.com'
-
-# LDAP BASE DN
-ldap_base_dn: 'DC=example,DC=com'
-
-# LDAP BIND Username
-ldap_bind_user_dn: 'CN=admin,CN=users,DC=example,DC=com'
-
-# LDAP BIND Password
-ldap_bind_user_password: '<password>'
-
-#
-# LDAP Securitry
-#
-
-# Enable LDAPS
-ldap_secure_enabled: False
-
-# Validate the servers TLS certificate
-ldap_secure_validation_enabled: True
-
-# TLS version to use when connection to LDAP server (default: TLSv1.2)
-# Options ["1", "1.1", "1.2"]
-ldap_secure_validation_tls_version: '1.2'
-
-# Location of local CA certificate file for server validation
-ldap_ca_certs_file: '/etc/ssl/certs/ca.crt'
-
-#
-# LDAP User Search
-#
-
-# Search LDAP for the username before doing a bind
-ldap_always_search_bind: True
-
-# LDAP user search filter
-ldap_user_search_filter: '(objectclass=person)'
-
-# LDAP user search scope
-# Options "LEVEL" or "SUBTREE"
-ldap_user_search_scope: 'SUBTREE'
-
-# User login attribute
-ldap_user_login_attr: 'sAMAccountName'
-
-# User login RDN (relative directory name) attribute
-# uid=testuser,ou=users,dc=example,dc=com = 'uid'
-# cn=testuser,ou=users,dc=example,dc=com = 'cn'
-ldap_user_rdn_attr: 'cn'
-
-# LDAP user DN used to be prepended to the base DN to limit the scope when searching for users
-ldap_user_dn : '' # OU=users
-
-#
-# LDAP GROUP OPTIONS
-#
-
-# Group search filter
-ldap_group_search_filter: '(objectClass=group)'
-
-# Group search scope
-# Options "LEVEL" or "SUBTREE"
-ldap_group_search_scope: 'SUBTREE'
-
-# Group members attribute
-ldap_group_members_attr: 'member'
-
-# LDAP group DN used to be prepended to the base DN to limit the scope when searching for groups
-ldap_group_dn : '' # OU=groups
+# Path to the location where repository clones should be stored for use by Automation Gateway.
+repos_path: "{{ iag_install_dir }}/repos"
 
 ###########
 # Ansible #
@@ -266,6 +145,7 @@ role_path:
   #This is a sample path to roles that extend device support
   #- "{{ iag_install_dir }}/venv/lib/python3.9/site-packages/automation_gateway/integrations/extensible_device_roles"
 
+
 # Discovery behavior for Ansible playbooks. Determines whether or not to
 # recursively search the directories found in the 'playbook_path' parameter, or
 # to only search those directories and no deeper. (default=true if absent/misconfigured)
@@ -305,7 +185,7 @@ nornir_enabled: {{ iag_enable_nornir }}
 
 # Path to the Nornir configuration file.
 # A valid file will allows the use of Nornir External inventory.
-nornir_config_file: "{{ iag_install_dir }}/nornir/config.yaml"
+nornir_config_file: "{{ iag_install_dir }}/nornir/config.yml"
 
 # Discovery behavior for Nornir modules. Determines whether or not to
 # recursively search the directories found in the 'nornir_module_path' parameter, or
@@ -336,7 +216,7 @@ script_path:
 #############
 # Terraform #
 #############
-# Terraform was removed due to HashiCorp adopting the 
+# Terraform was removed due to HashiCorp adopting the
 # Business Source License (BSL) for their core products
 
 # A boolean flag that enables Terraform support (default=false if absent/misconfigured).

@@ -5,8 +5,8 @@
   ansible.builtin.include_vars:
     file: "{{ item }}"
   with_first_found:
-    - "release-{{ iap_release }}.yaml"
-    - "release-undefined.yaml"
+    - "release-{{ iap_release }}.yml"
+    - "release-undefined.yml"
 
 - name: Check for valid RabbitMQ release
   ansible.builtin.fail:

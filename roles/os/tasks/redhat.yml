@@ -5,8 +5,8 @@
   ansible.builtin.include_vars:
     file: "{{ item }}"
   with_first_found:
-    - "release-{{ ansible_distribution_major_version }}.yaml"
-    - "release-undefined.yaml"
+    - "release-{{ ansible_distribution_major_version }}.yml"
+    - "release-undefined.yml"
 
 - name: Check supported OS
   ansible.builtin.fail:
@@ -14,13 +14,13 @@
   when: invalid_os_release is defined
 
 - name: Include OS specific tasks (online)
-  ansible.builtin.include_tasks: "{{ ansible_os_family.lower() }}-online.yaml"
+  ansible.builtin.include_tasks: "{{ ansible_os_family.lower() }}-online.yml"
   when:
     - not release_file.stat.exists
     - not offline_install
 
 - name: Include OS specific tasks (offline)
-  ansible.builtin.include_tasks: "{{ ansible_os_family.lower() }}-offline.yaml"
+  ansible.builtin.include_tasks: "{{ ansible_os_family.lower() }}-offline.yml"
   when:
     - not release_file.stat.exists
     - offline_install

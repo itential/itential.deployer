@@ -145,7 +145,6 @@ role_path:
   #This is a sample path to roles that extend device support
   #- "{{ iag_install_dir }}/venv/lib/python3.9/site-packages/automation_gateway/integrations/extensible_device_roles"
 
-
 # Discovery behavior for Ansible playbooks. Determines whether or not to
 # recursively search the directories found in the 'playbook_path' parameter, or
 # to only search those directories and no deeper. (default=true if absent/misconfigured)
@@ -185,7 +184,7 @@ nornir_enabled: {{ iag_enable_nornir }}
 
 # Path to the Nornir configuration file.
 # A valid file will allows the use of Nornir External inventory.
-nornir_config_file: "{{ iag_install_dir }}/nornir/config.yaml"
+nornir_config_file: "{{ iag_install_dir }}/nornir/config.yml"
 
 # Discovery behavior for Nornir modules. Determines whether or not to
 # recursively search the directories found in the 'nornir_module_path' parameter, or
@@ -216,7 +215,7 @@ script_path:
 #############
 # Terraform #
 #############
-# Terraform was removed due to HashiCorp adopting the 
+# Terraform was removed due to HashiCorp adopting the
 # Business Source License (BSL) for their core products
 
 # A boolean flag that enables Terraform support (default=false if absent/misconfigured).

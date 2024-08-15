@@ -5,8 +5,8 @@
   ansible.builtin.include_vars:
     file: "{{ item }}"
   with_first_found:
-    - "{{ iag_release }}-{{ ansible_distribution | lower }}-{{ ansible_distribution_major_version }}.yaml"
-    - "release-undefined.yaml"
+    - "{{ iag_release }}-{{ ansible_distribution | lower }}-{{ ansible_distribution_major_version }}.yml"
+    - "release-undefined.yml"
 
 - name: Check for valid IAG release
   ansible.builtin.fail:
@@ -149,7 +149,7 @@
         name: "{{ workingdir.path }}/{{ iag_whl_file | basename }}"
         virtualenv: "{{ iag_install_dir }}/venv"
 
-- name: Set ownership/permissions and create properties.yaml
+- name: Set ownership/permissions and create properties.yml
   when: not iag_installed.stat.exists
   block:
     # Using chown and chmod is a faster way to enforce the file ownership and
@@ -165,10 +165,10 @@
         cmd: "chmod -R 775 {{ iag_install_dir }}/venv"
       changed_when: true
 
-    - name: Create properties.yaml using template based on the version
+    - name: Create properties.yml using template based on the version
       ansible.builtin.template:
-        src: "properties.{{ iag_release }}.yaml.j2"
-        dest: "{{ iag_properties_location }}/properties.yaml"
+        src: "properties.{{ iag_release }}.yml.j2"
+        dest: "{{ iag_properties_location }}/properties.yml"
         owner: "{{ iag_user }}"
         group: "{{ iag_group }}"
         mode: "0660"
@@ -184,14 +184,14 @@
         mode: "0660"
         state: touch
       with_items:
-        - "{{ iag_install_dir }}/nornir/inventory/defaults.yaml"
-        - "{{ iag_install_dir }}/nornir/inventory/groups.yaml"
-        - "{{ iag_install_dir }}/nornir/inventory/hosts.yaml"
+        - "{{ iag_install_dir }}/nornir/inventory/defaults.yml"
+        - "{{ iag_install_dir }}/nornir/inventory/groups.yml"
+        - "{{ iag_install_dir }}/nornir/inventory/hosts.yml"
 
     - name: Create Nornir config file
       ansible.builtin.template:
-        src: nornir.config.yaml.j2
-        dest: "{{ iag_install_dir }}/nornir/config.yaml"
+        src: nornir.config.yml.j2
+        dest: "{{ iag_install_dir }}/nornir/config.yml"
         owner: "{{ iag_user }}"
         group: "{{ iag_group }}"
         mode: "0660"
@@ -247,7 +247,7 @@
 
 - name: Update release file
   ansible.builtin.include_tasks:
-    file: update-release-file.yaml
+    file: update-release-file.yml
 
 - name: Remove temporary working directory
   ansible.builtin.file:
