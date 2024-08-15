@@ -76,7 +76,9 @@
     - "{{ iag_install_dir }}/nornir/conf"
     - "{{ iag_install_dir }}/nornir/inventory"
     - "{{ iag_install_dir }}/nornir/modules"
+    - "{{ iag_install_dir }}/repos"
     - "{{ iag_install_dir }}/scripts"
+    - "{{ iag_install_dir }}/ssh"
 
 - name: Create Python venv directory
   ansible.builtin.file:
@@ -168,10 +170,14 @@
     - name: Create properties.yml using template based on the version
       ansible.builtin.template:
         src: "properties.{{ iag_release }}.yml.j2"
+<<<<<<< Updated upstream:roles/gateway/tasks/main.yml
         dest: "{{ iag_properties_location }}/properties.yml"
+=======
+        dest: "{{ iag_properties_location }}/properties.yaml"
+>>>>>>> Stashed changes:roles/gateway/tasks/main.yaml
         owner: "{{ iag_user }}"
         group: "{{ iag_group }}"
-        mode: "0660"
+        mode: "0600"
 
 - name: Create Nornir files
   when: iag_enable_nornir | bool
