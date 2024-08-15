@@ -170,7 +170,11 @@
     - name: Create properties.yml using template based on the version
       ansible.builtin.template:
         src: "properties.{{ iag_release }}.yml.j2"
+<<<<<<< Updated upstream:roles/gateway/tasks/main.yml
         dest: "{{ iag_properties_location }}/properties.yml"
+=======
+        dest: "{{ iag_properties_location }}/properties.yaml"
+>>>>>>> Stashed changes:roles/gateway/tasks/main.yaml
         owner: "{{ iag_user }}"
         group: "{{ iag_group }}"
         mode: "0600"
