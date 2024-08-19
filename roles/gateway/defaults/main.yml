@@ -15,6 +15,7 @@ iag_enable_netconf: true
 iag_enable_httpreq: true
 iag_enable_python_venv: true
 iag_enable_grpc: true
+iag_enable_git: true
 
 # Location of IAG assets
 iag_install_dir: /opt/automation-gateway
