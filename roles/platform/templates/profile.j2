@@ -211,7 +211,7 @@
   },
 {% endif %}
   "redisProps": {
-    "db" : 0,
+    "db" : {{ redis_db_number }},
     "host": {{ redis_host | to_json }},
     "maxHeartbeatWriteRetries" : 20,
     "maxRetriesPerRequest" : 20,

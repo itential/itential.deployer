@@ -71,3 +71,6 @@ npm_ignore_scripts: false
 # Offline install settings
 # Refer to the offline variables in common_vars for additional settings
 packages_path: "{{ itential_packages_path }}/{{ iap_release }}/iap"
+
+# Redis default db.
+redis_db_number: 0

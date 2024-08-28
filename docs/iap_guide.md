@@ -79,6 +79,7 @@ The following table lists the default variables located in `roles/platform/defau
 | `upload_using_rsync` | `platform` | Boolean | Flag to enable using rsync to upload artifacts.  <br>When set to `true`, rsync will be used.  <br>When set to `false`, secure copy will be used. | `false`
 | `mongo_backup` | `platform` | Boolean | Flag to enable performing a MongoDB backup when upgrading IAP. | `true`
 | `remove_iap_source_file` | `platform` | Boolean | Flag to remove the bin/tar file when finished. | `true`
+| `redis_db_number` | `platform` | Integer | Default redis db number. | `0`
 
 ## Platform Adapters Role Variables
 
