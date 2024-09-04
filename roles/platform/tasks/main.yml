@@ -65,16 +65,16 @@
 - name: Install Platform
   tags: install_platform
   block:
-  - name: Install Platform
-    ansible.builtin.include_tasks:
-      file: install-platform.yml
+    - name: Install Platform
+      ansible.builtin.include_tasks:
+        file: install-platform.yml
 
 - name: Configure properties.json file
   tags: configure_properties
   block:
-  - name: Create properties.json file
-    ansible.builtin.include_tasks:
-      file: create-properties-file.yml
+    - name: Create properties.json file
+      ansible.builtin.include_tasks:
+        file: create-properties-file.yml
 
 - name: Make the "custom" directories
   ansible.builtin.file:
@@ -95,6 +95,13 @@
   ansible.builtin.include_tasks:
     file: configure-firewalld.yml
 
+- name: Configure SELinux
+  tags: configure_selinux
+  block:
+    - name: Configure SELinux
+      ansible.builtin.include_tasks:
+        file: configure_selinux.yml
+
 - name: Set file ownership and permissions
   ansible.builtin.include_tasks:
     file: set-file-ownership.yml
@@ -103,10 +110,10 @@
 - name: Configure Vault
   tags: configure_vault
   block:
-  - name: Configure Vault
-    ansible.builtin.include_tasks:
-      file: configure-vault.yml
-    when: configure_vault | bool
+    - name: Configure Vault
+      ansible.builtin.include_tasks:
+        file: configure-vault.yml
+      when: configure_vault | bool
 
 - name: Init MongoDB
   tags: mongo_init
