@@ -11,8 +11,8 @@
 - name: Write all RabbitMQ nodes to the hosts file
   ansible.builtin.lineinfile:
     path: "/etc/hosts"
-    line: "{{hostvars[item].ansible_default_ipv4.address}}  rabbit{{my_idx + 1}} {{hostvars[item].ansible_hostname}}"
-  loop: "{{lookup('inventory_hostnames', 'rabbitmq', wantlist=True) }}"
+    line: "{{ hostvars[item].ansible_default_ipv4.address }} rabbit{{ my_idx + 1 }} {{ hostvars[item].inventory_hostname_short }} {{ item }}"
+  loop: "{{ lookup('inventory_hostnames', 'rabbitmq', wantlist=True) }}"
   loop_control:
     index_var: my_idx
   when: inventory_hostname in groups['rabbitmq']
@@ -20,8 +20,8 @@
 - name: Write all RabbitMQ nodes to the hosts file for secondary DR
   ansible.builtin.lineinfile:
     path: "/etc/hosts"
-    line: "{{hostvars[item].ansible_default_ipv4.address}}  rabbit{{my_idx + 1}} {{hostvars[item].ansible_hostname}}"
-  loop: "{{lookup('inventory_hostnames', 'rabbitmq_secondary', wantlist=True) }}"
+    line: "{{ hostvars[item].ansible_default_ipv4.address }} rabbit{{ my_idx + 1 }} {{ hostvars[item].inventory_hostname_short }} {{ item }}"
+  loop: "{{ lookup('inventory_hostnames', 'rabbitmq_secondary', wantlist=True) }}"
   loop_control:
     index_var: my_idx
   when:
@@ -32,8 +32,8 @@
   ansible.builtin.lineinfile:
     path: "{{ rabbitmq_config }}"
     insertafter: "cluster_formation.peer_discovery_backend = rabbit_peer_discovery_classic_config"
-    line: "cluster_formation.classic_config.nodes.{{my_idx + 1}} = rabbit@{{hostvars[item].ansible_hostname }}"
-  loop: "{{lookup('inventory_hostnames', 'rabbitmq', wantlist=True) }}"
+    line: "cluster_formation.classic_config.nodes.{{ my_idx + 1 }} = rabbit@{{ hostvars[item].inventory_hostname_short }}"
+  loop: "{{ lookup('inventory_hostnames', 'rabbitmq', wantlist=True) }}"
   loop_control:
     index_var: my_idx
   when: inventory_hostname in groups['rabbitmq']
@@ -42,8 +42,8 @@
   ansible.builtin.lineinfile:
     path: "{{ rabbitmq_config }}"
     insertafter: "cluster_formation.peer_discovery_backend = rabbit_peer_discovery_classic_config"
-    line: "cluster_formation.classic_config.nodes.{{my_idx + 1}} = rabbit@{{hostvars[item].ansible_hostname }}"
-  loop: "{{lookup('inventory_hostnames', 'rabbitmq_secondary', wantlist=True) }}"
+    line: "cluster_formation.classic_config.nodes.{{ my_idx + 1 }} = rabbit@{{ hostvars[item].inventory_hostname_short }}"
+  loop: "{{ lookup('inventory_hostnames', 'rabbitmq_secondary', wantlist=True) }}"
   loop_control:
     index_var: my_idx
   when:
@@ -53,7 +53,7 @@
 - name: Edit config variable
   ansible.builtin.lineinfile:
     path: "/root/.bashrc"
-    line: "export RABBITMQ_CONFIG_FILE={{rabbitmq_config}}"
+    line: "export RABBITMQ_CONFIG_FILE={{ rabbitmq_config }}"
     insertafter: "EOF"
 
 # RabbitMQ nodes and CLI tools (e.g. rabbitmqctl) use a cookie to determine
@@ -82,10 +82,10 @@
 - name: Open Ports on FirewallD Public Zone
   ansible.posix.firewalld:
     port: "{{ item }}"
-    permanent: yes
+    permanent: true
     state: enabled
     zone: public
-    immediate: yes
+    immediate: true
   loop:
     - "{{ rabbitmq_cluster_port }}/tcp"
     - "{{ rabbitmq_epmd_port }}/tcp"
@@ -93,77 +93,96 @@
     - ansible_facts.services["firewalld.service"] is defined
     - (ansible_facts.services["firewalld.service"].state == "running")
     - (ansible_facts.services["firewalld.service"].status == "enabled")
-  ignore_errors: true
 
 - name: Restart rabbitmq server
   ansible.builtin.systemd:
     name: rabbitmq-server
-    enabled: yes
+    enabled: true
     state: restarted
 
 # The first rabbit defined in the rabbitmq group is chosen as our primary that
 # the others will join a cluster with.  Run some additional tasks against the
 # non-primary members for them to join the cluster.
 - name: Stop rabbitmq
-  ansible.builtin.command: "rabbitmqctl stop_app"
+  ansible.builtin.command:
+    cmd: "rabbitmqctl stop_app"
+  register: output
+  changed_when: output.rc != 0
   when:
-    - inventory_hostname in groups['rabbitmq']
-    - hostvars[groups['rabbitmq'][0]].ansible_hostname != ansible_hostname
+    - inventory_hostname in groups.rabbitmq
+    - groups.rabbitmq.index(inventory_hostname) != 0
 
 - name: Stop rabbitmq for secondary
-  ansible.builtin.command: "rabbitmqctl stop_app"
+  ansible.builtin.command:
+    cmd: "rabbitmqctl stop_app"
+  register: output
+  changed_when: output.rc != 0
   when:
     - groups['rabbitmq_secondary'] is defined
-    - inventory_hostname in groups['rabbitmq_secondary']
-    - hostvars[groups['rabbitmq_secondary'][0]].ansible_hostname != ansible_hostname
+    - inventory_hostname in groups.rabbitmq_secondary
+    - groups.rabbitmq_secondary.index(inventory_hostname) != 0
 
 - name: Reset node
-  ansible.builtin.command: "rabbitmqctl reset"
+  ansible.builtin.command:
+    cmd: "rabbitmqctl reset"
+  register: output
+  changed_when: output.rc != 0
   when:
-    - inventory_hostname in groups['rabbitmq']
-    - hostvars[groups['rabbitmq'][0]].ansible_hostname != ansible_hostname
+    - inventory_hostname in groups.rabbitmq
+    - groups.rabbitmq.index(inventory_hostname) != 0
 
 - name: Reset node for secondary
-  ansible.builtin.command: "rabbitmqctl reset"
+  ansible.builtin.command:
+    cmd: "rabbitmqctl reset"
+  register: output
+  changed_when: output.rc != 0
   when:
     - groups['rabbitmq_secondary'] is defined
-    - inventory_hostname in groups['rabbitmq_secondary']
-    - hostvars[groups['rabbitmq_secondary'][0]].ansible_hostname != ansible_hostname
+    - inventory_hostname in groups.rabbitmq_secondary
+    - groups.rabbitmq_secondary.index(inventory_hostname) != 0
 
 - name: Join cluster
-  ansible.builtin.command: "rabbitmqctl join_cluster rabbit@{{ hostvars[groups['rabbitmq'][0]].ansible_hostname }}"
+  ansible.builtin.command:
+    cmd: "rabbitmqctl join_cluster rabbit@{{ hostvars[groups['rabbitmq'][0]].inventory_hostname_short }}"
+  register: output
+  changed_when: output.rc != 0
   when:
-    - inventory_hostname in groups['rabbitmq']
-    - hostvars[groups['rabbitmq'][0]].ansible_hostname != ansible_hostname
+    - inventory_hostname in groups.rabbitmq
+    - groups.rabbitmq.index(inventory_hostname) != 0
 
 - name: Join cluster for secondary DR
-  ansible.builtin.command: "rabbitmqctl join_cluster rabbit@{{ hostvars[groups['rabbitmq_secondary'][0]].ansible_hostname }}"
+  ansible.builtin.command:
+    cmd: "rabbitmqctl join_cluster rabbit@{{ hostvars[groups['rabbitmq_secondary'][0]].inventory_hostname_short }}"
+  register: output
+  changed_when: output.rc != 0
   when:
     - groups['rabbitmq_secondary'] is defined
-    - inventory_hostname in groups['rabbitmq_secondary']
-    - hostvars[groups['rabbitmq_secondary'][0]].ansible_hostname != ansible_hostname
+    - inventory_hostname in groups.rabbitmq_secondary
+    - groups.rabbitmq_secondary.index(inventory_hostname) != 0
 
 - name: Restart rabbitmq server
   ansible.builtin.systemd:
     name: rabbitmq-server
-    enabled: yes
+    enabled: true
     state: restarted
   when:
-    - inventory_hostname in groups['rabbitmq']
-    - hostvars[groups['rabbitmq'][0]].ansible_hostname != ansible_hostname
+    - inventory_hostname in groups.rabbitmq
+    - groups.rabbitmq.index(inventory_hostname) != 0
 
 - name: Restart rabbitmq server for secondary
   ansible.builtin.systemd:
     name: rabbitmq-server
-    enabled: yes
+    enabled: true
     state: restarted
   when:
     - groups['rabbitmq_secondary'] is defined
-    - inventory_hostname in groups['rabbitmq_secondary']
-    - hostvars[groups['rabbitmq_secondary'][0]].ansible_hostname != ansible_hostname
+    - inventory_hostname in groups.rabbitmq_secondary
+    - groups.rabbitmq_secondary.index(inventory_hostname) != 0
 
 # From the cmd line run this to set the proper HA policy on the iap vhost
 # rabbitmqctl set_policy ha-all -p iap ".*" '{"ha-mode":"all", "ha-promote-on-shutdown": "when-synced", "ha-sync-mode": "automatic"}'
 - name: Queue mirroring
   ansible.builtin.command:
     cmd: "rabbitmqctl set_policy ha-all -p {{ rabbitmq_vhost }} \".*\" '{\"ha-mode\":\"all\", \"ha-promote-on-shutdown\": \"when-synced\", \"ha-sync-mode\": \"automatic\"}'"
+  register: output
+  changed_when: output.rc != 0
