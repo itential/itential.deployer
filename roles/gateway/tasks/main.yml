@@ -239,6 +239,7 @@
     proto: tcp
     setype: http_port_t
     state: present
+  when: ansible_selinux.status == "enabled"
 
 - name: Start Automation Gateway service
   ansible.builtin.service:
