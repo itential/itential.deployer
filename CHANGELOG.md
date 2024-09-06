@@ -1,5 +1,17 @@
 # Changelog
 
+## v2.3.0 (September 05, 2024)
+
+* Configure SELinux when using custom IAP installation directory  https://github.com/itential/nickAtest/pull/39
+* Gateway 23.3  https://github.com/itential/nickAtest/pull/29
+* IAG task fails when SELinux is disabled  https://github.com/itential/nickAtest/pull/44
+* Rename to yml  https://github.com/itential/nickAtest/pull/28
+* added redis_db_number  https://github.com/itential/nickAtest/pull/40
+* updated mongo for 2023.2 redhat/rocky 8 to version 7  https://github.com/itential/nickAtest/pull/38
+
+Full Changelog: https://github.com/itential/nickAtest/compare/v2.2.0...v2.3.0 
+
+
 ## v2.2.0 (August 12, 2024)
 
 * 232 rhel/rocky8 support for platform and mongo   https://github.com/itential/nickAtest/pull/15
@@ -34,6 +46,7 @@
 * Update CHANGELOG.md
 * Update Ports and Networking section in README  https://github.com/itential/nickAtest/pull/16
 * Update README to remove instructions for installing from Itential Ansible Galaxy  https://github.com/itential/nickAtest/pull/26
+* Update galaxy version and changelog for release 2.2.0 [skip ci]
 * Update publish_ansible_collection.yml
 * addded support for 23.2 on RHEL 8 for Gateway install  https://github.com/itential/nickAtest/pull/13
 * added license to galaxy file  https://github.com/itential/nickAtest/pull/8
