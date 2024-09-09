@@ -7,13 +7,13 @@
     dest: "{{ redis_sentinel_conf_file }}"
     owner: "{{ redis_owner }}"
     group: "{{ redis_group }}"
-    mode: 0640
+    mode: "0640"
     backup: true
   when:
     - groups['redis'] is defined
     - inventory_hostname in groups['redis']
   vars:
-    master_name: "{{ hostvars[ groups['redis'][0] ].inventory_hostname }}"
+    master_name: "{{ hostvars[groups['redis'][0]].inventory_hostname }}"
 
 - name: Use template to generate sentinel.conf for secondary DR
   ansible.builtin.template:
@@ -21,13 +21,13 @@
     dest: "{{ redis_sentinel_conf_file }}"
     owner: "{{ redis_owner }}"
     group: "{{ redis_group }}"
-    mode: 0640
+    mode: "0640"
     backup: true
   when:
     - groups['redis_secondary'] is defined
     - inventory_hostname in groups['redis_secondary']
   vars:
-    master_name: "{{ hostvars[ groups['redis_secondary'][0] ].inventory_hostname }}"
+    master_name: "{{ hostvars[groups['redis_secondary'][0]].inventory_hostname }}"
 
 # Only the replicas should have this "replicaof" config line. The first host
 # defined in the hosts file is chosen as the Redis primary, so, this should
@@ -36,7 +36,7 @@
   ansible.builtin.lineinfile:
     path: "{{ redis_conf_file }}"
     regexp: "# replicaof <masterip> <masterport>"
-    line: "replicaof {{ hostvars[ groups['redis'][0] ].inventory_hostname }} 6379"
+    line: "replicaof {{ hostvars[groups['redis'][0]].inventory_hostname }} 6379"
   when:
     - groups['redis'] is defined
     - inventory_hostname in groups['redis']
@@ -46,7 +46,7 @@
   ansible.builtin.lineinfile:
     path: "{{ redis_conf_file }}"
     regexp: "# replicaof <masterip> <masterport>"
-    line: "replicaof {{ hostvars[ groups['redis_secondary'][0] ].inventory_hostname }} 6379"
+    line: "replicaof {{ hostvars[groups['redis_secondary'][0]].inventory_hostname }} 6379"
   when:
     - groups['redis_secondary'] is defined
     - inventory_hostname in groups['redis_secondary']
@@ -59,20 +59,21 @@
 - name: Open Port on FirewallD Public Zone
   ansible.posix.firewalld:
     port: "{{ redis_sentinel_port }}/tcp"
-    permanent: yes
+    permanent: true
     state: enabled
     zone: public
-    immediate: yes
+    immediate: true
   when:
     - ansible_facts.services["firewalld.service"] is defined
     - (ansible_facts.services["firewalld.service"].state == "running")
     - (ansible_facts.services["firewalld.service"].status == "enabled")
-  ignore_errors: true
 
 - name: Restart Redis
-  command: /bin/true
+  ansible.builtin.command: /bin/true
   notify: Restart Redis
+  changed_when: true # The task is always reported as changed
 
 - name: Restart Sentinel
-  command: /bin/true
+  ansible.builtin.command: /bin/true
   notify: Restart Sentinel
+  changed_when: true # The task is always reported as changed
