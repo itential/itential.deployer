@@ -36,9 +36,6 @@
         line: "masterauth {{ redis_user_repluser_password }}"
       when: redis_replication | bool
 
-- name: Update Redis Sentinel configuration
-  notify: Restart Sentinel
-  block:
     # Starting in Redis 7.0 the default user was being automatically inserted
     # into the redis.conf when missing. This will remove that extra line
     # when auth is enabled to avoid a configuration error that will prevent
@@ -50,6 +47,9 @@
         state: absent
       when: redis_replication | bool
 
+- name: Update Redis Sentinel configuration
+  notify: Restart Sentinel
+  block:
     # Starting in Redis 7.0 the default user was being automatically inserted
     # into the sentinel.conf when missing. This will remove that extra line
     # when auth is enabled to avoid a configuration error that will prevent
