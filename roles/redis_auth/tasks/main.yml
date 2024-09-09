@@ -1,80 +1,77 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-# The authorization users are already included in the redis.conf file from the
-# role that installed redis. This task is simply uncommenting those lines to
-# enable/disable the necessary users.
-- name: Disable "default" user, enable other users
-  ansible.builtin.lineinfile:
-    path: "{{ redis_conf_file }}"
-    regexp: ^#\s({{ item }}.*)$
-    line: \1
-    backrefs: true
-  with_items:
-    - user default
-    - user admin
-    - user itential
-    - user repluser
-    - user sentineluser
-
-# When auth is turned on its required to use a specially designed user who
-# has the required permissions to perform the replication.
-- name: Modify redis.conf to add replication user (if required)
-  ansible.builtin.lineinfile:
-    path: "{{ redis_conf_file }}"
-    regexp: "# masteruser <username>"
-    line: "masteruser repluser"
-  when: redis_replication | bool
-
-- name: Modify redis.conf to add replication user's password (if required)
-  ansible.builtin.lineinfile:
-    path: "{{ redis_conf_file }}"
-    regexp: "# masterauth <master-password>"
-    line: "masterauth {{ redis_user_repluser_password }}"
-  when: redis_replication | bool
-
-- name: Restart Redis
-  command: /bin/true
+- name: Update Redis configuration
   notify: Restart Redis
+  block:
+    # The authorization users are already included in the redis.conf file from the
+    # role that installed redis. This task is simply uncommenting those lines to
+    # enable/disable the necessary users.
+    - name: Disable "default" user, enable other users
+      ansible.builtin.lineinfile:
+        path: "{{ redis_conf_file }}"
+        regexp: ^#\s({{ item }}.*)$
+        line: \1
+        backrefs: true
+      with_items:
+        - user default
+        - user admin
+        - user itential
+        - user repluser
+        - user sentineluser
 
-# Starting in Redis 7.0 the default user was being automatically inserted
-# into the redis.conf when missing. This will remove that extra line
-# when auth is enabled to avoid a configuration error that will prevent
-# Redis from starting.
-- name: Modify redis.conf and remove any extra default user lines
-  ansible.builtin.lineinfile:
-    path: "{{ redis_conf_file }}"
-    regexp: "user default on nopass.+$"
-    state: absent
-  when: redis_replication | bool
+    # When auth is turned on its required to use a specially designed user who
+    # has the required permissions to perform the replication.
+    - name: Modify redis.conf to add replication user (if required)
+      ansible.builtin.lineinfile:
+        path: "{{ redis_conf_file }}"
+        regexp: "# masteruser <username>"
+        line: "masteruser repluser"
+      when: redis_replication | bool
 
-# Starting in Redis 7.0 the default user was being automatically inserted
-# into the sentinel.conf when missing. This will remove that extra line
-# when auth is enabled to avoid a configuration error that will prevent
-# Redis from starting.
-- name: Modify sentinel.conf and remove any extra default user lines
-  ansible.builtin.lineinfile:
-    path: "{{ redis_sentinel_conf_file }}"
-    regexp: "user default on nopass.+$"
-    state: absent
-  when: redis_replication | bool
+    - name: Modify redis.conf to add replication user's password (if required)
+      ansible.builtin.lineinfile:
+        path: "{{ redis_conf_file }}"
+        regexp: "# masterauth <master-password>"
+        line: "masterauth {{ redis_user_repluser_password }}"
+      when: redis_replication | bool
 
-# The authorization users are already included in the sentinel.conf file from
-# the role that installed redis. This task is simply uncommenting those lines
-# to enable/disable the necessary sentinel users.
-- name: Disable "default" user, enable other sentinel users
-  ansible.builtin.lineinfile:
-    path: "{{ redis_sentinel_conf_file }}"
-    regexp: ^#\s({{ item }}.*)$
-    line: '\1'
-    backrefs: true
-  with_items:
-    - user default
-    - user admin
-    - user sentineluser
-  when: redis_replication | bool
+    # Starting in Redis 7.0 the default user was being automatically inserted
+    # into the redis.conf when missing. This will remove that extra line
+    # when auth is enabled to avoid a configuration error that will prevent
+    # Redis from starting.
+    - name: Modify redis.conf and remove any extra default user lines
+      ansible.builtin.lineinfile:
+        path: "{{ redis_conf_file }}"
+        regexp: "user default on nopass.+$"
+        state: absent
+      when: redis_replication | bool
 
-- name: Restart Sentinel
-  command: /bin/true
+- name: Update Redis Sentinel configuration
   notify: Restart Sentinel
-  when: redis_replication | bool
+  block:
+    # Starting in Redis 7.0 the default user was being automatically inserted
+    # into the sentinel.conf when missing. This will remove that extra line
+    # when auth is enabled to avoid a configuration error that will prevent
+    # Redis from starting.
+    - name: Modify sentinel.conf and remove any extra default user lines
+      ansible.builtin.lineinfile:
+        path: "{{ redis_sentinel_conf_file }}"
+        regexp: "user default on nopass.+$"
+        state: absent
+      when: redis_replication | bool
+
+    # The authorization users are already included in the sentinel.conf file from
+    # the role that installed redis. This task is simply uncommenting those lines
+    # to enable/disable the necessary sentinel users.
+    - name: Disable "default" user, enable other sentinel users
+      ansible.builtin.lineinfile:
+        path: "{{ redis_sentinel_conf_file }}"
+        regexp: ^#\s({{ item }}.*)$
+        line: '\1'
+        backrefs: true
+      with_items:
+        - user default
+        - user admin
+        - user sentineluser
+      when: redis_replication | bool
