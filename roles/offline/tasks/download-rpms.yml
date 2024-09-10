@@ -36,13 +36,15 @@
         download_dir: "{{ download_dir }}"
       when: download_method == "yum_module"
 
-    - name: Download packages (yum install)
+    # Disabling ansible-lint check - yum module does not support downloadonly
+    - name: Download packages (yum install) # noqa command-instead-of-module
       ansible.builtin.command:
         cmd: yum install --downloadonly --downloaddir "{{ download_dir }}" -y "{{ download_packages }}"
       changed_when: true
       when: download_method == "yum_install"
 
-    - name: Download packages (yum reinstall)
+    # Disabling ansible-lint check - yum module does not support downloadonly
+    - name: Download packages (yum reinstall) # noqa command-instead-of-module
       ansible.builtin.command:
         cmd: yum reinstall --downloadonly --downloaddir "{{ download_dir }}" -y "{{ download_packages }}"
       changed_when: true
@@ -69,4 +71,3 @@
             cmd: "yumdownloader --resolve --downloaddir {{ download_dir }} {{ download_packages | join(' ') }}"
           changed_when: true
           failed_when: false
-

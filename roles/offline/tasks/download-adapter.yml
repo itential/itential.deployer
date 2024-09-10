@@ -15,7 +15,8 @@
   ansible.builtin.set_fact:
     adapter_name: "{{ adapter | basename | split('.') | first }}"
 
-- name: Git clone {{ adapter }}
+# Disabling ansible-lint check - always clone the latest
+- name: Git clone adapter # noqa: latest
   ansible.builtin.git:
     repo: "{{ adapter }}"
     dest: "{{ download_dir }}/{{ adapter_name }}"
@@ -35,9 +36,9 @@
     chdir: "{{ download_dir }}/{{ adapter_name }}"
   changed_when: true
 
-# The bundleDependencies defines an array of package names that will be bundled 
+# The bundleDependencies defines an array of package names that will be bundled
 # when publishing the package.  This really should be defined in the package.json
-# when it's downloaded.  If it is not already defined, set it to true.  A value of true 
+# when it's downloaded.  If it is not already defined, set it to true.  A value of true
 # will bundle all dependencies.
 - name: Check if bundleDependencies is already defined in package.json
   ansible.builtin.lineinfile:
