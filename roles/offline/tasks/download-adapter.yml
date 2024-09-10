@@ -15,8 +15,7 @@
   ansible.builtin.set_fact:
     adapter_name: "{{ adapter | basename | split('.') | first }}"
 
-# Disabling ansible-lint check - always clone the latest
-- name: Git clone adapter # noqa: latest
+- name: Git clone adapter # noqa: latest (always clone the latest)
   ansible.builtin.git:
     repo: "{{ adapter }}"
     dest: "{{ download_dir }}/{{ adapter_name }}"
