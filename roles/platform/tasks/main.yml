@@ -6,8 +6,11 @@
     file: validate-vars.yml
 
 - name: Determine release vars
-  ansible.builtin.include_tasks:
-    file: determine-release-vars.yml
+  tags: always
+  block:
+    - name: Determine release vars
+      ansible.builtin.include_tasks:
+        file: determine-release-vars.yml
 
 - name: Install base OS packages
   ansible.builtin.include_role:
@@ -32,9 +35,11 @@
   tags: install_nodejs
 
 - name: Install Python
-  ansible.builtin.include_tasks:
-    file: install-python.yml
   tags: install_python
+  block:
+    - name: Install Python
+      ansible.builtin.include_tasks:
+        file: install-python.yml
 
 - name: Create itential user
   ansible.builtin.include_tasks:
