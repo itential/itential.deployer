@@ -23,7 +23,7 @@ rabbitmq_bind_addr: 127.0.0.1
 
 # The largest allowed message payload size in bytes. Messages of larger size will be
 # rejected with a suitable channel exception. Default: 134217728, Max value: 536870912
-#rabbit_max_msg_size: 536870911
+# rabbit_max_msg_size: 536870911
 
 # Makes it possible to override the total amount of memory available, as opposed to
 # inferring it from the environment using OS-specific means. This should only be used
@@ -33,7 +33,7 @@ rabbitmq_bind_addr: 127.0.0.1
 # of bytes or, alternatively, in information units (e.g `8GB`). For example, when the
 # value is set to 4 GB, the node will believe it is running on a machine with 4 GB of RAM.
 # Default: undefined (not set or used).
-#rabbit_total_mem_available_override: 8GB
+# rabbit_total_mem_available_override: 8GB
 
 # Offline install settings
 # Refer to the offline variables in common_vars for additional settings
