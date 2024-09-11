@@ -26,6 +26,7 @@
         name: selinux
 
 - name: Install Redis
+  tags: install_redis
   block:
     - name: Include tasks to install Redis (online)
       when: not offline_install
@@ -45,7 +46,6 @@
       ansible.builtin.include_tasks:
         file: redis-offline.yml
       when: offline_install
-  tags: install_redis
 
 - name: Ensure the directories for the config exists
   ansible.builtin.file:
@@ -79,7 +79,6 @@
     - ansible_facts.services["firewalld.service"] is defined
     - (ansible_facts.services["firewalld.service"].state == "running")
     - (ansible_facts.services["firewalld.service"].status == "enabled")
-  ignore_errors: true
 
 - name: Enable redis
   throttle: 1
@@ -91,7 +90,7 @@
 
 - name: Determine redis version
   ansible.builtin.shell:
-    cmd: redis-server --version | cut -d" " -f3 | cut -d"=" -f2
+    cmd: set -o pipefail && redis-server --version | cut -d" " -f3 | cut -d"=" -f2
   register: result
   check_mode: false
   changed_when: false
@@ -106,3 +105,4 @@
     path: "{{ itential_release_file }}"
     line: "REDIS={{ redis_server_version }}"
     create: true
+    mode: "0644"
