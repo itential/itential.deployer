@@ -32,11 +32,13 @@
           - --quiet
           - --eval='EJSON.stringify(db.iap_profiles.find({"id":"Local_AAA"},{"_id":0,"services":1}).toArray());'
           - "{{ mongo_connection_string }}"
-      register: local_aaa_profile
+      register: local_aaa_profile_result
+      changed_when: local_aaa_profile_result.rc == 0
+      failed_when: local_aaa_profile_result.rc > 0
 
     - name: Set discovered services list for Local_AAA
       ansible.builtin.set_fact:
-        discovered_services: "{{ local_aaa_profile.stdout }}"
+        discovered_services: "{{ local_aaa_profile_result.stdout }}"
 
     # Create a default profile document in the itential database. This template
     # contains the logic to modify various properties based on the vars set in
@@ -62,11 +64,13 @@
           - --quiet
           - --eval='EJSON.stringify(db.iap_profiles.find({"id":"LDAP"},{"_id":0,"services":1}).toArray());'
           - "{{ mongo_connection_string }}"
-      register: ldap_profile
+      register: ldap_profile_result
+      changed_when: ldap_profile_result.rc == 0
+      failed_when: ldap_profile_result.rc > 0
 
     - name: Set discovered services list for LDAP
       ansible.builtin.set_fact:
-        discovered_services: "{{ ldap_profile.stdout }}"
+        discovered_services: "{{ ldap_profile_result.stdout }}"
 
     # Create a second profile document that is configured to use the LDAP adapter.
     # This still requires the admins to correctly configure the LDAP adapter to
@@ -113,11 +117,13 @@
           - --quiet
           - --eval='EJSON.stringify(db.iap_profiles.find({"id":"Primary_Local_AAA"},{"_id":0,"services":1}).toArray());'
           - "{{ mongo_connection_string }}"
-      register: primary_local_aaa_profile
+      register: primary_local_aaa_profile_result
+      changed_when: primary_local_aaa_profile_result.rc == 0
+      failed_when: primary_local_aaa_profile_result.rc > 0
 
     - name: Set discovered services list for Primary_Local_AAA
       ansible.builtin.set_fact:
-        discovered_services: "{{ primary_local_aaa_profile.stdout }}"
+        discovered_services: "{{ primary_local_aaa_profile_result.stdout }}"
 
     - name: Create Primary Local AAA profile document non-default production environments
       ansible.builtin.template:
@@ -139,11 +145,13 @@
           - --quiet
           - --eval='EJSON.stringify(db.iap_profiles.find({"id":"Secondary_Local_AAA"},{"_id":0,"services":1}).toArray());'
           - "{{ mongo_connection_string }}"
-      register: secondary_local_aaa_profile
+      register: secondary_local_aaa_profile_result
+      changed_when: secondary_local_aaa_profile_result.rc == 0
+      failed_when: secondary_local_aaa_profile_result.rc > 0
 
     - name: Set discovered services list for Secondary_Local_AAA
       ansible.builtin.set_fact:
-        discovered_services: "{{ secondary_local_aaa_profile.stdout }}"
+        discovered_services: "{{ secondary_local_aaa_profile_result.stdout }}"
 
     - name: Create Secondary Local AAA profile document non-default production environments
       ansible.builtin.template:
@@ -218,6 +226,9 @@
           - --upsertFields=name
           - --file="{{ item.path }}"
       loop: "{{ found_sc_files.files }}"
+      register: service_configs_result
+      changed_when: service_configs_result.rc == 0
+      failed_when: service_configs_result.rc > 0
 
 - name: Find all rendered template files in /tmp
   ansible.builtin.find:

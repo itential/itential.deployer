@@ -2,10 +2,11 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
 - name: Disable safe repository checks
-  ansible.builtin.command:
-    cmd: "git config --global --add safe.directory '*'"
+  community.general.git_config:
+    name: safe.directory
+    scope: global
+    value: '*'
   when: disable_git_safe_repo_checks
-  changed_when: true
 
 - name: Install any configured opensource adapters
   when:
@@ -27,7 +28,7 @@
     # symlinks.
     - name: Make a list of the adapter names
       ansible.builtin.set_fact:
-        adapter_names: "{{ adapter_names + [item | basename | split('.') | first ]}}"
+        adapter_names: "{{ adapter_names + [item | basename | split('.') | first] }}"
       loop: "{{ itential_adapters | default([], true) }}"
       vars:
         adapter_names: []
@@ -35,7 +36,7 @@
     - name: Install opensource adapters (online)
       when: not offline_install
       block:
-        - name: Git clone opensource adapters (online)
+        - name: Git clone opensource adapters (online) # noqa: latest (always clone the latest)
           ansible.builtin.git:
             repo: "{{ item }}"
             dest: "{{ iap_install_dir }}/current/custom/@itentialopensource/{{ adapter_names[i] }}"
@@ -142,7 +143,7 @@
     # symlinks.
     - name: Make a list of the custom adapter names
       ansible.builtin.set_fact:
-        custom_names: "{{ custom_names + [item | basename | split('.') | first ]}}"
+        custom_names: "{{ custom_names + [item | basename | split('.') | first] }}"
       loop: "{{ custom_adapters | default([], true) }}"
       vars:
         custom_names: []
@@ -150,7 +151,7 @@
     - name: Install custom adapters (online)
       when: not offline_install
       block:
-        - name: Git clone all custom adapters (online)
+        - name: Git clone all custom adapters (online) # noqa: latest (always clone the latest)
           ansible.builtin.git:
             repo: "{{ item }}"
             dest: "{{ iap_install_dir }}/current/custom/{{ custom_location }}/{{ custom_names[i] }}"
@@ -224,7 +225,7 @@
 - name: Restart IAP
   ansible.builtin.command: /bin/true
   notify: Restart IAP
-  when: > 
+  when: >
     (custom_adapters is defined and (custom_adapters | default([], true)) | length > 0) or
     (itential_adapters is defined and (itential_adapters | default([], true)) | length > 0)
   changed_when: true
