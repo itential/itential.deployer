@@ -121,7 +121,7 @@
     "cookieName": "token",
     "description": "Authentication",
     "logoutTime": 60,
-     {% if iap_release == 2023.2 %}
+    {% if iap_release >= 2023.2 %}
     "sso": {
       "enabled": false,
       "config": ""
