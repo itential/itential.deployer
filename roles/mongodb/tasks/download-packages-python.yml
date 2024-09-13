@@ -39,7 +39,7 @@
     - app_python_dependencies | length > 0
 
 - name: Uninstall Python rpms
-  ansible.builtin.yum:
+  ansible.builtin.dnf:
     name: "{{ item }}"
     state: absent
     autoremove: true

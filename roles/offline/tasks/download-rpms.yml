@@ -29,7 +29,7 @@
         mode: '0755'
 
     - name: Download packages (ansible yum module)
-      ansible.builtin.yum:
+      ansible.builtin.dnf:
         name: "{{ download_packages }}"
         state: present
         download_only: true
@@ -60,7 +60,7 @@
       when: download_method == "yumdownloader"
       block:
         - name: Install Yum utils
-          ansible.builtin.yum:
+          ansible.builtin.dnf:
             name: yum-utils
             state: present
 

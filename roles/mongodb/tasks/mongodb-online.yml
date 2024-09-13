@@ -16,7 +16,7 @@
 
 # Install mongodb if mongodb is not already installed
 - name: Install MongoDB packages (online)
-  ansible.builtin.yum:
+  ansible.builtin.dnf:
     name: "{{ mongodb_packages }}"
     state: present
   when: "'mongodb-org' not in ansible_facts.packages"

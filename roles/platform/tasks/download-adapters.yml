@@ -2,7 +2,7 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
 - name: Install rpms required for download
-  ansible.builtin.yum:
+  ansible.builtin.dnf:
     name: "{{ item }}"
     state: present
   with_items:
@@ -76,14 +76,14 @@
       with_items: "{{ found_custom_adapters.files }}"
 
 - name: Uninstall rpms required for download
-  ansible.builtin.yum:
+  ansible.builtin.dnf:
     name: "{{ item }}"
     state: absent
     autoremove: true
   with_items: "{{ install_result.results | selectattr('changed', 'equalto', true) | map(attribute='item') }}"
 
 - name: Uninstall nodejs rpms
-  ansible.builtin.yum:
+  ansible.builtin.dnf:
     name: "{{ item }}"
     state: absent
     autoremove: true
