@@ -37,7 +37,7 @@
   tags: download_gateway_packages
 
 - name: Install Gateway rpms
-  ansible.builtin.yum:
+  ansible.builtin.dnf:
     name: "{{ item }}"
     state: present
   with_items: "{{ gateway_packages }}"
@@ -71,7 +71,7 @@
     dest_dir: "{{ rpms_download_dir_control_node }}"
 
 - name: Uninstall Gateway packages
-  ansible.builtin.yum:
+  ansible.builtin.dnf:
     name: "{{ item }}"
     state: absent
     autoremove: true

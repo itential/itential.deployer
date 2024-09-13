@@ -3,9 +3,11 @@
 
 # Exclude these files from the linter
 exclude_paths:
-  - .gitlab
+  - .git*
 
 # Rules that we feel should not be errors but warnings
 warn_list:
   - yaml[line-length]
   - var-naming[no-role-prefix]
+  - meta-runtime[unsupported-version]
+  - run-once[task]

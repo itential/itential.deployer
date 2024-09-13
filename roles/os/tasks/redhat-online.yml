@@ -1,14 +1,8 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Update the current yum packages
-  ansible.builtin.yum:
-    name: '*'
-    state: latest
-  when: yum_update | bool
-
 - name: Install OS Packages
-  ansible.builtin.yum:
+  ansible.builtin.dnf:
     name: "{{ os_packages }}"
     state: present
     validate_certs: false
@@ -16,11 +10,11 @@
     update_cache: true
 
 - name: Install Security Packages
-  ansible.builtin.yum:
+  ansible.builtin.dnf:
     name: "{{ security_packages }}"
     state: present
 
 - name: Install Operations Packages
-  ansible.builtin.yum:
+  ansible.builtin.dnf:
     name: "{{ operational_packages }}"
     state: present

@@ -3,7 +3,7 @@
 ---
 # The keys here are intended to represent the Redhat/Rocky/Centos major version
 
-# The redis_packages and redis_repo_url are used when the 
+# The redis_packages and redis_repo_url are used when the
 # redis_install_method is set to 'remi_repo'
 redis_packages:
   "7":

@@ -40,6 +40,9 @@
         - ./config
         - make
         - make install
+      register: result
+      changed_when: result.changed
+      failed_when: result.rc > 0
 
 - name: Check if Python is already installed
   ansible.builtin.stat:

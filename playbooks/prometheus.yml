@@ -10,7 +10,7 @@
     - role: itential.deployer.common_vars
       tags:
         - always
-        
+
     - role: itential.deployer.prometheus
       tags:
         - prometheus_install

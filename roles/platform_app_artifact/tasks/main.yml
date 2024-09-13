@@ -1,48 +1,53 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Make directory for app-artifacts
-  ansible.builtin.file:
-    path: "{{ iap_install_dir }}/current/custom/@itential/app-artifacts"
-    owner: "{{ iap_user }}"
-    group: "{{ iap_group }}"
-    mode: 0775
-    state: directory
-
-- name: Copy to and unarchive app-artifact source code to destination
-  ansible.builtin.unarchive:
-    src: "{{ app_artifact_source_file }}"
-    dest: "{{ iap_install_dir }}/current/custom/@itential/app-artifacts"
-    mode: 0644
-    group: "{{ iap_user }}"
-    owner: "{{ iap_group }}"
-    extra_opts:
-      - --strip-components=1
-
-- name: Run npm install
-  community.general.npm:
-    path: "{{ iap_install_dir }}/current/custom/@itential/app-artifacts"
-
-# Using chown and chmod is a faster way to enforce the file ownership and
-# permissions. The file module in ansible checks each and every file/dir
-# in the tree, 'chown -R ' does not, it just sets it.
-- name: Set appropriate ownership on all itential files
-  ansible.builtin.command:
-    cmd: "chown -R {{ iap_user }}:{{ iap_group }} {{ iap_install_dir }}/current/custom/@itential/app-artifacts"
-
-- name: Set appropriate permissions on all itential files
-  ansible.builtin.command:
-    cmd: "chmod -R 775 {{ iap_install_dir }}/current/custom/@itential/app-artifacts"
-
-- name: Add symlink in install directory
-  ansible.builtin.file:
-    src: "{{ iap_install_dir }}/current/custom/@itential/app-artifacts"
-    dest: "{{ iap_install_dir }}/current/node_modules/@itential/app-artifacts"
-    group: "{{ iap_user }}"
-    owner: "{{ iap_group }}"
-    state: link
-    follow: false
-
-- name: Restart IAP
-  command: /bin/true
+- name: Install App Artifacts
   notify: Restart IAP
+  block:
+    - name: Make directory for app-artifacts
+      ansible.builtin.file:
+        path: "{{ iap_install_dir }}/current/custom/@itential/app-artifacts"
+        owner: "{{ iap_user }}"
+        group: "{{ iap_group }}"
+        mode: '0775'
+        state: directory
+
+    - name: Copy to and unarchive app-artifact source code to destination
+      ansible.builtin.unarchive:
+        src: "{{ app_artifact_source_file }}"
+        dest: "{{ iap_install_dir }}/current/custom/@itential/app-artifacts"
+        mode: '0644'
+        group: "{{ iap_user }}"
+        owner: "{{ iap_group }}"
+        extra_opts:
+          - --strip-components=1
+
+    - name: Run npm install
+      community.general.npm:
+        path: "{{ iap_install_dir }}/current/custom/@itential/app-artifacts"
+
+    # Using chown and chmod is a faster way to enforce the file ownership and
+    # permissions. The file module in ansible checks each and every file/dir
+    # in the tree, 'chown -R ' does not, it just sets it.
+    - name: Set appropriate ownership on all itential files
+      ansible.builtin.command:
+        cmd: "chown -R {{ iap_user }}:{{ iap_group }} {{ iap_install_dir }}/current/custom/@itential/app-artifacts"
+      register: result
+      changed_when: result.rc == 0
+      failed_when: result.rc > 0
+
+    - name: Set appropriate permissions on all itential files
+      ansible.builtin.command:
+        cmd: "chmod -R 775 {{ iap_install_dir }}/current/custom/@itential/app-artifacts"
+      register: result
+      changed_when: result.rc == 0
+      failed_when: result.rc > 0
+
+    - name: Add symlink in install directory
+      ansible.builtin.file:
+        src: "{{ iap_install_dir }}/current/custom/@itential/app-artifacts"
+        dest: "{{ iap_install_dir }}/current/node_modules/@itential/app-artifacts"
+        group: "{{ iap_user }}"
+        owner: "{{ iap_group }}"
+        state: link
+        follow: false
