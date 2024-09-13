@@ -25,7 +25,7 @@
 
 # Install grafana with yum
 - name: Install Grafana
-  ansible.builtin.yum:
+  ansible.builtin.dnf:
     name: grafana
     state: present
 

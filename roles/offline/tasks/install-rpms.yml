@@ -34,7 +34,7 @@
   changed_when: false
 
 - name: Install RPMs
-  ansible.builtin.yum:
+  ansible.builtin.dnf:
     name: "{{ rpm_list.files | map(attribute='path') | list | sort }}"
     state: present
     disable_gpg_check: true

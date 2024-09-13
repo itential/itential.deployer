@@ -46,7 +46,7 @@
 
     # This will perform the actual install of nodejs
     - name: Yum install nodejs
-      ansible.builtin.yum:
+      ansible.builtin.dnf:
         name: nodejs
         state: present
 

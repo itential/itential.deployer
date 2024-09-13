@@ -36,7 +36,7 @@
     download_dir: "{{ wheels_download_dir_target_node }}/app"
 
 - name: Uninstall Python rpms
-  ansible.builtin.yum:
+  ansible.builtin.dnf:
     name: "{{ item }}"
     state: absent
     autoremove: true
