@@ -10,6 +10,7 @@
     mongo_cmd: auto
     login_user: "{{ mongo_auth_enabled is defined and mongo_auth_enabled | ternary('admin', omit) }}"
     login_password: "{{ mongo_auth_enabled is defined and mongo_auth_enabled | ternary(mongo_user_admin_password, omit) }}"
+    login_port: "{{ mongo_port }}"
     eval: "rs.status()"
   register: rs_status_result
   changed_when: false
@@ -29,6 +30,7 @@
       community.mongodb.mongodb_status:
         login_user: "{{ mongo_auth_enabled is defined and mongo_auth_enabled | ternary('admin', omit) }}"
         login_password: "{{ mongo_auth_enabled is defined and mongo_auth_enabled | ternary(mongo_user_admin_password, omit) }}"
+        login_port: "{{ mongo_port }}"
         replica_set: rs0
       register: mongodb_status_result
 

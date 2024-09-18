@@ -202,6 +202,7 @@
       community.mongodb.mongodb_user:
         login_user: "{{ mongodb_auth_enabled is defined and mongodb_auth_enabled | ternary('admin', omit) }}"
         login_password: "{{ mongodb_auth_enabled is defined and mongodb_auth_enabled | ternary(mongo_user_admin_password, omit) }}"
+        login_port: "{{ mongo_port }}"
         database: "{{ mongo_admin_db_name }}"
         name: admin
         password: "{{ mongo_user_admin_password }}"
@@ -220,6 +221,7 @@
       community.mongodb.mongodb_user:
         login_user: "{{ mongodb_auth_enabled is defined and mongodb_auth_enabled | ternary('admin', omit) }}"
         login_password: "{{ mongodb_auth_enabled is defined and mongodb_auth_enabled | ternary(mongo_user_admin_password, omit) }}"
+        login_port: "{{ mongo_port }}"
         database: "{{ mongo_itential_db_name }}"
         user: itential
         password: "{{ mongo_user_itential_password }}"
@@ -238,6 +240,7 @@
       community.mongodb.mongodb_user:
         login_user: "{{ mongodb_auth_enabled is defined and mongodb_auth_enabled | ternary('admin', omit) }}"
         login_password: "{{ mongodb_auth_enabled is defined and mongodb_auth_enabled | ternary(mongo_user_admin_password, omit) }}"
+        login_port: "{{ mongo_port }}"
         database: "{{ mongo_localaaa_db_name }}"
         user: localaaa
         password: "{{ mongo_user_localaaa_password }}"
