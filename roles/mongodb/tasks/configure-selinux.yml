@@ -8,6 +8,16 @@
       ansible.builtin.include_role:
         name: selinux
 
+    - name: Allow mongodb to listen on tcp port when using non-standard mongo port
+      community.general.seport:
+        ports: "{{ mongo_port }}"
+        proto: tcp
+        setype: mongod_port_t
+        state: present
+      when:
+        - ansible_selinux.status == "enabled"
+        - mongo_port != 27017
+
     # MongoDB is configured to use non-default paths for its data and log
     # directories. First, we need to update the SELinux policy to allow the
     # mongod service to use the new directory, it’s worth to note that we
