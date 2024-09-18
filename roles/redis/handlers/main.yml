@@ -4,11 +4,11 @@
 - name: Restart Redis
   ansible.builtin.systemd:
     name: redis
-    enabled: yes
+    enabled: true
     state: restarted
 
 - name: Restart Sentinel
   ansible.builtin.systemd:
     name: redis-sentinel
-    enabled: yes
+    enabled: true
     state: restarted

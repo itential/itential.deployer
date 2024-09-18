@@ -40,7 +40,6 @@
         - name: Set the Redis build directory
           ansible.builtin.set_fact:
             redis_build_dir: "{{ unarchive_result.src.split('.tar.gz')[0] }}"
-          when: unarchive_result.changed
 
     - name: Offline install
       when: offline_install
@@ -68,14 +67,13 @@
         - name: Set the Redis build directory
           ansible.builtin.set_fact:
             redis_build_dir: "{{ unarchive_result.src.split('.tar.gz')[0] }}"
-          when: unarchive_result.changed
 
     - name: Make Redis
-      ansible.builtin.make:
+      community.general.make:
         chdir: "{{ redis_build_dir }}"
         target: install
         params:
-          USE_SYSTEMD: yes
+          USE_SYSTEMD: true
       tags: make_redis
 
     - name: Remove temporary working directory

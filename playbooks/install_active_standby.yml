@@ -68,13 +68,6 @@
         - mongodb
         - mongodb_install
 
-    # Insert some day zero data into the MongoDB, Itential users, profiles,
-    # configure redis, configure rabbitmq, etc...
-    - role: itential.deployer.mongodb_init
-      tags:
-        - mongodb
-        - mongodb_init
-
     # Enable MongoDB replication, configure replica set if required
     # https://www.mongodb.com/docs/manual/replication/
     - role: itential.deployer.mongodb_replication
@@ -128,12 +121,6 @@
       tags:
         - platform
         - platform_install
-
-    # Install any listed apps and/or adapters
-    - role: itential.deployer.platform_adapters
-      tags:
-        - platform
-        - platform_adapters
 
 - name: Install IAP
   hosts: platform

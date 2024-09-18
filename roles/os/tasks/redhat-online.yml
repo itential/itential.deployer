@@ -2,7 +2,7 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
 - name: Install OS Packages
-  ansible.builtin.yum:
+  ansible.builtin.dnf:
     name: "{{ os_packages }}"
     state: present
     validate_certs: false
@@ -10,11 +10,11 @@
     update_cache: true
 
 - name: Install Security Packages
-  ansible.builtin.yum:
+  ansible.builtin.dnf:
     name: "{{ security_packages }}"
     state: present
 
 - name: Install Operations Packages
-  ansible.builtin.yum:
+  ansible.builtin.dnf:
     name: "{{ operational_packages }}"
     state: present

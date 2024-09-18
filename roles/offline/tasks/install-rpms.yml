@@ -28,13 +28,13 @@
   ansible.builtin.command: rpmdb --rebuilddb
   changed_when: false
 
-- name: Get list of yum repos (to disable temporarily)
+- name: Get list of yum repos (to disable temporarily) # noqa command-instead-of-module (yum module does not support repolist)
   ansible.builtin.command: yum -q repolist
   register: repolist_result
   changed_when: false
 
 - name: Install RPMs
-  ansible.builtin.yum:
+  ansible.builtin.dnf:
     name: "{{ rpm_list.files | map(attribute='path') | list | sort }}"
     state: present
     disable_gpg_check: true

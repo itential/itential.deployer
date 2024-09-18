@@ -25,7 +25,7 @@
   register: workingdir
 
 - name: Install Gateway packages (online)
-  ansible.builtin.yum:
+  ansible.builtin.dnf:
     name: "{{ item }}"
     state: present
   with_items: "{{ gateway_packages }}"
