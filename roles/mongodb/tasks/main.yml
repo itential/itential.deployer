@@ -200,6 +200,7 @@
     # This creates the admin user that has root access to the database
     - name: Add admin user to database
       community.mongodb.mongodb_user:
+        login_port: "{{ mongo_port }}"
         login_user: "{{ mongodb_auth_enabled is defined and mongodb_auth_enabled | ternary('admin', omit) }}"
         login_password: "{{ mongodb_auth_enabled is defined and mongodb_auth_enabled | ternary(mongo_user_admin_password, omit) }}"
         database: "{{ mongo_admin_db_name }}"
@@ -218,6 +219,7 @@
     # itential database.  It is used by IAP to connect to the db.
     - name: Add itential user to database
       community.mongodb.mongodb_user:
+        login_port: "{{ mongo_port }}"
         login_user: "{{ mongodb_auth_enabled is defined and mongodb_auth_enabled | ternary('admin', omit) }}"
         login_password: "{{ mongodb_auth_enabled is defined and mongodb_auth_enabled | ternary(mongo_user_admin_password, omit) }}"
         database: "{{ mongo_itential_db_name }}"
@@ -236,6 +238,7 @@
     # LocalAAA database.  It is used by the local AAA adapter to login to IAP.
     - name: Add localaaa user to database
       community.mongodb.mongodb_user:
+        login_port: "{{ mongo_port }}"
         login_user: "{{ mongodb_auth_enabled is defined and mongodb_auth_enabled | ternary('admin', omit) }}"
         login_password: "{{ mongodb_auth_enabled is defined and mongodb_auth_enabled | ternary(mongo_user_admin_password, omit) }}"
         database: "{{ mongo_localaaa_db_name }}"
