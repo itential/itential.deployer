@@ -1,6 +1,27 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
+- name: Add RabbitMQ cluster port to environment file
+  ansible.builtin.lineinfile:
+    path: "{{ rabbitmq_env_config }}"
+    owner: "{{ rabbitmq_owner }}"
+    group: "{{ rabbitmq_group }}"
+    mode: "0600"
+    line: "RABBITMQ_DIST_PORT={{ rabbitmq_cluster_port }}"
+    search_string: "RABBITMQ_DIST_PORT"
+    create: true
+  when: rabbitmq_cluster_port != rabbitmq_default_cluster_port
+
+- name: Add RabbitMQ epmd port to environment file
+  ansible.builtin.lineinfile:
+    path: "{{ rabbitmq_env_config }}"
+    owner: "{{ rabbitmq_owner }}"
+    group: "{{ rabbitmq_group }}"
+    mode: "0600"
+    line: "ERL_EPMD_PORT={{ rabbitmq_epmd_port }}"
+    search_string: "ERL_EPMD_PORT"
+    create: true
+  when: rabbitmq_epmd_port != rabbitmq_default_epmd_port
 
 - name: Enable clustering in the RabbitMQ config file
   ansible.builtin.lineinfile:
@@ -91,8 +112,8 @@
     - "{{ rabbitmq_epmd_port }}/tcp"
   when:
     - ansible_facts.services["firewalld.service"] is defined
-    - (ansible_facts.services["firewalld.service"].state == "running")
-    - (ansible_facts.services["firewalld.service"].status == "enabled")
+    - ansible_facts.services["firewalld.service"].state == "running"
+    - ansible_facts.services["firewalld.service"].status == "enabled"
 
 - name: Restart rabbitmq server
   ansible.builtin.systemd:

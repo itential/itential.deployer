@@ -1,25 +1,39 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-# The Location of the config rabbitmq config file
-rabbitmq_config: /etc/rabbitmq/rabbitmq.conf
+# The RabbitMQ home directory
+rabbitmq_home_dir: "{{ rabbitmq_default_home_dir }}"
 
-# The default rabbitmq port
-rabbitmq_port: 5672
+# The RabbitMQ port
+rabbitmq_port: "{{ rabbitmq_default_port }}"
 
-# The default rabbitmq mgt console port
-rabbitmq_mgt_console_port: 15672
+# The RabbitMQ management console port
+rabbitmq_mgt_console_port: "{{ rabbitmq_default_mgt_console_port }}"
 
-# The default rabbitmq user and group
+# The default RabbitMQ user and group
 rabbitmq_owner: rabbitmq
 rabbitmq_group: rabbitmq
 
 # Flag to enable/disable IPv6
 rabbitmq_bind_ipv6: true
 
-# The hostnames and/or IP address on which rabbitmq should listen for
+# The hostnames and/or IP address on which RabbitMQ should listen for
 # client connections.
 rabbitmq_bind_addr: 127.0.0.1
+
+# Log settings
+rabbitmq_log_dir: /var/log/rabbitmq
+rabbitmq_log_file: rabbit.log
+rabbitmq_log_file_level: info
+
+# Inter-node connections use a buffer for data pending to be sent. Temporary throttling on
+# inter-node traffic is applied when the buffer is at max allowed capacity. The limit is
+# controlled via the RABBITMQ_DISTRIBUTION_BUFFER_SIZE environment variable in kilobytes.
+# Default value is 128 MB (128000 kB).
+#
+# In clusters with heavy inter-node traffic increasing this value may have a positive effect
+# on throughput. Values lower than 64 MB are not recommended.
+# rabbitmq_distribution_buffer_size: 128000
 
 # The largest allowed message payload size in bytes. Messages of larger size will be
 # rejected with a suitable channel exception. Default: 134217728, Max value: 536870912

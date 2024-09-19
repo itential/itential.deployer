@@ -6,7 +6,7 @@
 rabbitmq_cluster: false
 
 # The location of the Erlang cookie file
-rabbitmq_erlang_cookie: /var/lib/rabbitmq/.erlang.cookie
+rabbitmq_erlang_cookie: "{{ rabbitmq_home_dir }}/.erlang.cookie"
 
-rabbitmq_cluster_port: 25672
-rabbitmq_epmd_port: 4369
+rabbitmq_cluster_port: "{{ rabbitmq_default_cluster_port }}"
+rabbitmq_epmd_port: "{{ rabbitmq_default_epmd_port }}"
