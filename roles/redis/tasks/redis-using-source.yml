@@ -96,37 +96,3 @@
     owner: root
     group: root
     mode: "0644"
-
-- name: Create Redis group
-  ansible.builtin.group:
-    name: "{{ redis_group }}"
-
-- name: Create Redis user
-  ansible.builtin.user:
-    name: "{{ redis_owner }}"
-    group: "{{ redis_group }}"
-    state: present
-
-- name: Create Redis data directory
-  ansible.builtin.file:
-    name: "{{ redis_data_dir }}"
-    state: directory
-    owner: "{{ redis_owner }}"
-    group: "{{ redis_group }}"
-    mode: "0755"
-
-- name: Create Redis log directory
-  ansible.builtin.file:
-    name: "{{ redis_log_dir }}"
-    state: directory
-    owner: "{{ redis_owner }}"
-    group: "{{ redis_group }}"
-    mode: "0755"
-
-- name: Create Redis pid directory
-  ansible.builtin.file:
-    name: "{{ redis_pid_dir }}"
-    state: directory
-    owner: "{{ redis_owner }}"
-    group: "{{ redis_group }}"
-    mode: "0755"
