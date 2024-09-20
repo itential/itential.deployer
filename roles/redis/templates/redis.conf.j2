@@ -746,11 +746,9 @@ min-replicas-to-write 1
 #
 {% if redis_replication | bool %}
 replica-announce-ip {{ inventory_hostname }}
-{% endif %}
-# replica-announce-ip 5.5.5.5
-{% if redis_replication | bool %}
 replica-announce-port {{ redis_port }}
 {% endif %}
+# replica-announce-ip 5.5.5.5
 #replica-announce-port 1234
 
 ############################### KEYS TRACKING #################################
