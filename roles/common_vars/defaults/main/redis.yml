@@ -15,3 +15,9 @@ redis_user_itential_password: itential
 redis_user_repluser_password: repluser
 redis_user_sentineladmin_password: admin
 redis_user_sentineluser_password: sentineluser
+
+# Default redis port
+redis_port: 6379
+
+# The default redis sentinel listen port
+redis_sentinel_port: 26379
