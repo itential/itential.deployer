@@ -52,7 +52,7 @@ packages_path: "{{ itential_packages_path }}/{{ iap_release }}/redis"
 
 # Redis install method - string.
 # The valid values are 'remi_repo' (default) or 'source'.
-redis_install_method: remi_repo
+redis_install_method: source
 
 # The EPEL repo is only required when the redis_install_method is set to 'remi_repo'
 epel_repo_url: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_distribution_major_version }}.noarch.rpm"
