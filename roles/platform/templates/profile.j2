@@ -55,7 +55,7 @@
     {% set redis_host = None %}
     {% set sentinels = [] %}
     {% for sentinel in groups[vars.redis_group_name] %}
-      {% set sentinel = dict(host = hostvars[ sentinel ].inventory_hostname, port = 26379) %}
+      {% set sentinel = dict(host = hostvars[ sentinel ].inventory_hostname, port = redis_sentinel_port) %}
       {{ sentinels.append(sentinel) }}
     {% endfor %}
   {% endif %}
@@ -223,7 +223,7 @@
     "maxRetriesPerRequest" : 20,
     "name" : "mymaster",
     "password" : {{ redis_password | to_json }},
-    "port" : 6379,
+    "port" : {{ redis_port }},
 {% if redis_replication | bool %}
     "sentinels" : {{ sentinels | to_json }},
     "sentinelPassword" : {{ sentinel_password | to_json }},

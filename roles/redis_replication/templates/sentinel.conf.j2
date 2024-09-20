@@ -81,7 +81,7 @@ dir /tmp
 #
 # Note: master name should not include special characters or spaces.
 # The valid charset is A-z 0-9 and the three characters ".-_".
-sentinel monitor mymaster {{ master_name }} 6379 2
+sentinel monitor mymaster {{ master_name }} {{ redis_port }} 2
 
 {% if redis_auth %}
 sentinel auth-pass mymaster {{ redis_user_sentineluser_password }}
