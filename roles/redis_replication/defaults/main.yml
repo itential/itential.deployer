@@ -6,6 +6,3 @@ redis_sentinel_conf_file: "{{ redis_conf_path }}/sentinel.conf"
 
 # The location of the Redis Sentinel log file
 redis_sentinel_log: "{{ redis_log_dir }}/sentinel.log"
-
-# The default redis sentinel listen port
-redis_sentinel_port: 26379
