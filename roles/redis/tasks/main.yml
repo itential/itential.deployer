@@ -19,7 +19,7 @@
   tags: install_base_os_packages
 
 # Kernel Adjust
-# Memory overcommit must be enabled! Without it, a background save or replication may fail under low memory condition. 
+# Memory overcommit must be enabled! Without it, a background save or replication may fail under low memory condition.
 # Being disabled, it can can also cause failures without low memory condition, see https://github.com/jemalloc/jemalloc/issues/1328
 - name: Adjust Memory Overcommit
   ansible.posix.sysctl:
@@ -60,7 +60,7 @@
     group: "{{ redis_group }}"
     mode: "0755"
   when: redis_log_dir != "/var/log/redis" or redis_install_method == "source"
-    
+  
 - name: Create Redis pid directory
   ansible.builtin.file:
     state: directory
