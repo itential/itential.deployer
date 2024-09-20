@@ -18,12 +18,65 @@
     name: os
   tags: install_base_os_packages
 
+# Kernel Adjust
+# Memory overcommit must be enabled! Without it, a background save or replication may fail under low memory condition. 
+# Being disabled, it can can also cause failures without low memory condition, see https://github.com/jemalloc/jemalloc/issues/1328
+- name: Adjust Memory Overcommit
+  ansible.posix.sysctl:
+    name: vm.overcommit_memory
+    value: 1
+
 - name: Configure SELinux
   tags: configure_selinux
   block:
     - name: Install custom SELinux profiles
       ansible.builtin.include_role:
         name: selinux
+
+- name: Create Redis group
+  ansible.builtin.group:
+    name: "{{ redis_group }}"
+
+- name: Create Redis user
+  ansible.builtin.user:
+    name: "{{ redis_owner }}"
+    group: "{{ redis_group }}"
+    state: present
+
+- name: Create Redis data directory
+  ansible.builtin.file:
+    state: directory
+    path: "{{ redis_data_dir }}"
+    owner: "{{ redis_owner }}"
+    group: "{{ redis_group }}"
+    mode: "0755"
+  when: redis_data_dir is defined or redis_install_method == "source"
+
+- name: Create Redis log directory
+  ansible.builtin.file:
+    state: directory
+    path: "{{ redis_log_dir }}"
+    owner: "{{ redis_owner }}"
+    group: "{{ redis_group }}"
+    mode: "0755"
+  when: redis_log_dir is defined or redis_install_method == "source"
+
+- name: Ensure redis.log file exists
+  ansible.builtin.file:
+      path: "{{ redis_log }}"
+      state: touch
+      owner: redis  # Replace with the appropriate user
+      group: redis  # Replace with the appropriate group
+      mode: '0644'  # Adjust permissions as necessary
+    
+- name: Create Redis pid directory
+  ansible.builtin.file:
+    state: directory
+    path: "{{ redis_pid_dir }}"
+    owner: "{{ redis_owner }}"
+    group: "{{ redis_group }}"
+    mode: "0755"
+  when: redis_pid_dir is defined or redis_install_method == "source"
 
 - name: Install Redis
   tags: install_redis
