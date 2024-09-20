@@ -55,7 +55,7 @@
     {% set redis_host = None %}
     {% set sentinels = [] %}
     {% for sentinel in groups[vars.redis_group_name] %}
-      {% set sentinel = dict(host = hostvars[ sentinel ].inventory_hostname, port = sentinel_port) %}
+      {% set sentinel = dict(host = hostvars[ sentinel ].inventory_hostname, port = redis_sentinel_port) %}
       {{ sentinels.append(sentinel) }}
     {% endfor %}
   {% endif %}
