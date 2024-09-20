@@ -50,7 +50,7 @@
     owner: "{{ redis_owner }}"
     group: "{{ redis_group }}"
     mode: "0755"
-  when: redis_data_dir is defined or redis_install_method == "source"
+  when: redis_data_dir != "/var/lib/redis" or redis_install_method == "source"
 
 - name: Create Redis log directory
   ansible.builtin.file:
@@ -59,15 +59,7 @@
     owner: "{{ redis_owner }}"
     group: "{{ redis_group }}"
     mode: "0755"
-  when: redis_log_dir is defined or redis_install_method == "source"
-
-- name: Ensure redis.log file exists
-  ansible.builtin.file:
-      path: "{{ redis_log }}"
-      state: touch
-      owner: redis  # Replace with the appropriate user
-      group: redis  # Replace with the appropriate group
-      mode: '0644'  # Adjust permissions as necessary
+  when: redis_log_dir != "/var/log/redis" or redis_install_method == "source"
     
 - name: Create Redis pid directory
   ansible.builtin.file:
@@ -76,7 +68,7 @@
     owner: "{{ redis_owner }}"
     group: "{{ redis_group }}"
     mode: "0755"
-  when: redis_pid_dir is defined or redis_install_method == "source"
+  when: redis_pid_dir != "/var/run" or redis_install_method == "source"
 
 - name: Install Redis
   tags: install_redis
