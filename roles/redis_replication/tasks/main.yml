@@ -41,7 +41,7 @@
       ansible.builtin.lineinfile:
         path: "{{ redis_conf_file }}"
         regexp: "# replicaof <masterip> <masterport>"
-        line: "replicaof {{ hostvars[groups['redis'][0]].inventory_hostname }} 6379"
+        line: "replicaof {{ hostvars[groups['redis'][0]].inventory_hostname }} {{ redis_port }}"
       when:
         - groups['redis'] is defined
         - inventory_hostname in groups['redis']
@@ -51,7 +51,7 @@
       ansible.builtin.lineinfile:
         path: "{{ redis_conf_file }}"
         regexp: "# replicaof <masterip> <masterport>"
-        line: "replicaof {{ hostvars[groups['redis_secondary'][0]].inventory_hostname }} 6379"
+        line: "replicaof {{ hostvars[groups['redis_secondary'][0]].inventory_hostname }} {{ redis_port }}"
       when:
         - groups['redis_secondary'] is defined
         - inventory_hostname in groups['redis_secondary']
