@@ -2,8 +2,7 @@
 
 The playbook and roles in this section install and configure RabbitMQ for the Itential Automation Platform.  There are currently three RabbitMQ-related roles:
 
-* `rabbitmq` – Installs RabbitMQ and performs a base configuration.
-* `rabbitmq_cluster` – Configures RabbitMQ clustering.
+* `rabbitmq` – Installs RabbitMQ, performs a base configuration and configures clustering.
 * `rabbitmq_ssl` – Configures RabbitMQ SSL.
 
 **&#9432; Note:**
@@ -15,18 +14,16 @@ This role is used when installing IAP version 2023.1 and older.
 
 The `rabbitmq` role performs a base install of RabbitMQ including any OS packages required. It installs the appropriate version Erlang.  It creates the appropriate Linux users, directories, log files, and systemd services. It will create the required RabbitMQ users with a default password (see table). It will start the rabbitmq-server service when complete.
 
+The `rabbitmq` also role performs the steps to run RabbitMQ as a cluster of nodes.  It assumes a cluster of 3 and that the first host defined in the inventory will be used as the primary. It will modify the RabbitMQ config file to enable the cluster. It will write the hostname to each RabbitMQ node’s host file (RabbitMQ clustering requires DNS resolution). It creates the required Erlang cookie used by the RabbitMQ nodes to join a cluster. It invokes each RabbitMQ node to join the cluster. It enables queue mirroring. It will restart the rabbitmq-server service when complete.
+
+More info on rabbit cluster: https://www.rabbitmq.com/clustering.html
+
 | User Name | Default Password | Description
 | :-------- | :--------------- | :----------
 | admin | admin | The admin user with root permissions in this RabbitMQ install.
 | itential | itential | The itential user used by IAP to connect.
 
 :::(Warning) (⚠ Warning: ) It is assumed that these default passwords will be changed to meet more rigorous standards. These are intended to be defaults strictly used just for ease of the installation.  It is highly recommended that sensitive data be encrypted using Ansible Vault.
-
-## RabbitMQ Cluster
-
-The `rabbitmq_cluster` role performs the steps to run RabbitMQ as a cluster of nodes.  It assumes a cluster of 3 and that the first host defined in the inventory will be used as the primary. It will modify the RabbitMQ config file to enable the cluster. It will write the hostname to each RabbitMQ node’s host file (RabbitMQ clustering requires DNS resolution). It creates the required Erlang cookie used by the RabbitMQ nodes to join a cluster. It invokes each RabbitMQ node to join the cluster. It enables queue mirroring. It will restart the rabbitmq-server service when complete.
-
-More info on rabbit cluster: https://www.rabbitmq.com/clustering.html
 
 ## RabbitMQ SSL Role
 
@@ -47,7 +44,6 @@ The variables in this section are configured in the inventory in the `all` group
 | Variable | Group | Type | Description | Default Value | Required?
 | :------- | :---- | :--- | :---------- | :------------ | :--------
 | `iap_release` | `all` | Fixed-point | Designates the IAP major version. | N/A | Yes
-| `rabbit_svc_url` | `all` | String | This variable defines the rabbit service url to use when connecting to an externally provided RabbitMQ cluster. It is intended to be used when the architecture demands that rabbit be hosted elsewhere such as when using AmazonMQ or if the demands of an organization require some other external rabbit solution, like a shared service. | N/A | No
 
 The `iap_release` must be defined in the inventory.  This variable, along with the OS major version, is used to determine the static variables.
 
@@ -59,6 +55,8 @@ The following table lists the default variables that are shared between the Rabb
 
 | Variable | Group | Type | Description | Default Value
 | :------- | :---- | :--- | :---------- | :------------
+| `rabbitmq_port` | `all` | Integer | The RabbitMQ listen port. | `5672`
+| `rabbitmq_mgt_console_port` | `all` | Integer | The RabbitMQ management console listen port. | `15672`
 | `rabbitmq_vhost` | `all` | String | The name of the RabbitmMQ vhost. | `iap`
 | `rabbitmq_ssl` | `all` | Boolean | Flag to enable SSL. <br>`true` - enable HTTPS when connecting to rabbit, disable HTTP. <br>`false` - disable HTTPS when connecting to rabbit, enable HTTP. | `false`
 
@@ -70,9 +68,10 @@ The following table lists the default variables located in `roles/rabbitmq/defau
 
 | Variable | Group | Type | Description | Default Value
 | :------- | :---- | :--- | :---------- | :------------
-| `rabbitmq_config` | `rabbitmq` | String | The location of the RabbitMQ configuration file. | `/etc/rabbitmq/rabbitmq.conf`
-| `rabbitmq_port` | `rabbitmq` | Integer | The default listen port. | `5672`
-| `rabbitmq_mgt_console_port` | `rabbitmq` | Integer | The default management console listen port. | `15672`
+| `rabbitmq_home_dir` | `rabbitmq` | String | The RabbitMQ home directory. | `/var/lib/rabbitmq`
+| `rabbitmq_log_dir` | `rabbitmq` | String | The RabbitMQ log directory. | `/var/log/rabbitmq`
+| `rabbitmq_log_file` | `rabbitmq` | String | The RabbitMQ log file name. | `rabbit.log`
+| `rabbitmq_log_file_level` | `rabbitmq` | String | The RabbitMQ log level. | `info`
 | `rabbitmq_owner` | `rabbitmq` | String | The RabbitMQ Linux user. | `rabbitmq`
 | `rabbitmq_group` | `rabbitmq` | String | The RabbitMQ Linux group. | `rabbitmq`
 | `rabbitmq_bind_ipv6` | `rabbitmq` | Boolean | Flag to enable binding to IPv6. | `true`
@@ -81,21 +80,16 @@ The following table lists the default variables located in `roles/rabbitmq/defau
 | `rabbitmq_password` | `rabbitmq` | String | The default password for the RabbitMQ user. | `itential`
 | `rabbitmq_admin_user` | `rabbitmq` | String | The admin user with root permissions in this RabbitMQ install. | `admin`
 | `rabbitmq_admin_password` | `rabbitmq` | String | The default password for the admin user. | `admin`
-
-:::(Warning) (⚠ Warning: ) It is assumed that these default passwords will be changed to meet more rigorous standards. These are intended to be defaults strictly used just for ease of the installation.  It is highly recommended that sensitive data be encrypted using Ansible Vault.
-
-## RabbitMQ Cluster Role Variables
-
-The variables in this section may be overridden in the inventory in the `rabbmitmq` group vars.
-
-The following table lists the default variables located in `roles/rabbitmq_cluster/defaults/main.yml`.
-
-| Variable | Group | Type | Description | Default Value
-| :------- | :---- | :--- | :---------- | :------------
 | `rabbitmq_cluster` | `rabbitmq` | Boolean | Flag to enable clustering. | `false`
 | `rabbitmq_erlang_cookie` | `rabbitmq` | String | The location of the Erlang cookie file. | `/var/lib/rabbitmq/.erlang.cookie`
 | `rabbitmq_cluster_port` | `rabbitmq` | Integer | The default RabbitMQ cluster listen port. | `25672`
 | `rabbitmq_epmd_port` | `rabbitmq` | Integer | The default RabbitMQ Erlang Port Mapping Daemon listen port. | `4369`
+| `rabbitmq_distribution_buffer_size` | `rabbitmq` | Integer | Inter-node connections use a buffer for data pending to be sent. | N/A
+| `rabbit_max_msg_size` | `rabbitmq` | Integer | The largest allowed message payload size in bytes. | N/A
+| `rabbit_total_mem_available_override` | `rabbitmq` | Integer | Makes it possible to override the total amount of memory availabl in bytes, as opposed to inferring it from the environment using OS-specific means. | N/A
+| `disk_free_limit_absolute` | `rabbitmq` | Integer | Disk free limit in bytes. | N/A
+
+:::(Warning) (⚠ Warning: ) It is assumed that these default passwords will be changed to meet more rigorous standards. These are intended to be defaults strictly used just for ease of the installation.  It is highly recommended that sensitive data be encrypted using Ansible Vault.
 
 ## RabbitMQ SSL Role Variables
 
@@ -194,19 +188,12 @@ ansible-playbook itential.deployer.rabbitmq -i <inventory>
 You can also run select RabbitMQ roles by using the following tags:
 
 * `rabbitmq_install`
-* `rabbitmq_cluster`
 * `rabbitmq_ssl`
 
 To execute only the `rabbitmq` role (skipping the RabbitMQ Cluster and RabbitMQ SSL roles), run the `itential.deployer.rabbitmq` playbook with the `rabbitmq_install` tag:
 
 ```
 ansible-playbook itential.deployer.rabbitmq -i <inventory> --tags rabbitmq_install
-```
-
-To execute only the RabbitMQ Cluster role (skipping the RabbitMQ and RabbitMQ SSL roles), run the `itential.deployer.rabbitmq` playbook with the `rabbitmq_cluster` tag:
-
-```
-ansible-playbook itential.deployer.rabbitmq -i <inventory> --tags rabbitmq_cluster
 ```
 
 To execute only the RabbitMQ SSL role (skipping the RabbitMQ and RabbitMQ Cluster roles), run the `itential.deployer.rabbitmq` playbook with the `rabbitmq_ssl` tag:

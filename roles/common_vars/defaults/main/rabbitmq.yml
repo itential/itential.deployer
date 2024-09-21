@@ -1,6 +1,12 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
+# The RabbitMQ port
+rabbitmq_port: "{{ rabbitmq_default_port }}"
+
+# The RabbitMQ management console port
+rabbitmq_mgt_console_port: "{{ rabbitmq_default_mgt_console_port }}"
+
 # The name of the vhost to use so we do not use the default rabbitmq vhost
 rabbitmq_vhost: iap
 

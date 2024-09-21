@@ -1,0 +1,89 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+# The first rabbit defined in the rabbitmq group is chosen as our primary that
+# the others will join a cluster with.  Run some additional tasks against the
+# non-primary members for them to join the cluster.
+- name: Stop RabbitMQ
+  ansible.builtin.command:
+    cmd: "rabbitmqctl stop_app"
+  register: output
+  changed_when: output.rc != 0
+  when:
+    - inventory_hostname in groups['rabbitmq']
+    - hostvars[groups['rabbitmq'][0]].ansible_hostname != ansible_hostname
+
+- name: Stop RabbitMQ for secondary
+  ansible.builtin.command:
+    cmd: "rabbitmqctl stop_app"
+  register: output
+  changed_when: output.rc != 0
+  when:
+    - groups['rabbitmq_secondary'] is defined
+    - inventory_hostname in groups['rabbitmq_secondary']
+    - hostvars[groups['rabbitmq_secondary'][0]].ansible_hostname != ansible_hostname
+
+- name: Reset node
+  ansible.builtin.command:
+    cmd: "rabbitmqctl reset"
+  register: output
+  changed_when: output.rc != 0
+  when:
+    - inventory_hostname in groups['rabbitmq']
+    - hostvars[groups['rabbitmq'][0]].ansible_hostname != ansible_hostname
+
+- name: Reset node for secondary
+  ansible.builtin.command:
+    cmd: "rabbitmqctl reset"
+  register: output
+  changed_when: output.rc != 0
+  when:
+    - groups['rabbitmq_secondary'] is defined
+    - inventory_hostname in groups['rabbitmq_secondary']
+    - hostvars[groups['rabbitmq_secondary'][0]].ansible_hostname != ansible_hostname
+
+- name: Join cluster
+  ansible.builtin.command:
+    cmd: "rabbitmqctl join_cluster rabbit@{{ hostvars[groups['rabbitmq'][0]].ansible_hostname }}"
+  register: output
+  changed_when: output.rc != 0
+  when:
+    - inventory_hostname in groups['rabbitmq']
+    - hostvars[groups['rabbitmq'][0]].ansible_hostname != ansible_hostname
+
+- name: Join cluster for secondary DR
+  ansible.builtin.command:
+    cmd: "rabbitmqctl join_cluster rabbit@{{ hostvars[groups['rabbitmq_secondary'][0]].ansible_hostname }}"
+  register: output
+  changed_when: output.rc != 0
+  when:
+    - groups['rabbitmq_secondary'] is defined
+    - inventory_hostname in groups['rabbitmq_secondary']
+    - hostvars[groups['rabbitmq_secondary'][0]].ansible_hostname != ansible_hostname
+
+- name: Restart RabbitMQ server
+  ansible.builtin.systemd:
+    name: rabbitmq-server
+    enabled: true
+    state: restarted
+  when:
+    - inventory_hostname in groups['rabbitmq']
+    - hostvars[groups['rabbitmq'][0]].ansible_hostname != ansible_hostname
+
+- name: Restart RabbitMQ server for secondary
+  ansible.builtin.systemd:
+    name: rabbitmq-server
+    enabled: true
+    state: restarted
+  when:
+    - groups['rabbitmq_secondary'] is defined
+    - inventory_hostname in groups['rabbitmq_secondary']
+    - hostvars[groups['rabbitmq_secondary'][0]].ansible_hostname != ansible_hostname
+
+# From the cmd line run this to set the proper HA policy on the iap vhost
+# rabbitmqctl set_policy ha-all -p iap ".*" '{"ha-mode":"all", "ha-promote-on-shutdown": "when-synced", "ha-sync-mode": "automatic"}'
+- name: Queue mirroring
+  ansible.builtin.command:
+    cmd: "rabbitmqctl set_policy ha-all -p {{ rabbitmq_vhost }} \".*\" '{\"ha-mode\":\"all\", \"ha-promote-on-shutdown\": \"when-synced\", \"ha-sync-mode\": \"automatic\"}'"
+  register: output
+  changed_when: output.rc != 0

@@ -46,7 +46,6 @@ The variables in this section are configured in the inventory in the `all` group
 | Variable | Group | Type | Description | Default Value | Required?
 | :------- | :---- | :--- | :---------- | :------------ | :--------
 | `iap_release` | `all` | Fixed-point | Designates the IAP major version. | N/A | Yes
-| `redis_svc_url` | `all` | String | This variable defines the redis service url to use when connecting to an externally provided redis cluster. It is intended to be used when the architecture demands that redis be hosted elsewhere such as when using Elasticache or if the demands of an organization require some other external redis solution, like a shared service. | N/A | No
 
 The `iap_release` must be defined in the inventory.  This variable, along with the OS major version, is used to determine the static variables.
 

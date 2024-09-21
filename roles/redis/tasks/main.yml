@@ -60,7 +60,7 @@
     group: "{{ redis_group }}"
     mode: "0755"
   when: redis_log_dir != "/var/log/redis" or redis_install_method == "source"
-  
+
 - name: Create Redis pid directory
   ansible.builtin.file:
     state: directory

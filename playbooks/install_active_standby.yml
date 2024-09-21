@@ -39,15 +39,6 @@
         - rabbitmq
         - rabbitmq_install
 
-    # Add on any Rabbit features, HA, auth, etc...
-    # Configure Rabbit in a cluster
-    # https://www.rabbitmq.com/clustering.html
-    - role: itential.deployer.rabbitmq_cluster
-      when: rabbitmq_cluster | bool
-      tags:
-        - rabbitmq
-        - rabbitmq_cluster
-
     # Configure rabbit to only accept SSL connections
     - role: itential.deployer.rabbitmq_ssl
       when: rabbitmq_ssl | bool
