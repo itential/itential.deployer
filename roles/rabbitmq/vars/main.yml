@@ -15,7 +15,15 @@ rabbitmq_env_config: /etc/rabbitmq/rabbitmq-env.conf
 rabbitmq_default_home_dir: /var/lib/rabbitmq
 rabbitmq_default_log_dir: /var/log/rabbitmq
 
-# The RabbitMQ port defaults
-rabbitmq_default_port: 5672
-rabbitmq_default_mgt_console_port: 15672
+# Inter-node connections use a buffer for data pending to be sent. Temporary throttling on
+# inter-node traffic is applied when the buffer is at max allowed capacity. The limit is
+# controlled via the RABBITMQ_DISTRIBUTION_BUFFER_SIZE environment variable in kilobytes.
+# Default value is 128 MB (128000 kB).
+#
+# In clusters with heavy inter-node traffic increasing this value may have a positive effect
+# on throughput. Values lower than 64 MB are not recommended.
 rabbitmq_default_distribution_buffer_size: 128000
+
+# The RabbitMQ cluster port defaults
+rabbitmq_default_cluster_port: 25672
+rabbitmq_default_epmd_port: 4369

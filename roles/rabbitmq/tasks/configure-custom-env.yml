@@ -11,6 +11,8 @@
   when: >
     rabbitmq_home_dir != rabbitmq_default_home_dir or
     rabbitmq_port != rabbitmq_default_port or
+    rabbitmq_cluster_port != rabbitmq_default_cluster_port or
+    rabbitmq_epmd_port != rabbitmq_default_epmd_port or
     (rabbitmq_distribution_buffer_size is defined and rabbitmq_distribution_buffer_size != rabbitmq_default_distribution_buffer_size)
 
 - name: Handle custom rabbitmq directory
@@ -28,11 +30,6 @@
       ansible.builtin.file:
         path: "{{ rabbitmq_default_home_dir }}"
         state: absent
-
-    - name: Set rabbitmq user home directory
-      ansible.builtin.user:
-        name: rabbitmq
-        home: "{{ rabbitmq_home_dir }}"
 
     - name: Update service script with rabbitmq runtime directory
       ansible.builtin.lineinfile:

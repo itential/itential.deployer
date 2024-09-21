@@ -28,6 +28,11 @@
     file: rabbitmq-offline.yml
   when: offline_install
 
+- name: Set rabbitmq user home directory
+  ansible.builtin.user:
+    name: rabbitmq
+    home: "{{ rabbitmq_home_dir }}"
+
 - name: Create systemd dir
   ansible.builtin.file:
     name: /etc/systemd/system/rabbitmq-server.service.d
@@ -50,7 +55,13 @@
 
 - name: Include tasks to handle custom configuration
   ansible.builtin.include_tasks:
-    file: custom-configuration.yml
+    file: configure-custom-env.yml
+
+- name: Include tasks to configure clustering
+  ansible.builtin.include_tasks:
+    file: configure-clustering.yml
+  when: rabbitmq_cluster | bool
+  tags: rabbitmq_cluster
 
 # Check if firewalld is running, if it is then open the appropriate ports
 - name: Gather service facts
@@ -136,6 +147,12 @@
     cmd: "rabbitmqctl set_permissions -p {{ rabbitmq_vhost }} {{ rabbitmq_user }} \".*\" \".*\" \".*\""
   register: output
   changed_when: output.rc != 0
+
+- name: Include tasks to enable clustering
+  ansible.builtin.include_tasks:
+    file: enable-clustering.yml
+  when: rabbitmq_cluster | bool
+  tags: rabbitmq_cluster
 
 - name: Get installed erlang version
   ansible.builtin.command:

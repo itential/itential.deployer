@@ -4,12 +4,6 @@
 # The RabbitMQ home directory
 rabbitmq_home_dir: "{{ rabbitmq_default_home_dir }}"
 
-# The RabbitMQ port
-rabbitmq_port: "{{ rabbitmq_default_port }}"
-
-# The RabbitMQ management console port
-rabbitmq_mgt_console_port: "{{ rabbitmq_default_mgt_console_port }}"
-
 # The default RabbitMQ user and group
 rabbitmq_owner: rabbitmq
 rabbitmq_group: rabbitmq
@@ -48,6 +42,24 @@ rabbitmq_log_file_level: info
 # value is set to 4 GB, the node will believe it is running on a machine with 4 GB of RAM.
 # Default: undefined (not set or used).
 # rabbit_total_mem_available_override: 8GB
+
+# Set disk free limit (in bytes). Once free disk space reaches this
+# lower bound, a disk alarm will be set - see the documentation
+# listed above for more details.
+#
+# Absolute watermark will be ignored if relative is defined!
+# disk_free_limit_absolute: 50MB
+
+# Feature flags that can be overriden in the hosts file
+# Essentially, a default installation will not have clustering
+rabbitmq_cluster: false
+
+# The location of the Erlang cookie file
+rabbitmq_erlang_cookie: "{{ rabbitmq_home_dir }}/.erlang.cookie"
+
+## The RabbitMQ cluster ports
+rabbitmq_cluster_port: "{{ rabbitmq_default_cluster_port }}"
+rabbitmq_epmd_port: "{{ rabbitmq_default_epmd_port }}"
 
 # Offline install settings
 # Refer to the offline variables in common_vars for additional settings

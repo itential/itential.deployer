@@ -1,6 +1,6 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-# The RabbitMQ cluster port defaults
-rabbitmq_default_cluster_port: 25672
-rabbitmq_default_epmd_port: 4369
+# The RabbitMQ port defaults
+rabbitmq_default_port: 5672
+rabbitmq_default_mgt_console_port: 15672
