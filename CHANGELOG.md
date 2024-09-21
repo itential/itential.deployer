@@ -1,11 +1,26 @@
 # Changelog
 
-## v2.3.0 (September 05, 2024)
+## v2.3.1 (September 21, 2024)
+
+* Add mongo host to tasks, do not use default  https://github.com/itential/nickAtest/pull/69
+* Add task to stop rabbitmq service in rabbitmq role  https://github.com/itential/nickAtest/pull/70
+* Fix ansible lint issues in all roles and playbooks  https://github.com/itential/nickAtest/pull/61
+* Fixed RabbitMQ installation when using custom variables  https://github.com/itential/nickAtest/pull/67
+* Fixed redis installation when using custom variables  https://github.com/itential/nickAtest/pull/66
+* Missing SSO parameter in authenticationProps  https://github.com/itential/nickAtest/pull/58
+* Non standard dirs  https://github.com/itential/nickAtest/pull/68
+* Support non-standard mongo port  https://github.com/itential/nickAtest/pull/65
+
+Full Changelog: https://github.com/itential/nickAtest/compare/v2.3.0...v2.3.1 
+
+
+## v2.3.0 (September 06, 2024)
 
 * Configure SELinux when using custom IAP installation directory  https://github.com/itential/nickAtest/pull/39
 * Gateway 23.3  https://github.com/itential/nickAtest/pull/29
 * IAG task fails when SELinux is disabled  https://github.com/itential/nickAtest/pull/44
 * Rename to yml  https://github.com/itential/nickAtest/pull/28
+* Update galaxy version and changelog for release 2.3.0 [skip ci]
 * added redis_db_number  https://github.com/itential/nickAtest/pull/40
 * updated mongo for 2023.2 redhat/rocky 8 to version 7  https://github.com/itential/nickAtest/pull/38
 
