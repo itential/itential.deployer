@@ -55,10 +55,10 @@ The following table lists the default variables that are shared between the Rabb
 
 | Variable | Group | Type | Description | Default Value
 | :------- | :---- | :--- | :---------- | :------------
-| `rabbitmq_port`  | `all` | Integer | The RabbitMQ listen port. | `5672`
+| `rabbitmq_port` | `all` | Integer | The RabbitMQ listen port. | `5672`
 | `rabbitmq_mgt_console_port` | `all` | Integer | The RabbitMQ management console listen port. | `15672`
 | `rabbitmq_vhost` | `all` | String | The name of the RabbitmMQ vhost. | `iap`
-| `rabbitmq_ssl`   | `all` | Boolean | Flag to enable SSL. <br>`true` - enable HTTPS when connecting to rabbit, disable HTTP. <br>`false` - disable HTTPS when connecting to rabbit, enable HTTP. | `false`
+| `rabbitmq_ssl` | `all` | Boolean | Flag to enable SSL. <br>`true` - enable HTTPS when connecting to rabbit, disable HTTP. <br>`false` - disable HTTPS when connecting to rabbit, enable HTTP. | `false`
 
 ## RabbitMQ Role Variables
 
