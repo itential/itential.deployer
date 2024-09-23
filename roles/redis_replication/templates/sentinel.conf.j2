@@ -28,15 +28,15 @@ daemonize no
 # When running daemonized, Redis Sentinel writes a pid file in
 # /var/run/redis-sentinel.pid by default. You can specify a custom pid file
 # location here.
-pidfile /var/run/redis-sentinel.pid
+pidfile {{ redis_pid_dir }}/redis-sentinel.pid
 
 # Specify the log file name. Also the empty string can be used to force
 # Sentinel to log on the standard output. Note that if you use standard
 # output for logging but daemonize, logs will be sent to /dev/null
-logfile /var/log/redis/sentinel.log
+logfile {{ redis_log_dir }}/sentinel.log
 
 sentinel announce-ip {{ inventory_hostname }}
-# sentinel announce-port <port>
+sentinel announce-port {{ redis_sentinel_port }}
 #
 # The above two configuration directives are useful in environments where,
 # because of NAT, Sentinel is reachable from outside via a non-local address.
@@ -81,7 +81,7 @@ dir /tmp
 #
 # Note: master name should not include special characters or spaces.
 # The valid charset is A-z 0-9 and the three characters ".-_".
-sentinel monitor mymaster {{ master_name }} 6379 2
+sentinel monitor mymaster {{ master_name }} {{ redis_port }} 2
 
 {% if redis_auth %}
 sentinel auth-pass mymaster {{ redis_user_sentineluser_password }}

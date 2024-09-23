@@ -18,6 +18,17 @@
     name: os
   tags: install_base_os_packages
 
+- name: Gather service facts
+  ansible.builtin.service_facts:
+
+- name: Stop rabbitmq service
+  ansible.builtin.service:
+    name: rabbitmq-server
+    state: stopped
+  when:
+    - ansible_facts.services["rabbitmq-server.service"] is defined
+    - ansible_facts.services["rabbitmq-server.service"].state == "running"
+
 - name: Include tasks to install RabbitMQ (online)
   ansible.builtin.include_tasks:
     file: rabbitmq-online.yml
@@ -28,15 +39,22 @@
     file: rabbitmq-offline.yml
   when: offline_install
 
+- name: Set rabbitmq user home directory
+  ansible.builtin.user:
+    name: rabbitmq
+    home: "{{ rabbitmq_home_dir }}"
+
 - name: Create systemd dir
   ansible.builtin.file:
     name: /etc/systemd/system/rabbitmq-server.service.d
     state: directory
+    mode: "0755"
 
 - name: Set rabbitmq filesystem limit
   ansible.builtin.copy:
     src: "{{ role_path }}/files/limits.conf"
     dest: /etc/systemd/system/rabbitmq-server.service.d/limits.conf
+    mode: "0644"
 
 - name: Create rabbitmq config file
   ansible.builtin.template:
@@ -44,45 +62,53 @@
     dest: "{{ rabbitmq_config }}"
     owner: "{{ rabbitmq_owner }}"
     group: "{{ rabbitmq_group }}"
-    mode: 0640
+    mode: "0640"
+
+- name: Include tasks to handle custom configuration
+  ansible.builtin.include_tasks:
+    file: configure-custom-env.yml
+
+- name: Include tasks to configure clustering
+  ansible.builtin.include_tasks:
+    file: configure-clustering.yml
+  when: rabbitmq_cluster | bool
 
 # Check if firewalld is running, if it is then open the appropriate ports
-- name: Gather service facts
-  ansible.builtin.service_facts:
-
 - name: Open Port on FirewallD Public Zone
   ansible.posix.firewalld:
     port: "{{ item }}"
-    permanent: yes
+    permanent: true
     state: enabled
     zone: public
-    immediate: yes
+    immediate: true
   loop:
     - "{{ rabbitmq_port }}/tcp"
     - "{{ rabbitmq_mgt_console_port }}/tcp"
   when:
     - ansible_facts.services["firewalld.service"] is defined
-    - (ansible_facts.services["firewalld.service"].state == "running")
-    - (ansible_facts.services["firewalld.service"].status == "enabled")
-  ignore_errors: true
+    - ansible_facts.services["firewalld.service"].state == "running"
+    - ansible_facts.services["firewalld.service"].status == "enabled"
 
 - name: Enable rabbitmq services
   ansible.builtin.systemd:
     name: rabbitmq-server
-    enabled: yes
-    daemon_reload: yes
+    enabled: true
+    daemon_reload: true
     state: restarted
 
 # Enables the rabbitmq UI available at 15672
 - name: Enable rabbitmq management console
   ansible.builtin.command:
     cmd: rabbitmq-plugins enable rabbitmq_management
+  register: output
+  changed_when: output.rc != 0
 
 # Create & tag the required rabbitmq users
 - name: Create admin user
   ansible.builtin.command:
     cmd: "rabbitmqctl add_user {{ rabbitmq_admin_user }} {{ rabbitmq_admin_password }}"
   register: result
+  changed_when: result.rc != 0
   failed_when:
     - result.rc is defined
     - result.rc > 0
@@ -90,20 +116,27 @@
 
 - name: Set administrator tag for admin user
   ansible.builtin.command:
-    cmd:  "rabbitmqctl set_user_tags {{ rabbitmq_admin_user }} administrator"
+    cmd: "rabbitmqctl set_user_tags {{ rabbitmq_admin_user }} administrator"
+  register: output
+  changed_when: output.rc != 0
 
 - name: Set permissions for admin user
   ansible.builtin.command:
     cmd: "rabbitmqctl set_permissions -p / {{ rabbitmq_admin_user }} \".*\" \".*\" \".*\""
+  register: output
+  changed_when: output.rc != 0
 
 - name: Create iap vhost
   ansible.builtin.command:
     cmd: "rabbitmqctl add_vhost {{ rabbitmq_vhost }}"
+  register: output
+  changed_when: output.rc != 0
 
 - name: Create itential user
   ansible.builtin.command:
     cmd: "rabbitmqctl add_user {{ rabbitmq_user }} {{ rabbitmq_password }}"
   register: result
+  changed_when: result.rc != 0
   failed_when:
     - result.rc is defined
     - result.rc > 0
@@ -112,29 +145,41 @@
 # Required for event deduping
 - name: Set monitoring tag for itential user
   ansible.builtin.command:
-    cmd:  "rabbitmqctl set_user_tags {{ rabbitmq_user }} monitoring"
+    cmd: "rabbitmqctl set_user_tags {{ rabbitmq_user }} monitoring"
+  register: output
+  changed_when: output.rc != 0
 
 - name: Set permissions for itential user
   ansible.builtin.command:
     cmd: "rabbitmqctl set_permissions -p {{ rabbitmq_vhost }} {{ rabbitmq_user }} \".*\" \".*\" \".*\""
+  register: output
+  changed_when: output.rc != 0
+
+- name: Include tasks to enable clustering
+  ansible.builtin.include_tasks:
+    file: enable-clustering.yml
+  when: rabbitmq_cluster | bool
 
 - name: Get installed erlang version
   ansible.builtin.command:
     cmd: rabbitmq-diagnostics erlang_version
-  register: erlangVersion
+  register: erlang_version
+  changed_when: erlang_version.rc != 0
 
 - name: Write erlang release information
   ansible.builtin.lineinfile:
-    path: "/etc/iap-release"
-    line: "ERLANG={{ erlangVersion.stdout_lines[1] }}"
+    path: "{{ itential_release_file }}"
+    line: "ERLANG={{ erlang_version.stdout_lines[1] }}"
     create: true
+    mode: "0644"
 
 - name: Get installed rabbitmq version
   ansible.builtin.command:
     cmd: rabbitmqctl version
-  register: rabbitmqVersion
+  register: rabbitmq_version
+  changed_when: rabbitmq_version.rc != 0
 
 - name: Write rabbitmq release information
   ansible.builtin.lineinfile:
     path: "{{ itential_release_file }}"
-    line: "RABBITMQ={{ rabbitmqVersion.stdout }}"
+    line: "RABBITMQ={{ rabbitmq_version.stdout }}"

@@ -22,7 +22,7 @@
     file: download-python-dependencies.yml
 
 - name: Uninstall Python rpms
-  ansible.builtin.yum:
+  ansible.builtin.dnf:
     name: "{{ item }}"
     state: absent
     autoremove: true

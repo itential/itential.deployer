@@ -10,6 +10,10 @@
 
     - name: Check if auth is enabled
       community.mongodb.mongodb_shell:
+        login_user: "{{ mongo_auth_enabled is defined and mongo_auth_enabled | ternary('admin', omit) }}"
+        login_password: "{{ mongo_auth_enabled is defined and mongo_auth_enabled | ternary(mongo_user_admin_password, omit) }}"
+        login_port: "{{ mongo_port }}"
+        login_host: "{{ inventory_hostname }}"
         mongo_cmd: auto
         db: admin
         eval: "db.getUsers()"

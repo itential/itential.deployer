@@ -8,7 +8,7 @@ namespace: itential
 name: deployer
 
 # The version of the collection. Must be compatible with semantic versioning
-version: 2.2.0
+version: 2.3.1
 
 # The path to the Markdown (.md) readme file. This path is relative to the root of the collection
 readme: README.md
@@ -16,11 +16,11 @@ readme: README.md
 # A list of the collection's content authors. Can be just the name or in the format 'Full Name <email> (url)
 # @nicks:irc/im.site#channel'
 authors:
-- Steven Schattenberg <steven.schattenberg@itential.com>
-- Travis Nicks <travis.nicks@itential.com>
-- Kevin Velarde <kevin.velarde@itential.com>
-- Peter Sprygada <peter.sprygada@itential.com>
-- Nick Andreano <nick.andreano@itential.com>
+  - Steven Schattenberg <steven.schattenberg@itential.com>
+  - Travis Nicks <travis.nicks@itential.com>
+  - Kevin Velarde <kevin.velarde@itential.com>
+  - Peter Sprygada <peter.sprygada@itential.com>
+  - Nick Andreano <nick.andreano@itential.com>
 
 ### OPTIONAL but strongly recommended
 # A short summary description of the collection
@@ -38,6 +38,7 @@ license_file: 'LICENSE'
 # A list of tags you want to associate with the collection for indexing/searching. A tag name has the same character
 # requirements as 'namespace' and 'name'
 tags:
+  - tools
   - itential
   - deployer
 

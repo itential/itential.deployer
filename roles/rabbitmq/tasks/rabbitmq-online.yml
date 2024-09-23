@@ -24,7 +24,7 @@
     description: rabbitmq_erlang
     owner: "root"
     group: "root"
-    mode: 0644
+    mode: "0644"
     baseurl: "{{ rabbitmq_erlang_repo_baseurl }}"
     gpgcheck: true
     gpgkey:
@@ -41,7 +41,7 @@
     description: rabbitmq_server
     owner: "root"
     group: "root"
-    mode: 0644
+    mode: "0644"
     baseurl: "{{ rabbitmq_server_repo_baseurl }}"
     gpgcheck: true
     gpgkey:
@@ -55,6 +55,6 @@
 
 # Installs the packages enabled by the above repos
 - name: Install packages
-  ansible.builtin.yum:
-    name: "{{ rabbitmq_packages[ ansible_distribution_major_version ] }}"
+  ansible.builtin.dnf:
+    name: "{{ rabbitmq_packages[ansible_distribution_major_version] }}"
     update_cache: true

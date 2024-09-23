@@ -20,3 +20,6 @@
       - --out="{{ iap_install_dir }}/current/backups"
       - --gzip
       - "{{ mongo_connection_string }}"
+  register: result
+  changed_when: result.rc == 0
+  failed_when: result.rc > 0

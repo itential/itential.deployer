@@ -79,9 +79,10 @@
     daemon_reload: true
 
 - name: Capture vault version
-  ansible.builtin.shell:
+  ansible.builtin.command:
     cmd: vault --version
   register: vault_installed_version
+  changed_when: vault_installed_version.rc != 0
 
 - name: Update release file with vault version
   ansible.builtin.lineinfile:

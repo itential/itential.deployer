@@ -18,9 +18,6 @@ redis_data_dir: /var/lib/redis
 # The location of the Redis data directory
 redis_pid_dir: /var/run
 
-# Default redis port
-redis_port: 6379
-
 # Redis user and group
 redis_owner: redis
 redis_group: redis
@@ -52,7 +49,7 @@ packages_path: "{{ itential_packages_path }}/{{ iap_release }}/redis"
 
 # Redis install method - string.
 # The valid values are 'remi_repo' (default) or 'source'.
-redis_install_method: remi_repo
+redis_install_method: source
 
 # The EPEL repo is only required when the redis_install_method is set to 'remi_repo'
 epel_repo_url: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_distribution_major_version }}.noarch.rpm"

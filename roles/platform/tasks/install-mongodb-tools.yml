@@ -22,6 +22,6 @@
 
     # Install mongodb tools if they are not already installed
     - name: Install the MongoDB tools packages
-      ansible.builtin.yum:
+      ansible.builtin.dnf:
         name: "{{ mongodb_tools_packages }}"
         state: present

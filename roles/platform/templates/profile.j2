@@ -9,20 +9,17 @@
 {% set rabbit_hosts = [] %}
 {% if rabbit_svc_url is defined %}
   {{ rabbit_hosts.append(rabbit_svc_url) }}
-  {% set rabbit_port = 5671 %}
   {% set rabbit_protocol = "amqps" %}
   {% set rabbit_certPath = "" %}
   {% set rabbit_keyPath = "" %}
   {% set rabbit_passphrase = "guest" %}
   {% set rabbit_caPath = "" %}
 {% elif groups["rabbitmq"] is defined and groups["rabbitmq"] | length > 0 %}
-  {% set rabbit_port = 5672 %}
   {% set rabbit_protocol = "amqp" %}
   {% for rabbit in groups[vars.rabbit_group_name] %}
     {{ rabbit_hosts.append( hostvars[ rabbit ].inventory_hostname ) }}
   {% endfor %}
   {% if rabbitmq_ssl | bool -%}
-    {% set rabbit_port = 5671 %}
     {% set rabbit_protocol = "amqps" %}
     {% set rabbit_certPath = "" %}
     {% set rabbit_keyPath = "" %}
@@ -55,7 +52,7 @@
     {% set redis_host = None %}
     {% set sentinels = [] %}
     {% for sentinel in groups[vars.redis_group_name] %}
-      {% set sentinel = dict(host = hostvars[ sentinel ].inventory_hostname, port = 26379) %}
+      {% set sentinel = dict(host = hostvars[ sentinel ].inventory_hostname, port = redis_sentinel_port) %}
       {{ sentinels.append(sentinel) }}
     {% endfor %}
   {% endif %}
@@ -121,6 +118,12 @@
     "cookieName": "token",
     "description": "Authentication",
     "logoutTime": 60,
+    {% if iap_release >= 2023.2 %}
+    "sso": {
+      "enabled": false,
+      "config": ""
+      },
+    {% endif %}
     "uniqueSession": false
   },
   "description": "{{ vars.desc }}",
@@ -194,7 +197,7 @@
   },
 {% if rabbit_hosts is defined and rabbit_hosts | length > 0 -%}
   "rabbitmq": {
-    "adminPort": 15672,
+    "adminPort": {{ rabbitmq_mgt_console_port }},
     "caPath": "",
     "certPath": "",
     "frameMax": 0,
@@ -204,7 +207,7 @@
     "locale": "en_US",
     "passphrase": "guest",
     "password": "{{ rabbitmq_password }}",
-    "port": {{ rabbit_port }},
+    "port": {{ rabbitmq_port }},
     "protocol": "{{ rabbit_protocol }}",
     "username": "{{ rabbitmq_user }}",
     "vhost": "{{ rabbitmq_vhost }}"
@@ -217,7 +220,7 @@
     "maxRetriesPerRequest" : 20,
     "name" : "mymaster",
     "password" : {{ redis_password | to_json }},
-    "port" : 6379,
+    "port" : {{ redis_port }},
 {% if redis_replication | bool %}
     "sentinels" : {{ sentinels | to_json }},
     "sentinelPassword" : {{ sentinel_password | to_json }},
