@@ -11,7 +11,7 @@
   changed_when: output.rc != 0
   when:
     - inventory_hostname in groups['rabbitmq']
-    - hostvars[groups['rabbitmq'][0]].ansible_hostname != ansible_hostname
+    - groups.rabbitmq.index(inventory_hostname) != 0
 
 - name: Stop RabbitMQ for secondary
   ansible.builtin.command:
@@ -21,7 +21,7 @@
   when:
     - groups['rabbitmq_secondary'] is defined
     - inventory_hostname in groups['rabbitmq_secondary']
-    - hostvars[groups['rabbitmq_secondary'][0]].ansible_hostname != ansible_hostname
+    - groups.rabbitmq_secondary.index(inventory_hostname) != 0
 
 - name: Reset node
   ansible.builtin.command:
@@ -30,7 +30,7 @@
   changed_when: output.rc != 0
   when:
     - inventory_hostname in groups['rabbitmq']
-    - hostvars[groups['rabbitmq'][0]].ansible_hostname != ansible_hostname
+    - groups.rabbitmq.index(inventory_hostname) != 0
 
 - name: Reset node for secondary
   ansible.builtin.command:
@@ -40,26 +40,26 @@
   when:
     - groups['rabbitmq_secondary'] is defined
     - inventory_hostname in groups['rabbitmq_secondary']
-    - hostvars[groups['rabbitmq_secondary'][0]].ansible_hostname != ansible_hostname
+    - groups.rabbitmq_secondary.index(inventory_hostname) != 0
 
 - name: Join cluster
   ansible.builtin.command:
-    cmd: "rabbitmqctl join_cluster rabbit@{{ hostvars[groups['rabbitmq'][0]].ansible_hostname }}"
+    cmd: "rabbitmqctl join_cluster rabbit@{{ hostvars[groups['rabbitmq'][0]].inventory_hostname_short }}"
   register: output
   changed_when: output.rc != 0
   when:
-    - inventory_hostname in groups['rabbitmq']
-    - hostvars[groups['rabbitmq'][0]].ansible_hostname != ansible_hostname
+    - inventory_hostname in groups.rabbitmq
+    - groups.rabbitmq.index(inventory_hostname) != 0
 
 - name: Join cluster for secondary DR
   ansible.builtin.command:
-    cmd: "rabbitmqctl join_cluster rabbit@{{ hostvars[groups['rabbitmq_secondary'][0]].ansible_hostname }}"
+    cmd: "rabbitmqctl join_cluster rabbit@{{ hostvars[groups['rabbitmq_secondary'][0]].inventory_hostname_short }}"
   register: output
   changed_when: output.rc != 0
   when:
     - groups['rabbitmq_secondary'] is defined
-    - inventory_hostname in groups['rabbitmq_secondary']
-    - hostvars[groups['rabbitmq_secondary'][0]].ansible_hostname != ansible_hostname
+    - inventory_hostname in groups.rabbitmq_secondary
+    - groups.rabbitmq_secondary.index(inventory_hostname) != 0
 
 - name: Restart RabbitMQ server
   ansible.builtin.systemd:
@@ -68,7 +68,7 @@
     state: restarted
   when:
     - inventory_hostname in groups['rabbitmq']
-    - hostvars[groups['rabbitmq'][0]].ansible_hostname != ansible_hostname
+    - groups.rabbitmq.index(inventory_hostname) != 0
 
 - name: Restart RabbitMQ server for secondary
   ansible.builtin.systemd:
@@ -78,7 +78,7 @@
   when:
     - groups['rabbitmq_secondary'] is defined
     - inventory_hostname in groups['rabbitmq_secondary']
-    - hostvars[groups['rabbitmq_secondary'][0]].ansible_hostname != ansible_hostname
+    - groups.rabbitmq_secondary.index(inventory_hostname) != 0
 
 # From the cmd line run this to set the proper HA policy on the iap vhost
 # rabbitmqctl set_policy ha-all -p iap ".*" '{"ha-mode":"all", "ha-promote-on-shutdown": "when-synced", "ha-sync-mode": "automatic"}'
