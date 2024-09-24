@@ -48,7 +48,7 @@ rabbitmq_log_file_level: info
 # listed above for more details.
 #
 # Absolute watermark will be ignored if relative is defined!
-# disk_free_limit_absolute: 50MB
+# rabbitmq_disk_free_limit_absolute: 50MB
 
 # Feature flags that can be overriden in the hosts file
 # Essentially, a default installation will not have clustering
