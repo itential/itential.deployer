@@ -442,14 +442,14 @@ total_memory_available_override_value = {{ rabbit_total_mem_available_override }
 # disk_free_limit.absolute = 500KB
 # disk_free_limit.absolute = 50mb
 # disk_free_limit.absolute = 5GB
-{% if disk_free_limit_absolute is defined %}
-disk_free_limit.absolute = {{ disk_free_limit_absolute }}
+{% if rabbitmq_disk_free_limit_absolute is defined %}
+disk_free_limit.absolute = {{ rabbitmq_disk_free_limit_absolute }}
 {% endif %}
 
 ## Alternatively, we can set a limit relative to total available RAM.
 ##
 ## Values lower than 1.0 can be dangerous and should be used carefully.
-{% if disk_free_limit_absolute is defined %}
+{% if rabbitmq_disk_free_limit_absolute is defined %}
 # disk_free_limit.relative = 1.0
 {% else %}
 disk_free_limit.relative = 1.0
@@ -760,10 +760,6 @@ management.tcp.port = {{ rabbitmq_mgt_console_port }}
 ##
 ## See https://rabbitmq.com/logging.html and https://github.com/erlang-lager/lager for details.
 ##
-
-## Log directory, taken from the RABBITMQ_LOG_BASE env variable by default.
-##
-log.dir = {{ rabbitmq_log_dir }}
 
 ## Logging to file. Can be false or a filename.
 ## Default:

@@ -1,17 +1,20 @@
 {% if rabbitmq_home_dir != rabbitmq_default_home_dir %}
 HOME={{ rabbitmq_home_dir }}
-RABBITMQ_MNESIA_BASE={{ rabbitmq_home_dir }}
-RABBITMQ_MNESIA_DIR={{ rabbitmq_home_dir }}/mnesia
+MNESIA_BASE={{ rabbitmq_home_dir }}
+MNESIA_DIR={{ rabbitmq_home_dir }}/mnesia
+{% endif %}
+{% if rabbitmq_log_dir != rabbitmq_default_log_dir %}
+LOG_BASE={{ rabbitmq_log_dir }}
 {% endif %}
 {% if rabbitmq_port != rabbitmq_default_port %}
-RABBITMQ_NODE_PORT={{ rabbitmq_port }}
+NODE_PORT={{ rabbitmq_port }}
 {% endif %}
 {% if rabbitmq_cluster_port != rabbitmq_default_cluster_port %}
-RABBITMQ_DIST_PORT={{ rabbitmq_cluster_port }}
+DIST_PORT={{ rabbitmq_cluster_port }}
 {% endif %}
 {% if rabbitmq_epmd_port != rabbitmq_default_epmd_port %}
 ERL_EPMD_PORT={{ rabbitmq_epmd_port }}
 {% endif %}
 {% if rabbitmq_distribution_buffer_size is defined %}
-RABBITMQ_DISTRIBUTION_BUFFER_SIZE={{ rabbitmq_distribution_buffer_size }}
+DISTRIBUTION_BUFFER_SIZE={{ rabbitmq_distribution_buffer_size }}
 {% endif %}
