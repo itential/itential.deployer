@@ -4,7 +4,7 @@
 - name: Write all RabbitMQ nodes to the hosts file
   ansible.builtin.lineinfile:
     path: "/etc/hosts"
-    line: "{{ hostvars[item].ansible_default_ipv4.address }}  rabbit{{ my_idx + 1 }} {{ hostvars[item].ansible_hostname }}"
+    line: "{{ hostvars[item].ansible_default_ipv4.address }} {{ item }} {{ hostvars[item].inventory_hostname_short }} rabbit{{ my_idx + 1 }}"
   loop: "{{ lookup('inventory_hostnames', 'rabbitmq', wantlist=True) }}"
   loop_control:
     index_var: my_idx
@@ -13,7 +13,7 @@
 - name: Write all RabbitMQ nodes to the hosts file for secondary DR
   ansible.builtin.lineinfile:
     path: "/etc/hosts"
-    line: "{{ hostvars[item].ansible_default_ipv4.address }}  rabbit{{ my_idx + 1 }} {{ hostvars[item].ansible_hostname }}"
+    line: "{{ hostvars[item].ansible_default_ipv4.address }} {{ item }} {{ hostvars[item].inventory_hostname_short }} rabbit{{ my_idx + 1 }}"
   loop: "{{ lookup('inventory_hostnames', 'rabbitmq_secondary', wantlist=True) }}"
   loop_control:
     index_var: my_idx
@@ -25,7 +25,7 @@
   ansible.builtin.lineinfile:
     path: "{{ rabbitmq_config }}"
     insertafter: "cluster_formation.peer_discovery_backend = rabbit_peer_discovery_classic_config"
-    line: "cluster_formation.classic_config.nodes.{{ my_idx + 1 }} = rabbit@{{ hostvars[item].ansible_hostname }}"
+    line: "cluster_formation.classic_config.nodes.{{ my_idx + 1 }} = rabbit@{{ hostvars[item].inventory_hostname_short }}"
   loop: "{{ lookup('inventory_hostnames', 'rabbitmq', wantlist=True) }}"
   loop_control:
     index_var: my_idx
@@ -35,7 +35,7 @@
   ansible.builtin.lineinfile:
     path: "{{ rabbitmq_config }}"
     insertafter: "cluster_formation.peer_discovery_backend = rabbit_peer_discovery_classic_config"
-    line: "cluster_formation.classic_config.nodes.{{ my_idx + 1 }} = rabbit@{{ hostvars[item].ansible_hostname }}"
+    line: "cluster_formation.classic_config.nodes.{{ my_idx + 1 }} = rabbit@{{ hostvars[item].inventory_hostname_short }}"
   loop: "{{ lookup('inventory_hostnames', 'rabbitmq_secondary', wantlist=True) }}"
   loop_control:
     index_var: my_idx

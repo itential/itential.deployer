@@ -1,5 +1,14 @@
 # Changelog
 
+## v2.3.2 (September 24, 2024)
+
+* Change RabbitMQ cluster node names to short hostname  https://github.com/itential/nickAtest/pull/43
+* Fix RabbitMQ env config template
+* Missing replset name  https://github.com/itential/nickAtest/pull/71
+
+Full Changelog: https://github.com/itential/nickAtest/compare/v2.3.1...v2.3.2 
+
+
 ## v2.3.1 (September 21, 2024)
 
 * Add mongo host to tasks, do not use default  https://github.com/itential/nickAtest/pull/69
@@ -10,6 +19,7 @@
 * Missing SSO parameter in authenticationProps  https://github.com/itential/nickAtest/pull/58
 * Non standard dirs  https://github.com/itential/nickAtest/pull/68
 * Support non-standard mongo port  https://github.com/itential/nickAtest/pull/65
+* Update galaxy version and changelog for release 2.3.1 [skip ci]
 
 Full Changelog: https://github.com/itential/nickAtest/compare/v2.3.0...v2.3.1 
 
