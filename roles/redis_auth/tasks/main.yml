@@ -19,6 +19,7 @@
         - user itential
         - user repluser
         - user sentineluser
+        - user prometheus
 
     # When auth is turned on its required to use a specially designed user who
     # has the required permissions to perform the replication.

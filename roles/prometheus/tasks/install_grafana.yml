@@ -26,8 +26,11 @@
 # Install grafana with yum
 - name: Install Grafana
   ansible.builtin.dnf:
-    name: grafana
+    name: "{{ item }}"
     state: present
+  with_items:
+    - grafana
+    - chkconfig
 
 # Add default datasources
 - name: Create grafana datasources file
