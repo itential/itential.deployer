@@ -15,6 +15,7 @@ redis_user_itential_password: itential
 redis_user_repluser_password: repluser
 redis_user_sentineladmin_password: admin
 redis_user_sentineluser_password: sentineluser
+redis_user_prometheus_password: prometheus
 
 # Default redis port
 redis_port: 6379
