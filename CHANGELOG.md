@@ -1,10 +1,18 @@
 # Changelog
 
-## v2.3.2 (September 24, 2024)
+## v2.3.3 (September 27, 2024)
+
+* Fix prometheus redis exporter when auth is enabled  https://github.com/itential/nickAtest/pull/80
+
+Full Changelog: https://github.com/itential/nickAtest/compare/v2.3.2...v2.3.3 
+
+
+## v2.3.2 (September 25, 2024)
 
 * Change RabbitMQ cluster node names to short hostname  https://github.com/itential/nickAtest/pull/43
 * Fix RabbitMQ env config template
 * Missing replset name  https://github.com/itential/nickAtest/pull/71
+* Update galaxy version and changelog for release 2.3.2 [skip ci]
 
 Full Changelog: https://github.com/itential/nickAtest/compare/v2.3.1...v2.3.2 
 
