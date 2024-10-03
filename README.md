@@ -15,7 +15,7 @@
     4. [Certificates](#certificates)
     5. [Passwords](#passwords)
     6. [Obtaining the Itential Binaries](#obtaining-the-itential-binaries)
-4. [Installing and Upgrading the Depoloyer](#installing-and-upgrading-the-deployer)
+4. [Installing and Upgrading the Deployer](#installing-and-upgrading-the-deployer)
     1. [Online Installation](#online-installation)
     2. [Offline Installation](#offline-installation)
 5. [Running the Deployer](#running-the-deployer)
