@@ -311,6 +311,10 @@ The deployer will create several user accounts in the dependent systems. It uses
 
 ### Obtaining the Itential Binaries
 
+#### SaaS Customers
+The latest IAG whl file is available to download from hub.itential.io.
+
+#### On prem customers
 The IAP and IAG binary files are hosted on the Itential Nexus repository. An account is required to access Itential Nexus. If you do not have an account, contact your Itential Sales representative.
 
 ## Installing and Upgrading the Deployer
