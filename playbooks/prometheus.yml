@@ -1,16 +1,95 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Install Prometheus Clients
-  hosts: all
+- name: Install Prometheus
+  hosts: prometheus
   become: true
   roles:
-
     # Pull in the common vars
     - role: itential.deployer.common_vars
-      tags:
-        - always
+      tags: always
 
     - role: itential.deployer.prometheus
-      tags:
-        - prometheus_install
+      tags: prometheus_install
+
+- name: Install Grafana
+  hosts: grafana
+  become: true
+  roles:
+    # Pull in the common vars
+    - role: itential.deployer.common_vars
+      tags: always
+
+    - role: itential.deployer.grafana
+      tags: grafana_install
+
+- name: Install node exporter
+  hosts: all,!prometheus,!grafana
+  become: true
+  roles:
+    # Pull in the common vars
+    - role: itential.deployer.common_vars
+      tags: always
+  tasks:
+    - name: Install node exporters
+      ansible.builtin.import_role:
+        name: itential.deployer.prometheus
+        tasks_from: install_node_exporter
+      tags: install_node_exporter
+
+- name: Install process exporter
+  hosts: platform
+  become: true
+  roles:
+    # Pull in the common vars
+    - role: itential.deployer.common_vars
+      tags: always
+  tasks:
+    - name: Install process exporter
+      ansible.builtin.import_role:
+        name: itential.deployer.prometheus
+        tasks_from: install_process_exporter
+      tags: install_process_exporter
+
+- name: Enable RabbitMQ plugin
+  hosts: rabbitmq, rabbitmq_secondary
+  become: true
+  roles:
+    # Pull in the common vars
+    - role: itential.deployer.common_vars
+      tags: always
+  tasks:
+    - name: Install Redis exporter
+      ansible.builtin.import_role:
+        name: itential.deployer.prometheus
+        tasks_from: enable_rabbit_prometheus_plugin
+      when: iap_release < 2023.2
+      tags: enable_rabbit_plugin
+
+- name: Install Redis exporter
+  hosts: redis, redis_secondary
+  become: true
+  roles:
+    # Pull in the common vars
+    - role: itential.deployer.common_vars
+      tags: always
+  tasks:
+    - name: Install Redis exporter
+      ansible.builtin.import_role:
+        name: itential.deployer.prometheus
+        tasks_from: install_redis_exporter
+      tags: install_redis_exporter
+
+- name: Install MongoDB exporter
+  hosts: mongodb, mongodb_arbiter, mongodb_secondary
+  become: true
+  roles:
+    # Pull in the common vars
+    - role: itential.deployer.common_vars
+      tags: always
+  tasks:
+    - name: Install MongoDB exporter
+      ansible.builtin.import_role:
+        name: itential.deployer.prometheus
+        tasks_from: install_mongodb_exporter
+      tags: install_mongodb_exporter

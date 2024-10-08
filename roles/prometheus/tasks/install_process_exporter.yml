@@ -1,6 +1,11 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
+- name: Run common setup tasks
+  tags: prometheus_server
+  ansible.builtin.import_tasks:
+    file: setup.yml
+
 - name: Download prometheus process-exporter
   ansible.builtin.uri:
     creates: "{{ prometheus_dir }}/process-exporter.tar.gz"
@@ -51,8 +56,8 @@
     immediate: true
   when:
     - ansible_facts.services["firewalld.service"] is defined
-    - (ansible_facts.services["firewalld.service"].state == "running")
-    - (ansible_facts.services["firewalld.service"].status == "enabled")
+    - ansible_facts.services["firewalld.service"].state == "running"
+    - ansible_facts.services["firewalld.service"].status == "enabled"
 
 - name: Start the process exporter as a systemd service
   ansible.builtin.systemd:
