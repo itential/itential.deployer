@@ -14,9 +14,9 @@
   ansible.builtin.set_fact:
     prev_iap_install_dir: "{{ prev_current.stat.lnk_target }}"
 
-# Stat the previous custom directory within the "current" directory. This is needed
-# because we need re-create the symlinks later and we don't want to symlink to the
-# adapters in the previous installation directory.
+# Stat the previous custom directory within the "current" directory. We need
+# to re-create the symlinks later and we don't want to symlink to the adapters
+# in the previous installation directory.
 - name: Stat the custom directory within the "current" directory
   ansible.builtin.stat:
     path: "{{ iap_install_dir }}/current/custom"
