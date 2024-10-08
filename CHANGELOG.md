@@ -2,94 +2,94 @@
 
 ## v2.3.3 (September 27, 2024)
 
-* Fix prometheus redis exporter when auth is enabled  https://github.com/itential/nickAtest/pull/80
+* Fix prometheus redis exporter when auth is enabled  https://github.com/itential/itential.deployer/pull/80
 
-Full Changelog: https://github.com/itential/nickAtest/compare/v2.3.2...v2.3.3 
+Full Changelog: https://github.com/itential/itential.deployer/compare/v2.3.2...v2.3.3 
 
 
 ## v2.3.2 (September 25, 2024)
 
-* Change RabbitMQ cluster node names to short hostname  https://github.com/itential/nickAtest/pull/43
+* Change RabbitMQ cluster node names to short hostname  https://github.com/itential/itential.deployer/pull/43
 * Fix RabbitMQ env config template
-* Missing replset name  https://github.com/itential/nickAtest/pull/71
+* Missing replset name  https://github.com/itential/itential.deployer/pull/71
 * Update galaxy version and changelog for release 2.3.2 [skip ci]
 
-Full Changelog: https://github.com/itential/nickAtest/compare/v2.3.1...v2.3.2 
+Full Changelog: https://github.com/itential/itential.deployer/compare/v2.3.1...v2.3.2 
 
 
 ## v2.3.1 (September 21, 2024)
 
-* Add mongo host to tasks, do not use default  https://github.com/itential/nickAtest/pull/69
-* Add task to stop rabbitmq service in rabbitmq role  https://github.com/itential/nickAtest/pull/70
-* Fix ansible lint issues in all roles and playbooks  https://github.com/itential/nickAtest/pull/61
-* Fixed RabbitMQ installation when using custom variables  https://github.com/itential/nickAtest/pull/67
-* Fixed redis installation when using custom variables  https://github.com/itential/nickAtest/pull/66
-* Missing SSO parameter in authenticationProps  https://github.com/itential/nickAtest/pull/58
-* Non standard dirs  https://github.com/itential/nickAtest/pull/68
-* Support non-standard mongo port  https://github.com/itential/nickAtest/pull/65
+* Add mongo host to tasks, do not use default  https://github.com/itential/itential.deployer/pull/69
+* Add task to stop rabbitmq service in rabbitmq role  https://github.com/itential/itential.deployer/pull/70
+* Fix ansible lint issues in all roles and playbooks  https://github.com/itential/itential.deployer/pull/61
+* Fixed RabbitMQ installation when using custom variables  https://github.com/itential/itential.deployer/pull/67
+* Fixed redis installation when using custom variables  https://github.com/itential/itential.deployer/pull/66
+* Missing SSO parameter in authenticationProps  https://github.com/itential/itential.deployer/pull/58
+* Non standard dirs  https://github.com/itential/itential.deployer/pull/68
+* Support non-standard mongo port  https://github.com/itential/itential.deployer/pull/65
 * Update galaxy version and changelog for release 2.3.1 [skip ci]
 
-Full Changelog: https://github.com/itential/nickAtest/compare/v2.3.0...v2.3.1 
+Full Changelog: https://github.com/itential/itential.deployer/compare/v2.3.0...v2.3.1 
 
 
 ## v2.3.0 (September 06, 2024)
 
-* Configure SELinux when using custom IAP installation directory  https://github.com/itential/nickAtest/pull/39
-* Gateway 23.3  https://github.com/itential/nickAtest/pull/29
-* IAG task fails when SELinux is disabled  https://github.com/itential/nickAtest/pull/44
-* Rename to yml  https://github.com/itential/nickAtest/pull/28
+* Configure SELinux when using custom IAP installation directory  https://github.com/itential/itential.deployer/pull/39
+* Gateway 23.3  https://github.com/itential/itential.deployer/pull/29
+* IAG task fails when SELinux is disabled  https://github.com/itential/itential.deployer/pull/44
+* Rename to yml  https://github.com/itential/itential.deployer/pull/28
 * Update galaxy version and changelog for release 2.3.0 [skip ci]
-* added redis_db_number  https://github.com/itential/nickAtest/pull/40
-* updated mongo for 2023.2 redhat/rocky 8 to version 7  https://github.com/itential/nickAtest/pull/38
+* added redis_db_number  https://github.com/itential/itential.deployer/pull/40
+* updated mongo for 2023.2 redhat/rocky 8 to version 7  https://github.com/itential/itential.deployer/pull/38
 
-Full Changelog: https://github.com/itential/nickAtest/compare/v2.2.0...v2.3.0 
+Full Changelog: https://github.com/itential/itential.deployer/compare/v2.2.0...v2.3.0 
 
 
 ## v2.2.0 (August 12, 2024)
 
-* 232 rhel/rocky8 support for platform and mongo   https://github.com/itential/nickAtest/pull/15
-* Add Code of conduct and contributing guidelines  https://github.com/itential/nickAtest/pull/5
-* Add flag to disable installation of YUM repositories  https://github.com/itential/nickAtest/pull/12
+* 232 rhel/rocky8 support for platform and mongo   https://github.com/itential/itential.deployer/pull/15
+* Add Code of conduct and contributing guidelines  https://github.com/itential/itential.deployer/pull/5
+* Add flag to disable installation of YUM repositories  https://github.com/itential/itential.deployer/pull/12
 * Add jmespath requirement to docs
-* Add license file  https://github.com/itential/nickAtest/pull/4
+* Add license file  https://github.com/itential/itential.deployer/pull/4
 * Add notes to docs about RabbitMQ not being required for IAP 2023.2 and newer
 * Add processManagement section to mongod.conf template
-* Add specs for control node to README  https://github.com/itential/nickAtest/pull/19
+* Add specs for control node to README  https://github.com/itential/itential.deployer/pull/19
 * Add support for installing adapters from zip archive
-* Add variables for http server threads (IAG) and IAG adapter token timeout (IAP)  https://github.com/itential/nickAtest/pull/14
+* Add variables for http server threads (IAG) and IAG adapter token timeout (IAP)  https://github.com/itential/itential.deployer/pull/14
 * Added conditional to prevent RabbitMQ install when iap_release is less than 2023.2
-* Correct lint issues  https://github.com/itential/nickAtest/pull/17
+* Correct lint issues  https://github.com/itential/itential.deployer/pull/17
 * Create ansible-lint.yml
 * Create publish_ansible_collection.yml
 * Create updateChangelog.yml
 * Fix IAG adapter service config base_path
-* Fix IAP Vault token location and permissions  https://github.com/itential/nickAtest/pull/23
+* Fix IAP Vault token location and permissions  https://github.com/itential/itential.deployer/pull/23
 * Fix MongoDB tools package list for IAP v2021.1 installs
-* Fix iag_http_server_threads syntax issue in IAG properties template  https://github.com/itential/nickAtest/pull/27
-* HAProxy timeout settings update  https://github.com/itential/nickAtest/pull/7
-* Hashicorp read only support  https://github.com/itential/nickAtest/pull/11
-* Improve logging  https://github.com/itential/nickAtest/pull/10
-* Lint issues  https://github.com/itential/nickAtest/pull/18
-* Lint issues  https://github.com/itential/nickAtest/pull/20
-* Lint issues  https://github.com/itential/nickAtest/pull/22
-* Prometheus  https://github.com/itential/nickAtest/pull/24
+* Fix iag_http_server_threads syntax issue in IAG properties template  https://github.com/itential/itential.deployer/pull/27
+* HAProxy timeout settings update  https://github.com/itential/itential.deployer/pull/7
+* Hashicorp read only support  https://github.com/itential/itential.deployer/pull/11
+* Improve logging  https://github.com/itential/itential.deployer/pull/10
+* Lint issues  https://github.com/itential/itential.deployer/pull/18
+* Lint issues  https://github.com/itential/itential.deployer/pull/20
+* Lint issues  https://github.com/itential/itential.deployer/pull/22
+* Prometheus  https://github.com/itential/itential.deployer/pull/24
 * Re-factor Running the Deployer section of README
-* Rename documents to docs  https://github.com/itential/nickAtest/pull/6
+* Rename documents to docs  https://github.com/itential/itential.deployer/pull/6
 * Support MongoDB installs on aarch64 servers
 * Update CHANGELOG.md
-* Update Ports and Networking section in README  https://github.com/itential/nickAtest/pull/16
-* Update README to remove instructions for installing from Itential Ansible Galaxy  https://github.com/itential/nickAtest/pull/26
+* Update Ports and Networking section in README  https://github.com/itential/itential.deployer/pull/16
+* Update README to remove instructions for installing from Itential Ansible Galaxy  https://github.com/itential/itential.deployer/pull/26
 * Update galaxy version and changelog for release 2.2.0 [skip ci]
 * Update publish_ansible_collection.yml
-* addded support for 23.2 on RHEL 8 for Gateway install  https://github.com/itential/nickAtest/pull/13
-* added license to galaxy file  https://github.com/itential/nickAtest/pull/8
+* addded support for 23.2 on RHEL 8 for Gateway install  https://github.com/itential/itential.deployer/pull/13
+* added license to galaxy file  https://github.com/itential/itential.deployer/pull/8
 * delete file
-* moved vault_port to common_vars  https://github.com/itential/nickAtest/pull/9
+* moved vault_port to common_vars  https://github.com/itential/itential.deployer/pull/9
 * removed Terraform
 * update changelog script
 * updated iag_guide.md
 
-Full Changelog: https://github.com/itential/nickAtest/compare/v2.1.2...v2.2.0 
+Full Changelog: https://github.com/itential/itential.deployer/compare/v2.1.2...v2.2.0 
 
 
 ## v2.1.2 (April 22, 2024)
@@ -100,7 +100,7 @@ Full Changelog: https://github.com/itential/nickAtest/compare/v2.1.2...v2.2.0
 * Update CI build pipeline to fetch all tags
 * Update links in mongodb role documentation
 
-Full Changelog: https://github.com/itential/nickAtest/compare/v2.1.1...v2.1.2 
+Full Changelog: https://github.com/itential/itential.deployer/compare/v2.1.1...v2.1.2 
 
 
 ## v2.1.1 (April 10, 2024)
@@ -113,7 +113,7 @@ Full Changelog: https://github.com/itential/nickAtest/compare/v2.1.1...v2.1.2
 * Update example inventory hostnames in README
 * Update selinux role to configure SELinux only if it is enabled
 
-Full Changelog: https://github.com/itential/nickAtest/compare/v2.1.0...v2.1.1 
+Full Changelog: https://github.com/itential/itential.deployer/compare/v2.1.0...v2.1.1 
 
 
 ## v2.1.0 (March 26, 2024)
@@ -125,14 +125,14 @@ Full Changelog: https://github.com/itential/nickAtest/compare/v2.1.0...v2.1.1
 * Update Redis and RabbitMQ roles to use configurable usernames/passwords
 * Update Redis settings to support IAP 23.2
 
-Full Changelog: https://github.com/itential/nickAtest/compare/v2.0.2...v2.1.0 
+Full Changelog: https://github.com/itential/itential.deployer/compare/v2.0.2...v2.1.0 
 
 
 ## v2.0.2 (March 25, 2024)
 
 * Rename patch IAP/IAG playbooks to support calling from collection
 
-Full Changelog: https://github.com/itential/nickAtest/compare/v2.0.1...v2.0.2 
+Full Changelog: https://github.com/itential/itential.deployer/compare/v2.0.1...v2.0.2 
 
 
 ## v2.0.1 (March 21, 2024)
@@ -146,7 +146,7 @@ Full Changelog: https://github.com/itential/nickAtest/compare/v2.0.1...v2.0.2
 * Move playbooks to playbooks directory
 * Update .gitlab-ci.yml file
 
-Full Changelog: https://github.com/itential/nickAtest/compare/v1.5.0...v2.0.1 
+Full Changelog: https://github.com/itential/itential.deployer/compare/v1.5.0...v2.0.1 
 
 
 ## v1.5.0 (December 15, 2023)
@@ -168,7 +168,7 @@ Full Changelog: https://github.com/itential/nickAtest/compare/v1.5.0...v2.0.1
 * Update SELinux configurations for IAP/Redis/MongoDB
 * Vars cleanup
 
-Full Changelog: https://github.com/itential/nickAtest/compare/v1.4.0...v1.5.0 
+Full Changelog: https://github.com/itential/itential.deployer/compare/v1.4.0...v1.5.0 
 
 
 ## v1.4.0 (October 26, 2023)
@@ -180,7 +180,7 @@ Full Changelog: https://github.com/itential/nickAtest/compare/v1.4.0...v1.5.0
 * Minor changes for rabbit
 * Minor optimizations
 
-Full Changelog: https://github.com/itential/nickAtest/compare/v1.3.0...v1.4.0 
+Full Changelog: https://github.com/itential/itential.deployer/compare/v1.3.0...v1.4.0 
 
 
 ## v1.3.0 (October 02, 2023)
@@ -191,21 +191,21 @@ Full Changelog: https://github.com/itential/nickAtest/compare/v1.3.0...v1.4.0
 * Fixed Mongo tools yum reference for rhel8
 * Support mongodb replication with no arbiter
 
-Full Changelog: https://github.com/itential/nickAtest/compare/v1.2.1...v1.3.0 
+Full Changelog: https://github.com/itential/itential.deployer/compare/v1.2.1...v1.3.0 
 
 
 ## v1.2.1 (September 22, 2023)
 
 * Add ansible-pylibssh to pip install for IAG 2023.1
 
-Full Changelog: https://github.com/itential/nickAtest/compare/v1.2.0...v1.2.1 
+Full Changelog: https://github.com/itential/itential.deployer/compare/v1.2.0...v1.2.1 
 
 
 ## v1.2.0 (September 22, 2023)
 
 * Add flag for determining whether to use rsync for artifact uploads
 
-Full Changelog: https://github.com/itential/nickAtest/compare/v1.1.0...v1.2.0 
+Full Changelog: https://github.com/itential/itential.deployer/compare/v1.1.0...v1.2.0 
 
 
 ## v1.1.0 (September 19, 2023)
@@ -225,7 +225,7 @@ Full Changelog: https://github.com/itential/nickAtest/compare/v1.1.0...v1.2.0
 * Remove mongo init
 * Removed mongodb_init role, tasks moved to mongo and platform roles
 
-Full Changelog: https://github.com/itential/nickAtest/compare/v1.0.0...v1.1.0 
+Full Changelog: https://github.com/itential/itential.deployer/compare/v1.0.0...v1.1.0 
 
 
 ## v1.0.0 (August 21, 2023)
