@@ -74,6 +74,14 @@
       ansible.builtin.include_tasks:
         file: install-platform.yml
 
+- name: Create systemd file
+  ansible.builtin.template:
+    src: automation-platform.service.j2
+    dest: /usr/lib/systemd/system/automation-platform.service
+    owner: root
+    group: root
+    mode: "0644"
+
 - name: Configure properties.json file
   tags: configure_properties
   block:

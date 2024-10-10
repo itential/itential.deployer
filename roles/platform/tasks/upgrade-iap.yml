@@ -14,11 +14,40 @@
   ansible.builtin.set_fact:
     prev_iap_install_dir: "{{ prev_current.stat.lnk_target }}"
 
+# Stat the previous custom directory within the "current" directory. We need
+# to re-create the symlinks later and we don't want to symlink to the adapters
+# in the previous installation directory.
+- name: Stat the custom directory within the "current" directory
+  ansible.builtin.stat:
+    path: "{{ iap_install_dir }}/current/custom"
+  register: prev_custom_1
+
+# Find all custom apps/adapters.
+# This will identify the package.json files for all customized apps and
+# adapters. The list of files found is then saved into a variable called
+# "custom_apps" so that later we can use what we found to generate symlinks to
+# these locations from their new location. Limiting the depth to 3 for this
+# search ensures that we don't mistakenly identify the app's node module
+# dependencies as additional things to include and symlink.
+- name: Find custom apps/adapters
+  ansible.builtin.find:
+    paths:
+      - "{{ iap_install_dir }}/current/custom"
+    patterns:
+      - "package.json"
+    file_type: file
+    depth: 3
+    recurse: true
+  register: custom_apps
+  when: prev_custom_1.stat.exists
+
 - name: Backup mongodb itential database
   ansible.builtin.include_tasks:
     file: backup-mongo.yml
   when: mongo_backup | bool
 
+# Install the new IAP version. Note that the "current" symlink will be
+# pointing to the new release after the installation.
 - name: Install Platform
   ansible.builtin.include_tasks:
     file: install-platform.yml
@@ -32,10 +61,12 @@
     owner: "{{ iap_user }}"
     group: "{{ iap_group }}"
 
-- name: Check that the custom directory exists in the previous IAP install
+# Stat the custom directory again, but this time within the previous installation
+# directory, since the "current" symlink has been moved to the new release.
+- name: Stat the custom directory within the previous installation directory
   ansible.builtin.stat:
-    path: "{{ prev_iap_install_dir }}/custom/"
-  register: prev_custom_stat_result
+    path: "{{ prev_iap_install_dir }}/custom"
+  register: prev_custom_2
 
 # Copy files in old custom directory to new custom directory.
 # Customizations such as opensource adapters or customer authored apps need to
@@ -49,26 +80,7 @@
     mode: "0775"
     owner: "{{ iap_user }}"
     group: "{{ iap_group }}"
-  when: prev_custom_stat_result.stat.exists
-
-# Find all custom apps/adapters.
-# This will identify the package.json files for all customized apps and
-# adapters. The list of files found is then saved into a variable called
-# "custom_apps" so that later we can use what we found to generate symlinks to
-# these locations from their new location. Limiting the depth to 3 for this
-# search ensures that we don't mistakenly identify the app's node module
-# dependencies as additional things to include and symlink.
-- name: Find custom apps/adapters
-  ansible.builtin.find:
-    paths:
-      - "{{ prev_iap_install_dir }}/custom"
-    patterns:
-      - "package.json"
-    file_type: file
-    depth: 3
-    recurse: true
-  register: custom_apps
-  when: prev_custom_stat_result.stat.exists
+  when: prev_custom_2.stat.exists
 
 # Make a list of the full paths to the new locations of the apps/adapters
 - name: Add all locations to a list
