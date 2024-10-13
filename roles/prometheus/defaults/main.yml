@@ -14,10 +14,6 @@ prometheus_evaluation_interval: 15s
 
 # Prometheus exporter settings
 prometheus_node_exporter_download_url: https://github.com/prometheus/node_exporter/releases/download/v1.8.1/node_exporter-1.8.1.linux-amd64.tar.gz
-prometheus_node_exporter_port: "9100"
 prometheus_process_exporter_download_url: https://github.com/ncabatoff/process-exporter/releases/download/v0.8.2/process-exporter-0.8.2.linux-amd64.tar.gz
-prometheus_process_exporter_port: "9256"
 prometheus_redis_exporter_download_url: https://github.com/oliver006/redis_exporter/releases/download/v1.61.0/redis_exporter-v1.61.0.linux-amd64.tar.gz
-prometheus_redis_exporter_port: "9121"
 prometheus_mongo_exporter_download_url: https://github.com/percona/mongodb_exporter/releases/download/v0.40.0/mongodb_exporter-0.40.0.linux-amd64.tar.gz
-prometheus_mongo_exporter_port: "9216"

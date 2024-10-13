@@ -2,3 +2,8 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
 prometheus_port: 9090
+prometheus_node_exporter_port: 9100
+prometheus_process_exporter_port: 9256
+prometheus_redis_exporter_port: 9121
+prometheus_mongo_exporter_port: 9216
+prometheus_rabbitmq_exporter_port: 15692

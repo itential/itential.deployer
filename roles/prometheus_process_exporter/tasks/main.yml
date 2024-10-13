@@ -1,0 +1,12 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Print the prometheus_process_exporter_names
+  ansible.builtin.debug:
+    var: prometheus_process_exporter_names
+
+- name: Call prometheus process_exporter
+  ansible.builtin.import_role:
+    name: prometheus.prometheus.process_exporter
+  vars:
+    process_exporter_names: "{{ prometheus_process_exporter_names | to_yaml(indent=4) }}"

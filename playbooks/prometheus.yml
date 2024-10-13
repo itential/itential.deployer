@@ -35,7 +35,9 @@
       ansible.builtin.import_role:
         name: itential.deployer.prometheus
         tasks_from: install_node_exporter
-      tags: install_node_exporter
+      tags:
+        - exporters_install
+        - node_exporter_install
 
 - name: Install process exporter
   hosts: platform
@@ -49,7 +51,9 @@
       ansible.builtin.import_role:
         name: itential.deployer.prometheus
         tasks_from: install_process_exporter
-      tags: install_process_exporter
+      tags:
+        - exporters_install
+        - process_exporter_install
 
 - name: Enable RabbitMQ plugin
   hosts: rabbitmq, rabbitmq_secondary
@@ -64,7 +68,9 @@
         name: itential.deployer.prometheus
         tasks_from: enable_rabbit_prometheus_plugin
       when: iap_release < 2023.2
-      tags: enable_rabbit_plugin
+      tags:
+        - exporters_install
+        - enable_rabbit_plugin
 
 - name: Install Redis exporter
   hosts: redis, redis_secondary
@@ -78,7 +84,9 @@
       ansible.builtin.import_role:
         name: itential.deployer.prometheus
         tasks_from: install_redis_exporter
-      tags: install_redis_exporter
+      tags:
+        - exporters_install
+        - redis_exporter_install
 
 - name: Install MongoDB exporter
   hosts: mongodb, mongodb_arbiter, mongodb_secondary
@@ -92,4 +100,6 @@
       ansible.builtin.import_role:
         name: itential.deployer.prometheus
         tasks_from: install_mongodb_exporter
-      tags: install_mongodb_exporter
+      tags:
+        - exporters_install
+        - mongodb_exporter_install

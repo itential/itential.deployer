@@ -25,7 +25,7 @@
 {% endfor %}
 {% set rabbit_hosts = [] %}
 {% for hosts in groups['rabbitmq'] %}
-  {% set rabbit_uri = hosts + ":15692" %}
+  {% set rabbit_uri = hosts + ":" + prometheu_rabbitmq_exporter_port %}
   {{ rabbit_hosts.append( rabbit_uri ) }}
   {{ all_hosts.append( hosts + ":" + prometheus_node_exporter_port ) }}
 {% endfor %}

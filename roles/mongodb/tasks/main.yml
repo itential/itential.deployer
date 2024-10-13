@@ -174,8 +174,8 @@
     immediate: true
   when:
     - ansible_facts.services["firewalld.service"] is defined
-    - (ansible_facts.services["firewalld.service"].state == "running")
-    - (ansible_facts.services["firewalld.service"].status == "enabled")
+    - ansible_facts.services["firewalld.service"].state == "running"
+    - ansible_facts.services["firewalld.service"].status == "enabled"
 
 - name: Start mongo
   ansible.builtin.systemd:
