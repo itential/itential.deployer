@@ -1,6 +1,5 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Call prometheus process_exporter
-  ansible.builtin.import_role:
-    name: prometheus.prometheus.process_exporter
+# The RabbitMQ exporter port cannot be overridden
+rabbitmq_exporter_port: 15692

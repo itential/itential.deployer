@@ -1,0 +1,55 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Install RabbitMQ exporter
+  hosts: rabbitmq, rabbitmq_secondary
+  become: true
+  tasks:
+    # RabbitMQ has builtin Prometheus support, just enable the plugin.
+    # https://www.rabbitmq.com/docs/prometheus#rabbitmq-configuration
+    - name: Enable the RabbitMQ Prometheus plugin
+      ansible.builtin.command:
+        cmd: rabbitmq-plugins enable rabbitmq_prometheus
+      register: cmdoutput
+      changed_when: cmdoutput.rc != 0
+      tags: rabbitmq_prometheus_plugin_enable
+
+- name: Install Redis exporter
+  hosts: redis, redis_secondary
+  become: true
+  roles:
+    # Pull in the common vars
+    - role: itential.deployer.common_vars
+      tags: always
+
+    - role: prometheus.prometheus.redis_exporter
+      vars:
+        redis_exporter_user: admin
+      tags: redis_exporter_install
+
+- name: Install MongoDB exporter
+  hosts: mongodb, mongodb_arbiter, mongodb_secondary
+  become: true
+  roles:
+    # Pull in the common vars
+    - role: itential.deployer.common_vars
+      tags: always
+
+    - role: prometheus.prometheus.mongodb_exporter
+      vars:
+        mongodb_exporter_collectors: all
+      tags: mongodb_exporter_install
+
+- name: Install node exporter
+  hosts: all,!prometheus,!grafana
+  become: true
+  roles:
+    - role: prometheus.prometheus.node_exporter
+      tags: node_exporter_install
+
+- name: Install process exporter
+  hosts: platform, gateway
+  become: true
+  roles:
+    - role: prometheus.prometheus.process_exporter
+      tags: process_exporter_install

@@ -1,10 +1,6 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-process_exporter_names: |
-  {% raw %}
-    - cmdline:
-      - Pronghorn
-    - cmdline:
-      - python3
-  {% endraw %}
+- name: Call prometheus redis_exporter
+  ansible.builtin.import_role:
+    name: prometheus.prometheus.redis_exporter

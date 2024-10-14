@@ -10,30 +10,35 @@
 {%- for platform in groups['platform'] -%}
   {%- set platform_uri = platform + ":" + iap_port | string -%}
   {{ iap_exporter_targets.append( platform_uri ) }}
-  {%- set platform_proc_uri = platform + ":" + prometheus_process_exporter_port | string -%}
+  {%- set platform_proc_uri = platform + ":" + process_exporter_web_listen_address | split(':') | last | string -%}
   {{ process_exporter_targets.append( platform_proc_uri ) }}
-  {{ all_hosts.append( platform + ":" + prometheus_node_exporter_port | string ) }}
+  {{ all_hosts.append( platform + ":" + node_exporter_web_listen_address | split(':') | last | string ) }}
+{%- endfor -%}
+{%- for gateway in groups['gateway'] -%}
+  {%- set gateway_proc_uri = gateway + ":" + process_exporter_web_listen_address | split(':') | last | string -%}
+  {{ process_exporter_targets.append( gateway_proc_uri ) }}
+  {{ all_hosts.append( gateway + ":" + node_exporter_web_listen_address | split(':') | last | string ) }}
 {%- endfor -%}
 {%- set mongo_exporter_targets = [] -%}
 {%- for hosts in groups['mongodb'] -%}
-  {%- set mongo_uri = hosts + ":" + prometheus_mongo_exporter_port | string -%}
+  {%- set mongo_uri = hosts + ":" + mongodb_exporter_web_listen_address | split(':') | last | string -%}
   {{ mongo_exporter_targets.append( mongo_uri ) }}
-  {{ all_hosts.append( hosts + ":" + prometheus_node_exporter_port | string ) }}
+  {{ all_hosts.append( hosts + ":" + node_exporter_web_listen_address | split(':') | last | string ) }}
 {%- endfor -%}
 {%- set redis_exporter_targets = [] -%}
 {%- for hosts in groups['redis'] -%}
-  {%- set redis_uri = hosts + ":" + prometheus_redis_exporter_port | string -%}
+  {%- set redis_uri = hosts + ":" + redis_exporter_web_listen_address | split(':') | last | string -%}
   {{ redis_exporter_targets.append( redis_uri ) }}
-  {{ all_hosts.append( hosts + ":" + prometheus_node_exporter_port | string ) }}
+  {{ all_hosts.append( hosts + ":" + node_exporter_web_listen_address | split(':') | last | string ) }}
 {%- endfor -%}
 {%- set rabbitmq_exporter_targets = [] -%}
 {%- for hosts in groups['rabbitmq'] -%}
-  {%- set rabbit_uri = hosts + ":" + prometheus_rabbitmq_exporter_port | string -%}
+  {%- set rabbit_uri = hosts + ":" + rabbitmq_exporter_port | string -%}
   {{ rabbitmq_exporter_targets.append( rabbit_uri ) }}
-  {{ all_hosts.append( hosts + ":" + prometheus_node_exporter_port | string) }}
+  {{ all_hosts.append( hosts + ":" + node_exporter_web_listen_address | split(':') | last | string) }}
 {%- endfor %}
 {%- for hosts in groups['vault'] -%}
-  {{ all_hosts.append( hosts + ":" + prometheus_node_exporter_port | string) }}
+  {{ all_hosts.append( hosts + ":" + node_exporter_web_listen_address | split(':') | last | string) }}
 {%- endfor %}
 
 scrape_configs:
@@ -47,6 +52,8 @@ scrape_configs:
   - job_name: process_exporter
     static_configs:
       - targets: {{ process_exporter_targets | to_yaml(indent=2,sort_keys=False) | indent(2, False) }}
+{% endif %}
+{% if iap_exporter_targets | length > 0 %}
   - job_name: iap_exporter
     metrics_path: "/prometheus_metrics"
     static_configs:

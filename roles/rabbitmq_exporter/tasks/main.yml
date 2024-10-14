@@ -1,0 +1,10 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+# RabbitMQ has builtin Prometheus support, just enable the plugin.
+# https://www.rabbitmq.com/docs/prometheus#rabbitmq-configuration
+- name: Enable the RabbitMQ Prometheus plugin
+  ansible.builtin.command:
+    cmd: rabbitmq-plugins enable rabbitmq_prometheus
+  register: cmdoutput
+  changed_when: cmdoutput.rc != 0
