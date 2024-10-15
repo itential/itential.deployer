@@ -1,51 +1,110 @@
 {{ ansible_managed | comment }}
-{%- set all_hosts = [] -%}
+{%- set iap_exporter_targets = [] -%}
+{%- set process_exporter_targets = [] -%}
+{%- set node_export_targets = [] -%}
+{%- set mongodb_exporter_targets = [] -%}
+{%- set redis_exporter_targets = [] -%}
+{%- set rabbitmq_exporter_targets = [] -%}
+
 {%- if iap_https -%}
   {%- set iap_port = iap_https_port -%}
 {%- else -%}
   {%- set iap_port = iap_http_port -%}
 {%- endif -%}
-{%- set iap_exporter_targets = [] -%}
-{%- set process_exporter_targets = [] -%}
-{%- for platform in groups['platform'] -%}
-  {%- set platform_uri = platform + ":" + iap_port | string -%}
-  {{ iap_exporter_targets.append( platform_uri ) }}
-  {%- set platform_proc_uri = platform + ":" + process_exporter_web_listen_address | split(':') | last | string -%}
-  {{ process_exporter_targets.append( platform_proc_uri ) }}
-  {{ all_hosts.append( platform + ":" + node_exporter_web_listen_address | split(':') | last | string ) }}
+
+{%- for host in groups['platform'] -%}
+  {%- set iap_exporter_web_listen_address = host + ":" + iap_port | string -%}
+  {{ iap_exporter_targets.append( iap_exporter_web_listen_address ) }}
+
+  {% if 'process_exporter_web_listen_address' in hostvars[host] %}
+    {%- set process_exporter_web_listen_address = hostvars[host].process_exporter_web_listen_address -%}
+  {% else %}
+    {%- set process_exporter_web_listen_address = host + ":" + prometheus_default_process_exporter_port | string -%}
+  {% endif %}
+  {{ process_exporter_targets.append( process_exporter_web_listen_address ) }}
+
+  {% if 'node_exporter_web_listen_address' in hostvars[host] %}
+    {%- set node_exporter_web_listen_address = hostvars[host].node_exporter_web_listen_address -%}
+  {% else %}
+    {%- set node_exporter_web_listen_address = host + ":" + prometheus_default_node_exporter_port | string -%}
+  {% endif %}
+  {{ node_export_targets.append( node_exporter_web_listen_address ) }}
 {%- endfor -%}
-{%- for gateway in groups['gateway'] -%}
-  {%- set gateway_proc_uri = gateway + ":" + process_exporter_web_listen_address | split(':') | last | string -%}
-  {{ process_exporter_targets.append( gateway_proc_uri ) }}
-  {{ all_hosts.append( gateway + ":" + node_exporter_web_listen_address | split(':') | last | string ) }}
+
+{%- for host in groups['gateway'] -%}
+  {% if 'process_exporter_web_listen_address' in hostvars[host] %}
+    {%- set process_exporter_web_listen_address = hostvars[host].process_exporter_web_listen_address -%}
+  {% else %}
+    {%- set process_exporter_web_listen_address = host + ":" + prometheus_default_process_exporter_port | string -%}
+  {% endif %}
+  {{ process_exporter_targets.append( process_exporter_web_listen_address ) }}
+
+  {% if 'node_exporter_web_listen_address' in hostvars[host] %}
+    {%- set node_exporter_web_listen_address = hostvars[host].node_exporter_web_listen_address -%}
+  {% else %}
+    {%- set node_exporter_web_listen_address = host + ":" + prometheus_default_node_exporter_port | string -%}
+  {% endif %}
+  {{ node_export_targets.append( node_exporter_web_listen_address ) }}
 {%- endfor -%}
-{%- set mongo_exporter_targets = [] -%}
-{%- for hosts in groups['mongodb'] -%}
-  {%- set mongo_uri = hosts + ":" + mongodb_exporter_web_listen_address | split(':') | last | string -%}
-  {{ mongo_exporter_targets.append( mongo_uri ) }}
-  {{ all_hosts.append( hosts + ":" + node_exporter_web_listen_address | split(':') | last | string ) }}
+
+{%- for host in groups['mongodb'] -%}
+  {% if 'mongodb_exporter_web_listen_address' in hostvars[host] %}
+    {%- set mongodb_exporter_web_listen_address = hostvars[host].mongodb_exporter_web_listen_address -%}
+  {% else %}
+    {%- set mongodb_exporter_web_listen_address = host + ":" + prometheus_default_mongodb_exporter_port | string -%}
+  {% endif %}
+  {{ mongodb_exporter_targets.append( mongodb_exporter_web_listen_address ) }}
+
+  {% if 'node_exporter_web_listen_address' in hostvars[host] %}
+    {%- set node_exporter_web_listen_address = hostvars[host].node_exporter_web_listen_address -%}
+  {% else %}
+    {%- set node_exporter_web_listen_address = host + ":" + prometheus_default_node_exporter_port | string -%}
+  {% endif %}
+  {{ node_export_targets.append( node_exporter_web_listen_address ) }}
 {%- endfor -%}
-{%- set redis_exporter_targets = [] -%}
-{%- for hosts in groups['redis'] -%}
-  {%- set redis_uri = hosts + ":" + redis_exporter_web_listen_address | split(':') | last | string -%}
-  {{ redis_exporter_targets.append( redis_uri ) }}
-  {{ all_hosts.append( hosts + ":" + node_exporter_web_listen_address | split(':') | last | string ) }}
+
+{%- for host in groups['redis'] -%}
+  {% if 'redis_exporter_web_listen_address' in hostvars[host] %}
+    {%- set redis_exporter_web_listen_address = hostvars[host].redis_exporter_web_listen_address -%}
+  {% else %}
+    {%- set redis_exporter_web_listen_address = host + ":" + prometheus_default_redis_exporter_port | string -%}
+  {% endif %}
+  {{ redis_exporter_targets.append( redis_exporter_web_listen_address ) }}
+
+  {% if 'node_exporter_web_listen_address' in hostvars[host] %}
+    {%- set node_exporter_web_listen_address = hostvars[host].node_exporter_web_listen_address -%}
+  {% else %}
+    {%- set node_exporter_web_listen_address = host + ":" + prometheus_default_node_exporter_port | string -%}
+  {% endif %}
+  {{ node_export_targets.append( node_exporter_web_listen_address ) }}
 {%- endfor -%}
-{%- set rabbitmq_exporter_targets = [] -%}
-{%- for hosts in groups['rabbitmq'] -%}
-  {%- set rabbit_uri = hosts + ":" + rabbitmq_exporter_port | string -%}
-  {{ rabbitmq_exporter_targets.append( rabbit_uri ) }}
-  {{ all_hosts.append( hosts + ":" + node_exporter_web_listen_address | split(':') | last | string) }}
+
+{%- for host in groups['rabbitmq'] -%}
+  {%- set rabbitmq_exporter_web_listen_address = host + ":" + rabbitmq_exporter_port | string -%}
+  {{ rabbitmq_exporter_targets.append( rabbitmq_exporter_web_listen_address ) }}
+
+  {% if 'node_exporter_web_listen_address' in hostvars[host] %}
+    {%- set node_exporter_web_listen_address = hostvars[host].node_exporter_web_listen_address -%}
+  {% else %}
+    {%- set node_exporter_web_listen_address = host + ":" + prometheus_default_node_exporter_port | string -%}
+  {% endif %}
+  {{ node_export_targets.append( node_exporter_web_listen_address ) }}
 {%- endfor %}
-{%- for hosts in groups['vault'] -%}
-  {{ all_hosts.append( hosts + ":" + node_exporter_web_listen_address | split(':') | last | string) }}
+
+{%- for host in groups['vault'] -%}
+  {% if 'node_exporter_web_listen_address' in hostvars[host] %}
+    {%- set node_exporter_web_listen_address = hostvars[host].node_exporter_web_listen_address -%}
+  {% else %}
+    {%- set node_exporter_web_listen_address = host + ":" + prometheus_default_node_exporter_port | string -%}
+  {% endif %}
+  {{ node_export_targets.append( node_exporter_web_listen_address ) }}
 {%- endfor %}
 
 scrape_configs:
-{% if all_hosts | length > 0 %}
+{% if node_export_targets | length > 0 %}
   - job_name: node_exporter
     static_configs:
-      - targets: {{ all_hosts | to_json }}
+      - targets: {{ node_export_targets | to_json }}
 {% endif %}
 
 {% if process_exporter_targets | length > 0 %}
@@ -64,10 +123,10 @@ scrape_configs:
     static_configs:
       - targets: {{ redis_exporter_targets | to_yaml(indent=2,sort_keys=False) | indent(2, False) }}
 {% endif %}
-{% if mongo_exporter_targets | length > 0 %}
+{% if mongodb_exporter_targets | length > 0 %}
   - job_name: mongo_exporter
     static_configs:
-      - targets: {{ mongo_exporter_targets | to_yaml(indent=2,sort_keys=False) | indent(2, False) }}
+      - targets: {{ mongodb_exporter_targets | to_yaml(indent=2,sort_keys=False) | indent(2, False) }}
 {% endif %}
 {% if rabbitmq_exporter_targets | length > 0 %}
   - job_name: rabbitmq_exporter

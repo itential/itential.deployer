@@ -1,0 +1,7 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+prometheus_default_process_exporter_port: 9256
+prometheus_default_node_exporter_port: 9100
+prometheus_default_redis_exporter_port: 9121
+prometheus_default_mongodb_exporter_port: 9216
