@@ -1,6 +1,11 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
+- name: Include repository secrets from the ansible vault file
+  ansible.builtin.include_vars:
+    file: "{{ repository_encrypted_file }}"
+  when: repository_encrypted_file is defined
+
 - name: Validate vars
   ansible.builtin.include_tasks:
     file: validate-vars.yml
@@ -67,12 +72,21 @@
     state: present
     line: "{{ iap_user }} ALL=(ALL) NOPASSWD: /usr/sbin/chroot, /sbin/chroot"
 
-- name: Install Platform
+- name: Install Platform from local file
   tags: install_platform
+  when: platform_download_url is not defined
   block:
     - name: Install Platform
       ansible.builtin.include_tasks:
-        file: install-platform.yml
+        file: install-platform-from-local.yml
+
+- name: Install Platform from repository
+  tags: install_platform
+  when: platform_download_url is defined
+  block:
+    - name: Install Platform
+      ansible.builtin.include_tasks:
+        file: install-platform-from-repo.yml
 
 - name: Create systemd file
   ansible.builtin.template:

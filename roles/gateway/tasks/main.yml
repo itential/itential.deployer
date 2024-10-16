@@ -9,6 +9,11 @@
     - "release-undefined.yml"
   tags: always
 
+- name: Include repository secrets from the ansible vault file
+  ansible.builtin.include_vars:
+    file: "{{ repository_encrypted_file }}"
+  when: repository_encrypted_file is defined
+
 - name: Check for valid IAG release
   ansible.builtin.fail:
     msg: "Deployer does not support installing Gateway version {{ iag_release }} on {{ ansible_distribution }}-{{ ansible_distribution_major_version }}"
@@ -140,10 +145,13 @@
     path: "{{ iag_install_dir }}/venv/automation-gateway"
   register: iag_installed
 
-- name: Install Automation Gateway
-  when: not iag_installed.stat.exists
+- name: Install Automation Gateway from local
+  when:
+    - not iag_installed.stat.exists
+    - iag_whl_file is defined
+    - gateway_download_url is not defined
   block:
-    - name: Copy IAG to host
+    - name: Copy IAG to host from local
       ansible.builtin.copy:
         src: "{{ iag_whl_file }}"
         dest: "{{ workingdir.path }}/{{ iag_whl_file | basename }}"
@@ -152,6 +160,37 @@
     - name: Install IAG
       ansible.builtin.pip:
         name: "{{ workingdir.path }}/{{ iag_whl_file | basename }}"
+        virtualenv: "{{ iag_install_dir }}/venv"
+
+- name: Instal Automation Gateway from repository
+  when:
+    - not iag_installed.stat.exists
+    - gateway_download_url is defined
+    - iag_whl_file is not defined
+  block:
+    - name: Download IAG file from repository
+      ansible.builtin.get_url:
+        url: "{{ gateway_download_url }}"
+        dest: "{{ iag_install_dir }}/{{ gateway_download_url | basename }}"
+        mode: '0644'
+        headers: >-
+          {%- if repository_api_key is defined -%}
+            {"Authorization": "Bearer {{ repository_api_key }}", "Accept": "application/octet-stream"}
+          {%- else -%}
+            {"Accept": "application/octet-stream"}
+          {%- endif -%}
+        url_username: "{{ repository_username | default(omit) }}"
+        url_password: "{{ repository_password | default(omit) }}"
+        validate_certs: true
+      register: download_result
+
+    - name: Extract downloaded filename from result
+      ansible.builtin.set_fact:
+        downloaded_file: "{{ download_result.dest | basename }}"
+
+    - name: Install IAG from the downloaded file
+      ansible.builtin.pip:
+        name: "{{ iag_install_dir }}/{{ downloaded_file }}"
         virtualenv: "{{ iag_install_dir }}/venv"
 
 - name: Set ownership/permissions and create properties.yml

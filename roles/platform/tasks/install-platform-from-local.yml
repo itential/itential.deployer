@@ -66,18 +66,18 @@
 # upgrade with this role for transparency. If the extracted directory already
 # exists then do nothing (creates).
 - name: Extract the bin file contents
+  when: iap_bin_file is defined
   ansible.builtin.command:
     cmd: "{{ iap_install_dir }}/{{ iap_bin_file }} -ey -d {{ iap_install_dir }}"
     chdir: "{{ iap_install_dir }}"
     creates: "{{ iap_install_dir }}/{{ iap_package_name }}"
-  when: iap_bin_file is defined
 
 - name: Extract the tar file contents
+  when: iap_tar_file is defined
   ansible.builtin.unarchive:
     src: "{{ iap_install_dir }}/{{ iap_tar_file }}"
     dest: "{{ iap_install_dir }}"
     remote_src: true
-  when: iap_tar_file is defined
 
 - name: Create the "current" symlink
   ansible.builtin.file:

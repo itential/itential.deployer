@@ -29,6 +29,11 @@ The variables in this section may be overridden in the inventory in the `gateway
 | :------- | :---- | :--- | :---------- | :------------ | :--------
 | `iag_release` | `gateway` | Fixed-point | Designates which major release version of IAG to install. | N/A | Yes
 | `iag_whl_file` | `gateway` | String | The name of the IAG wheel file to install. | N/A | Yes
+| `gateway_download_url` | `platform` | String | The URL for the download of the iag whl file from a repository. | N/A | Yes*
+| `repository_username` | `platform` | String | The username for authentication of the repository from gateway_download_url. | N/A | No
+| `repository_password` | `platform` | String | The password for authentication of the repository from gateway_download_url. | N/A | No
+| `repository_api_key` | `platform` | String | The API for authentication of the repository from gateway_download_url. Can be used instead of username/password for authentication.| N/A | No
+| `repository_encrypted_file` | `platform` | String | Path to an ansible vault encrypted file containing credentials for the file downloads.| N/A | No
 
 Both the `iag_release` and `iag_whl_file` must be configured in the inventory.
 

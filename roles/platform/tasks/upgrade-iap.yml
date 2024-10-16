@@ -48,9 +48,15 @@
 
 # Install the new IAP version. Note that the "current" symlink will be
 # pointing to the new release after the installation.
-- name: Install Platform
+- name: Install Platform Repo
+  when: platform_download_url is defined
   ansible.builtin.include_tasks:
-    file: install-platform.yml
+    file: install-platform-from-repo.yml
+
+- name: Install Platform local
+  when: iap_bin_file is defined or iap_tar_file is defined
+  ansible.builtin.include_tasks:
+    file: install-platform-from-local.yml
 
 - name: Copy old properties.json file to the new install directory
   ansible.builtin.copy:

@@ -1,0 +1,61 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Download the IAP file from URL
+  ansible.builtin.get_url:
+    url: "{{ platform_download_url }}"
+    dest: "{{ iap_install_dir }}/"
+    mode: '0755'
+    headers: >-
+      {%- if repository_api_key is defined -%}
+        {"Authorization": "Bearer {{ repository_api_key }}", "Accept": "application/octet-stream"}
+      {%- else -%}
+        {"Accept": "application/octet-stream"}
+      {%- endif -%}
+    url_username: "{{ repository_username | default(omit) }}"
+    url_password: "{{ repository_password | default(omit) }}"
+    validate_certs: true
+  register: download_result
+
+- name: Extract downloaded filename from result
+  ansible.builtin.set_fact:
+    downloaded_file: "{{ download_result.dest | basename }}"
+
+- name: Determine package name from the downloaded file
+  ansible.builtin.set_fact:
+    iap_package_name: >-
+      {%- if downloaded_file.endswith('.bin') -%}
+        {{ downloaded_file.split('.linux.x86_64.bin')[0] }}
+      {%- elif downloaded_file.endswith('.tar.gz') -%}
+        {{ downloaded_file.split('.linux.x86_64.tar.gz')[0] }}
+      {%- endif -%}
+
+- name: Extract the bin file contents
+  ansible.builtin.command:
+    cmd: "{{ download_result.dest }} -ey -d /opt/itential"
+    chdir: /opt/itential
+    creates: "/opt/itential/{{ iap_package_name }}"
+  when: downloaded_file.endswith('.bin')
+
+- name: Extract the tar file contents
+  ansible.builtin.unarchive:
+    src: "{{ download_result.dest }}"
+    dest: /opt/itential
+    remote_src: true
+  when: downloaded_file.endswith('.tar.gz')
+
+- name: Create the "current" symlink
+  ansible.builtin.file:
+    path: /opt/itential/current
+    src: "/opt/itential/{{ iap_package_name }}"
+    owner: "{{ download_result.owner }}"
+    group: "{{ download_result.group }}"
+    state: link
+
+- name: Remove the source file
+  when: remove_iap_source_file | bool
+  block:
+    - name: Remove the downloaded file
+      ansible.builtin.file:
+        path: "{{ download_result.dest }}"
+        state: absent

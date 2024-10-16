@@ -55,6 +55,11 @@ The variables in this section may be overridden in the inventory in the `platfor
 | :------- | :---- | :--- | :---------- | :------------ | :--------
 | `iap_bin_file` | `platform` | String | The name of the IAP bin file. | N/A | Yes*
 | `iap_tar_file` | `platform` | String | The name of the IAP tar file. | N/A | Yes*
+| `platform_download_url` | `platform` | String | The URL for the download of the bin/tar file from a repository. | N/A | Yes*
+| `repository_username` | `platform` | String | The username for authentication of the repository from platform_download_url. | N/A | No
+| `repository_password` | `platform` | String | The password for authentication of the repository from platform_download_url. | N/A | No
+| `repository_api_key` | `platform` | String | The API for authentication of the repository from platform_download_url. Can be used instead of username/password for authentication.| N/A | No
+| `repository_encrypted_file` | `platform` | String | Path to an ansible vault encrypted file containing credentials for the file downloads.| N/A | No
 | `rabbit_svc_url` | `platform` | String | This variable defines the rabbit service url to use when connecting to an externally provided RabbitMQ cluster. It is intended to be used when the architecture demands that rabbit be hosted elsewhere such as when using AmazonMQ or if the demands of an organization require some other external rabbit solution, like a shared service. | N/A | No
 | `redis_svc_url` | `platform` | String | This variable defines the redis service url to use when connecting to an externally provided redis cluster. It is intended to be used when the architecture demands that redis be hosted elsewhere such as when using Elasticache or if the demands of an organization require some other external redis solution, like a shared service. | N/A | No
 | `mongobdb_svc_url_itential` | `platform` | String | This variable defines the mongodb connection string to use when connecting to the "itential" database. It is intended to be used when the architecture demands that mongo be hosted elsewhere such as when using Mongo Atlas or if the demands of an organization require some other external mongo solution, like a shared service. | N/A | No
