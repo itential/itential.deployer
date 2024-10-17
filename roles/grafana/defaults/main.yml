@@ -1,0 +1,14 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+# Grafana user and group
+grafana_user: grafana
+grafana_group: grafana
+
+# Grafana server settings
+grafana_port: 3000
+grafana_repo_url: https://rpm.grafana.com
+grafana_gpg_key: https://rpm.grafana.com/gpg.key
+grafana_install_dir: /etc/grafana
+grafana_dashboard_dir: "{{ grafana_install_dir }}/provisioning/dashboards"
+grafana_allow_ui_updates: false
