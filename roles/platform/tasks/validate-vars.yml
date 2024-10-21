@@ -1,16 +1,33 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Check if both IAP bin file and tar file are undefined
+- name: Check if both IAP bin file and tar file are undefined and no download URL is provided
   ansible.builtin.fail:
-    msg: Either iap_bin_file file or iap_tar_file file should be defined.
+    msg: Either iap_bin_file, iap_tar_file, or a download URL with authentication must be defined.
   when:
     - iap_bin_file is not defined
     - iap_tar_file is not defined
+    - iap_archive_download_url is not defined
 
-- name: Check if both IAP bin file and tar file are defined
+- name: Check if more than one of iap_bin_file, iap_tar_file, or iap_archive_download_url is defined
   ansible.builtin.fail:
-    msg: Only one of iap_bin_file file or iap_tar_file file should be defined.
+    msg: Only one of iap_bin_file, iap_tar_file, or iap_archive_download_url should be defined.
+  when: >
+    (iap_bin_file is defined | int) +
+    (iap_tar_file is defined | int) +
+    (iap_archive_download_url is defined | int) > 1
+
+- name: Check if both user/password and API key are provided
+  ansible.builtin.fail:
+    msg: Only one authentication method should be defined either user/password or API token, not both.
   when:
-    - iap_bin_file is defined
-    - iap_tar_file is defined
+    - repository_username is defined or repository_password is defined
+    - download_api_key is defined
+
+- name: Check if either both username and password are defined or neither
+  ansible.builtin.fail:
+    msg: Both repository_username and repository_password must be defined together.
+  when:
+    - download_url is defined
+    - (repository_username is defined and repository_password is not defined)
+      or (repository_username is not defined and repository_password is defined)
