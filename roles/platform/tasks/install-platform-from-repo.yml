@@ -39,4 +39,3 @@
       {%- elif downloaded_file.endswith('.tar.gz') -%}
         {{ downloaded_file.split('.linux.x86_64.tar.gz')[0] }}
       {%- endif -%}
-
