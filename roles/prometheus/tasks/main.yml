@@ -1,80 +1,19 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Install base OS packages
-  ansible.builtin.include_role:
-    name: os
-  tags: install_base_os_packages
+- name: Install Prometheus
+  ansible.builtin.import_role:
+    name: prometheus.prometheus.prometheus
 
-- name: Create prometheus group
-  ansible.builtin.group:
-    name: "{{ prometheus_group }}"
-    state: present
-
-- name: Create prometheus user
-  ansible.builtin.user:
-    name: "{{ prometheus_user }}"
-    group: "{{ prometheus_group }}"
-    state: present
-
-- name: Create the prometheus directory if it does not exist
-  ansible.builtin.file:
-    path: "{{ prometheus_dir }}"
-    state: directory
-    owner: "{{ prometheus_user }}"
-    group: "{{ prometheus_group }}"
-    mode: "0755"
-
-# Install prometheus on its own server
-- name: Install Prometheus server
-  tags: prometheus_server
-  ansible.builtin.import_tasks:
-    file: install_prometheus.yml
-  when: inventory_hostname in groups['prometheus']
-
-# Install the node exporter on all servers
-- name: Install node exporter on all hosts
-  tags: node_exporter
-  ansible.builtin.import_tasks:
-    file: install_node_exporter.yml
-  when: inventory_hostname not in groups['prometheus']
-
-# Install the process exporter on platform servers
-- name: Install process exporter on platform hosts
-  tags: process_exporter
-  ansible.builtin.import_tasks:
-    file: install_process_exporter.yml
-  when: inventory_hostname in groups['platform']
-
-# Install the mongo exporter on the mongo servers
-- name: Install Mongo exporter only on Mongo hosts
-  tags: mongo_exporter
-  ansible.builtin.import_tasks:
-    file: install_mongodb_exporter.yml
-  when: inventory_hostname in groups['mongodb']
-
-# Install the Redis exporter on the redis servers
-- name: Install Redis exporter only on Redis hosts
-  tags: redis_exporter
-  ansible.builtin.import_tasks:
-    file: install_redis_exporter.yml
-  when: inventory_hostname in groups['redis']
-
-# Enable the rabbitmq prometheus plugin to expose rabbitmq metrics
-# Only required on IAP versions 23.1 and earlier
-- name: Enable RabbitMQ metrics
-  tags: rabbitmq_metrics
-  ansible.builtin.import_tasks:
-    file: enable_rabbit_prometheus_plugin.yml
-  when:
-    - inventory_hostname in groups['rabbitmq']
-    - iap_release < 2023.2
-
-# Install grafana on the prometheus server
-- name: Install Grafana
-  tags: grafana
-  ansible.builtin.import_tasks:
-    file: install_grafana.yml
-  when:
-    - prometheus_grafana | bool
-    - inventory_hostname in groups['prometheus']
+- name: Create Itential scrape config file
+  notify: Restart Prometheus
+  tags: itential_scrape_config_install
+  block:
+    - name: Create Itential scrape config file
+      ansible.builtin.template:
+        src: scrape_configs.j2
+        dest: "{{ prometheus_config_dir }}/scrapes/itential.yml"
+        owner: "{{ prometheus_system_user }}"
+        group: "{{ prometheus_system_group }}"
+        mode: "0644"
+        lstrip_blocks: true

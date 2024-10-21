@@ -7,13 +7,6 @@ iap_install_dir: /opt/itential
 # The directory to write logs to
 iap_log_dir: /var/log/itential
 
-# Run IAP server as HTTPS
-iap_https: false
-
-# The IAP listen ports
-iap_http_port: 3000
-iap_https_port: 3443
-
 # Should the platform role add necessary docs to mongodb? For a day
 # zero install this would be true. However, a scenario where they
 # already have a database but are using the Installer to do a
