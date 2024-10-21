@@ -1,3 +1,4 @@
+{%- set prometheus_host = groups.prometheus | first -%}
 # config file version
 apiVersion: 1
 
@@ -16,7 +17,11 @@ datasources:
   # <int> org id. will default to orgId 1 if not specified
   orgId: 1
   # <string> url
-  url: http://{{ inventory_hostname }}:{{ prometheus_port }}
+  {% if 'prometheus_web_listen_address' in hostvars[prometheus_host] %}
+  url: http://{{ hostvars[prometheus_host].prometheus_web_listen_address }}
+  {% else %}
+  url: http://{{ prometheus_host }}:{{ grafana_prometheus_web_listen_port }}
+  {% endif %}
   # <string> database password, if used
   password:
   # <string> database user, if used
