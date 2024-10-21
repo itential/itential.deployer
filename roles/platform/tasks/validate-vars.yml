@@ -7,29 +7,21 @@
   when:
     - iap_bin_file is not defined
     - iap_tar_file is not defined
-    - platform_download_url is not defined
+    - iap_archive_download_url is not defined
 
-- name: Check if both IAP bin file and tar file are defined
+- name: Check if more than one of iap_bin_file, iap_tar_file, or iap_archive_download_url is defined
   ansible.builtin.fail:
-    msg: Only one of iap_bin_file or iap_tar_file should be defined.
-  when:
-    - iap_bin_file is defined
-    - iap_tar_file is defined
-
-- name: Check if more than one of iap_bin_file, iap_tar_file, or platform_download_url is defined
-  ansible.builtin.fail:
-    msg: Only one of iap_bin_file, iap_tar_file, or platform_download_url should be defined.
+    msg: Only one of iap_bin_file, iap_tar_file, or iap_archive_download_url should be defined.
   when: >
     (iap_bin_file is defined | int) +
     (iap_tar_file is defined | int) +
-    (platform_download_url is defined | int) > 1
+    (iap_archive_download_url is defined | int) > 1
 
 - name: Check if both user/password and API key are provided
   ansible.builtin.fail:
     msg: Only one authentication method should be defined either user/password or API token, not both.
   when:
-    - repository_username is defined
-    - repository_password is defined
+    - repository_username is defined or repository_password is defined
     - download_api_key is defined
 
 - name: Check if either both username and password are defined or neither
