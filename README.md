@@ -402,23 +402,41 @@ itential.deployer 1.0.0
 
 The Deployer directory will be referred to as the `DEPLOYER-DIR` in this guide.
 
-### Create the Files and Inventories Directories
+### Create the Inventories Directory
 
-The files and inventories directories should be sub-directories of the working directory.  The files directory will contain the Itential binaries and artifacts.  The inventories directory will contain the hosts files.
+The `inventories` directory should be a sub-directory of the working directory. It will contain the hosts files.
 
-```base
-% cd <WORKING-DIR>
-% mkdir files inventories
+```bash
+cd <WORKING-DIR>
+mkdir inventories
 ```
 
-### Download Installation Artifacts
+### Determine Installation Artifacts Method
+
+Choose one of the following installation methods based on your requirements:
+
+1. **Manual Upload**: Manually download the required files onto the control node in a `files` directory. The deployer will move these artifact files to the target nodes.
+2. **Repository Download**: Provide a repository download URL with either a username/password or an API key. The deployer will make an API request to download the files directly onto the target nodes.
+
+### Manual Upload
+
+#### Create the Files Directory
+
+The `files` directory should be a sub-directory of the working directory. It will contain the Itential binaries and artifacts.
+
+```bash
+cd <WORKING-DIR>
+mkdir files
+```
+
+#### Download Installation Artifacts
 
 Download the IAP binary along with any desired IAP adapters (and, if applicable, the IAG binary) from the [Itential Nexus Repository] to local storage.
 
 **&#9432; Note:**
 If you are unsure which files should be downloaded for your environment, contact your Itential Professional Services representative.
 
-### Copy Installation Artifacts into the Files Directory
+#### Copy Installation Artifacts into the Files Directory
 
 Next, copy the files downloaded in the previous step to the `files` subdirectory.
 
@@ -430,7 +448,7 @@ cp ~/Downloads/itential-premium_2023.1.1.linux.x86_64.bin .
 cp ~/Downloads/automation_gateway-3.198.19+2023.1.0-py3-none-any.whl .
 ```
 
-### Create a Symlink to the Files Directory
+#### Create a Symlink to the Files Directory
 
 Navigate to the playbooks directory in the Deployer directory and create a symlink to the files directory in the working directory.
 
@@ -438,6 +456,27 @@ Navigate to the playbooks directory in the Deployer directory and create a symli
 cd <DEPLOYER-DIR>/playbooks
 ln -s <WORKING-DIR>/files .
 ```
+
+### Repository Download
+
+#### Obtain the Download URL
+
+You can obtain the download URL from either a **Sonatype Nexus Repository** or **JFrog**. Follow the steps below based on the repository type:
+
+- **For Sonatype Nexus**: Navigate to the file you wish to use and locate the **Path** parameter. Copy the link provided in the **Path** field to obtain the download URL.
+- **For JFrog**: Locate the file in the JFrog repository and copy the File URL.
+
+This download method supports both the IAP (bin/tar) files and the IAG (whl) files.
+
+#### Configure Repository Credentials
+
+Depending on the repository you are using, you will need to provide the appropriate credentials:
+
+- **For Nexus**: Set the `repository_username` and `repository_password` variables.
+- **For JFrog**: Set the `repository_api_key` variable.
+
+**&#9432; Note:**
+To secure sensitive information like passwords or API keys, consider using Ansible Vault to encrypt these variables.
 
 ### Create the Inventory File
 
@@ -487,7 +526,14 @@ all:
         hosts:
             example1.host.com:
         vars:
-            iap_bin_file: itential-premium_2023.1.1.linux.x86_64.bin
+            iap_archive_download_url: https://registry.aws.itential.com/repository/itential-premium/2023.2/2023.2.8/itential-premium_2023.2.8.linux.x86_64.tar.gzx
+            repository_username: user.name
+            repository_password: !vault |
+                  $ANSIBLE_VAULT;1.1;AES123
+                  12341234123412341234123412341234123412341234123412341234123412341234123412341234
+                  12341234123412341234123412341234123412341234123412341234123412341234123412341234
+                  12341234123412341234123412341241234123412341234123412341234123412341234123412341
+                  1234123412341324
 
     gateway:
         hosts:

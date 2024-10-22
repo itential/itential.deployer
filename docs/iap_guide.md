@@ -55,12 +55,17 @@ The variables in this section may be overridden in the inventory in the `platfor
 | :------- | :---- | :--- | :---------- | :------------ | :--------
 | `iap_bin_file` | `platform` | String | The name of the IAP bin file. | N/A | Yes*
 | `iap_tar_file` | `platform` | String | The name of the IAP tar file. | N/A | Yes*
+| `iap_archive_download_url` | `platform` | String | The URL for the download of the bin/tar file from a repository. | N/A | Yes*
+| `repository_username` | `platform` | String | The username for authentication of the repository from iap_archive_download_url. | N/A | No
+| `repository_password` | `platform` | String | The password for authentication of the repository from iap_archive_download_url. | N/A | No
+| `repository_api_key` | `platform` | String | The API for authentication of the repository from iap_archive_download_url. Can be used instead of username/password for authentication.| N/A | No
 | `rabbit_svc_url` | `platform` | String | This variable defines the rabbit service url to use when connecting to an externally provided RabbitMQ cluster. It is intended to be used when the architecture demands that rabbit be hosted elsewhere such as when using AmazonMQ or if the demands of an organization require some other external rabbit solution, like a shared service. | N/A | No
 | `redis_svc_url` | `platform` | String | This variable defines the redis service url to use when connecting to an externally provided redis cluster. It is intended to be used when the architecture demands that redis be hosted elsewhere such as when using Elasticache or if the demands of an organization require some other external redis solution, like a shared service. | N/A | No
 | `mongobdb_svc_url_itential` | `platform` | String | This variable defines the mongodb connection string to use when connecting to the "itential" database. It is intended to be used when the architecture demands that mongo be hosted elsewhere such as when using Mongo Atlas or if the demands of an organization require some other external mongo solution, like a shared service. | N/A | No
 | `mongobdb_svc_url_localaaa` | `platform` | String | This variable defines the mongodb connection string to use when connecting to the "LocalAAA" database. It is intended to be used when the architecture demands that mongo be hosted elsewhere such as when using Mongo Atlas or if the demands of an organization require some other external mongo solution, like a shared service. | N/A | No
 
-Either `iap_bin_file` or `iap_tar_file` must be defined in the inventory, but not both.
+Either `iap_bin_file`, `iap_tar_file`, or `iap_archive_download_url` must be defined in the inventory, but not both.
+If `iap_archive_download_url` is defined, either `repository_api_key` or `repository_username` and `repository_password` should be defined.
 
 The following table lists the default variables located in `roles/platform/defaults/main.yml`.
 
@@ -113,7 +118,7 @@ The following table lists the default variables located in `roles/platform_app_a
 
 # Building the Inventory
 
-To install and configure IAP, add a `platform` group and host(s) to your inventory and configure the `iap_release` and either `iap_bin_file` or `iap_tar_file`.  The following inventory shows a basic IAP configuration with a single IAP node.
+To install and configure IAP, add a `platform` group and host(s) to your inventory and configure the `iap_release` and either `iap_bin_file`, `iap_tar_file`, or `iap_archive_download_url`. The `iap_archive_download_url` supports Sonatype Nexus and JFrog Artifactory. It is recommended to use `repository_username` and `repository_password` for Nexus and `repository_api_key` for Artifactory.  The following inventory shows a basic IAP configuration with a single IAP node. 
 
 ## Example Inventory - Single IAP Node
 
