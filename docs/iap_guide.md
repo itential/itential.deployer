@@ -118,7 +118,7 @@ The following table lists the default variables located in `roles/platform_app_a
 
 # Building the Inventory
 
-To install and configure IAP, add a `platform` group and host(s) to your inventory and configure the `iap_release` and either `iap_bin_file`, `iap_tar_file`, or `iap_archive_download_url`. `iap_archive_download_url` supports sonatype nexus and jfrog. It is reccomended to use `repository_username` and `repository_password` for nexus and `repository_api_key` for jfrog.  The following inventory shows a basic IAP configuration with a single IAP node. 
+To install and configure IAP, add a `platform` group and host(s) to your inventory and configure the `iap_release` and either `iap_bin_file`, `iap_tar_file`, or `iap_archive_download_url`. The `iap_archive_download_url` supports Sonatype Nexus and JFrog Artifactory. It is recommended to use `repository_username` and `repository_password` for Nexus and `repository_api_key` for Artifactory.  The following inventory shows a basic IAP configuration with a single IAP node. 
 
 ## Example Inventory - Single IAP Node
 

@@ -140,29 +140,30 @@
     path: "{{ iag_install_dir }}/venv/automation-gateway"
   register: iag_installed
 
-- name: Install Automation Gateway from local
+- name: Copy IAG archive from local
+  ansible.builtin.copy:
+    src: "{{ iag_whl_file }}"
+    dest: "{{ workingdir.path }}/{{ iag_whl_file | basename }}"
+    mode: '0644'
   when:
     - not iag_installed.stat.exists
     - iag_whl_file is defined
     - iag_archive_download_url is not defined
-  block:
-    - name: Copy IAG to host from local
-      ansible.builtin.copy:
-        src: "{{ iag_whl_file }}"
-        dest: "{{ workingdir.path }}/{{ iag_whl_file | basename }}"
-        mode: '0644'
 
-- name: Install Automation Gateway from repository
+- name: Download IAG archive from repository
   when:
     - not iag_installed.stat.exists
     - iag_archive_download_url is defined
     - iag_whl_file is not defined
   block:
-    - name: Download IAG file from repository
+    - name: Download IAG archive from repository
       ansible.builtin.get_url:
         url: "{{ iag_archive_download_url }}"
         dest: "{{ workingdir.path }}/"
         mode: '0644'
+        # Sets the appropriate header based on the repository type:
+        # - For JFrog: Uses the "X-JFrog-Art-Api" header with the API key if "repository_api_key" is defined and "jfrog" is part of the download URL.
+        # - For Nexus: Uses a default header ("Accept: application/octet-stream") since Nexus doesn't support API key authentication.
         headers: >-
           {%- if repository_api_key is defined and iag_archive_download_url is search("jfrog") -%}
             {"X-JFrog-Art-Api": "{{ repository_api_key }}", "Accept": "application/octet-stream"}

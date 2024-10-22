@@ -28,7 +28,7 @@ The variables in this section may be overridden in the inventory in the `gateway
 | Variable | Group | Type | Description | Default Value | Required?
 | :------- | :---- | :--- | :---------- | :------------ | :--------
 | `iag_release` | `gateway` | Fixed-point | Designates which major release version of IAG to install. | N/A | Yes
-| `iag_whl_file` | `gateway` | String | The name of the IAG wheel file to install. | N/A | Yes
+| `iag_whl_file` | `gateway` | String | The name of the IAG wheel file to install. | N/A | Yes*
 | `iag_archive_download_url` | `gateway` | String | The URL for the download of the iag whl file from a repository. | N/A | Yes*
 | `repository_username` | `gateway` | String | The username for authentication of the repository from iag_archive_download_url. | N/A | No
 | `repository_password` | `gateway` | String | The password for authentication of the repository from iag_archive_download_url. | N/A | No

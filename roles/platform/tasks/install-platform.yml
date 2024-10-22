@@ -2,14 +2,14 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
 - name: Download archive files local
-  when: iap_bin_file is defined or iap_tar_file is defined
   ansible.builtin.include_tasks:
-    file: install-platform-from-local.yml
+    file: upload-platform-archive-from-local.yml
+  when: iap_bin_file is defined or iap_tar_file is defined
 
 - name: Download archive files repository
-  when: iap_archive_download_url is defined
   ansible.builtin.include_tasks:
-    file: install-platform-from-repo.yml
+    file: download-platform-archive-from-repo.yml
+  when: iap_archive_download_url is defined
 
 # Extract bin file contents
 # -e Extract tar archive and exit
@@ -20,18 +20,18 @@
 # upgrade with this role for transparency. If the extracted directory already
 # exists then do nothing (creates).
 - name: Extract the bin file contents
-  when: iap_bin_file is defined
   ansible.builtin.command:
     cmd: "{{ iap_install_dir }}/{{ iap_bin_file }} -ey -d {{ iap_install_dir }}"
     chdir: "{{ iap_install_dir }}"
     creates: "{{ iap_install_dir }}/{{ iap_package_name }}"
+  when: iap_bin_file is defined
 
 - name: Extract the tar file contents
-  when: iap_tar_file is defined
   ansible.builtin.unarchive:
     src: "{{ iap_install_dir }}/{{ iap_tar_file }}"
     dest: "{{ iap_install_dir }}"
     remote_src: true
+  when: iap_tar_file is defined
 
 - name: Create the "current" symlink
   ansible.builtin.file:

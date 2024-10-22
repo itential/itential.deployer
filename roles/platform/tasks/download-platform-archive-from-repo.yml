@@ -6,6 +6,9 @@
     url: "{{ iap_archive_download_url }}"
     dest: "{{ iap_install_dir }}/"
     mode: '0755'
+    # Sets the appropriate header based on the repository type:
+    # - For JFrog: Uses the "X-JFrog-Art-Api" header with the API key if "repository_api_key" is defined and "jfrog" is part of the download URL.
+    # - For Nexus: Uses a default header ("Accept: application/octet-stream") since Nexus doesn't support API key authentication.
     headers: >-
       {%- if repository_api_key is defined and iap_archive_download_url is search("jfrog") -%}
         {"X-JFrog-Art-Api": "{{ repository_api_key }}", "Accept": "application/octet-stream"}
