@@ -9,11 +9,6 @@
     - "release-undefined.yml"
   tags: always
 
-- name: Include repository secrets from the ansible vault file
-  ansible.builtin.include_vars:
-    file: "{{ repository_encrypted_file }}"
-  when: repository_encrypted_file is defined
-
 - name: Check for valid IAG release
   ansible.builtin.fail:
     msg: "Deployer does not support installing Gateway version {{ iag_release }} on {{ ansible_distribution }}-{{ ansible_distribution_major_version }}"
