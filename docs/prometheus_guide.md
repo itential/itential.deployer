@@ -13,6 +13,20 @@ In order to run the Prometheus playbooks and roles, the `prometheus.prometheus` 
 ansible-galaxy collection install prometheus.prometheus
 ```
 
+If you see the following error when running the Prometheus-related playbooks:
+
+```
+objc[58735]: +[__NSCFConstantString initialize] may have been in progress in another thread when fork() was called.
+objc[58735]: +[__NSCFConstantString initialize] may have been in progress in another thread when fork() was called. We cannot safely call it or ignore it in the fork() child process. Crashing instead. Set a breakpoint on objc_initializeAfterForkError to debug.
+ERROR! A worker was found in a dead state
+```
+
+Set this environment variable:
+
+```
+export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
+```
+
 # Roles
 
 There are currently two `itential.deployer` and several `prometheus.prometheus` roles responsible for installing all of the necessary components.

@@ -20,7 +20,7 @@
   roles:
     # Pull in the common vars
     - role: itential.deployer.common_vars
-      tags: always
+      tags: redis_exporter_install
 
     - role: prometheus.prometheus.redis_exporter
       vars:
@@ -33,11 +33,20 @@
   roles:
     # Pull in the common vars
     - role: itential.deployer.common_vars
-      tags: always
+      tags: mongodb_exporter_install
 
     - role: prometheus.prometheus.mongodb_exporter
       vars:
         mongodb_exporter_collectors: all
+      tags: mongodb_exporter_install
+  tasks:
+    - name: Add the MongoDB password export to the systemd service file
+      ansible.builtin.lineinfile:
+        path: /etc/systemd/system/mongodb_exporter.service
+        insertafter: '^\[Service\]'
+        line: "export MONGODB_PASSWORD={{ mongo_user_admin_password }}"
+      when: mongo_auth | bool
+      notify: Restart mongodb_exporter
       tags: mongodb_exporter_install
 
 - name: Install node exporter

@@ -1,0 +1,58 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Upload the IAP bin file using rsync
+  ansible.posix.synchronize:
+    src: "{{ iap_bin_file }}"
+    dest: "{{ iap_install_dir }}/{{ iap_bin_file }}"
+    rsync_opts:
+      - "--copy-links"
+  when:
+    - upload_using_rsync
+    - iap_bin_file is defined
+
+- name: Upload the IAP tar file using rsync
+  ansible.posix.synchronize:
+    src: "{{ iap_tar_file }}"
+    dest: "{{ iap_install_dir }}/{{ iap_tar_file }}"
+    rsync_opts:
+      - "--copy-links"
+  when:
+    - upload_using_rsync
+    - iap_tar_file is defined
+
+- name: Upload the IAP bin file using copy
+  ansible.builtin.copy:
+    src: "{{ iap_bin_file }}"
+    dest: "{{ iap_install_dir }}/{{ iap_bin_file }}"
+    mode: "0775"
+    force: false
+  when:
+    - not upload_using_rsync
+    - iap_bin_file is defined
+
+- name: Upload the IAP tar file using copy
+  ansible.builtin.copy:
+    src: "{{ iap_tar_file }}"
+    dest: "{{ iap_install_dir }}/{{ iap_tar_file }}"
+    mode: "0775"
+    force: false
+  when:
+    - not upload_using_rsync
+    - iap_tar_file is defined
+
+- name: Change bin file ownership, group and permissions
+  ansible.builtin.file:
+    path: "{{ iap_install_dir }}/{{ iap_bin_file }}"
+    owner: "{{ iap_user }}"
+    group: "{{ iap_group }}"
+    mode: "0755"
+  when: iap_bin_file is defined
+
+- name: Change tar file ownership, group and permissions
+  ansible.builtin.file:
+    path: "{{ iap_install_dir }}/{{ iap_tar_file }}"
+    owner: "{{ iap_user }}"
+    group: "{{ iap_group }}"
+    mode: "0755"
+  when: iap_tar_file is defined
