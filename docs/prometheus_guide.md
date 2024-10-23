@@ -13,7 +13,7 @@ In order to run the Prometheus playbooks and roles, the `prometheus.prometheus` 
 ansible-galaxy collection install prometheus.prometheus
 ```
 
-If see the following error when running the Prometheus-related playbooks:
+If you see the following error when running the Prometheus-related playbooks:
 
 ```
 objc[58735]: +[__NSCFConstantString initialize] may have been in progress in another thread when fork() was called.
