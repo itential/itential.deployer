@@ -1,6 +1,13 @@
 # Changelog
 
-## v2.4.0 (October 23, 2024)
+## v2.4.1 (October 25, 2024)
+
+* Add README for grafana role  https://github.com/itential/itential.deployer/pull/91
+
+Full Changelog: https://github.com/itential/itential.deployer/compare/v2.4.0...v2.4.1 
+
+
+## v2.4.0 (October 25, 2024)
 
 *  Support installation of Itential artifacts using repository URL  https://github.com/itential/itential.deployer/pull/87
 * Added tuned to operational packages  https://github.com/itential/itential.deployer/pull/84
@@ -9,6 +16,7 @@
 * Restructure prometheus playbooks and roles  https://github.com/itential/itential.deployer/pull/86
 * Separate out Grafana RabbitMQ dashboard definition  https://github.com/itential/itential.deployer/pull/89
 * Support auth in MongoDB exporter  https://github.com/itential/itential.deployer/pull/88
+* Update galaxy version and changelog for release 2.4.0 [skip ci]
 * Use rabbitmq_default_mgt_console_port in prometheus role  https://github.com/itential/itential.deployer/pull/90
 * Wrong mongo version  https://github.com/itential/itential.deployer/pull/82
 
