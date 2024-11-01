@@ -68,6 +68,9 @@
     mode: "0644"
   when: "'rabbitmq' in groups"
 
+- name: Gather service facts
+  ansible.builtin.service_facts:
+
 - name: Open Port on FirewallD Public Zone
   ansible.posix.firewalld:
     port: "{{ grafana_port }}/tcp"
