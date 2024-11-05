@@ -7,7 +7,7 @@ platform_packages:
   - openldap-clients
   - openssl
 
-iap_nodejs_package: "@nodejs:18"
+iap_nodejs_package: "@nodejs:20"
 
 python_version: 3.9
 python_executable: "/usr/bin/python{{ python_version }}"
