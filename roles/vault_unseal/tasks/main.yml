@@ -105,7 +105,7 @@
   changed_when: false
 
 - name: Enable KV Secrets Engine
-  ansible.builtin.command: vault secrets enable -path={{vault_name}} -version=2 kv
+  ansible.builtin.command: vault secrets enable -path={{ vault_name }} -version=2 kv
   environment:
     VAULT_ADDR: "http://{{ inventory_hostname }}:{{ vault_port }}"
     VAULT_TOKEN: "{{ root_key.content | b64decode }}"
