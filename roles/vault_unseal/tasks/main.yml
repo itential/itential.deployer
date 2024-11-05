@@ -96,7 +96,7 @@
   register: root_key
 
 # Check if kv-v2 engine exists
-- name: Check for kv-v2 secrets engine
+- name: Check for secrets engine
   ansible.builtin.command: vault secrets list
   environment:
     VAULT_ADDR: "http://{{ inventory_hostname }}:{{ vault_port }}"
@@ -105,10 +105,10 @@
   changed_when: false
 
 - name: Enable KV Secrets Engine
-  ansible.builtin.command: vault secrets enable kv-v2
+  ansible.builtin.command: vault secrets enable -path={{vault_name}} -version=2 kv
   environment:
     VAULT_ADDR: "http://{{ inventory_hostname }}:{{ vault_port }}"
     VAULT_TOKEN: "{{ root_key.content | b64decode }}"
   register: vault_secrets_enable_result
   changed_when: vault_secrets_enable_result.changed
-  when: '"kv-v2" not in secrets.stdout'
+  when: 'vault_name not in secrets.stdout'
