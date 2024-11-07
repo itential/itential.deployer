@@ -79,8 +79,7 @@
         - name: Include tasks to install Redis using Remi repo (online)
           ansible.builtin.include_tasks:
             file: redis-using-remi-repo.yml
-          when:
-            - redis_install_method == "remi_repo"
+          when: redis_install_method == "remi_repo"
 
         - name: Include tasks to install Redis using source
           ansible.builtin.include_tasks:
@@ -92,7 +91,7 @@
         file: redis-offline.yml
       when: offline_install
 
-- name: Ensure the directories for the config exists
+- name: Ensure the configuration directory exists
   ansible.builtin.file:
     path: "{{ redis_conf_path }}"
     state: directory
@@ -132,6 +131,14 @@
     enabled: true
     state: restarted
     daemon_reload: true
+
+- name: Configure Redis Sentinel
+  tags: configure_redis_sentinel
+  when: redis_replication | bool
+  block:
+    - name: Include tasks to configure Sentinel
+      ansible.builtin.include_tasks:
+        file: configure-sentinel.yml
 
 - name: Determine redis version
   ansible.builtin.shell:

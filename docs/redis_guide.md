@@ -1,20 +1,18 @@
 # Overview
 
-The playbook and roles in this section install and configure Redis for the Itential Automation Platform.  There are currently three Redis-related roles:
+The playbook and roles in this section install and configure Redis for the Itential Automation Platform.  There is one Redis-related role:
 
-* `redis` – Installs Redis and performs a base configuration.
-* `redis_auth` – Configures Redis authentication.
-* `redis_replication` – Configures Redis replication.
+* `redis` – Installs Redis and performs a base configuration.  Optionally configures authentication and replication.
 
 # Roles
 
 ## Redis Role
 
-The `redis` role performs a base install of Redis including any OS packages required. It will compile and install any custom SELinux profiles. It creates the appropriate Linux users, directories, log files, and systemd services. It uses a template to generate a configuration file with some potential features available in other roles commented out. It will start the redis service when complete.
+The `redis` role performs a base install of Redis including any OS packages required. It will compile and install any custom SELinux profiles. It creates the appropriate Linux users, directories, log files, and systemd services. It uses a template to generate a configuration file with some potential features available in other roles commented out. It will start the Redis service when complete.
 
-## Redis Auth Role
+### Authentication
 
-The `redis_auth` role performs tasks to require authentication (username and password) when communicating with the Redis server. It adjusts the Redis config file and adds each of the required users and applies appropriate ACLs (see table). The "default" Redis user is disabled. It modifies the Redis config file to use the appropriate user while doing replication. It adjusts the Sentinel config file to enable the correct Sentinel user to monitor the redis cluster, if required. It disables the default user in both Redis and Redis Sentinel. It will restart the redis service and the Sentinel service (if required) when complete.
+Optionally, the `redis` role performs tasks to require authentication (username and password) when communicating with the Redis server. It adjusts the Redis config file and adds each of the required users and applies appropriate ACLs (see table). The "default" Redis user is disabled. It modifies the Redis config file to use the appropriate user while doing replication. It adjusts the Sentinel config file to enable the correct Sentinel user to monitor the redis cluster, if required. It disables the default user in both Redis and Redis Sentinel.
 
 More info on Redis authorization: https://redis.io/docs/manual/security/
 
@@ -24,12 +22,13 @@ More info on Redis authorization: https://redis.io/docs/manual/security/
 | itential | itential | Has access to all keys, all channels, and all commands except: -asking -cluster -readonly -readwrite -bgrewriteaof -bgsave -failover -flushall -flushdb -psync -replconf -replicaof -save -shutdown -sync
 | repluser | repluser | Has access to the minimum set of commands to perform replication.
 | sentineluser | sentineluser | Has access to the minimum set of commands to perform sentinel monitoring.
+| prometheus | prometheus | Has access to the minimum set of commands to perform Redis and Sentinel monitoring with Prometheus. Required by the optional redis_exporter service.
 
 :::(Warning) (⚠ Warning: ) It is assumed that these default passwords will be changed to meet more rigorous standards. These are intended to be defaults strictly used just for ease of the installation.  It is highly recommended that sensitive data be encrypted using Ansible Vault.
 
-## Redis Replication Role
+### Replication
 
-The `redis_replication` role performs the steps required to create a Redis replica set. It uses a template to generate a Redis Sentinel config file. It modifies the Redis config file to turn off protected-mode. It assumes that the first host defined in the inventory file is the initial primary. It will update the config file for the non-primary Redis servers to replicate from the primary using hostname. It will restart Redis and Redis Sentinel when complete.
+Optionally, the `redis` role performs the steps required to create a Redis replica set. It uses a template to generate a Redis Sentinel config file. It modifies the Redis config file to turn off protected-mode. It assumes that the first host defined in the inventory file is the initial primary. It will update the config file for the non-primary Redis servers to replicate from the primary using hostname. It will start Redis Sentinel when complete.
 
 For more information on Redis replication: https://redis.io/docs/manual/replication/
 
@@ -57,15 +56,15 @@ The following table lists the default variables that are shared between the Redi
 
 | Variable | Group | Type | Description | Default Value
 | :------- | :---- | :--- | :---------- | :------------
-| `redis_auth` | `all` | Boolean | Flag to enable Redis authentication. When set to to `true`, the `redis_auth` role will be executed. | `false`
-| `redis_replication` | `all` | Boolean | Flag to enable Redis replication. When set to `true`, the `redis_replication` role will be executed. | `false`
+| `redis_auth` | `all` | Boolean | Flag to enable Redis authentication. When set to to `true`, Redis authentication will be configured. | `false`
+| `redis_replication` | `all` | Boolean | Flag to enable Redis replication. When set to `true`, Redis replication will be configured and the Redis Sentinel service started. | `false`
 | `redis_tls` | `all` | Boolean | Flag to enable TLS connections. | `false`
 
 ## Redis Role Variables
 
 The variables in this section may be overridden in the inventory in the `redis` group vars.
 
-The following table lists the default variables located in `roles/redis/defaults/main.yml`.
+The following table lists the default variables located in `roles/redis/defaults/main/redis.yml` and `roles/redis/defaults/main/sentinel.yml`.
 
 | Variable | Group | Type | Description | Default Value
 | :------- | :---- | :--- | :---------- | :------------
@@ -82,23 +81,8 @@ The following table lists the default variables located in `roles/redis/defaults
 | `redis_bind_ipv6` | `redis` | Boolean | Flag to enable IPv6. | `true`
 | `redis_bind_addr_source` | `redis` | String | The bind address source. Will default to the Ansible `inventory_hostname` unless explicitly set to `default_ipv4_address`. | `inventory_hostname`
 | `redis_bind_addrs` | `redis` | String | A space-separated list of hostnames/IP addresses on which Redis listeners will be created.  If `redis_bind_ipv6` is set to `true`, `::1` will be added to the addresses.  The `redis_bind_addr_source` will also be added to the addresses. | `127.0.0.1`
-| `iap_redis_packages` | `redis` | List of Strings | The Linux packages to install. | `redis`<br>`jemalloc`
 | `redis_install_method` | `redis` | String | The method to use to install Redis.<br>Set to `remi_repo` to use the Remi repo.<br>Set to `source` to install from source. | `remi_repo`
-| `epel_repo_url` | `redis` | String | The URL of the EPEL repo RPM.<br>Note: this is only used when the `redis_install_method` is set to `remi_repo`. | `https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_distribution_major_version }}.noarch.rpm`
-
-
-## Redis Auth Role Variables
-
-There are no default variables for the Redis Auth role other than the Redis common default variables.
-
-## Redis Replication Role Variables
-
-The variables in this section may be overridden in the inventory in the `redis` group vars.
-
-The following table lists the default variables located in `roles/redis_replication/defaults/main.yml`.
-
-| Variable | Group | Type | Description | Default Value
-| :------- | :---- | :--- | :---------- | :------------
+| `redis_epel_repo_url` | `redis` | String | The URL of the EPEL repo RPM.<br>Note: this is only used when the `redis_install_method` is set to `remi_repo`. | `https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_distribution_major_version }}.noarch.rpm`
 | `redis_sentinel_conf_file` | `redis` | String | The location of the Redis Sentinel configuration file. | `{{ redis_conf_path }}/sentinel.conf`
 | `redis_sentinel_port` | `redis` | Integer | The Redis Sentinel listen port | `26379`
 
@@ -169,28 +153,4 @@ To execute all Redis roles, run the `redis` playbook:
 
 ```
 ansible-playbook itential.deployer.redis -i <inventory>
-```
-
-You can also run select Redis roles by using the following tags:
-
-* `redis_install`
-* `redis_auth`
-* `redis_replication`
-
-To execute only the `redis` role (skipping the `redis_auth` and `redis_replication` roles), run the `itential.deployer.redis` playbook with the `redis_install` tag:
-
-```
-ansible-playbook itential.deployer.redis -i <inventory> --tags redis_install
-```
-
-To execute only the Redis Auth role (skipping the Redis and Redis Replication roles), run the `itential.deployer.redis` playbook with the `redis_auth` tag:
-
-```
-ansible-playbook itential.deployer.redis -i <inventory> --tags redis_auth
-```
-
-To execute only the Redis Replication role (skipping the Redis and Redis Auth roles), run the `itential.deployer.redis` playbook with the `redis_replication` tag:
-
-```
-ansible-playbook itential.deployer.redis -i <inventory> --tags redis_replication
 ```
