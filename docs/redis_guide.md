@@ -1,16 +1,16 @@
 # Overview
 
-The playbook and roles in this section install and configure Redis for the Itential Automation Platform.  There is one Redis-related role:
+The playbook and role in this section install and configure Redis for the Itential Automation Platform.  There is one Redis-related role:
 
 * `redis` – Installs Redis and performs a base configuration.  Optionally configures authentication and replication.
 
-# Roles
+# Redis Role
 
-## Redis Role
+## Base Install
 
 The `redis` role performs a base install of Redis including any OS packages required. It will compile and install any custom SELinux profiles. It creates the appropriate Linux users, directories, log files, and systemd services. It uses a template to generate a configuration file with some potential features available in other roles commented out. It will start the Redis service when complete.
 
-### Authentication
+## Authentication
 
 Optionally, the `redis` role performs tasks to require authentication (username and password) when communicating with the Redis server. It adjusts the Redis config file and adds each of the required users and applies appropriate ACLs (see table). The "default" Redis user is disabled. It modifies the Redis config file to use the appropriate user while doing replication. It adjusts the Sentinel config file to enable the correct Sentinel user to monitor the redis cluster, if required. It disables the default user in both Redis and Redis Sentinel.
 
@@ -26,7 +26,7 @@ More info on Redis authorization: https://redis.io/docs/manual/security/
 
 :::(Warning) (⚠ Warning: ) It is assumed that these default passwords will be changed to meet more rigorous standards. These are intended to be defaults strictly used just for ease of the installation.  It is highly recommended that sensitive data be encrypted using Ansible Vault.
 
-### Replication
+## Replication
 
 Optionally, the `redis` role performs the steps required to create a Redis replica set. It uses a template to generate a Redis Sentinel config file. It modifies the Redis config file to turn off protected-mode. It assumes that the first host defined in the inventory file is the initial primary. It will update the config file for the non-primary Redis servers to replicate from the primary using hostname. It will start Redis Sentinel when complete.
 
@@ -149,7 +149,7 @@ all:
 
 # Running the Playbook
 
-To execute all Redis roles, run the `redis` playbook:
+To execute the Redis role, run the `redis` playbook:
 
 ```
 ansible-playbook itential.deployer.redis -i <inventory>
