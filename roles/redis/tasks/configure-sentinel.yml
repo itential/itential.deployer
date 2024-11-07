@@ -1,62 +1,41 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Create Redis Sentinel systemd file
-  ansible.builtin.template:
-    src: redis-sentinel.service.j2
-    dest: /usr/lib/systemd/system/redis-sentinel.service
-    owner: root
-    group: root
-    mode: "0644"
+- name: Configure Sentinel
+  notify: Enable and Start Redis Sentinel
+  block:
+    - name: Create Redis Sentinel systemd file
+      ansible.builtin.template:
+        src: redis-sentinel.service.j2
+        dest: /usr/lib/systemd/system/redis-sentinel.service
+        owner: root
+        group: root
+        mode: "0644"
 
-- name: Use template to generate sentinel.conf
-  ansible.builtin.template:
-    src: sentinel.conf.j2
-    dest: "{{ redis_sentinel_conf_file }}"
-    owner: "{{ redis_owner }}"
-    group: "{{ redis_group }}"
-    mode: "0640"
-    backup: true
-  when:
-    - groups['redis'] is defined
-    - inventory_hostname in groups['redis']
-  vars:
-    master_name: "{{ hostvars[groups['redis'][0]].inventory_hostname }}"
+    - name: Use template to generate sentinel.conf
+      ansible.builtin.template:
+        src: sentinel.conf.j2
+        dest: "{{ redis_sentinel_conf_file }}"
+        owner: "{{ redis_owner }}"
+        group: "{{ redis_group }}"
+        mode: "0640"
+        backup: true
+      when:
+        - groups['redis'] is defined
+        - inventory_hostname in groups['redis']
+      vars:
+        master_name: "{{ hostvars[groups['redis'][0]].inventory_hostname }}"
 
-- name: Use template to generate sentinel.conf for secondary DR
-  ansible.builtin.template:
-    src: sentinel.conf.j2
-    dest: "{{ redis_sentinel_conf_file }}"
-    owner: "{{ redis_owner }}"
-    group: "{{ redis_group }}"
-    mode: "0640"
-    backup: true
-  when:
-    - groups['redis_secondary'] is defined
-    - inventory_hostname in groups['redis_secondary']
-  vars:
-    master_name: "{{ hostvars[groups['redis_secondary'][0]].inventory_hostname }}"
-
-# Check if firewalld is running, if it is then open the appropriate ports
-- name: Gather service facts
-  ansible.builtin.service_facts:
-
-- name: Open Port on FirewallD Public Zone
-  ansible.posix.firewalld:
-    port: "{{ redis_sentinel_port }}/tcp"
-    permanent: true
-    state: enabled
-    zone: public
-    immediate: true
-  when:
-    - ansible_facts.services["firewalld.service"] is defined
-    - ansible_facts.services["firewalld.service"].state == "running"
-    - ansible_facts.services["firewalld.service"].status == "enabled"
-
-- name: Enable Redis Sentinel
-  throttle: 1
-  ansible.builtin.systemd:
-    name: redis-sentinel
-    enabled: true
-    state: restarted
-    daemon_reload: true
+    - name: Use template to generate sentinel.conf for secondary DR
+      ansible.builtin.template:
+        src: sentinel.conf.j2
+        dest: "{{ redis_sentinel_conf_file }}"
+        owner: "{{ redis_owner }}"
+        group: "{{ redis_group }}"
+        mode: "0640"
+        backup: true
+      when:
+        - groups['redis_secondary'] is defined
+        - inventory_hostname in groups['redis_secondary']
+      vars:
+        master_name: "{{ hostvars[groups['redis_secondary'][0]].inventory_hostname }}"
