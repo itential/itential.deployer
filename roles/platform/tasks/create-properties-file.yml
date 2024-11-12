@@ -12,13 +12,11 @@
   vars:
     profile_name: Local_AAA
   when:
-    - (groups["redis_secondary"] is not defined and groups["rabbitmq_secondary"] is not defined) or
-      (groups["redis_secondary"] | length == 0 and groups["rabbitmq_secondary"] | length == 0)
+    - groups["platform_secondary"] is not defined or groups["platform_secondary"] | length < 1
 
 - name: Create the Itential properties.json files for advanced prod builds
   when:
-    - groups["redis_secondary"] is defined and groups["rabbitmq_secondary"] is defined
-    - groups["redis_secondary"] | length > 0 and groups["rabbitmq_secondary"] | length > 0
+    - groups["platform_secondary"] is defined and groups["platform_secondary"] | length > 0
   block:
     - name: Create the default Itential properties.json file for the primary
       ansible.builtin.template:
