@@ -12,7 +12,7 @@
     - name: Create Itential scrape config file
       ansible.builtin.template:
         src: scrape_configs.j2
-        dest: "{{ prometheus_config_dir }}/scrapes/itential.yml"
+        dest: "{{ prometheus_config_dir }}/scrape_configs/itential.yml"
         owner: "{{ prometheus_system_user }}"
         group: "{{ prometheus_system_group }}"
         mode: "0644"

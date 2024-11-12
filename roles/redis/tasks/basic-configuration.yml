@@ -1,0 +1,79 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+# Kernel Adjust
+# Memory overcommit must be enabled! Without it, a background save or replication may fail under low memory condition.
+# Being disabled, it can can also cause failures without low memory condition, see https://github.com/jemalloc/jemalloc/issues/1328
+- name: Adjust Memory Overcommit
+  ansible.posix.sysctl:
+    name: vm.overcommit_memory
+    value: 1
+
+- name: Install custom SELinux profiles
+  ansible.builtin.include_role:
+    name: selinux
+  tags: configure_selinux
+
+# Check if firewalld is running, if it is then open the appropriate ports
+- name: Gather service facts
+  ansible.builtin.service_facts:
+
+- name: Open Ports on FirewallD Public Zone
+  ansible.posix.firewalld:
+    port: "{{ item }}"
+    permanent: true
+    state: enabled
+    zone: public
+    immediate: true
+  loop:
+    - "{{ redis_port }}/tcp"
+    - "{{ redis_replication | bool | ternary(rabbitmq_mgt_console_port ~ '/tcp', omit) }}"
+  when:
+    - ansible_facts.services["firewalld.service"] is defined
+    - ansible_facts.services["firewalld.service"].state == "running"
+    - ansible_facts.services["firewalld.service"].status == "enabled"
+
+- name: Create Redis group
+  ansible.builtin.group:
+    name: "{{ redis_group }}"
+
+- name: Create Redis user
+  ansible.builtin.user:
+    name: "{{ redis_owner }}"
+    group: "{{ redis_group }}"
+    state: present
+
+- name: Create Redis data directory
+  ansible.builtin.file:
+    state: directory
+    path: "{{ redis_data_dir }}"
+    owner: "{{ redis_owner }}"
+    group: "{{ redis_group }}"
+    mode: "0755"
+  when: redis_data_dir != "/var/lib/redis" or redis_install_method == "source"
+
+- name: Create Redis log directory
+  ansible.builtin.file:
+    state: directory
+    path: "{{ redis_log_dir }}"
+    owner: "{{ redis_owner }}"
+    group: "{{ redis_group }}"
+    mode: "0755"
+  when: redis_log_dir != "/var/log/redis" or redis_install_method == "source"
+
+- name: Create Redis pid directory
+  ansible.builtin.file:
+    state: directory
+    path: "{{ redis_pid_dir }}"
+    owner: "{{ redis_owner }}"
+    group: "{{ redis_group }}"
+    mode: "0755"
+  when: redis_pid_dir != "/var/run" or redis_install_method == "source"
+
+- name: Create Redis configuration directory
+  ansible.builtin.file:
+    path: "{{ redis_conf_path }}"
+    state: directory
+    owner: "{{ redis_owner }}"
+    group: "{{ redis_group }}"
+    mode: "0760"

@@ -49,14 +49,27 @@
     owner: "{{ grafana_user }}"
     mode: "0644"
 
-- name: Upload grafana dashboard definitions
+- name: Upload grafana dashboard default definitions
   ansible.builtin.copy:
-    src: definitions/
+    src: definitions/default/
     dest: "{{ grafana_install_dir }}/provisioning/dashboards/definitions/"
     directory_mode: "0755"
     group: "{{ grafana_group }}"
     owner: "{{ grafana_user }}"
     mode: "0644"
+
+- name: Upload grafana dashboard RabbitMQ definitions
+  ansible.builtin.copy:
+    src: definitions/rabbitmq/
+    dest: "{{ grafana_install_dir }}/provisioning/dashboards/definitions/"
+    directory_mode: "0755"
+    group: "{{ grafana_group }}"
+    owner: "{{ grafana_user }}"
+    mode: "0644"
+  when: "'rabbitmq' in groups"
+
+- name: Gather service facts
+  ansible.builtin.service_facts:
 
 - name: Open Port on FirewallD Public Zone
   ansible.posix.firewalld:

@@ -106,8 +106,7 @@
 - name: Create advanced profile documents for non-default production environments
   when:
     - inventory_hostname == groups.platform[0]
-    - groups["redis_secondary"] | default([]) | length > 0
-    - groups["rabbitmq_secondary"] | default([]) | length > 0
+    - groups["platform_secondary"] | default([]) | length > 0
   block:
     # Determine if the Local_AAA profile is already in the database
     - name: Determine if the Primary_Local_AAA profile document already exists

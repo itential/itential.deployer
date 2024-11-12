@@ -51,6 +51,7 @@ The following table lists the default variables that are shared between the Vaul
 | `vault_group` | `all` | String | The Vault Linux group. | `vault`
 | `vault_port` | `all` | Integer | The Vault listen port. | `8200`
 | `vault_root_key_dir` | `all` | String | The Vault root key directory. | `/opt/vault/keys/root_key`
+| `vault_name` | `all` | String | The name of the secret engine used to configure vault and IAP | `itential`
 
 ## Vault Role Variables
 

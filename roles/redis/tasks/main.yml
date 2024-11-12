@@ -7,147 +7,88 @@
   with_first_found:
     - "release-{{ iap_release }}.yml"
     - "release-undefined.yml"
+  tags: always
 
 - name: Check for valid Redis release
   ansible.builtin.fail:
     msg: "Deployer does not support installing Redis on IAP version {{ iap_release }}"
   when: invalid_redis_release is defined
+  tags: always
 
 - name: Install base OS packages
   ansible.builtin.include_role:
     name: os
   tags: install_base_os_packages
 
-# Kernel Adjust
-# Memory overcommit must be enabled! Without it, a background save or replication may fail under low memory condition.
-# Being disabled, it can can also cause failures without low memory condition, see https://github.com/jemalloc/jemalloc/issues/1328
-- name: Adjust Memory Overcommit
-  ansible.posix.sysctl:
-    name: vm.overcommit_memory
-    value: 1
-
-- name: Configure SELinux
-  tags: configure_selinux
+- name: Install and configure Redis
+  notify: Enable and Start Redis
+  tags: install_configure_redis
   block:
-    - name: Install custom SELinux profiles
-      ansible.builtin.include_role:
-        name: selinux
-
-- name: Create Redis group
-  ansible.builtin.group:
-    name: "{{ redis_group }}"
-
-- name: Create Redis user
-  ansible.builtin.user:
-    name: "{{ redis_owner }}"
-    group: "{{ redis_group }}"
-    state: present
-
-- name: Create Redis data directory
-  ansible.builtin.file:
-    state: directory
-    path: "{{ redis_data_dir }}"
-    owner: "{{ redis_owner }}"
-    group: "{{ redis_group }}"
-    mode: "0755"
-  when: redis_data_dir != "/var/lib/redis" or redis_install_method == "source"
-
-- name: Create Redis log directory
-  ansible.builtin.file:
-    state: directory
-    path: "{{ redis_log_dir }}"
-    owner: "{{ redis_owner }}"
-    group: "{{ redis_group }}"
-    mode: "0755"
-  when: redis_log_dir != "/var/log/redis" or redis_install_method == "source"
-
-- name: Create Redis pid directory
-  ansible.builtin.file:
-    state: directory
-    path: "{{ redis_pid_dir }}"
-    owner: "{{ redis_owner }}"
-    group: "{{ redis_group }}"
-    mode: "0755"
-  when: redis_pid_dir != "/var/run" or redis_install_method == "source"
-
-- name: Install Redis
-  tags: install_redis
-  block:
-    - name: Include tasks to install Redis (online)
-      when: not offline_install
+    - name: Basic configuration
+      tags: basic_configuration
       block:
-        - name: Include tasks to install Redis using Remi repo (online)
+        - name: Include tasks to perform basic configuration
           ansible.builtin.include_tasks:
-            file: redis-using-remi-repo.yml
-          when:
-            - redis_install_method == "remi_repo"
+            file: basic-configuration.yml
 
-        - name: Include tasks to install Redis using source
+    - name: Install Redis
+      tags: install_redis
+      block:
+        - name: Include tasks to install Redis (online)
+          when: not offline_install
+          block:
+            - name: Include tasks to install Redis using Remi repo (online)
+              ansible.builtin.include_tasks:
+                file: redis-using-remi-repo.yml
+              when: redis_install_method == "remi_repo"
+
+            - name: Include tasks to install Redis using source
+              ansible.builtin.include_tasks:
+                file: redis-using-source.yml
+              when: redis_install_method == "source"
+
+        - name: Include tasks to install Redis (offline)
           ansible.builtin.include_tasks:
-            file: redis-using-source.yml
-          when: redis_install_method == "source"
+            file: redis-offline.yml
+          when: offline_install
 
-    - name: Include tasks to install Redis (offline)
+    - name: Use template to generate redis.conf
+      ansible.builtin.template:
+        src: redis.conf.j2
+        dest: "{{ redis_conf_file }}"
+        owner: "{{ redis_owner }}"
+        group: "{{ redis_group }}"
+        mode: "0640"
+        backup: true
+
+- name: Configure Redis Sentinel
+  tags: configure_redis_sentinel
+  when: redis_replication | bool
+  block:
+    - name: Include tasks to configure Sentinel
       ansible.builtin.include_tasks:
-        file: redis-offline.yml
-      when: offline_install
+        file: configure-sentinel.yml
 
-- name: Ensure the directories for the config exists
-  ansible.builtin.file:
-    path: "{{ redis_conf_path }}"
-    state: directory
-    owner: "{{ redis_owner }}"
-    group: "{{ redis_group }}"
-    mode: "0760"
+- name: Update Itential release file
+  tags: update_release_file
+  block:
+    - name: Determine redis version
+      ansible.builtin.shell:
+        cmd: 'set -o pipefail && redis-server --version | cut -d" " -f3 | cut -d"=" -f2'
+      register: result
+      check_mode: false
+      changed_when: false
+      failed_when: result.rc != 0
+      environment:
+        PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
 
-- name: Use template to generate redis.conf
-  ansible.builtin.template:
-    src: redis.conf.j2
-    dest: "{{ redis_conf_file }}"
-    owner: "{{ redis_owner }}"
-    group: "{{ redis_group }}"
-    mode: "0640"
-    backup: true
+    - name: Set redis version variable
+      ansible.builtin.set_fact:
+        redis_server_version: "{{ result.stdout }}"
 
-# Check if firewalld is running, if it is then open the appropriate ports
-- name: Gather service facts
-  ansible.builtin.service_facts:
-
-- name: Open Port on FirewallD Public Zone
-  ansible.posix.firewalld:
-    port: "{{ redis_port }}/tcp"
-    permanent: true
-    state: enabled
-    zone: public
-    immediate: true
-  when:
-    - ansible_facts.services["firewalld.service"] is defined
-    - ansible_facts.services["firewalld.service"].state == "running"
-    - ansible_facts.services["firewalld.service"].status == "enabled"
-
-- name: Enable redis
-  throttle: 1
-  ansible.builtin.systemd:
-    name: redis
-    enabled: true
-    state: restarted
-    daemon_reload: true
-
-- name: Determine redis version
-  ansible.builtin.shell:
-    cmd: set -o pipefail && redis-server --version | cut -d" " -f3 | cut -d"=" -f2
-  register: result
-  check_mode: false
-  changed_when: false
-  failed_when: result.rc != 0 and result.rc != 127
-
-- name: Set redis version variable
-  ansible.builtin.set_fact:
-    redis_server_version: "{{ result.stdout }}"
-
-- name: Write redis release information
-  ansible.builtin.lineinfile:
-    path: "{{ itential_release_file }}"
-    line: "REDIS={{ redis_server_version }}"
-    create: true
-    mode: "0644"
+    - name: Write redis release information
+      ansible.builtin.lineinfile:
+        path: "{{ itential_release_file }}"
+        line: "REDIS={{ redis_server_version }}"
+        create: true
+        mode: "0644"
