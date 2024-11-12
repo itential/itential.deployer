@@ -12,3 +12,6 @@ vault_root_key_dir: /opt/vault/keys/root_key
 
 # Flag to manage how secret data is written to Vault with IAP version 2021.2 and later.
 vault_read_only: false
+
+# default vault name
+vault_name: itential
