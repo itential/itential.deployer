@@ -88,11 +88,3 @@
     owner: root
     group: root
     mode: "0644"
-
-- name: Create Redis Sentinel systemd file
-  ansible.builtin.template:
-    src: redis-sentinel.service.j2
-    dest: /usr/lib/systemd/system/redis-sentinel.service
-    owner: root
-    group: root
-    mode: "0644"
