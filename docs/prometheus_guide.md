@@ -89,7 +89,7 @@ All exporter variables are handled by the exporter roles. Refer to the documenta
 
 ### MongoDB Exporter Recommendations
 
-We recommend setting the `mongodb_exporter_global_conn_pool` variable to `true` in the `mongodb` group variables section when MongoDB replication is enabled.
+We recommend setting the `mongodb_exporter_global_conn_pool` variable to `true` in the `mongodb` group variables section when MongoDB replication is enabled.  Otherwise the exporter may consume all available file descriptors and cause the mongod process to crash.
 
 ```
 all:
