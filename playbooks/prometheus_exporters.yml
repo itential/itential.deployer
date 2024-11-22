@@ -46,7 +46,7 @@
 
     - role: prometheus.prometheus.redis_exporter
       vars:
-        redis_exporter_user: admin
+        redis_exporter_user: prometheus
       tags: redis_exporter_install
   tasks:
     - name: Make custom configuration changes
