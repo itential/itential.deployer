@@ -128,11 +128,18 @@ Itential recommends using a dedicated node running the requirements listed below
 
 ### Required Python, Ansible, and Ansible modules
 
-- **Itential Galaxy Access**: The Itential Deployer is hosted on the Itential Galaxy repository. An account is required to access Itential Galaxy. If you do not have an account, contact your Itential Professional Services representative.
-- **Python Version**: The control node must be running Python 3.9 or later.
-- **Required Python Modules**: The following Python modules are required on the **Ansible Control Node** for the deployer to run.
+The **Ansible Control Node** must have the following installed:
+
+- **Python**
+  - python >= 3.9
+
+- **Python Modules**
   - jmespath
-- **Ansible Version**: The control node must be running Ansible version 2.11 or later. To see which Ansible version is currently installed, execute the `ansible --version` command as shown below.
+
+- **Ansible**
+  - ansible-core >= 2.11, < 2.17
+
+To see which Ansible version is currently installed, execute the `ansible --version` command as shown below.
 
   _Example: Confirming Ansible Version_
 
@@ -148,7 +155,7 @@ Itential recommends using a dedicated node running the requirements listed below
     jinja version = 3.0.3
     libyaml = True
   ```
-- **Required Ansible Modules**: The following ansible modules are required on the control node for the deployer to run.
+- **Ansible Modules**: The following ansible modules are required on the control node for the deployer to run.
   - 'ansible.posix': '>=0.0.1'
   - 'community.mongodb': '>=0.0.1'
 
@@ -325,9 +332,9 @@ The Itential Deployer can be installed via the `ansible-galaxy` utility.
 
 On your control node, execute the following command to install the Itential Deployer:
 
-    ```bash
-    ansible-galaxy collection install itential.deployer
-    ```
+```bash
+ansible-galaxy collection install itential.deployer
+```
 
 When a new version of the Deployer is available, you can upgrade using the following command:
 

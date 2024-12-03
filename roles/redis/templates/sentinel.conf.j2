@@ -35,8 +35,6 @@ pidfile {{ redis_pid_dir }}/redis-sentinel.pid
 # output for logging but daemonize, logs will be sent to /dev/null
 logfile {{ redis_log_dir }}/sentinel.log
 
-sentinel announce-ip {{ inventory_hostname }}
-sentinel announce-port {{ redis_sentinel_port }}
 #
 # The above two configuration directives are useful in environments where,
 # because of NAT, Sentinel is reachable from outside via a non-local address.
@@ -56,6 +54,8 @@ sentinel announce-port {{ redis_sentinel_port }}
 # Example:
 #
 # sentinel announce-ip 1.2.3.4
+sentinel announce-ip {{ inventory_hostname }}
+sentinel announce-port {{ redis_sentinel_port }}
 
 # dir <working-directory>
 # Every long running process should have a well-defined working directory.
@@ -83,9 +83,7 @@ dir /tmp
 # The valid charset is A-z 0-9 and the three characters ".-_".
 sentinel monitor mymaster {{ master_name }} {{ redis_port }} 2
 
-{% if redis_auth %}
-sentinel auth-pass mymaster {{ redis_user_sentineluser_password }}
-{% endif%}
+
 # sentinel auth-pass <master-name> <password>
 #
 # Set the password to use to authenticate with the master and replicas.
@@ -104,10 +102,10 @@ sentinel auth-pass mymaster {{ redis_user_sentineluser_password }}
 # Example:
 #
 # sentinel auth-pass mymaster MySUPER--secret-0123passw0rd
-
 {% if redis_auth %}
-sentinel auth-user mymaster sentineluser
-{% endif %}#
+sentinel auth-pass mymaster {{ redis_user_sentineluser_password }}
+{% endif %}
+
 # sentinel auth-user <master-name> <username>
 #
 # This is useful in order to authenticate to instances having ACL capabilities,
@@ -119,13 +117,13 @@ sentinel auth-user mymaster sentineluser
 #
 #     user sentinel-user >somepassword +client +subscribe +publish \
 #                        +ping +info +multi +slaveof +config +client +exec on
-###########################
-# Itential user definitions
-# uncomment if using auth with Itential redis
-###########################
-# user default off
-# user admin on >{{ redis_user_sentineladmin_password }} ~* &* +@all
-# user sentineluser on >{{ redis_user_sentineluser_password }} &* -@all +auth +client|getname +client|id +client|setname +command +hello +ping +role +sentinel|is-master-down-by-addr +sentinel|get-master-addr-by-name +sentinel|master +sentinel|myid +sentinel|replicas +sentinel|sentinels
+{% if redis_auth %}
+sentinel auth-user mymaster sentineluser
+
+user default off
+user admin on >{{ redis_user_sentineladmin_password }} ~* &* +@all
+user sentineluser on >{{ redis_user_sentineluser_password }} &* -@all +auth +client|getname +client|id +client|setname +command +hello +ping +role +sentinel|is-master-down-by-addr +sentinel|get-master-addr-by-name +sentinel|master +sentinel|myid +sentinel|replicas +sentinel|sentinels
+{% endif %}
 
 # sentinel down-after-milliseconds <master-name> <milliseconds>
 #
@@ -193,18 +191,16 @@ acllog-max-len 128
 #
 # The requirepass is not compatable with aclfile option and the ACL LOAD
 # command, these will cause requirepass to be ignored.
-
-{% if redis_auth %}
-sentinel sentinel-user sentineluser
-{% endif %}
+#
 # sentinel sentinel-user <username>
 #
 # You can configure Sentinel to authenticate with other Sentinels with specific
 # user name.
-
 {% if redis_auth %}
+sentinel sentinel-user sentineluser
 sentinel sentinel-pass {{ redis_user_sentineluser_password }}
 {% endif %}
+
 # sentinel sentinel-pass <password>
 #
 # The password for Sentinel to authenticate with other Sentinels. If sentinel-user
