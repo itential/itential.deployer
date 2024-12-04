@@ -289,3 +289,13 @@
   ansible.builtin.file:
     path: "{{ workingdir.path }}"
     state: absent
+
+- name: Uninstall gcc packages
+  ansible.builtin.dnf:
+    name: "{{ item }}"
+    allowerasing: true
+    autoremove: true
+    state: absent
+  with_items:
+     - gcc
+     - gcc-c++

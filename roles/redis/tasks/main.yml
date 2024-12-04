@@ -92,3 +92,13 @@
         line: "REDIS={{ redis_server_version }}"
         create: true
         mode: "0644"
+
+- name: Uninstall gcc packages
+  ansible.builtin.dnf:
+    name: "{{ item }}"
+    allowerasing: true
+    autoremove: true
+    state: absent
+  with_items:
+     - gcc
+     - gcc-c++
