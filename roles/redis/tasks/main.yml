@@ -100,5 +100,5 @@
     autoremove: true
     state: absent
   with_items:
-     - gcc
-     - gcc-c++
+    - gcc
+    - gcc-c++
