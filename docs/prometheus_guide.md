@@ -87,6 +87,25 @@ All Prometheus variables are handled by the `prometheus.prometheus.prometheus` r
 
 All exporter variables are handled by the exporter roles. Refer to the documentation links in the [Exporter Roles](#exporter-roles) section.
 
+### MongoDB Exporter Recommendations
+
+We recommend setting the `mongodb_exporter_global_conn_pool` variable to `true` in the `mongodb` group variables section when MongoDB replication is enabled.  Otherwise the exporter may consume all available file descriptors and cause the mongod process to crash.
+
+```
+all:
+    vars:
+        mongodb_replication: true
+
+    children:
+        mongodb:
+            hosts:
+                <MONGODB-HOST1>:
+                <MONGODB-HOST2>:
+                <MONGODB-HOST3>:
+        vars:
+            mongodb_exporter_global_conn_pool: true
+```
+
 ## Grafana Role Variables
 
 | Variable | Group | Type | Description | Default Value | Required?
