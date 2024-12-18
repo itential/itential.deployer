@@ -7,7 +7,7 @@
 # redis_install_method is set to 'remi_repo'
 redis_packages:
   "8":
-    - "@redis:remi-7.0"
+    - "@redis:remi-5.0"
   "9":
     - "@redis:remi-7.0"
 
@@ -18,7 +18,7 @@ redis_repo_url:
 # The redis_source_url and redis_build_packages are used when the
 # redis_install_method is set to 'source'
 redis_source_url:
-  "8": "https://github.com/redis/redis/archive/7.0.15.tar.gz"
+  "8": "https://github.com/redis/redis/archive/5.0.3.tar.gz"
   "9": "https://github.com/redis/redis/archive/7.0.15.tar.gz"
 
 redis_build_packages:
