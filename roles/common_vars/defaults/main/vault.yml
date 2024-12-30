@@ -1,7 +1,17 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
 # The default group that runs vault
 vault_group: vault
 
 # The default port of the vault server
 vault_port: 8200
+
+# Default default to store the root key
+vault_root_key_dir: /opt/vault/keys/root_key
+
+# Flag to manage how secret data is written to Vault with IAP version 2021.2 and later.
+vault_read_only: false
+
+# default vault name
+vault_name: itential

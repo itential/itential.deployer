@@ -22,8 +22,8 @@
   ansible.builtin.include_vars:
     file: "{{ item }}"
   with_first_found:
-    - "release-{{ ansible_distribution_major_version }}.yaml"
-    - "release-undefined.yaml"
+    - "release-{{ ansible_distribution_major_version }}.yml"
+    - "release-undefined.yml"
 
 - name: Check supported OS
   ansible.builtin.fail:

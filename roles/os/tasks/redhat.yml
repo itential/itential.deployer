@@ -1,0 +1,26 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Include release vars
+  ansible.builtin.include_vars:
+    file: "{{ item }}"
+  with_first_found:
+    - "release-{{ ansible_distribution_major_version }}.yml"
+    - "release-undefined.yml"
+
+- name: Check supported OS
+  ansible.builtin.fail:
+    msg: "Deployer does not support installing on OS version {{ ansible_distribution_major_version }}!"
+  when: invalid_os_release is defined
+
+- name: Include OS specific tasks (online)
+  ansible.builtin.include_tasks: "{{ ansible_os_family.lower() }}-online.yml"
+  when:
+    - not release_file.stat.exists
+    - not offline_install
+
+- name: Include OS specific tasks (offline)
+  ansible.builtin.include_tasks: "{{ ansible_os_family.lower() }}-offline.yml"
+  when:
+    - not release_file.stat.exists
+    - offline_install

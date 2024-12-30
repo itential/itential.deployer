@@ -1,0 +1,19 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Install Prometheus
+  ansible.builtin.import_role:
+    name: prometheus.prometheus.prometheus
+
+- name: Create Itential scrape config file
+  notify: Restart Prometheus
+  tags: itential_scrape_config_install
+  block:
+    - name: Create Itential scrape config file
+      ansible.builtin.template:
+        src: scrape_configs.j2
+        dest: "{{ prometheus_config_dir }}/scrape_configs/itential.yml"
+        owner: "{{ prometheus_system_user }}"
+        group: "{{ prometheus_system_group }}"
+        mode: "0644"
+        lstrip_blocks: true

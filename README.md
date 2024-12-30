@@ -15,7 +15,7 @@
     4. [Certificates](#certificates)
     5. [Passwords](#passwords)
     6. [Obtaining the Itential Binaries](#obtaining-the-itential-binaries)
-4. [Installing and Upgrading the Depoloyer](#installing-and-upgrading-the-deployer)
+4. [Installing and Upgrading the Deployer](#installing-and-upgrading-the-deployer)
     1. [Online Installation](#online-installation)
     2. [Offline Installation](#offline-installation)
 5. [Running the Deployer](#running-the-deployer)
@@ -128,11 +128,18 @@ Itential recommends using a dedicated node running the requirements listed below
 
 ### Required Python, Ansible, and Ansible modules
 
-- **Itential Galaxy Access**: The Itential Deployer is hosted on the Itential Galaxy repository. An account is required to access Itential Galaxy. If you do not have an account, contact your Itential Professional Services representative.
-- **Python Version**: The control node must be running Python 3.9 or later.
-- **Required Python Modules**: The following Python modules are required on the **Ansible Control Node** for the deployer to run.
+The **Ansible Control Node** must have the following installed:
+
+- **Python**
+  - python >= 3.9
+
+- **Python Modules**
   - jmespath
-- **Ansible Version**: The control node must be running Ansible version 2.11 or later. To see which Ansible version is currently installed, execute the `ansible --version` command as shown below.
+
+- **Ansible**
+  - ansible-core >= 2.11, < 2.17
+
+To see which Ansible version is currently installed, execute the `ansible --version` command as shown below.
 
   _Example: Confirming Ansible Version_
 
@@ -148,7 +155,7 @@ Itential recommends using a dedicated node running the requirements listed below
     jinja version = 3.0.3
     libyaml = True
   ```
-- **Required Ansible Modules**: The following ansible modules are required on the control node for the deployer to run.
+- **Ansible Modules**: The following ansible modules are required on the control node for the deployer to run.
   - 'ansible.posix': '>=0.0.1'
   - 'community.mongodb': '>=0.0.1'
 
@@ -311,35 +318,23 @@ The deployer will create several user accounts in the dependent systems. It uses
 
 ### Obtaining the Itential Binaries
 
+#### SaaS Customers
+The latest IAG whl file is available to download from hub.itential.io.
+
+#### On prem customers
 The IAP and IAG binary files are hosted on the Itential Nexus repository. An account is required to access Itential Nexus. If you do not have an account, contact your Itential Sales representative.
 
 ## Installing and Upgrading the Deployer
 
 ### Online Installation
 
-The Itential Deployer can be installed via the `ansible-galaxy` utility. To do this, [configure Ansible][Ansible Configuration File] to use the Itential and Ansible Galaxy servers when installing collections. On your control node:
+The Itential Deployer can be installed via the `ansible-galaxy` utility.
 
-1. Create a blank file named `ansible.cfg` in your working directory. This will be your new Ansible configuration file.
-2. Open `ansible.cfg` in a text editor and add the following. Be sure to supply the proper credentials where relevant.
+On your control node, execute the following command to install the Itential Deployer:
 
-    ```ini
-    [galaxy]
-    server_list = itential_galaxy, release_galaxy
-
-    [galaxy_server.itential_galaxy]
-    url=https://registry.aws.itential.com/repository/ansible-galaxy/
-    username=<USERNAME>
-    password=<PASSWORD>
-
-    [galaxy_server.release_galaxy]
-    url=https://galaxy.ansible.com/
-    ```
-
-3. Execute the following command to install the Itential Deployer:
-
-    ```bash
-    ansible-galaxy collection install itential.deployer
-    ```
+```bash
+ansible-galaxy collection install itential.deployer
+```
 
 When a new version of the Deployer is available, you can upgrade using the following command:
 
@@ -356,10 +351,10 @@ Some of the following collections may already be installed on your control node.
 
 1. Download the following collections from the provided links:
 
-    - [Itential Deployer]
-    - [Community General]
-    - [Community MongoDB]
-    - [Ansible POSIX]
+    - [Itential Deployer](https://galaxy.ansible.com/ui/repo/published/itential/deployer/)
+    - [Community General](https://galaxy.ansible.com/ui/repo/published/community/general/)
+    - [Community MongoDB](https://galaxy.ansible.com/ui/repo/published/community/mongodb/)
+    - [Ansible POSIX](https://galaxy.ansible.com/ui/repo/published/ansible/posix/)
 
 2. Copy the downloaded collections to your control node.
 3. Install the collections using the following command:
@@ -414,23 +409,41 @@ itential.deployer 1.0.0
 
 The Deployer directory will be referred to as the `DEPLOYER-DIR` in this guide.
 
-### Create the Files and Inventories Directories
+### Create the Inventories Directory
 
-The files and inventories directories should be sub-directories of the working directory.  The files directory will contain the Itential binaries and artifacts.  The inventories directory will contain the hosts files.
+The `inventories` directory should be a sub-directory of the working directory. It will contain the hosts files.
 
-```base
-% cd <WORKING-DIR>
-% mkdir files inventories
+```bash
+cd <WORKING-DIR>
+mkdir inventories
 ```
 
-### Download Installation Artifacts
+### Determine Installation Artifacts Method
+
+Choose one of the following installation methods based on your requirements:
+
+1. **Manual Upload**: Manually download the required files onto the control node in a `files` directory. The deployer will move these artifact files to the target nodes.
+2. **Repository Download**: Provide a repository download URL with either a username/password or an API key. The deployer will make an API request to download the files directly onto the target nodes.
+
+### Manual Upload
+
+#### Create the Files Directory
+
+The `files` directory should be a sub-directory of the working directory. It will contain the Itential binaries and artifacts.
+
+```bash
+cd <WORKING-DIR>
+mkdir files
+```
+
+#### Download Installation Artifacts
 
 Download the IAP binary along with any desired IAP adapters (and, if applicable, the IAG binary) from the [Itential Nexus Repository] to local storage.
 
 **&#9432; Note:**
 If you are unsure which files should be downloaded for your environment, contact your Itential Professional Services representative.
 
-### Copy Installation Artifacts into the Files Directory
+#### Copy Installation Artifacts into the Files Directory
 
 Next, copy the files downloaded in the previous step to the `files` subdirectory.
 
@@ -442,7 +455,7 @@ cp ~/Downloads/itential-premium_2023.1.1.linux.x86_64.bin .
 cp ~/Downloads/automation_gateway-3.198.19+2023.1.0-py3-none-any.whl .
 ```
 
-### Create a Symlink to the Files Directory
+#### Create a Symlink to the Files Directory
 
 Navigate to the playbooks directory in the Deployer directory and create a symlink to the files directory in the working directory.
 
@@ -450,6 +463,27 @@ Navigate to the playbooks directory in the Deployer directory and create a symli
 cd <DEPLOYER-DIR>/playbooks
 ln -s <WORKING-DIR>/files .
 ```
+
+### Repository Download
+
+#### Obtain the Download URL
+
+You can obtain the download URL from either a **Sonatype Nexus Repository** or **JFrog**. Follow the steps below based on the repository type:
+
+- **For Sonatype Nexus**: Navigate to the file you wish to use and locate the **Path** parameter. Copy the link provided in the **Path** field to obtain the download URL.
+- **For JFrog**: Locate the file in the JFrog repository and copy the File URL.
+
+This download method supports both the IAP (bin/tar) files and the IAG (whl) files.
+
+#### Configure Repository Credentials
+
+Depending on the repository you are using, you will need to provide the appropriate credentials:
+
+- **For Nexus**: Set the `repository_username` and `repository_password` variables.
+- **For JFrog**: Set the `repository_api_key` variable.
+
+**&#9432; Note:**
+To secure sensitive information like passwords or API keys, consider using Ansible Vault to encrypt these variables.
 
 ### Create the Inventory File
 
@@ -499,7 +533,14 @@ all:
         hosts:
             example1.host.com:
         vars:
-            iap_bin_file: itential-premium_2023.1.1.linux.x86_64.bin
+            iap_archive_download_url: https://registry.aws.itential.com/repository/itential-premium/2023.2/2023.2.8/itential-premium_2023.2.8.linux.x86_64.tar.gzx
+            repository_username: user.name
+            repository_password: !vault |
+                  $ANSIBLE_VAULT;1.1;AES123
+                  12341234123412341234123412341234123412341234123412341234123412341234123412341234
+                  12341234123412341234123412341234123412341234123412341234123412341234123412341234
+                  12341234123412341234123412341241234123412341234123412341234123412341234123412341
+                  1234123412341324
 
     gateway:
         hosts:

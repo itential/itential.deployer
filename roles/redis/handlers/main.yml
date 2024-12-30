@@ -1,14 +1,18 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Restart Redis
+- name: Enable and Start Redis
+  throttle: 1
   ansible.builtin.systemd:
     name: redis
-    enabled: yes
+    enabled: true
     state: restarted
+    daemon_reload: true
 
-- name: Restart Sentinel
+- name: Enable and Start Redis Sentinel
+  throttle: 1
   ansible.builtin.systemd:
     name: redis-sentinel
-    enabled: yes
+    enabled: true
     state: restarted
+    daemon_reload: true

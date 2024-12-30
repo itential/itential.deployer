@@ -1,0 +1,72 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Update RabbitMQ to support SSL
+  notify: Restart RabbitMQ
+  block:
+    - name: Create ssl directory
+      ansible.builtin.file:
+        path: "{{ rabbitmq_ssl_dir }}"
+        state: directory
+        owner: rabbitmq
+        group: rabbitmq
+        mode: "0700"
+
+    - name: Copy Server Certificate
+      ansible.builtin.copy:
+        src: "{{ role_path }}/files/server_certificate.pem"
+        dest: "{{ rabbitmq_ssl_dir }}/serverCert.pem"
+        owner: rabbitmq
+        group: rabbitmq
+        mode: "0600"
+
+    - name: Copy Server Key
+      ansible.builtin.copy:
+        src: "{{ role_path }}/files/server_key.pem"
+        dest: "{{ rabbitmq_ssl_dir }}/serverKey.pem"
+        owner: rabbitmq
+        group: rabbitmq
+        mode: "0600"
+
+    - name: Copy CA Certificate
+      ansible.builtin.copy:
+        src: "{{ role_path }}/files/ca_certificate.pem"
+        dest: "{{ rabbitmq_ssl_dir }}/ca_certificate.pem"
+        owner: rabbitmq
+        group: rabbitmq
+        mode: "0600"
+
+    # Modify many lines on the config file for the SSL settings
+    - name: Modify rabbitmq config with SSL settings
+      ansible.builtin.lineinfile:
+        path: "{{ rabbitmq_config }}"
+        regexp: ^\s*#\s*{{ item.name }}.*$
+        line: "{{ item.name }} = {{ item.value }} "
+        insertafter: ^\s*#\s*{{ item.name }}.*$
+        firstmatch: true
+      with_items:
+        - { name: "listeners.ssl.1", value: "{{ rabbitmq_ssl_port }}" }
+        - { name: "listeners.tcp", value: "none" }
+        - { name: "ssl_options.cacertfile", value: "{{ rabbitmq_ssl_dir }}/ca_certificate.pem" }
+        - { name: "ssl_options.certfile", value: "{{ rabbitmq_ssl_dir }}/serverCert.pem" }
+        - { name: "ssl_options.keyfile", value: "{{ rabbitmq_ssl_dir }}/serverKey.pem" }
+        - { name: "management.ssl.port", value: "15671" }
+        - { name: "management.ssl.cacertfile", value: "{{ rabbitmq_ssl_dir }}/ca_certificate.pem" }
+        - { name: "management.ssl.certfile", value: "{{ rabbitmq_ssl_dir }}/serverCert.pem" }
+        - { name: "management.ssl.keyfile", value: "{{ rabbitmq_ssl_dir }}/serverKey.pem" }
+
+    # Check if firewalld is running, if it is then open the appropriate ports
+    - name: Gather service facts
+      ansible.builtin.service_facts:
+
+    - name: Open Port on FirewallD Public Zone
+      ansible.posix.firewalld:
+        port: "{{ rabbitmq_ssl_port }}/tcp"
+        permanent: true
+        state: enabled
+        zone: public
+        immediate: true
+      when:
+        - ansible_facts.services["firewalld.service"] is defined
+        - ansible_facts.services["firewalld.service"].state == "running"
+        - ansible_facts.services["firewalld.service"].status == "enabled"

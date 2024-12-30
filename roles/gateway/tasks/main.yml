@@ -1,0 +1,291 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Include release vars
+  ansible.builtin.include_vars:
+    file: "{{ item }}"
+  with_first_found:
+    - "{{ iag_release }}-{{ ansible_distribution | lower }}-{{ ansible_distribution_major_version }}.yml"
+    - "release-undefined.yml"
+  tags: always
+
+- name: Check for valid IAG release
+  ansible.builtin.fail:
+    msg: "Deployer does not support installing Gateway version {{ iag_release }} on {{ ansible_distribution }}-{{ ansible_distribution_major_version }}"
+  when: invalid_iag_release is defined
+
+- name: Install base OS packages
+  ansible.builtin.include_role:
+    name: os
+  tags: install_base_os_packages
+
+- name: Create temporary working directory
+  ansible.builtin.tempfile:
+    state: directory
+  register: workingdir
+
+- name: Install Gateway packages (online)
+  ansible.builtin.dnf:
+    name: "{{ item }}"
+    state: present
+  with_items: "{{ gateway_packages }}"
+  when: not offline_install
+  tags: install_gateway_packages
+
+- name: Install Gateway packages (offline)
+  ansible.builtin.import_role:
+    name: offline
+    tasks_from: install-rpms
+  when: offline_install
+  tags: install_gateway_packages
+
+- name: Create itential group
+  ansible.builtin.group:
+    name: "{{ iag_group }}"
+
+- name: Create itential user
+  ansible.builtin.user:
+    name: "{{ iag_user }}"
+    group: "{{ iag_group }}"
+    groups: wheel
+    generate_ssh_key: true
+    state: present
+
+- name: Create working directories
+  ansible.builtin.file:
+    name: "{{ item }}"
+    owner: "{{ iag_user }}"
+    group: "{{ iag_group }}"
+    mode: "0775"
+    state: directory
+  with_items:
+    - /etc/ansible
+    - "{{ iag_log_dir }}"
+    - "{{ iag_properties_location }}"
+    - "{{ iag_data_dir }}"
+    - "{{ iag_install_dir }}"
+    - "{{ iag_install_dir }}/ansible/collections"
+    - "{{ iag_install_dir }}/ansible/inventory"
+    - "{{ iag_install_dir }}/ansible/modules"
+    - "{{ iag_install_dir }}/ansible/roles"
+    - "{{ iag_install_dir }}/ansible/collections"
+    - "{{ iag_install_dir }}/ansible/playbooks"
+    - "{{ iag_install_dir }}/ansible/plugins/modules"
+    - "{{ iag_install_dir }}/ansible/scripts"
+    - "{{ iag_install_dir }}/conf"
+    - "{{ iag_install_dir }}/conf/certs"
+    - "{{ iag_install_dir }}/nornir/conf"
+    - "{{ iag_install_dir }}/nornir/inventory"
+    - "{{ iag_install_dir }}/nornir/modules"
+    - "{{ iag_install_dir }}/repos"
+    - "{{ iag_install_dir }}/scripts"
+    - "{{ iag_install_dir }}/ssh"
+
+- name: Create Python venv directory
+  ansible.builtin.file:
+    name: "{{ iag_install_dir }}/python-venvs"
+    owner: "{{ iag_user }}"
+    group: "{{ iag_group }}"
+    mode: "0775"
+    state: directory
+  when: iag_enable_python_venv | bool
+
+- name: Copy certs
+  ansible.builtin.include_tasks:
+    file: copy-certs.yml
+  when: iag_https and iag_ssl_copy_certs
+
+- name: Install Python
+  tags: install_python
+  block:
+    - name: Install Python
+      ansible.builtin.include_tasks:
+        file: install-python.yml
+
+# Need to install ansible within the virtual environment
+- name: Install Ansible
+  when: iag_enable_ansible | bool
+  block:
+    - name: Install Ansible into the python virtual environment
+      ansible.builtin.pip:
+        name: "{{ iag_ansible_version }}"
+        virtualenv: "{{ iag_install_dir }}/venv"
+      when: not offline_install
+
+    - name: Create Ansible config file
+      ansible.builtin.template:
+        src: ansible.cfg.j2
+        dest: /etc/ansible/ansible.cfg
+        mode: "0644"
+        backup: true
+
+    - name: Create empty ansible inventory files
+      ansible.builtin.file:
+        name: "{{ iag_install_dir }}/ansible/inventory/hosts"
+        owner: "{{ iag_user }}"
+        group: "{{ iag_group }}"
+        mode: "0660"
+        state: touch
+
+    - name: Create empty ansible vault file
+      ansible.builtin.file:
+        name: "{{ iag_install_dir }}/conf/.vault_password_file"
+        owner: "{{ iag_user }}"
+        group: "{{ iag_group }}"
+        mode: "0400"
+        state: touch
+
+- name: Check if Automation Gateway is already installed
+  ansible.builtin.stat:
+    path: "{{ iag_install_dir }}/venv/automation-gateway"
+  register: iag_installed
+
+- name: Copy IAG archive from local
+  ansible.builtin.copy:
+    src: "{{ iag_whl_file }}"
+    dest: "{{ workingdir.path }}/{{ iag_whl_file | basename }}"
+    mode: '0644'
+  when:
+    - not iag_installed.stat.exists
+    - iag_whl_file is defined
+    - iag_archive_download_url is not defined
+
+- name: Download IAG archive from repository
+  when:
+    - not iag_installed.stat.exists
+    - iag_archive_download_url is defined
+    - iag_whl_file is not defined
+  block:
+    - name: Download IAG archive from repository
+      ansible.builtin.get_url:
+        url: "{{ iag_archive_download_url }}"
+        dest: "{{ workingdir.path }}/"
+        mode: '0644'
+        # Sets the appropriate header based on the repository type:
+        # - For JFrog: Uses the "X-JFrog-Art-Api" header with the API key if "repository_api_key" is defined and "jfrog" is part of the download URL.
+        # - For Nexus: Uses a default header ("Accept: application/octet-stream") since Nexus doesn't support API key authentication.
+        headers: >-
+          {%- if repository_api_key is defined and iag_archive_download_url is search("jfrog") -%}
+            {"X-JFrog-Art-Api": "{{ repository_api_key }}", "Accept": "application/octet-stream"}
+          {%- else -%}
+            {"Accept": "application/octet-stream"}
+          {%- endif -%}
+        url_username: "{{ repository_username | default(omit) }}"
+        url_password: "{{ repository_password | default(omit) }}"
+        validate_certs: true
+      register: download_result
+
+    - name: Set iag_whl_file destination from download
+      ansible.builtin.set_fact:
+        iag_whl_file: "{{ download_result.dest }}"
+
+- name: Install IAG
+  ansible.builtin.pip:
+    name: "{{ workingdir.path }}/{{ iag_whl_file | basename }}"
+    virtualenv: "{{ iag_install_dir }}/venv"
+
+- name: Set ownership/permissions and create properties.yml
+  when: not iag_installed.stat.exists
+  block:
+    # Using chown and chmod is a faster way to enforce the file ownership and
+    # permissions. The file module in ansible checks each and every file/dir
+    # in the tree, 'chown -R ' does not, it just sets it.
+    - name: Set appropriate ownership on all gateway files
+      ansible.builtin.command:
+        cmd: "chown -R {{ iag_user }}:{{ iag_group }} {{ iag_install_dir }}/venv"
+      changed_when: true
+
+    - name: Set appropriate permissions on all gateway files
+      ansible.builtin.command:
+        cmd: "chmod -R 775 {{ iag_install_dir }}/venv"
+      changed_when: true
+
+    - name: Create properties.yml using template based on the version
+      ansible.builtin.template:
+        src: "properties.{{ iag_release }}.yml.j2"
+        dest: "{{ iag_properties_location }}/properties.yml"
+        owner: "{{ iag_user }}"
+        group: "{{ iag_group }}"
+        mode: "0600"
+
+- name: Create Nornir files
+  when: iag_enable_nornir | bool
+  block:
+    - name: Create Nornir inventory files (empty)
+      ansible.builtin.file:
+        name: "{{ item }}"
+        owner: "{{ iag_user }}"
+        group: "{{ iag_group }}"
+        mode: "0660"
+        state: touch
+      with_items:
+        - "{{ iag_install_dir }}/nornir/inventory/defaults.yml"
+        - "{{ iag_install_dir }}/nornir/inventory/groups.yml"
+        - "{{ iag_install_dir }}/nornir/inventory/hosts.yml"
+
+    - name: Create Nornir config file
+      ansible.builtin.template:
+        src: nornir.config.yml.j2
+        dest: "{{ iag_install_dir }}/nornir/config.yml"
+        owner: "{{ iag_user }}"
+        group: "{{ iag_group }}"
+        mode: "0660"
+
+- name: Write automation-gateway.service to host
+  ansible.builtin.template:
+    src: automation-gateway.service.j2
+    dest: /etc/systemd/system/automation-gateway.service
+    mode: "0644"
+    backup: true
+
+# Check if firewalld is running, if it is then open the appropriate ports
+- name: Gather service facts
+  ansible.builtin.service_facts:
+
+- name: Configure HTTP Port on FirewallD Public Zone
+  ansible.posix.firewalld:
+    port: "{{ iag_port }}/tcp"
+    permanent: true
+    state: "{{ iag_https or iag_haproxy | ternary('disabled', 'enabled') }}"
+    zone: public
+    immediate: true
+  when:
+    - ansible_facts.services["firewalld.service"] is defined
+    - ansible_facts.services["firewalld.service"].state == "running"
+    - ansible_facts.services["firewalld.service"].status == "enabled"
+
+- name: Configure HTTPS Port on FirewallD Public Zone
+  ansible.posix.firewalld:
+    port: "{{ iag_https_port }}/tcp"
+    permanent: true
+    state: "{{ iag_https or iag_haproxy | ternary('enabled', 'disabled') }}"
+    zone: public
+    immediate: true
+  when:
+    - ansible_facts.services["firewalld.service"] is defined
+    - ansible_facts.services["firewalld.service"].state == "running"
+    - ansible_facts.services["firewalld.service"].status == "enabled"
+
+- name: Allow IAG to listen on tcp port {{ iag_port }}
+  community.general.seport:
+    ports: "{{ iag_port }}"
+    proto: tcp
+    setype: http_port_t
+    state: present
+  when: ansible_selinux.status == "enabled"
+
+- name: Start Automation Gateway service
+  ansible.builtin.service:
+    name: automation-gateway
+    enabled: true
+    state: restarted
+    daemon_reload: true
+
+- name: Update release file
+  ansible.builtin.include_tasks:
+    file: update-release-file.yml
+
+- name: Remove temporary working directory
+  ansible.builtin.file:
+    path: "{{ workingdir.path }}"
+    state: absent

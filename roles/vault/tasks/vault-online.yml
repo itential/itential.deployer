@@ -2,7 +2,7 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
 - name: Install yum-config-manager
-  ansible.builtin.yum:
+  ansible.builtin.dnf:
     name: yum-utils
     state: present
     update_cache: true
@@ -17,7 +17,7 @@
   when: install_yum_repos | bool
 
 - name: Install vault
-  ansible.builtin.yum:
+  ansible.builtin.dnf:
     name: "{{ vault_version }}"
     update_cache: true
     state: present

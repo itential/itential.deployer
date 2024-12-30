@@ -28,11 +28,16 @@ The variables in this section may be overridden in the inventory in the `gateway
 | Variable | Group | Type | Description | Default Value | Required?
 | :------- | :---- | :--- | :---------- | :------------ | :--------
 | `iag_release` | `gateway` | Fixed-point | Designates which major release version of IAG to install. | N/A | Yes
-| `iag_whl_file` | `gateway` | String | The name of the IAG wheel file to install. | N/A | Yes
+| `iag_whl_file` | `gateway` | String | The name of the IAG wheel file to install. | N/A | Yes*
+| `iag_archive_download_url` | `gateway` | String | The URL for the download of the iag whl file from a repository. | N/A | Yes*
+| `repository_username` | `gateway` | String | The username for authentication of the repository from iag_archive_download_url. | N/A | No
+| `repository_password` | `gateway` | String | The password for authentication of the repository from iag_archive_download_url. | N/A | No
+| `repository_api_key` | `gateway` | String | The API for authentication of the repository from iag_archive_download_url. Can be used instead of username/password for authentication.| N/A | No
 
-Both the `iag_release` and `iag_whl_file` must be configured in the inventory.
+The `iag_release` and either `iag_whl_file` or `iag_archive_download_url` must be configured in the inventory.
+When `iag_archive_download_url` is configured, the `repository_username`/`repository_password` or `repository_api_key` must be defined.
 
-The following table lists the default variables located in `roles/gateway/defaults/main.yml`.  
+The following table lists the default variables located in `roles/gateway/defaults/main.yml`.
 
 | Variable | Group | Type | Description | Default Value
 | :------- | :---- | :--- | :---------- | :------------
@@ -41,6 +46,10 @@ The following table lists the default variables located in `roles/gateway/defaul
 | `iag_enable_netmiko` | `gateway` | Boolean | Flag to enable Netmiko. | `true`
 | `iag_enable_scripts` | `gateway` | Boolean | Flag to enable scripts. | `true`
 | `iag_enable_httpreq` | `gateway` | Boolean | Flag to enable HTTP requests. | `true`
+| `iag_enable_netconf` | `gateway` | Boolean | Flag to enable Netconf requests. | `true`
+| `iag_enable_python_venv` | `gateway` | Boolean | Flag to enable Python virtual environments. | `true`
+| `iag_enable_grpc` | `gateway` | Boolean | Flag to enable GRPC requests. | `true`
+| `iag_enable_git` | `gateway` | Boolean | Flag to enable Git integration. | `true`
 | `iag_install_dir` | `gateway` | String |  The base directory where to install the IAG files. | `/opt/automation-gateway`
 | `iag_data_dir` | `gateway` | String | The IAG data directory. | `/opt/automation-gateway`
 | `iag_log_dir` | `gateway` | String | The IAG log directory. | `/var/log/automation-gateway`
@@ -99,7 +108,7 @@ To configure HTTPS via HAProxy:
   - Do not configure `iag_https` in the inventory so IAG Native HTTPS does not get configured.
 * Optional
   - Set the `haproxy_ssl_cert_src` and `haproxy_ssl_cert_dest` variables in the inventory.
-  
+
  Itential does not attempt to create any HTTPS certificates. These must be
  created independently. When they are included in the appropriate location
  the installer will ensure that they get uploaded to the correct location.

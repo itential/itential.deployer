@@ -300,7 +300,7 @@ daemonize no
 #
 # Note that on modern Linux systems "/run/redis.pid" is more conforming
 # and should be used instead.
-pidfile /var/run/redis_6379.pid
+pidfile {{ redis_pid_dir }}/redis_{{ redis_port }}.pid
 
 # Specify the server verbosity level.
 # This can be one of:
@@ -489,6 +489,13 @@ dir {{ redis_data_dir }}
 #    and resynchronize with them.
 #
 # replicaof <masterip> <masterport>
+{% if redis_replication %}
+{%   if groups['redis'] is defined and inventory_hostname in groups['redis'] and inventory_hostname not in groups['redis'][0] %}
+replicaof {{ hostvars[groups['redis'][0]].inventory_hostname }} {{ redis_port }}
+{%   elif groups['redis_secondary'] is defined and inventory_hostname in groups['redis_secondary'] and inventory_hostname not in groups['redis_secondary'][0] %}
+replicaof {{ hostvars[groups['redis_secondary'][0]].inventory_hostname }} {{ redis_port }}
+{%   endif %}
+{% endif %}
 
 # If the master is password protected (using the "requirepass" configuration
 # directive below) it is possible to tell the replica to authenticate before
@@ -507,6 +514,10 @@ dir {{ redis_data_dir }}
 #
 # When masteruser is specified, the replica will authenticate against its
 # master using the new AUTH form: AUTH <username> <password>.
+{% if redis_auth and redis_replication %}
+masterauth {{ redis_user_repluser_password }}
+masteruser repluser
+{% endif %}
 
 # When a replica loses its connection with the master, or when the replication
 # is still in progress, the replica can act in two different ways:
@@ -746,9 +757,10 @@ min-replicas-to-write 1
 #
 {% if redis_replication | bool %}
 replica-announce-ip {{ inventory_hostname }}
+replica-announce-port {{ redis_port }}
 {% endif %}
 # replica-announce-ip 5.5.5.5
-# replica-announce-port 1234
+#replica-announce-port 1234
 
 ############################### KEYS TRACKING #################################
 
@@ -888,16 +900,16 @@ replica-announce-ip {{ inventory_hostname }}
 #
 # For more information about ACL configuration please refer to
 # the Redis web site at https://redis.io/topics/acl
-###########################
-# Itential user definitions
-# uncomment if using auth with Itential redis
-###########################
-# user default off
-# user admin on allkeys allchannels allcommands >{{ redis_user_admin_password }}
-# user itential on allkeys allchannels allcommands -asking -cluster -readonly -readwrite -bgrewriteaof -bgsave -failover -flushall -flushdb -psync -replconf -replicaof -save -shutdown -sync >{{ redis_user_itential_password }}
-# user repluser on allchannels +psync +replconf +ping >{{ redis_user_repluser_password }}
-# user sentineluser on allchannels +multi +slaveof +ping +exec +subscribe +config|rewrite +role +publish +info +client|setname +client|kill +script|kill >{{ redis_user_sentineluser_password }}
-
+{% if redis_auth %}
+user default off
+user admin on allkeys allchannels allcommands >{{ redis_user_admin_password }}
+user itential on allkeys allchannels allcommands -asking -cluster -readonly -readwrite -bgrewriteaof -bgsave -failover -flushall -flushdb -psync -replconf -replicaof -save -shutdown -sync >{{ redis_user_itential_password }}
+user prometheus on -@all +@connection +memory -readonly +strlen +config|get +xinfo +pfcount -quit +zcard +type +xlen -readwrite -command +client -wait +scard +llen +hlen +get +eval +slowlog +cluster|info -hello -echo +info +latency +scan -reset -auth -asking >{{ redis_user_prometheus_password }}
+{%  if redis_replication %}
+user repluser on allchannels +psync +replconf +ping >{{ redis_user_repluser_password }}
+user sentineluser on allchannels +multi +slaveof +ping +exec +subscribe +config|rewrite +role +publish +info +client|setname +client|kill +script|kill >{{ redis_user_sentineluser_password }}
+{%  endif %}
+{% endif %}
 
 # ACL LOG
 #

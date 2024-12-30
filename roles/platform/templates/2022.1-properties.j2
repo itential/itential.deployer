@@ -16,7 +16,7 @@
 {# Build Vault props #}
 {% set vaultProps = None %}
 {% if configure_vault | bool %}
-  {% set vaultProps = dict(url = "http://" ~ hostvars[groups['vault'][0]].inventory_hostname ~ ":" ~ vault_port, token = vault_install_dir ~ "/token.txt", endpoint = "kv-v2/data", readOnly = "false" | bool) %}
+  {% set vaultProps = dict(url = "http://" ~ hostvars[groups['vault'][0]].inventory_hostname ~ ":" ~ vault_port, token = iap_vault_token_dir ~ "/token.txt", endpoint = vault_name ~ "/data", readOnly = "false" | bool) %}
   {% if vault_read_only | bool %}
     {% set vaultProps = dict(vaultProps, **{'readOnly': vault_read_only}) %}
   {% endif %}

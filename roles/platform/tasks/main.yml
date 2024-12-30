@@ -1,0 +1,148 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Validate vars
+  ansible.builtin.include_tasks:
+    file: validate-vars.yml
+
+- name: Determine release vars
+  tags: always
+  block:
+    - name: Determine release vars
+      ansible.builtin.include_tasks:
+        file: determine-release-vars.yml
+
+- name: Install base OS packages
+  ansible.builtin.include_role:
+    name: os
+  tags: install_base_os_packages
+
+- name: Gather the package facts
+  ansible.builtin.package_facts:
+    manager: auto
+
+- name: Install Platform packages
+  ansible.builtin.include_tasks:
+    file: install-platform-packages.yml
+
+- name: Install MongoDB tools
+  ansible.builtin.include_tasks:
+    file: install-mongodb-tools.yml
+
+- name: Install NodeJS
+  ansible.builtin.include_tasks:
+    file: install-nodejs.yml
+  tags: install_nodejs
+
+- name: Install Python
+  tags: install_python
+  block:
+    - name: Install Python
+      ansible.builtin.include_tasks:
+        file: install-python.yml
+
+- name: Create itential user
+  ansible.builtin.include_tasks:
+    file: create-itential-user.yml
+
+- name: Create itential directories
+  ansible.builtin.file:
+    name: "{{ item }}"
+    state: directory
+    owner: "{{ iap_user }}"
+    group: "{{ iap_group }}"
+    mode: "0775"
+  with_items:
+    - "{{ iap_install_dir }}"
+    - "{{ iap_install_dir }}/keys"
+    - "{{ iap_install_dir }}/automation"
+    - "{{ iap_install_dir }}/automation/public"
+    - "{{ iap_log_dir }}"
+    - "{{ iap_log_dir }}/automation"
+
+- name: Ensure secure mode for TemplateBuilder
+  ansible.builtin.lineinfile:
+    path: /etc/sudoers
+    insertafter: EOF
+    state: present
+    line: "{{ iap_user }} ALL=(ALL) NOPASSWD: /usr/sbin/chroot, /sbin/chroot"
+
+- name: Install Platform
+  tags: install_platform
+  block:
+    - name: Install Platform
+      ansible.builtin.include_tasks:
+        file: install-platform.yml
+
+- name: Create systemd file
+  ansible.builtin.template:
+    src: automation-platform.service.j2
+    dest: /usr/lib/systemd/system/automation-platform.service
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Configure properties.json file
+  tags: configure_properties
+  block:
+    - name: Create properties.json file
+      ansible.builtin.include_tasks:
+        file: create-properties-file.yml
+
+- name: Make the "custom" directories
+  ansible.builtin.file:
+    name: "{{ item }}"
+    state: directory
+    owner: "{{ iap_user }}"
+    group: "{{ iap_group }}"
+    mode: "0775"
+  with_items:
+    - "{{ iap_install_dir }}/current/custom/@itential"
+    - "{{ iap_install_dir }}/current/custom/@itentialopensource"
+
+- name: Copy certs
+  ansible.builtin.include_tasks:
+    file: copy-certs.yml
+
+- name: Configure firewalld
+  ansible.builtin.include_tasks:
+    file: configure-firewalld.yml
+
+- name: Configure SELinux
+  tags: configure_selinux
+  block:
+    - name: Configure SELinux
+      ansible.builtin.include_tasks:
+        file: configure_selinux.yml
+
+- name: Set file ownership and permissions
+  ansible.builtin.include_tasks:
+    file: set-file-ownership.yml
+
+# This needs to run after set-file-ownership.yml so the permissions don't get over-written
+- name: Configure Vault
+  tags: configure_vault
+  block:
+    - name: Configure Vault
+      ansible.builtin.include_tasks:
+        file: configure-vault.yml
+      when: configure_vault | bool
+
+- name: Init MongoDB
+  tags: mongo_init
+  block:
+    - name: Initialize MongoDB with IAP data
+      ansible.builtin.include_tasks:
+        file: mongo-init.yml
+      when: configure_iap | bool
+
+- name: Enable and start IAP
+  ansible.builtin.systemd:
+    name: automation-platform
+    enabled: true
+    state: restarted
+  tags: always
+
+- name: Update release file
+  ansible.builtin.include_tasks:
+    file: update-release-file.yml

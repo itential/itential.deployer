@@ -1,0 +1,51 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+# The location of the Redis config file
+redis_conf_path: /etc/redis
+redis_conf_file: "{{ redis_conf_path }}/redis.conf"
+
+# The location of the Redis log file
+redis_log_dir: /var/log/redis
+redis_log: "{{ redis_log_dir }}/redis.log"
+
+# The name of the Redis data file
+redis_db_filename: dump.rdb
+
+# The location of the Redis data directory
+redis_data_dir: /var/lib/redis
+
+# The location of the Redis data directory
+redis_pid_dir: /var/run
+
+# Redis user and group
+redis_owner: redis
+redis_group: redis
+
+# Flag to enable IPv6
+redis_bind_ipv6: true
+
+# The bind address source
+# Will default to inventory_hostname unless set to default_ipv4_address
+redis_bind_addr_source: inventory_hostname
+
+# The hostnames and/or IP addresses on which redis should listen for
+# client connections, separated by spaces.
+#
+# If redis_bind_ipv6 is set to true, '::1' will be added to the
+# redis_bind_addrs.
+#
+# The inventory_hostname or default_ipv4_address will be automatically added
+# to the redis_bind_addrs depending on the redis_bind_addr_source.
+redis_bind_addrs: 127.0.0.1
+
+# Offline install settings
+# Refer to the offline variables in common_vars for additional settings
+packages_path: "{{ itential_packages_path }}/{{ iap_release }}/redis"
+
+# Redis install method - string.
+# The valid values are 'remi_repo' (default) or 'source'.
+redis_install_method: source
+
+# The EPEL repo is only required when the redis_install_method is set to 'remi_repo'
+redis_epel_repo_url: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_distribution_major_version }}.noarch.rpm"

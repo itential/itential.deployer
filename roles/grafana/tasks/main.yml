@@ -1,0 +1,90 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Create grafana group
+  ansible.builtin.group:
+    name: "{{ grafana_group }}"
+    state: present
+
+- name: Create grafana user
+  ansible.builtin.user:
+    name: "{{ grafana_user }}"
+    group: "{{ grafana_group }}"
+    state: present
+
+- name: Install Grafana repo
+  ansible.builtin.yum_repository:
+    name: "grafana"
+    description: Grafana Repository
+    baseurl: "{{ grafana_repo_url }}"
+    enabled: true
+    gpgcheck: true
+    gpgkey: "{{ grafana_gpg_key }}"
+  when: install_yum_repos | bool
+
+# Install grafana with yum
+- name: Install Grafana
+  ansible.builtin.dnf:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - grafana
+    - chkconfig
+
+# Add default datasources
+- name: Create grafana datasources file
+  ansible.builtin.template:
+    src: grafana_datasources.yml.j2
+    dest: "{{ grafana_install_dir }}/provisioning/datasources/datasources.yml"
+    owner: "{{ grafana_user }}"
+    group: "{{ grafana_group }}"
+    mode: "0644"
+    lstrip_blocks: true
+
+- name: Upload grafana dashboard config
+  ansible.builtin.template:
+    src: grafana_dashboard_config_iap.yml.j2
+    dest: "{{ grafana_install_dir }}/provisioning/dashboards/grafana_dashboard_config_iap.yml"
+    group: "{{ grafana_group }}"
+    owner: "{{ grafana_user }}"
+    mode: "0644"
+
+- name: Upload grafana dashboard default definitions
+  ansible.builtin.copy:
+    src: definitions/default/
+    dest: "{{ grafana_install_dir }}/provisioning/dashboards/definitions/"
+    directory_mode: "0755"
+    group: "{{ grafana_group }}"
+    owner: "{{ grafana_user }}"
+    mode: "0644"
+
+- name: Upload grafana dashboard RabbitMQ definitions
+  ansible.builtin.copy:
+    src: definitions/rabbitmq/
+    dest: "{{ grafana_install_dir }}/provisioning/dashboards/definitions/"
+    directory_mode: "0755"
+    group: "{{ grafana_group }}"
+    owner: "{{ grafana_user }}"
+    mode: "0644"
+  when: "'rabbitmq' in groups"
+
+- name: Gather service facts
+  ansible.builtin.service_facts:
+
+- name: Open Port on FirewallD Public Zone
+  ansible.posix.firewalld:
+    port: "{{ grafana_port }}/tcp"
+    permanent: true
+    state: enabled
+    zone: public
+    immediate: true
+  when:
+    - ansible_facts.services["firewalld.service"] is defined
+    - ansible_facts.services["firewalld.service"].state == "running"
+    - ansible_facts.services["firewalld.service"].status == "enabled"
+
+- name: Start Grafana
+  ansible.builtin.systemd:
+    name: grafana-server
+    state: restarted
+    enabled: true

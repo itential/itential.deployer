@@ -1,0 +1,25 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Install EPEL repo
+  ansible.builtin.dnf:
+    name: "{{ redis_epel_repo_url }}"
+    state: present
+    update_cache: true
+    disable_gpg_check: true
+  when: install_yum_repos | bool
+
+- name: Install Remi repo
+  ansible.builtin.package:
+    update_cache: true
+    name: "{{ redis_repo_url[ansible_distribution_major_version] }}"
+    state: present
+    disable_gpg_check: true
+  when: install_yum_repos | bool
+
+- name: Install Redis using Remi repo
+  ansible.builtin.package:
+    name: '{{ redis_packages[ansible_distribution_major_version] }}'
+    state: present
+    update_cache: true
+    enablerepo: remi

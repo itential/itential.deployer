@@ -442,11 +442,18 @@ total_memory_available_override_value = {{ rabbit_total_mem_available_override }
 # disk_free_limit.absolute = 500KB
 # disk_free_limit.absolute = 50mb
 # disk_free_limit.absolute = 5GB
+{% if rabbitmq_disk_free_limit_absolute is defined %}
+disk_free_limit.absolute = {{ rabbitmq_disk_free_limit_absolute }}
+{% endif %}
 
 ## Alternatively, we can set a limit relative to total available RAM.
 ##
 ## Values lower than 1.0 can be dangerous and should be used carefully.
+{% if rabbitmq_disk_free_limit_absolute is defined %}
+# disk_free_limit.relative = 1.0
+{% else %}
 disk_free_limit.relative = 1.0
+{% endif %}
 
 ##
 ## Clustering
@@ -481,6 +488,9 @@ disk_free_limit.relative = 1.0
 ##
 
 # cluster_formation.peer_discovery_backend     = rabbit_peer_discovery_classic_config
+{% if rabbitmq_cluster %}
+cluster_formation.peer_discovery_backend = rabbit_peer_discovery_classic_config
+{% endif %}
 #
 # cluster_formation.classic_config.nodes.1 = rabbit1@hostname
 # cluster_formation.classic_config.nodes.2 = rabbit2@hostname
@@ -650,6 +660,7 @@ disk_free_limit.relative = 1.0
 # ## See https://rabbitmq.com/management.html for details.
 #
 # management.tcp.port = 15672
+management.tcp.port = {{ rabbitmq_mgt_console_port }}
 # management.tcp.ip   = 0.0.0.0
 #
 # management.tcp.shutdown_timeout   = 7000
@@ -750,20 +761,16 @@ disk_free_limit.relative = 1.0
 ## See https://rabbitmq.com/logging.html and https://github.com/erlang-lager/lager for details.
 ##
 
-## Log directory, taken from the RABBITMQ_LOG_BASE env variable by default.
-##
-log.dir = /var/log/rabbitmq
-
 ## Logging to file. Can be false or a filename.
 ## Default:
-log.file = rabbit.log
+log.file = {{ rabbitmq_log_file }}
 
 ## To disable logging to a file
 # log.file = false
 
 ## Log level for file logging
 ##
-log.file.level = info
+log.file.level = {{ rabbitmq_log_file_level }}
 
 ## File rotation config. No rotation by default.
 ## DO NOT SET rotation date to ''. Leave the value unset if "" is the desired value

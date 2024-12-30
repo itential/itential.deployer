@@ -1,0 +1,94 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Include release vars
+  ansible.builtin.include_vars:
+    file: "{{ item }}"
+  with_first_found:
+    - "release-{{ iap_release }}.yml"
+    - "release-undefined.yml"
+  tags: always
+
+- name: Check for valid Redis release
+  ansible.builtin.fail:
+    msg: "Deployer does not support installing Redis on IAP version {{ iap_release }}"
+  when: invalid_redis_release is defined
+  tags: always
+
+- name: Install base OS packages
+  ansible.builtin.include_role:
+    name: os
+  tags: install_base_os_packages
+
+- name: Install and configure Redis
+  notify: Enable and Start Redis
+  tags: install_configure_redis
+  block:
+    - name: Basic configuration
+      tags: basic_configuration
+      block:
+        - name: Include tasks to perform basic configuration
+          ansible.builtin.include_tasks:
+            file: basic-configuration.yml
+
+    - name: Install Redis
+      tags: install_redis
+      block:
+        - name: Include tasks to install Redis (online)
+          when: not offline_install
+          block:
+            - name: Include tasks to install Redis using Remi repo (online)
+              ansible.builtin.include_tasks:
+                file: redis-using-remi-repo.yml
+              when: redis_install_method == "remi_repo"
+
+            - name: Include tasks to install Redis using source
+              ansible.builtin.include_tasks:
+                file: redis-using-source.yml
+              when: redis_install_method == "source"
+
+        - name: Include tasks to install Redis (offline)
+          ansible.builtin.include_tasks:
+            file: redis-offline.yml
+          when: offline_install
+
+    - name: Use template to generate redis.conf
+      ansible.builtin.template:
+        src: redis.conf.j2
+        dest: "{{ redis_conf_file }}"
+        owner: "{{ redis_owner }}"
+        group: "{{ redis_group }}"
+        mode: "0640"
+        backup: true
+
+- name: Configure Redis Sentinel
+  tags: configure_redis_sentinel
+  when: redis_replication | bool
+  block:
+    - name: Include tasks to configure Sentinel
+      ansible.builtin.include_tasks:
+        file: configure-sentinel.yml
+
+- name: Update Itential release file
+  tags: update_release_file
+  block:
+    - name: Determine redis version
+      ansible.builtin.shell:
+        cmd: 'set -o pipefail && redis-server --version | cut -d" " -f3 | cut -d"=" -f2'
+      register: result
+      check_mode: false
+      changed_when: false
+      failed_when: result.rc != 0
+      environment:
+        PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
+
+    - name: Set redis version variable
+      ansible.builtin.set_fact:
+        redis_server_version: "{{ result.stdout }}"
+
+    - name: Write redis release information
+      ansible.builtin.lineinfile:
+        path: "{{ itential_release_file }}"
+        line: "REDIS={{ redis_server_version }}"
+        create: true
+        mode: "0644"

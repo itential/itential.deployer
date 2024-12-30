@@ -7,7 +7,7 @@ platform_packages:
   - openldap-clients
   - openssl
 
-iap_nodejs_package: "@nodejs:18"
+iap_nodejs_package: "@nodejs:20"
 
 python_version: 3.9
 python_executable: "/usr/bin/python{{ python_version }}"
@@ -28,7 +28,7 @@ app_python_dependencies:
   - pymongo
   - textfsm>=1.1.2,<1.2.0
 
-mongodb_version: 5.0
+mongodb_version: 7.0
 
 mongodb_tools_packages:
   - mongodb-database-tools

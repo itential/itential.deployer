@@ -25,7 +25,7 @@
     file: "{{ item }}"
   with_first_found:
     - "{{ iap_release }}-{{ ansible_distribution | lower }}-{{ ansible_distribution_major_version }}.yml"
-    - "release-undefined.yaml"
+    - "release-undefined.yml"
 
 - name: Check for valid IAP release
   ansible.builtin.fail:
