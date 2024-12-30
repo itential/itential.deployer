@@ -12,7 +12,7 @@ The playbook and roles in this section install and configure IAP for the Itentia
 
 The `platform` role performs a base install of IAP including any OS packages required. It includes the appropriate version of Python, Pip, Jinja, and TextFSM. It handles a few security vulnerabilities. It creates the appropriate Linux users, directories, log files, and systemd services. It will start the automation-platform service when complete.
 
-When there is a device configured in the `gateway` group this role will also install and configure an IAG adapter that points to the gateway server named in the `gateway` group.
+When there is a device configured in the `gateway` group this role will also install and configure an IAG adapter that points to the gateway server(s) named in the `gateway` group.
 
 ## Platform Adapters Role
 
