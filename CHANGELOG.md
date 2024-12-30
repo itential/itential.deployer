@@ -1,8 +1,22 @@
 # Changelog
 
+## v2.5.0 (November 22, 2024)
+
+* 23.2 RHEL and Rocky 8 now install node 20 instead of 18  https://github.com/itential/itential.deployer/pull/93
+* Add tasks to open prometheus exporter ports in firewalld  https://github.com/itential/itential.deployer/pull/92
+* Added customer engine name  https://github.com/itential/itential.deployer/pull/94
+* Change Prometheus Redis exporter to use prometheus user  https://github.com/itential/itential.deployer/pull/102
+* Consolidate Redis roles  https://github.com/itential/itential.deployer/pull/99
+* Redefine logic that triggers tasks for the ASA architecture  https://github.com/itential/itential.deployer/pull/101
+* Update Ansible requirements in readme  https://github.com/itential/itential.deployer/pull/96
+
+Full Changelog: https://github.com/itential/itential.deployer/compare/v2.4.1...v2.5.0 
+
+
 ## v2.4.1 (October 25, 2024)
 
 * Add README for grafana role  https://github.com/itential/itential.deployer/pull/91
+* Update galaxy version and changelog for release 2.4.1 [skip ci]
 
 Full Changelog: https://github.com/itential/itential.deployer/compare/v2.4.0...v2.4.1 
 
