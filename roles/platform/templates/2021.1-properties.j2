@@ -34,7 +34,7 @@
   "mongoProps": {
     "credentials": {
       "dbAuth": {{ mongodb_auth | bool | to_json }},
-      "passwd": "{{ mongo_user_itential_password }}",
+      "passwd": {{ mongo_user_itential_password | to_json }},
       "user": "itential"
     },
     "db": "{{ mongo_itential_db_name }}",
