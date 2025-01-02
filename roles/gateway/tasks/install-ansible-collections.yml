@@ -22,6 +22,9 @@
   register: install_result
   changed_when: '"Nothing to do" not in install_result.stdout'
   failed_when: install_result.failed
+  when:
+    - iag_ansible_collections is defined
+    - iag_ansible_collections | length > 0
 
 - name: Remove temporary working directory
   ansible.builtin.file:
