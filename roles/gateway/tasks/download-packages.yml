@@ -52,6 +52,10 @@
     state: present
   with_items: "{{ gateway_packages }}"
   register: gateway_packages_installed
+  when:
+    - gateway_packages is defined
+    - gateway_packages is iterable
+    - gateway_packages | length > 0
   tags: install_gateway_packages
 
 - name: Download Python packages

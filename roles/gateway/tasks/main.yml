@@ -31,7 +31,11 @@
     name: "{{ item }}"
     state: present
   with_items: "{{ gateway_packages }}"
-  when: not offline_install
+  when:
+    - not offline_install
+    - gateway_packages is defined
+    - gateway_packages is iterable
+    - gateway_packages | length > 0
   tags: install_gateway_packages
 
 - name: Install Gateway packages (offline)
