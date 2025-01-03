@@ -5,6 +5,11 @@ gateway_packages:
   - gcc-c++
   - make
 
+gateway_build_packages:
+  - gcc-c++
+  - make
+  - python3-devel
+
 python_version: 3.9
 python_executable: "/usr/bin/python{{ python_version }}"
 pip_executable: "/usr/bin/pip{{ python_version }}"
