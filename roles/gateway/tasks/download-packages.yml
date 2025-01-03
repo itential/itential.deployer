@@ -1,30 +1,32 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
+- name: Validation steps
+  tags: always
+  block:
+    - name: Validate distribution major version
+      ansible.builtin.fail:
+        msg: Download not supported for version 7
+      when: ansible_distribution_major_version == "7"
 
-- name: Validate distribution major version
-  ansible.builtin.fail:
-    msg: Download not supported for version 7
-  when: ansible_distribution_major_version == "7"
+    - name: Validate offline_install variable
+      ansible.builtin.fail:
+        msg: offline_install must be set to false for download
+      when:
+        - offline_install is defined
+        - offline_install
 
-- name: Validate offline_install variable
-  ansible.builtin.fail:
-    msg: offline_install must be set to false for download
-  when:
-    - offline_install is defined
-    - offline_install
+    - name: Include release vars
+      ansible.builtin.include_vars:
+        file: "{{ item }}"
+      with_first_found:
+        - "{{ iag_release }}-{{ ansible_distribution | lower }}-{{ ansible_distribution_major_version }}.yml"
+        - "release-undefined.yml"
 
-- name: Include release vars
-  ansible.builtin.include_vars:
-    file: "{{ item }}"
-  with_first_found:
-    - "{{ iag_release }}-{{ ansible_distribution | lower }}-{{ ansible_distribution_major_version }}.yml"
-    - "release-undefined.yml"
-
-- name: Check for valid IAG release
-  ansible.builtin.fail:
-    msg: "Deployer does not support installing Gateway version {{ iag_release }} on {{ ansible_distribution }}-{{ ansible_distribution_major_version }}"
-  when: invalid_iag_release is defined
+    - name: Check for valid IAG release
+      ansible.builtin.fail:
+        msg: "Deployer does not support installing Gateway version {{ iag_release }} on {{ ansible_distribution }}-{{ ansible_distribution_major_version }}"
+      when: invalid_iag_release is defined
 
 - name: Download Gateway OS rpms
   ansible.builtin.import_role:
@@ -36,12 +38,24 @@
     download_dir: "{{ rpms_download_dir_target_node }}"
   tags: download_gateway_packages
 
+- name: Copy rpms to control node
+  ansible.builtin.import_role:
+    name: offline
+    tasks_from: fetch-packages
+  vars:
+    src_dir: "{{ rpms_download_dir_target_node }}"
+    dest_dir: "{{ rpms_download_dir_control_node }}"
+
 - name: Install Gateway rpms
   ansible.builtin.dnf:
     name: "{{ item }}"
     state: present
   with_items: "{{ gateway_packages }}"
   register: gateway_packages_installed
+  when:
+    - gateway_packages is defined
+    - gateway_packages is iterable
+    - gateway_packages | length > 0
   tags: install_gateway_packages
 
 - name: Download Python packages
@@ -61,14 +75,6 @@
   vars:
     src_dir: "{{ archives_download_dir_target_node }}"
     dest_dir: "{{ archives_download_dir_control_node }}"
-
-- name: Copy rpms to control node
-  ansible.builtin.import_role:
-    name: offline
-    tasks_from: fetch-packages
-  vars:
-    src_dir: "{{ rpms_download_dir_target_node }}"
-    dest_dir: "{{ rpms_download_dir_control_node }}"
 
 - name: Uninstall Gateway packages
   ansible.builtin.dnf:

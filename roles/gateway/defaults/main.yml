@@ -20,6 +20,9 @@ iag_enable_git: true
 # Location of IAG assets
 iag_install_dir: /opt/automation-gateway
 
+# Location of IAG Ansible collections
+iag_ansible_collections_path: "{{ iag_install_dir }}/ansible/collections"
+
 # Location of IAG data
 iag_data_dir: /var/lib/automation-gateway
 
