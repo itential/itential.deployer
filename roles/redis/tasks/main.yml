@@ -100,3 +100,4 @@
     autoremove: true
     state: absent
   with_items: "{{ redis_build_packages[ansible_distribution_major_version] }}"
+  

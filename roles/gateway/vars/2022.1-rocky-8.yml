@@ -11,7 +11,7 @@ gateway_build_packages:
   - make
   - sqlite-devel
   - python39-devel
-  
+
 python_version: 3.9
 python_executable: "/usr/bin/python{{ python_version }}"
 pip_executable: "/usr/bin/pip{{ python_version }}"
