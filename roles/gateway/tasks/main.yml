@@ -128,11 +128,12 @@
           failed_when: install_result.failed
           when:
             - iag_ansible_collections is defined
+            - iag_ansible_collections is iterable
             - iag_ansible_collections | length > 0
 
     - name: Install Ansible collections (offline)
       ansible.builtin.include_tasks:
-        file: install-ansible-collections.yml
+        file: install-ansible-collections-offline.yml
       when: offline_install
 
     - name: Create Ansible config file

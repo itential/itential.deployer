@@ -76,6 +76,7 @@
         file: download-ansible-collections.yml
       when:
         - iag_ansible_collections is defined
+        - iag_ansible_collections is iterable
         - iag_ansible_collections | length > 0
 
 - name: Copy IAG wheel file to target node

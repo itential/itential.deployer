@@ -24,6 +24,7 @@
   failed_when: install_result.failed
   when:
     - iag_ansible_collections is defined
+    - iag_ansible_collections is iterable
     - iag_ansible_collections | length > 0
 
 - name: Remove temporary working directory
