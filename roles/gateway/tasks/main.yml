@@ -313,3 +313,15 @@
   ansible.builtin.file:
     path: "{{ workingdir.path }}"
     state: absent
+
+- name: Uninstall gateway build packages
+  ansible.builtin.dnf:
+    name: "{{ item }}"
+    allowerasing: true
+    autoremove: true
+    state: absent
+  with_items: "{{ gateway_build_packages }}"
+  when:
+    - gateway_build_packages is defined
+    - gateway_build_packages is iterable
+    - gateway_build_packages | length > 0
