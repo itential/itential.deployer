@@ -1,0 +1,33 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Create temporary working directory
+  ansible.builtin.tempfile:
+    state: directory
+  register: install_collections_temp_dir
+
+- name: Copy collections to target node
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ install_collections_temp_dir.path }}/{{ item | basename }}"
+    mode: '0644'
+  with_fileglob:
+    - "{{ ansible_collections_download_dir_control_node }}/*.tar.gz"
+    - "{{ ansible_collections_download_dir_control_node }}/requirements.yml"
+
+- name: Install collections
+  ansible.builtin.command:
+    cmd: "ansible-galaxy collection install -p {{ iag_ansible_collections_path }} -r requirements.yml"
+    chdir: "{{ install_collections_temp_dir.path }}"
+  register: install_result
+  changed_when: '"Nothing to do" not in install_result.stdout'
+  failed_when: install_result.failed
+  when:
+    - iag_ansible_collections is defined
+    - iag_ansible_collections is iterable
+    - iag_ansible_collections | length > 0
+
+- name: Remove temporary working directory
+  ansible.builtin.file:
+    path: "{{ install_collections_temp_dir.path }}"
+    state: absent
