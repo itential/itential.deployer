@@ -4,15 +4,6 @@
 # When authorization is enabled in mongo using a replica set, the members of
 # the set will be required to authenticate too. This is accomplished with a
 # keyFile or x509 certificate. It is assumed that this keyFile already exists.
-- name: Upload the key file if this is a replica set
-  ansible.builtin.copy:
-    src: "{{ mongo_auth_keyfile_source }}"
-    dest: "{{ mongo_auth_keyfile_destination }}"
-    mode: '0400'
-    group: "{{ mongo_group }}"
-    owner: "{{ mongo_owner }}"
-  when: mongodb_replication | bool
-
 - name: Modify mongod.conf to enable authorization
   ansible.builtin.lineinfile:
     path: "{{ mongo_conf_file }}"
@@ -26,6 +17,46 @@
     regexp: "^  #keyFile: /etc/ssl/"
     line: "  keyFile: {{ mongo_auth_keyfile_destination }}"
   when: mongodb_replication | bool
+
+- name: Generate the replica set key on the first defined MongoDB node
+  ansible.builtin.set_fact:
+      replica_set_key: "{{ 768 | random | to_uuid | replace('-', '') | b64encode }}"
+  when:
+      - inventory_hostname == groups['mongodb'][0]
+      - mongodb_replication | bool
+  run_once: true
+
+- name: Save the generated key to first node
+  ansible.builtin.copy:
+      content: "{{ replica_set_key }}"
+      dest: /etc/ssl/mongo-replicaset-key.pem
+      owner: "{{ mongo_owner }}"
+      group: "{{ mongo_group }}"
+      mode: '0400'
+  when:
+      - inventory_hostname == groups['mongodb'][0]
+      - mongodb_replication | bool
+  run_once: true
+
+- name: Fetch the key from the first MongoDB node
+  ansible.builtin.slurp:
+     src: /etc/ssl/mongo-replicaset-key.pem
+  register: slurped_key
+  when:
+      - inventory_hostname == groups['mongodb'][0]
+      - mongodb_replication | bool
+  run_once: true
+
+- name: Distribute the key to all other nodes
+  ansible.builtin.copy:
+      content: "{{ slurped_key.content | b64decode }}"
+      dest: /etc/ssl/mongo-replicaset-key.pem
+      owner: "{{ mongo_owner }}"
+      group: "{{ mongo_group }}"
+      mode: '0400'
+  when:
+      - inventory_hostname != groups['mongodb'][0]
+      - mongodb_replication | bool
 
 - name: Check the auth status
   ansible.builtin.include_role:
