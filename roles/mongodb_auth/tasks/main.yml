@@ -1,9 +1,9 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-# When authorization is enabled in mongo using a replica set, the members of
-# the set will be required to authenticate too. This is accomplished with a
-# keyFile or x509 certificate. It is assumed that this keyFile already exists.
+  # When authorization is enabled in mongo using a replica set, the members of
+  # the set will be required to authenticate too. This is accomplished with a
+  # keyFile or x509 certificate. It is assumed that this keyFile already exists.
 - name: Modify mongod.conf to enable authorization
   ansible.builtin.lineinfile:
     path: "{{ mongo_conf_file }}"
@@ -18,45 +18,35 @@
     line: "  keyFile: {{ mongo_auth_keyfile_destination }}"
   when: mongodb_replication | bool
 
-- name: Generate the replica set key on the first defined MongoDB node
-  ansible.builtin.set_fact:
-    replica_set_key: "{{ 768 | random | to_uuid | replace('-', '') | b64encode }}"
+- name: Check if key exists on the first node
+  ansible.builtin.stat:
+    path: "{{ mongo_auth_keyfile_destination }}"
+  register: keyfile_stat
   when:
     - inventory_hostname == groups['mongodb'][0]
-    - mongodb_replication | bool
+    - mongodb_replication
   run_once: true
 
-- name: Save the generated key to first node
-  ansible.builtin.copy:
-    content: "{{ replica_set_key }}"
-    dest: /etc/ssl/mongo-replicaset-key.pem
-    owner: "{{ mongo_owner }}"
-    group: "{{ mongo_group }}"
-    mode: '0400'
+- name: Generate and copy the key to all nodes (only if missing)
   when:
     - inventory_hostname == groups['mongodb'][0]
-    - mongodb_replication | bool
+    - mongodb_replication
+    - not keyfile_stat.stat.exists
   run_once: true
+  block:
+    - name: Generate new replica set key
+      ansible.builtin.set_fact:
+        replica_set_key: "{{ 768 | random | to_uuid | replace('-', '') | b64encode }}"
 
-- name: Fetch the key from the first MongoDB node
-  ansible.builtin.slurp:
-    src: /etc/ssl/mongo-replicaset-key.pem
-  register: slurped_key
-  when:
-    - inventory_hostname == groups['mongodb'][0]
-    - mongodb_replication | bool
-  run_once: true
-
-- name: Distribute the key to all other nodes
-  ansible.builtin.copy:
-    content: "{{ slurped_key.content | b64decode }}"
-    dest: /etc/ssl/mongo-replicaset-key.pem
-    owner: "{{ mongo_owner }}"
-    group: "{{ mongo_group }}"
-    mode: '0400'
-  when:
-    - inventory_hostname != groups['mongodb'][0]
-    - mongodb_replication | bool
+    - name: Copy key to all MongoDB nodes
+      ansible.builtin.copy:
+        content: "{{ replica_set_key }}"
+        dest: "{{ mongo_auth_keyfile_destination }}"
+        owner: "{{ mongo_owner }}"
+        group: "{{ mongo_group }}"
+        mode: '0400'
+      loop: "{{ groups['mongodb'] }}"
+      delegate_to: "{{ item }}"
 
 - name: Check the auth status
   ansible.builtin.include_role:
