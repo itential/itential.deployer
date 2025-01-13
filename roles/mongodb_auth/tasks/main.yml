@@ -30,7 +30,7 @@
 - name: Generate and copy the key to all nodes (only if missing)
   when:
     - inventory_hostname == groups['mongodb'][0]
-    - mongodb_replication
+    - mongodb_replication | bool
     - not keyfile_stat.stat.exists
   run_once: true
   block:
