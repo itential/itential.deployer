@@ -80,7 +80,7 @@
 - name: Set Size Available
   ansible.builtin.set_fact:
     results: '{{ results | combine({mount + "_sizeAvailable": size_available | int}) }}'
-    mountVarName: "{{ mount }}_sizeAvailable"
+    mountvarname: "{{ mount }}_sizeAvailable"
 
 - name: Set http_proxy
   ansible.builtin.set_fact:

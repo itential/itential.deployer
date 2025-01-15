@@ -21,6 +21,7 @@
 - name: Get avx cpu info
   ansible.builtin.command: grep avx /proc/cpuinfo
   register: avx_cpuinfo
+  changed_when: true
 
 - name: Set avx variable
   ansible.builtin.set_fact:
@@ -80,4 +81,4 @@
     success_msg: "Platform host passed the preflight checks"
   when:
     - ignore_preflight_checks is defined
-    - ignore_preflight_checks == false
+    - not ignore_preflight_checks

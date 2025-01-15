@@ -29,7 +29,7 @@
     results: '{{ results | combine({"pass": true}) }}'
   when:
     - results.cpuCores >= redis_cpu_cores
-    - results.get(mountVarName, 0) >= redis_free_disk_space
+    - results.get(mountvarname, 0) >= redis_free_disk_space
     - results.memory >= redis_ram
     - results.url_status.values() | unique | length == 1 and results.url_status.values() | unique | first == 200
 
@@ -69,4 +69,4 @@
     success_msg: "Redis host passed the preflight checks"
   when:
     - ignore_preflight_checks is defined
-    - ignore_preflight_checks == false
+    - not ignore_preflight_checks

@@ -71,4 +71,4 @@
     success_msg: "Platform host passed the preflight checks"
   when:
     - ignore_preflight_checks is defined
-    - ignore_preflight_checks == false
+    - not ignore_preflight_checks

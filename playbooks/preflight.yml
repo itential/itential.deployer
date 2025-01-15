@@ -112,3 +112,4 @@
             echo "" >> {{ preflight_directory }}/Results.tx # Adds a blank line for spacing
           fi
         done
+      changed_when: true
