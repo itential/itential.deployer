@@ -1,0 +1,23 @@
+Name: {{results['name']}}
+Role: Gateway
+Pass:{{results['pass']}}
+
+
+SELinux     | {{results['SELinux']}}
+http_proxy  | {{ 'Yes' if results['http_proxy'] else 'None'}}
+https_proxy | {{ 'Yes' if results['https_proxy'] else 'None'}}
+IPv6        | {{ 'Enabled' if results['ipv6'] else 'Disabled'}}
+
+CPU         | {{ 'Pass' if results['cpuCores'] >= gateway_cpu_cores else 'FAIL'}}       | Cores: {{results['cpuCores']}}     Req: {{gateway_cpu_cores}}
+HDD         | {{ 'Pass' if results['/_sizeAvailable'] >= gateway_free_disk_space else 'FAIL'}}       | Free: {{results['/_sizeAvailable']}} on {{results['mount']}} Req: {{gateway_free_disk_space}}
+Memory      | {{ 'Pass' if results['memory'] >= gateway_ram else 'FAIL'}}       | Free: {{results['memory']}}  Req: {{gateway_ram}}
+
+Port  | Status
+{% for key, value in results['ports_status'].items() %}
+ {{key}} | {{value}}
+{% endfor %}
+
+URL  | Status
+{% for key, value in results['url_status'].items() %}
+ {{key}} | {{value}}
+{% endfor %}

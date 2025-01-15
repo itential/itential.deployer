@@ -15,6 +15,13 @@
   when: invalid_iag_release is defined
   tags: always
 
+- name: Run preflight checks
+  ansible.builtin.include_tasks:
+    file: preflight.yml
+  when:
+    - run_preflight is defined
+    - run_preflight | bool
+
 - name: Install base OS packages
   ansible.builtin.include_role:
     name: os

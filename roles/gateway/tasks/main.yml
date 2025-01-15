@@ -16,6 +16,13 @@
         msg: "Deployer does not support installing Gateway version {{ iag_release }} on {{ ansible_distribution }}-{{ ansible_distribution_major_version }}"
       when: invalid_iag_release is defined
 
+- name: Run preflight checks
+  ansible.builtin.include_tasks:
+    file: preflight.yml
+  when:
+    - run_preflight is defined
+    - run_preflight | bool
+
 - name: Install base OS packages
   ansible.builtin.include_role:
     name: os
