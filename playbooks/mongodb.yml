@@ -11,34 +11,6 @@
       tags:
         - always
 
-    # Perform a base installation of MongoDB
-    # Many of the other component's settings with regard to IAP are stored in MongoDB.
+    # Perform a base installation of MongoDB.
     # Run these tasks on any defined arbiters as well.
     - role: itential.deployer.mongodb
-      tags:
-        - mongodb
-        - mongodb_install
-
-    # Enable MongoDB replication, configure replica set if required
-    # https://www.mongodb.com/docs/manual/replication/
-    - role: itential.deployer.mongodb_replication
-      when: mongodb_replication | bool
-      tags:
-        - mongodb
-        - mongodb_replication
-
-    # Enable MongoDB authorization for stand alone and replica set if required
-    # https://www.mongodb.com/docs/manual/core/authentication/
-    - role: itential.deployer.mongodb_auth
-      when: mongodb_auth | bool
-      tags:
-        - mongodb
-        - mongodb_auth
-
-    # Require TLS for all MongoDB connections for stand alone and replica set if required
-    # https://www.mongodb.com/docs/manual/tutorial/configure-ssl/
-    - role: itential.deployer.mongodb_tls
-      when: mongodb_tls | bool
-      tags:
-        - mongodb
-        - mongodb_tls

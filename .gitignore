@@ -8,3 +8,6 @@
 **/*.pem
 **/*.log
 **/*.keep
+inventories
+playbooks/files
+.vscode
