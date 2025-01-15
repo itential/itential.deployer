@@ -31,7 +31,7 @@
     results: '{{ results | combine({"pass": true}) }}'
   when:
     - results.cpuCores >= platform_cpu_cores
-    - results.get(mountVarName, 0) >= platform_free_disk_space
+    - results.get(mountvarname, 0) >= platform_free_disk_space
     - results.memory >= platform_ram
     - results.url_status.values() | unique | length == 1 and results.url_status.values() | unique | first == 200
 

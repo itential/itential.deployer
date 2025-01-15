@@ -41,7 +41,7 @@
     results: '{{ results | combine({"pass": true}) }}'
   when:
     - results.cpuCores >= mongodb_cpu_cores
-    - results.get(mountVarName, 0) >= mongodb_free_disk_space
+    - results.get( , 0) >= mongodb_free_disk_space
     - results.memory >= mongodb_ram
     - results.url_status.values() | unique | length == 1 and results.url_status.values() | unique | first == 200
 

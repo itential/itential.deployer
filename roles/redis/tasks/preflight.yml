@@ -64,7 +64,7 @@
 
 - name: Check if host passed preflight checks.
   ansible.builtin.assert:
-    that: results["pass"]
+    that: results["pass"] == true
     fail_msg: "Redis host did not pass the preflight checks"
     success_msg: "Redis host passed the preflight checks"
   when:

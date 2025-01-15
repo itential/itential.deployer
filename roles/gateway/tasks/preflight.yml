@@ -28,7 +28,7 @@
     results: '{{ results | combine({"pass": true}) }}'
   when:
     - results.cpuCores >= gateway_cpu_cores
-    - results.get(mountVarName, 0) >= gateway_free_disk_space
+    - results.get(mountvarname, 0) >= gateway_free_disk_space
     - results.memory >= gateway_ram
     - results.url_status.values() | unique | length == 1 and results.url_status.values() | unique | first == 200
 
