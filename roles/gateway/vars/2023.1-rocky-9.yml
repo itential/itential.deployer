@@ -28,3 +28,6 @@ app_python_dependencies:
   - ansible-pylibssh
 
 iag_ansible_version: ansible==7.7.0
+
+iag_ansible_collections:
+  - ansible.netcommon:5.1.0

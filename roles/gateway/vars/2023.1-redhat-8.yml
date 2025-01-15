@@ -31,3 +31,6 @@ base_python_dependencies:
   - wheel==0.42.0
 
 iag_ansible_version: ansible==7.7.0
+
+iag_ansible_collections:
+  - ansible.netcommon:5.1.0
