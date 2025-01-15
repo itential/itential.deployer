@@ -3,25 +3,24 @@
 ---
 # Platform - Dev
 platform_cpu_cores: 8
-platform_os: [8,9]
+platform_os: [8, 9]
 platform_ram: 32
 platform_free_disk_space: 250
 
 # MongoDB - Dev
 mongodb_cpu_cores: 8
-mongodb_os: [8,9]
+mongodb_os: [8, 9]
 mongodb_ram: 64
 mongodb_free_disk_space: 1000
 
 # Redis - Dev
 redis_cpu_cores: 4
-redis_os: [8,9]
+redis_os: [8, 9]
 redis_ram: 16
 redis_free_disk_space: 100
 
 # Gateway - Dev
 gateway_cpu_cores: 4
-gateway_os: [8,9]
+gateway_os: [8, 9]
 gateway_ram: 16
 gateway_free_disk_space: 10
-

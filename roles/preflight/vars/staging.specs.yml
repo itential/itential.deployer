@@ -3,25 +3,24 @@
 ---
 # Platform - Staging
 platform_cpu_cores: 16
-platform_os: [8,9]
+platform_os: [8, 9]
 platform_ram: 64
 platform_free_disk_space: 250
 
 # MongoDB - Staging
 mongodb_cpu_cores: 16
-mongodb_os: [8,9]
+mongodb_os: [8, 9]
 mongodb_ram: 128
 mongodb_free_disk_space: 1000
 
 # Redis - Staging
 redis_cpu_cores: 8
-redis_os: [8,9]
+redis_os: [8, 9]
 redis_ram: 32
 redis_free_disk_space: 100
 
 # Gateway - Staging
 gateway_cpu_cores: 4
-gateway_os: [8,9]
+gateway_os: [8, 9]
 gateway_ram: 16
 gateway_free_disk_space: 10
-

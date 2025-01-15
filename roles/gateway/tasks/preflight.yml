@@ -13,10 +13,10 @@
   ansible.builtin.include_role:
     name: preflight
   vars:
-    port_checks: 
+    port_checks:
       - 8083   # IAG http
       - 8443   # IAG https
-    url_checks: 
+    url_checks:
 
 - name: Create temporary working directory
   ansible.builtin.tempfile:
@@ -25,7 +25,7 @@
 
 - name: Set pass to true if all conditions pass
   ansible.builtin.set_fact:
-      results: '{{ results | combine({ "pass": true}) }}'
+    results: '{{ results | combine({"pass": true}) }}'
   when:
     - results.cpuCores >= gateway_cpu_cores
     - results.get(mountVarName, 0) >= gateway_free_disk_space
@@ -36,22 +36,24 @@
   ansible.builtin.copy:
     content: "{{ results | to_json | indent(2) }}"
     dest: "{{ workingdir.path }}/preflightResults.json"
+    mode: '0777'
 
 - name: Fetch Gateway results json
   ansible.builtin.fetch:
     src: "{{ workingdir.path }}/preflightResults.json"
-    dest: "{{ preflight_directory }}/gateway_{{inventory_hostname}}_results.json"
+    dest: "{{ preflight_directory }}/gateway_{{ inventory_hostname }}_results.json"
 
-- name: Create Gateway preflight results 
+- name: Create Gateway preflight results
   ansible.builtin.template:
     src: "gateway.preflight.j2"
     dest: "{{ workingdir.path }}/preflightResults.txt"
+    mode: '0777'
 
 - name: Fetch Gateway results
   ansible.builtin.fetch:
     src: "{{ workingdir.path }}/preflightResults.txt"
-    dest: "{{ preflight_directory }}/gateway_{{inventory_hostname}}_results.txt"
-    flat: True
+    dest: "{{ preflight_directory }}/gateway_{{ inventory_hostname }}_results.txt"
+    flat: true
 
 - name: Remove temporary working directory
   ansible.builtin.file:
@@ -63,6 +65,6 @@
     that: results["pass"] == true
     fail_msg: "Platform host did not pass the preflight checks"
     success_msg: "Platform host passed the preflight checks"
-  when: 
+  when:
     - ignore_preflight_checks is defined
     - ignore_preflight_checks == false

@@ -13,10 +13,10 @@
   ansible.builtin.include_role:
     name: preflight
   vars:
-    port_checks: 
+    port_checks:
       - 27017   # Mongo
-    url_checks: 
-      - "https://repo.mongodb.org/yum/redhat/" 
+    url_checks:
+      - "https://repo.mongodb.org/yum/redhat/"
 
 - name: Get avx cpu info
   ansible.builtin.command: grep avx /proc/cpuinfo
@@ -24,11 +24,11 @@
 
 - name: Set avx variable
   ansible.builtin.set_fact:
-      avx: "{{ 'supported' if ('avx' in avx_cpuinfo['stdout']) else 'not supported' }}"
+    avx: "{{ 'supported' if ('avx' in avx_cpuinfo['stdout']) else 'not supported' }}"
 
 - name: Set avx
   ansible.builtin.set_fact:
-      results: '{{ results | combine({ "avx" : avx }) }}'
+    results: '{{ results | combine({"avx": avx}) }}'
 
 - name: Create temporary working directory
   ansible.builtin.tempfile:
@@ -37,7 +37,7 @@
 
 - name: Set pass to true if all conditions pass
   ansible.builtin.set_fact:
-      results: '{{ results | combine({ "pass": true}) }}'
+    results: '{{ results | combine({"pass": true}) }}'
   when:
     - results.cpuCores >= mongodb_cpu_cores
     - results.get(mountVarName, 0) >= mongodb_free_disk_space
@@ -48,23 +48,25 @@
   ansible.builtin.copy:
     content: "{{ results | to_json | indent(2) }}"
     dest: "{{ workingdir.path }}/mongodbPreflightResults.json"
-    
+    mode: '0777'
+
 - name: Fetch MongoDB results json
   ansible.builtin.fetch:
     src: "{{ workingdir.path }}/mongodbPreflightResults.json"
-    dest: "{{ preflight_directory }}/mongodb_{{inventory_hostname}}_results.json"
-    flat: True
+    dest: "{{ preflight_directory }}/mongodb_{{ inventory_hostname }}_results.json"
+    flat: true
 
-- name: Create MongoDB preflight results 
+- name: Create MongoDB preflight results
   ansible.builtin.template:
     src: "mongodb.preflight.j2"
     dest: "{{ workingdir.path }}/mongodbPreflightResults.txt"
+    mode: '0777'
 
 - name: Fetch MongoDB results
   ansible.builtin.fetch:
     src: "{{ workingdir.path }}/mongodbPreflightResults.txt"
-    dest: "{{ preflight_directory }}/mongodb_{{inventory_hostname}}_results.txt"
-    flat: True
+    dest: "{{ preflight_directory }}/mongodb_{{ inventory_hostname }}_results.txt"
+    flat: true
 
 - name: Remove temporary working directory
   ansible.builtin.file:
@@ -76,6 +78,6 @@
     that: results["pass"] == true
     fail_msg: "Platform host did not pass the preflight checks"
     success_msg: "Platform host passed the preflight checks"
-  when: 
+  when:
     - ignore_preflight_checks is defined
     - ignore_preflight_checks == false
