@@ -1,0 +1,70 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Include release vars
+  ansible.builtin.include_vars:
+    file: "{{ item }}"
+  with_first_found:
+    - "release-{{ iap_release }}.yml"
+    - "release-undefined.yml"
+  
+- name: Run common checks
+  ansible.builtin.include_role:
+    name: preflight
+  vars:
+    port_checks: 
+      - 6379   # Redis
+      - 26379  # Sentinel
+    url_checks: 
+      - "{{ redis_repo_url[ansible_distribution_major_version] }}"
+      - "{{ redis_epel_repo_url }}"
+
+- name: Create temporary working directory
+  ansible.builtin.tempfile:
+    state: directory
+  register: workingdir
+
+- name: Set pass to true if all conditions pass
+  ansible.builtin.set_fact:
+      results: '{{ results | combine({ "pass": true}) }}'
+  when:
+    - results.cpuCores >= redis_cpu_cores
+    - results.get(mountVarName, 0) >= redis_free_disk_space
+    - results.memory >= redis_ram
+    - results.url_status.values() | unique | length == 1 and results.url_status.values() | unique | first == 200 
+
+- name: Write the JSON fact to a file
+  ansible.builtin.copy:
+    content: "{{ results | to_json | indent(2) }}"
+    dest: "{{ workingdir.path }}/redisPreflightResults.json"
+
+- name: Fetch Redis results json
+  ansible.builtin.fetch:
+    src: "{{ workingdir.path }}/redisPreflightResults.json"
+    dest: "{{ preflight_directory }}/redis_{{inventory_hostname}}_results.json"
+    flat: True
+
+- name: Create Redis preflight results 
+  ansible.builtin.template:
+    src: "redis.preflight.j2"
+    dest: "{{ workingdir.path }}/redisPreflightResults.txt"
+
+- name: Fetch Redis results
+  ansible.builtin.fetch:
+    src: "{{ workingdir.path }}/redisPreflightResults.txt"
+    dest: "{{ preflight_directory }}/redis_{{inventory_hostname}}_results.txt"
+    flat: True
+
+- name: Remove temporary working directory
+  ansible.builtin.file:
+    path: "{{ workingdir.path }}"
+    state: absent
+
+- name: Check if host passed preflight checks.
+  ansible.builtin.assert:
+    that: results["pass"] == true
+    fail_msg: "Redis host did not pass the preflight checks"
+    success_msg: "Redis host passed the preflight checks"
+  when: 
+    - ignore_preflight_checks is defined
+    - ignore_preflight_checks == false

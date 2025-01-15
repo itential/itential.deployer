@@ -1,0 +1,151 @@
+# # Copyright (c) 2024, Itential, Inc
+# # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+# ---
+
+# - name: Print all available facts
+#   ansible.builtin.debug:
+#     var: ansible_facts
+
+- name: Include environment specs
+  ansible.builtin.include_vars:
+    file: "{{ item }}"
+  with_first_found:
+    - "{{env}}.specs.yml"
+    - "undefined.specs.yml"
+
+- name: Check for valid environment
+  ansible.builtin.fail:
+    msg: "Do defined environment. Please add env: dev, staging, or prod to your host file."
+  when: invalid_env is defined
+
+- name: Initialize Results
+  ansible.builtin.set_fact:
+      results: '{}'
+
+- name: Set Results var to JSON
+  ansible.builtin.set_fact:
+      results: "{{ results | from_json }}"
+
+- name: Set Inventory Name
+  ansible.builtin.set_fact:
+      results: '{{ results | combine({ "name": inventory_hostname}) }}'
+
+- name: Initialize pass to false
+  ansible.builtin.set_fact:
+      results: '{{ results | combine({ "pass": false}) }}'
+
+- name: Set OS
+  ansible.builtin.set_fact:
+      results: '{{ results | combine({ "os": ansible_facts.os_family}) }}'
+
+- name: Set OS Version
+  ansible.builtin.set_fact:
+      results: '{{ results | combine({ "osVersion": ansible_facts.distribution_version}) }}'
+
+- name: Set Mount
+  ansible.builtin.set_fact:
+      results: '{{ results | combine({ "mount": mount}) }}'
+
+- name: Set SELinux Variable
+  ansible.builtin.set_fact:
+      selinux: "{{ 'enabled' if (ansible_facts.selinux.config_mode == 'enforcing') else 'disabled' }}"
+
+- name: Set SELinux Variable
+  ansible.builtin.set_fact:
+      results: '{{ results | combine({ "SELinux": selinux}) }}'
+
+- name: Set IPv6 Variable 
+  ansible.builtin.set_fact:
+      results: '{{ results | combine({ "ipv6": ansible_facts.all_ipv6_addresses | length > 0}) }}'
+
+- name: Set CPU cores 
+  ansible.builtin.set_fact:
+      results: '{{ results | combine({ "cpuCores": ansible_processor_cores }) }}'
+
+- name: Set RAM 
+  ansible.builtin.set_fact:
+      results: '{{ results | combine({ "memory": (ansible_memory_mb["real"]["total"]/1000) }) }}'
+
+- name: Get mount info
+  ansible.builtin.set_fact:
+    mount_info: "{{ ansible_facts.mounts |
+                        selectattr('mount', 'defined') |
+                        selectattr('size_available', 'defined') |
+                        selectattr('mount', '==', mount) | list | unique }}"
+
+- name: Get size_available from mount
+  ansible.builtin.set_fact:
+    size_available: "{{mount_info[0]['size_available'] / 1024 / 1024 / 1024}}" 
+
+- name: Set Size Available 
+  ansible.builtin.set_fact:
+      results: '{{ results | combine({ mount + "_sizeAvailable" : size_available | int } ) }}'
+      mountVarName: "{{mount}}_sizeAvailable"
+
+
+- name: Set http_proxy
+  ansible.builtin.set_fact:
+      results: '{{ results | combine({ "http_proxy" :  ansible_env.http_proxy | default(false) }) }}'
+
+- name: Set https_proxy
+  ansible.builtin.set_fact:
+      results: '{{ results | combine({ "https_proxy" :  ansible_env.http_proxy | default(false) }) }}'
+
+
+- name: Initialize port status variable
+  ansible.builtin.set_fact:
+      ports_status: {}
+
+- name: Check if ports are open
+  block:
+    - name: Test port availability
+      wait_for:
+        port: "{{ item }}"
+        host: "{{ inventory_hostname }}"
+        timeout: 5
+        delay: 0
+        state: started
+      register: port_result
+      ignore_errors: true
+      with_items: "{{ port_checks }}"
+
+    - name: Update port status
+      set_fact:
+        ports_status: "{{ ports_status | combine({ item.item: (item.failed is false) }) }}"
+      with_items: "{{ port_result.results }}"
+  when:
+    - port_checks is defined
+    - port_checks is iterable
+    - port_checks | length > 0
+
+- name: Set ports_status
+  ansible.builtin.set_fact:
+      results: '{{ results | combine({ "ports_status" :  ports_status }) }}'
+
+- name: Initialize url status variable
+  ansible.builtin.set_fact:
+      url_status: {}
+
+- name: Check if urls are available
+  block:
+    - name: Test url availability
+      uri:
+        url: "{{ item }}"
+        timeout: 3
+        return_content: no
+      register: url_result
+      ignore_errors: true
+      with_items: "{{url_checks}}"
+
+    - name: Update URL status
+      set_fact:
+        url_status: "{{ url_status | combine({ item.item: item.status }) }}"
+      with_items: "{{ url_result.results }}"
+  when:
+    - url_checks is defined
+    - url_checks is iterable
+    - url_checks | length > 0
+
+- name: Set url_status
+  ansible.builtin.set_fact:
+      results: '{{ results | combine({ "url_status" :  url_status }) }}'
