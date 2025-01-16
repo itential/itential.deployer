@@ -13,12 +13,12 @@
   ansible.builtin.include_role:
     name: preflight
   vars:
-    port_checks:
+    preflight_port_checks:
       - 3000   # IAP http
       - 3443   # IAP https
       - 389    # IAP ldap http
       - 636    # IAP ldap https
-    url_checks:
+    preflight_url_checks:
       - "https://gitlab.com/itentialopensource"
 
 - name: Create temporary working directory

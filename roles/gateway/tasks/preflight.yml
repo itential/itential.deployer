@@ -13,10 +13,10 @@
   ansible.builtin.include_role:
     name: preflight
   vars:
-    port_checks:
+    preflight_port_checks:
       - 8083   # IAG http
       - 8443   # IAG https
-    url_checks:
+    preflight_url_checks:
 
 - name: Create temporary working directory
   ansible.builtin.tempfile:

@@ -1,12 +1,12 @@
 # Overview
 
-The playbook and role in this section are designed to run preflight checks on the hosts for Redis, Mongodb, Platform, and Gateway. These checks will determine if the host meets the minimum recomended system specifications for the given application.
+The playbook and role in this section are designed to run preflight checks on the hosts for Redis, Mongodb, Platform, and Gateway. These checks will determine if the host meets the minimum recommended system specifications for the given application.
 
 # Preflight Role
 
 ## General information
 
-This role can be run seperatly to check the inventory host as well as when running the installtion role for the other applications. By default, when installing an application using the deployer, the preflight role will run however, it will ignore the results so the application will still be installed. This behaviour is controlled with the variables `run_preflight` and `ignore_preflight_checks`. When `ignore_preflight_checks` is set to false, and any of the preflight checks fail, installition on the application will not preceed.
+This role can be run separately to check the inventory host as well as when running the installation role for the other applications. By default, when installing an application using the deployer, the preflight role will run however, it will ignore the results so the application will still be installed. This behavior is controlled with the variables `run_preflight` and `ignore_preflight_checks`. When `ignore_preflight_checks` is set to false, and any of the preflight checks fail, installation on the application will not proceed.
 
 The following checks will be made against the host. 
 
@@ -24,7 +24,7 @@ The following checks will be made against the host.
 | `URLs` | Does the host have access to required URLs | No
 | `AVX` | Is AVX supported (MongoDB only) | No
 
-The preflight role will run checks against the hosts and then trasfer the results into a local directory defined by the `preflight_directory` for review. 
+The preflight role will run checks against the hosts and then transfer the results into a local directory defined by the `preflight_directory` for review. 
 
 # Variables
 
@@ -49,7 +49,7 @@ The following table lists the default variables that are shared between the Redi
 
 # Building Your Inventory
 
-To install and configure Redis, add a `redis` group and host(s) to your inventory.  The following inventory shows a basic Redis configuration with a single Redis node with no authentication.
+The preflight checks will run by default when installing the redis, mongodb, platform, and gateway applications. If a host fails, by default, the deployer will continue to install the application. This behavior can be controlled by setting variables in the inventory as shown below.
 
 ## Example Inventory - Single Redis Node
 

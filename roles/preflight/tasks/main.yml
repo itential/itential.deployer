@@ -1,11 +1,6 @@
 # # Copyright (c) 2024, Itential, Inc
 # # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
-# ---
-
-# - name: Print all available facts
-#   ansible.builtin.debug:
-#     var: ansible_facts
-
+---
 - name: Include environment specs
   ansible.builtin.include_vars:
     file: "{{ item }}"
@@ -96,9 +91,9 @@
 
 - name: Check if ports are open
   when:
-    - port_checks is defined
-    - port_checks is iterable
-    - port_checks | length > 0
+    - preflight_port_checks is defined
+    - preflight_port_checks is iterable
+    - preflight_port_checks | length > 0
   block:
     - name: Test port availability
       ansible.builtin.wait_for:
@@ -109,7 +104,7 @@
         state: started
       register: port_result
       ignore_errors: true
-      with_items: "{{ port_checks }}"
+      with_items: "{{ preflight_port_checks }}"
 
     - name: Update port status
       ansible.builtin.set_fact:
@@ -126,9 +121,9 @@
 
 - name: Check if urls are available
   when:
-    - url_checks is defined
-    - url_checks is iterable
-    - url_checks | length > 0
+    - preflight_url_checks is defined
+    - preflight_url_checks is iterable
+    - preflight_url_checks | length > 0
   block:
     - name: Test url availability
       ansible.builtin.uri:
@@ -137,7 +132,7 @@
         return_content: false
       register: url_result
       ignore_errors: true
-      with_items: "{{ url_checks }}"
+      with_items: "{{ preflight_url_checks }}"
 
     - name: Update URL status
       ansible.builtin.set_fact:

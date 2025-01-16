@@ -1,6 +1,6 @@
 Name: {{results['name']}}
 Role: Redis
-Pass:{{results['pass']}}
+Pass: {{results['pass']}}
 
 
 SELinux     | {{results['SELinux']}}
@@ -14,10 +14,10 @@ Memory      | {{ 'Pass' if results['memory'] >= redis_ram else 'FAIL'}}       | 
 
 Port  | Status
 {% for key, value in results['ports_status'].items() %}
- {{key}} | {{value}}
+{{key}} | {{value}}
 {% endfor %}
 
 URL  | Status
 {% for key, value in results['url_status'].items() %}
- {{key}} | {{value}}
+{{key}} | {{value}}
 {% endfor %}

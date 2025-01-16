@@ -13,9 +13,9 @@
   ansible.builtin.include_role:
     name: preflight
   vars:
-    port_checks:
+    preflight_port_checks:
       - 27017   # Mongo
-    url_checks:
+    preflight_url_checks:
       - "https://repo.mongodb.org/yum/redhat/"
 
 - name: Get avx cpu info
@@ -77,8 +77,8 @@
 - name: Check if host passed preflight checks.
   ansible.builtin.assert:
     that: results["pass"] == true
-    fail_msg: "Platform host did not pass the preflight checks"
-    success_msg: "Platform host passed the preflight checks"
+    fail_msg: "MongoDB host did not pass the preflight checks"
+    success_msg: "MongoDB host passed the preflight checks"
   when:
     - ignore_preflight_checks is defined
     - not ignore_preflight_checks

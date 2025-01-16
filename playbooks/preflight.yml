@@ -73,43 +73,43 @@
 
     - name: Combine files into the output file
       ansible.builtin.shell: |
-        echo -------------------------------- >> {{ preflight_directory }}/Results.tx
-        echo "Redis RESULTS" >> {{ preflight_directory }}/Results.tx
+        echo -------------------------------- >> {{ preflight_directory }}/Results.txt
+        echo "Redis RESULTS" >> {{ preflight_directory }}/Results.txt
         for file in {{ preflight_directory }}/*.txt; do
           if [[ $(basename "$file") == redis*.txt ]]; then
-            echo ---------------- >> {{ preflight_directory }}/Results.tx
-            cat "$file" >> {{ preflight_directory }}/Results.tx
-            echo "" >> {{ preflight_directory }}/Results.tx # Adds a blank line for spacing
+            echo ---------------- >> {{ preflight_directory }}/Results.txt
+            cat "$file" >> {{ preflight_directory }}/Results.txt
+            echo "" >> {{ preflight_directory }}/Results.txt # Adds a blank line for spacing
           fi
         done
-        echo "" >> {{ preflight_directory }}/Results.tx # Adds a blank line for spacing
-        echo -------------------------------- >> {{ preflight_directory }}/Results.tx
-        echo "Mongodb RESULTS" >> {{ preflight_directory }}/Results.tx
+        echo "" >> {{ preflight_directory }}/Results.txt # Adds a blank line for spacing
+        echo -------------------------------- >> {{ preflight_directory }}/Results.txt
+        echo "Mongodb RESULTS" >> {{ preflight_directory }}/Results.txt
         for file in {{ preflight_directory }}/*.txt; do
           if [[ $(basename "$file") == mongodb*.txt ]]; then
-            echo ---------------- >> {{ preflight_directory }}/Results.tx
-            cat "$file" >> {{ preflight_directory }}/Results.tx
-            echo "" >> {{ preflight_directory }}/Results.tx # Adds a blank line for spacing
+            echo ---------------- >> {{ preflight_directory }}/Results.txt
+            cat "$file" >> {{ preflight_directory }}/Results.txt
+            echo "" >> {{ preflight_directory }}/Results.txt # Adds a blank line for spacing
           fi
         done
-        echo "" >> {{ preflight_directory }}/Results.tx # Adds a blank line for spacing
-        echo -------------------------------- >> {{ preflight_directory }}/Results.tx
-        echo "Platform RESULTS" >> {{ preflight_directory }}/Results.tx
+        echo "" >> {{ preflight_directory }}/Results.txt # Adds a blank line for spacing
+        echo -------------------------------- >> {{ preflight_directory }}/Results.txt
+        echo "Platform RESULTS" >> {{ preflight_directory }}/Results.txt
         for file in {{ preflight_directory }}/*.txt; do
           if [[ $(basename "$file") == platform*.txt ]]; then
-            echo ---------------- >> {{ preflight_directory }}/Results.tx
-            cat "$file" >> {{ preflight_directory }}/Results.tx
-            echo "" >> {{ preflight_directory }}/Results.tx # Adds a blank line for spacing
+            echo ---------------- >> {{ preflight_directory }}/Results.txt
+            cat "$file" >> {{ preflight_directory }}/Results.txt
+            echo "" >> {{ preflight_directory }}/Results.txt # Adds a blank line for spacing
           fi
         done
-        echo "" >> {{ preflight_directory }}/Results.tx # Adds a blank line for spacing
-        echo -------------------------------- >> {{ preflight_directory }}/Results.tx
-        echo "GATEWAY RESULTS" >> {{ preflight_directory }}/Results.tx
+        echo "" >> {{ preflight_directory }}/Results.txt # Adds a blank line for spacing
+        echo -------------------------------- >> {{ preflight_directory }}/Results.txt
+        echo "GATEWAY RESULTS" >> {{ preflight_directory }}/Results.txt
         for file in {{ preflight_directory }}/*.txt; do
           if [[ $(basename "$file") == gateway*.txt ]]; then
-            echo ---------------- >> {{ preflight_directory }}/Results.tx
-            cat "$file" >> {{ preflight_directory }}/Results.tx
-            echo "" >> {{ preflight_directory }}/Results.tx # Adds a blank line for spacing
+            echo ---------------- >> {{ preflight_directory }}/Results.txt
+            cat "$file" >> {{ preflight_directory }}/Results.txt
+            echo "" >> {{ preflight_directory }}/Results.txt # Adds a blank line for spacing
           fi
         done
       changed_when: true
