@@ -6,7 +6,7 @@ The playbook and role in this section are designed to run preflight checks on th
 
 ## General information
 
-This role can be run separately to check the inventory host as well as when running the installation role for the other applications. By default, when installing an application using the deployer, the preflight role will run however, it will ignore the results so the application will still be installed. This behavior is controlled with the variables `run_preflight` and `ignore_preflight_checks`. When `ignore_preflight_checks` is set to false, and any of the preflight checks fail, installation on the application will not proceed.
+This role can be run separately to check the inventory host as well as when running the installation role for the other applications. By default, when installing an application using the deployer, the preflight role will not run however, it will ignore the results so the application will still be installed. This behavior is controlled with the variables `run_preflight` and `ignore_preflight_checks`. When `ignore_preflight_checks` is set to false, and any of the preflight checks fail, installation on the application will not proceed.
 
 The following checks will be made against the host. 
 
@@ -36,7 +36,7 @@ The variables located in the `vars` directory of each role are "static" and not 
 
 The variables in this section may be overridden in the inventory in the `all` group vars.
 
-The following table lists the default variables that are shared between the Redis-related roles, located in `roles/common_vars/defaults/main/preflight.yml`.
+The following table lists the default variables, located in `roles/common_vars/defaults/main/preflight.yml`.
 
 | Variable | Group | Type | Description | Default Value
 | :------- | :---- | :--- | :---------- | :------------
@@ -49,7 +49,7 @@ The following table lists the default variables that are shared between the Redi
 
 # Building Your Inventory
 
-The preflight checks will run by default when installing the redis, mongodb, platform, and gateway applications. If a host fails, by default, the deployer will continue to install the application. This behavior can be controlled by setting variables in the inventory as shown below.
+The preflight checks will not run by default when installing the redis, mongodb, platform, and gateway applications. If a host fails, by default, the deployer will continue to install the application. This behavior can be controlled by setting variables in the inventory as shown below.
 
 ## Example Inventory - Single Redis Node
 

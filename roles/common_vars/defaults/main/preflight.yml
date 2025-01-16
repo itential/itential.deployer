@@ -10,5 +10,5 @@ mount: "/"
 env: dev
 
 # defaults for running and ignoring the preflight checks
-run_preflight: true
+run_preflight: false
 ignore_preflight_checks: true
