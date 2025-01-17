@@ -48,3 +48,19 @@ python_venv: "{{ mongodb_python_venv_root }}/{{ mongodb_python_venv_name }}"
 # Offline install settings
 # Refer to the offline variables in common_vars for additional settings
 packages_path: "{{ itential_packages_path }}/{{ iap_release }}/mongodb"
+
+# The base directory for SSL certs and key files
+mongodb_ssl_root_dir: /etc/ssl
+
+# Key file source
+mongo_auth_keyfile_source: mongo-replicaset-key.pem
+
+# Key file destination location
+# The key file is used to authenticate members of a replica set
+mongodb_auth_keyfile_destination: "{{ mongodb_ssl_root_dir }}/mongodb/mongo-replicaset-key.pem"
+
+# Destination location of the certificate key file used for TLS connections
+mongodb_cert_keyfile_destination: "{{ mongodb_ssl_root_dir }}/mongodb/mongo-certificate.pem"
+
+# Destination location of the CA root file used for TLS connections
+mongodb_root_ca_file_destination: "{{ mongodb_ssl_root_dir }}/mongodb/mongo-rootCA.pem"

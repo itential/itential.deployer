@@ -1,0 +1,44 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+
+# When authorization is enabled in mongo using a replica set, the members of a
+# replica set will be required to authenticate to each other. This is accomplished
+# with a keyFile or x509 certificate. Ensure that the directory exists for the
+# certificates and key files.
+- name: Ensure that the directory exists for the certificates and key files
+  ansible.builtin.file:
+    state: directory
+    path: "{{ mongodb_ssl_root_dir }}/mongodb"
+    owner: root
+    group: root
+    mode: "0775"
+  when:
+    - mongodb_replication | bool
+
+- name: Upload the key file if this is a replica set
+  ansible.builtin.copy:
+    src: "{{ mongodb_auth_keyfile_source }}"
+    dest: "{{ mongodb_auth_keyfile_destination }}"
+    owner: "{{ mongo_owner }}"
+    group: "{{ mongo_group }}"
+    mode: '0400'
+  when:
+    - mongodb_replication | bool
+
+# Execute the template to apply changes to the mongo.conf for auth
+- name: Create MongoDB config file
+  ansible.builtin.template:
+    src: mongod.conf.j2
+    dest: "{{ mongo_conf_file }}"
+    owner: "{{ mongo_owner }}"
+    group: "{{ mongo_group }}"
+    mode: "0644"
+  vars:
+    stage: "auth"
+
+- name: Start mongo
+  ansible.builtin.systemd:
+    name: mongod
+    state: restarted
+    enabled: true

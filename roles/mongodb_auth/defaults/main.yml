@@ -1,9 +1,0 @@
-# Copyright (c) 2024, Itential, Inc
-# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
----
-# Key file source
-mongo_auth_keyfile_source: mongo-replicaset-key.pem
-
-# Key file destination location
-# The key file is used to authenticate members of a replica set
-mongo_auth_keyfile_destination: "/etc/ssl/{{ mongo_auth_keyfile_source }}"
