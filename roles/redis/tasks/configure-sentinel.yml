@@ -11,6 +11,7 @@
         owner: root
         group: root
         mode: "0644"
+      when: redis_install_method == "source"
 
     - name: Use template to generate sentinel.conf
       ansible.builtin.template:

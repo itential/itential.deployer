@@ -10,6 +10,7 @@ WorkingDirectory={{ iap_install_dir }}/current
 ExecStart=/usr/bin/node --max-old-space-size=8192 server.js
 Restart=on-failure
 ExecReload=/bin/kill -USR2 $MAINPID
+KillMode=mixed
 
 [Install]
 WantedBy=multi-user.target

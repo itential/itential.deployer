@@ -6,6 +6,12 @@ gateway_packages:
   - make
   - sqlite-devel
 
+gateway_build_packages:
+  - gcc-c++
+  - make
+  - sqlite-devel
+  - python39-devel
+
 python_version: 3.9
 python_executable: "/usr/bin/python{{ python_version }}"
 pip_executable: "/usr/bin/pip{{ python_version }}"
@@ -37,4 +43,4 @@ app_python_dependencies:
   - nornir-utils==0.2.0
   - pygnmi==0.8.9
 
-iag_ansible_version: ansible==7.7.0
+iag_ansible_version: ansible==8.7.0
