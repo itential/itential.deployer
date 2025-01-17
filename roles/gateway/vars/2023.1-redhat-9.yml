@@ -5,6 +5,11 @@ gateway_packages:
   - gcc-c++
   - make
 
+gateway_build_packages:
+  - gcc-c++
+  - make
+  - python39-devel
+
 python_version: 3.9
 python_executable: "/usr/bin/python{{ python_version }}"
 pip_executable: "/usr/bin/pip{{ python_version }}"
@@ -23,3 +28,6 @@ app_python_dependencies:
   - ansible-pylibssh
 
 iag_ansible_version: ansible==7.7.0
+
+iag_ansible_collections:
+  - ansible.netcommon:5.1.0

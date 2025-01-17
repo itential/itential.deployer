@@ -9,7 +9,7 @@
     {% set tlsOptions = "&tls=true&tlsCAFile=" + itential_root_ca_file_destination %}
   {% endif %}
   {% if mongodb_auth | bool %}
-    {% set userpassword = "itential:" + mongo_user_itential_password + "@" %}
+    {% set userpassword = "itential:" + ( mongo_user_itential_password | urlencode | regex_replace("/","%2F") ) + "@" %}
   {% endif %}
   {% if mongodb_replication | bool %}
     {% for h in groups['mongodb'] -%}
