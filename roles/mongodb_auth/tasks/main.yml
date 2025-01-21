@@ -10,23 +10,6 @@
     regexp: "^  authorization: disabled"
     line: "  authorization: enabled"
 
-# The keyFile is only required if there is replication
-- name: Modify mongod.conf to include key file location if this a replica set
-  ansible.builtin.lineinfile:
-    path: "{{ mongo_conf_file }}"
-    regexp: "^  #keyFile: /etc/ssl/"
-    line: "  keyFile: {{ mongo_auth_keyfile_destination }}"
-  when: mongodb_replication | bool
-
-- name: Check if key exists on the first node
-  when:
-    - inventory_hostname == groups['mongodb'][0]
-    - mongodb_replication | bool
-  run_once: true
-  ansible.builtin.stat:
-    path: "{{ mongo_auth_keyfile_destination }}"
-  register: keyfile_stat
-
 - name: Create replica set keyfile
   when: mongodb_replication | bool
   block:
@@ -35,11 +18,13 @@
         path: "{{ mongo_conf_file }}"
         regexp: "^  #keyFile: /etc/ssl/"
         line: "  keyFile: {{ mongo_auth_keyfile_destination }}"
+
     - name: Check if replica set key exists on the primary node
       ansible.builtin.stat:
         path: "{{ mongo_auth_keyfile_destination }}"
       when: inventory_hostname == groups['mongodb'][0]
       register: keyfile_stat
+
     - name: Generate a new replica set key with OpenSSL
       ansible.builtin.shell:
         cmd: openssl rand -base64 756 > "{{ mongo_auth_keyfile_destination }}"
@@ -48,12 +33,14 @@
       when:
         - inventory_hostname == groups['mongodb'][0]
         - not keyfile_stat.stat.exists
+
     - name: Get the key from the primary node
       ansible.builtin.slurp:
         src: '{{ mongo_auth_keyfile_destination }}'
       register: keyfile
       delegate_to: "{{ groups['mongodb'][0] }}"
       when: inventory_hostname != groups['mongodb'][0]
+
     - name: Create the key file on the secondary nodes
       ansible.builtin.copy:
         dest: "{{ mongo_auth_keyfile_destination }}"
@@ -62,6 +49,7 @@
         group: "{{ mongo_group }}"
         mode: "0400"
       when: inventory_hostname != groups['mongodb'][0]
+
     - name: Set the key file ownership and permissions
       ansible.builtin.file:
         path: "{{ mongo_auth_keyfile_destination }}"
