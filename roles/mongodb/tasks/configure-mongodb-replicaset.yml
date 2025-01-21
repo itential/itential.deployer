@@ -20,7 +20,7 @@
     tls: "{{ mongodb_tls | bool | to_json }}"
     tlsAllowInvalidCertificates: "CERT_OPTIONAL"
     tlsCAFile: "{{ mongodb_tls | ternary(mongodb_root_ca_file_destination, omit) }}"
-    tlsCertificateKeyFile: "{{ mongodb_tls | ternary('/etc/ssl/mongodb/mongo-certificate.pem', omit) }}"
+    tlsCertificateKeyFile: "{{ mongodb_tls | ternary(mongodb_cert_keyfile_destination, omit) }}"
   register: rs
   failed_when:
     - "'Unable to determine if auth is enabled' not in rs.msg"
@@ -32,8 +32,7 @@
 - name: Set replset_exists to true if it exists
   ansible.builtin.set_fact:
     replset_exists: true
-  when:
-    - "'replicaset is in a converged state' in rs.msg"
+  when: "'replicaset is in a converged state' in rs.msg"
 
 # Execute the template to apply changes to the mongo.conf for replication
 - name: Create MongoDB config file

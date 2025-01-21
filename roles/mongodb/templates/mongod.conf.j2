@@ -44,7 +44,7 @@ security:
   # The path to a key file that stores the shared secret that MongoDB
   # instances use to authenticate to each other in a sharded cluster
   # or replica set. Not required for standalone instance.
-  keyFile: /etc/ssl/mongodb/mongo-replicaset-key.pem
+  keyFile: {{ mongodb_auth_keyfile_destination }}
 {% endif %}
 
 # Network Interfaces & TLS Settings
