@@ -16,8 +16,6 @@
     preflight_port_checks:
       - 3000   # IAP http
       - 3443   # IAP https
-      - 389    # IAP ldap http
-      - 636    # IAP ldap https
     preflight_url_checks:
       - "https://gitlab.com/itentialopensource"
 

@@ -7,7 +7,7 @@ preflight_directory: "/tmp/preflight"
 mount: "/"
 
 # default env specs to check
-env: dev
+preflight_env: dev
 
 # defaults for running and ignoring the preflight checks
 run_preflight: false

@@ -6,7 +6,7 @@ The playbook and role in this section are designed to run preflight checks on th
 
 ## General information
 
-This role can be run separately to check the inventory host as well as when running the installation role for the other applications. By default, when installing an application using the deployer, the preflight role will not run however, it will ignore the results so the application will still be installed. This behavior is controlled with the variables `run_preflight` and `ignore_preflight_checks`. When `ignore_preflight_checks` is set to false, and any of the preflight checks fail, installation on the application will not proceed.
+This role can be run separately to check the inventory host as well as when running the installation role for the other applications. By default, when installing an application using the deployer, the preflight role will not run the preflight role will not run. This behavior is controlled with the variables `preflight_run_checks` and `preflight_enforce_checks`. When `preflight_enforce_checks` is set to true, and any of the preflight checks fail, installation on the application will not proceed.
 
 The following checks will be made against the host. 
 
@@ -59,7 +59,7 @@ all:
         iap_release: 2023.1
         preflight_directory: "/tmp/preflight"
         mount: "/"
-        env: dev
+        preflight_env: dev
         run_preflight: true
         ignore_preflight_checks: true
 
