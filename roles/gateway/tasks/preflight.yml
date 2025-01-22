@@ -39,6 +39,7 @@
   ansible.builtin.fetch:
     src: "{{ workingdir.path }}/preflightResults.json"
     dest: "{{ preflight_directory }}/gateway_{{ inventory_hostname }}_results.json"
+    flat: true
 
 - name: Create Gateway preflight results
   ansible.builtin.template:
