@@ -13,8 +13,6 @@
   ansible.builtin.include_role:
     name: preflight
   vars:
-    preflight_port_checks:
-      - 27017   # Mongo
     preflight_url_checks:
       - "https://repo.mongodb.org/yum/redhat/"
 

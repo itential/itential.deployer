@@ -4,11 +4,11 @@
 preflight_directory: "/tmp/preflight"
 
 # default mount to check
-mount: "/"
+preflight_mounts: "/"
 
 # default env specs to check
 preflight_env: dev
 
 # defaults for running and ignoring the preflight checks
-run_preflight: false
+preflight_run_checks: false
 ignore_preflight_checks: true

@@ -20,8 +20,8 @@
   ansible.builtin.include_tasks:
     file: preflight.yml
   when:
-    - run_preflight is defined
-    - run_preflight | bool
+    - preflight_run_checks is defined
+    - preflight_run_checks | bool
 
 - name: Install base OS packages
   ansible.builtin.include_role:

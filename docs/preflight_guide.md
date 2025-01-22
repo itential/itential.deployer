@@ -41,9 +41,9 @@ The following table lists the default variables, located in `roles/common_vars/d
 | Variable | Group | Type | Description | Default Value
 | :------- | :---- | :--- | :---------- | :------------
 | `preflight_directory` | `all` | String | Directory containing the results of the preflight checks  |`/tmp/preflight`
-| `mount` | `all` | String | Which mount to check for the storage requirment | `/`
+| `preflight_mounts` | `all` | String | Which mount to check for the storage requirment | `/`
 | `env` | `all` | String | Which environment specs to check the host against `dev`/`staging`/`prod`   | `dev`
-| `run_preflight` | `all` | Boolean | Flag to run the preflight checks | `true`
+| `preflight_run_checks` | `all` | Boolean | Flag to run the preflight checks | `true`
 | `ignore_preflight_checks` | `all` | Boolean | Ignore a failed result of preflight checks and proceed with installation  | `true`
 
 
@@ -51,16 +51,16 @@ The following table lists the default variables, located in `roles/common_vars/d
 
 The preflight checks will not run by default when installing the redis, mongodb, platform, and gateway applications. If a host fails, by default, the deployer will continue to install the application. This behavior can be controlled by setting variables in the inventory as shown below.
 
-## Example Inventory - Single Redis Node
+## Example Inventory
 
 ```
 all:
     vars:
         iap_release: 2023.1
         preflight_directory: "/tmp/preflight"
-        mount: "/"
+        preflight_mounts: "/"
         preflight_env: dev
-        run_preflight: true
+        preflight_run_checks: true
         ignore_preflight_checks: true
 
 ```

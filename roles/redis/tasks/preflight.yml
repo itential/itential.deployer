@@ -12,9 +12,6 @@
   ansible.builtin.include_role:
     name: preflight
   vars:
-    preflight_port_checks:
-      - 6379   # Redis
-      - 26379  # Sentinel
     preflight_url_checks:
       - "{{ redis_repo_url[ansible_distribution_major_version] }}"
       - "{{ redis_epel_repo_url }}"

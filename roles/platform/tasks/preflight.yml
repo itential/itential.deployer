@@ -13,9 +13,6 @@
   ansible.builtin.include_role:
     name: preflight
   vars:
-    preflight_port_checks:
-      - 3000   # IAP http
-      - 3443   # IAP https
     preflight_url_checks:
       - "https://gitlab.com/itentialopensource"
 
