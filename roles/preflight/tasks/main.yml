@@ -45,7 +45,7 @@
   ansible.builtin.set_fact:
     selinux: "{{ 'enabled' if (ansible_facts.selinux.config_mode == 'enforcing') else 'disabled' }}"
 
-- name: Set SELinux Variable
+- name: Set SELinux Variable in results
   ansible.builtin.set_fact:
     results: '{{ results | combine({"SELinux": selinux}) }}'
 

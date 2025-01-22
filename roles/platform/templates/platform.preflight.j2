@@ -12,11 +12,6 @@ CPU         | {{ 'Pass' if results['cpuCores'] >= platform_cpu_cores else 'FAIL'
 HDD         | {{ 'Pass' if results['/_sizeAvailable'] >= platform_free_disk_space else 'FAIL'}}       | Free: {{results['/_sizeAvailable']}} on {{results['mount']}} Req: {{platform_free_disk_space}}
 Memory      | {{ 'Pass' if results['memory'] >= platform_ram else 'FAIL'}}       | Free: {{results['memory']}}  Req: {{platform_ram}}
 
-Port  | Status
-{% for key, value in results['ports_status'].items() %}
-{{key}} | {{value}}
-{% endfor %}
-
 URL  | Status
 {% for key, value in results['url_status'].items() %}
 {{key}} | {{value}}
