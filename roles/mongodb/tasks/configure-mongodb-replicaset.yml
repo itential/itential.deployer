@@ -6,33 +6,32 @@
   ansible.builtin.set_fact:
     replset_exists: false
 
+# This command against mongo will return some basic information about the database.
+# If there is already a replicaset defined then the output of this command will
+# contain the "setName" field. If there is no replicaset defined then this field
+# will not be present in the output. We can determine if the replicaset has already
+# been configured by the presence of this variable.
 - name: Check if the replicaset exists
-  community.mongodb.mongodb_status:
+  community.mongodb.mongodb_shell:
+    login_host: "{{ inventory_hostname }}"
+    login_port: "{{ mongo_port }}"
     login_user: "{{ mongodb_auth | ternary('admin', omit) }}"
     login_password: "{{ mongodb_auth | ternary(mongo_user_admin_password, omit) }}"
-    login_port: "{{ mongo_port }}"
     login_database: admin
-    login_host: "{{ inventory_hostname }}"
-    replica_set: "{{ mongo_replset_name }}"
-    poll: 3
-    interval: 10
-    validate: minimal
-    tls: "{{ mongodb_tls | bool | to_json }}"
-    tlsAllowInvalidCertificates: "CERT_OPTIONAL"
-    tlsCAFile: "{{ mongodb_tls | ternary(mongodb_root_ca_file_destination, omit) }}"
-    tlsCertificateKeyFile: "{{ mongodb_tls | ternary(mongodb_cert_keyfile_destination, omit) }}"
+    eval: db.runCommand({"hello":1})
+    mongo_cmd: auto
   register: rs
-  failed_when:
-    - "'Unable to determine if auth is enabled' not in rs.msg"
-    - "'replicaset is in a converged state' not in rs.msg" # replset exists already
-    - "'NotPrimaryOrSecondary' not in rs.msg" # replset does not exist yet
   vars:
     ansible_python_interpreter: "{{ python_venv }}/bin/python3"
 
+# If setName is present in the output and if it equals the expected value then the
+# replicaset has already been created.
 - name: Set replset_exists to true if it exists
   ansible.builtin.set_fact:
     replset_exists: true
-  when: "'replicaset is in a converged state' in rs.msg"
+  when:
+    - rs.transformed_output.setName is defined
+    - rs.transformed_output.setName == mongo_replset_name
 
 # Execute the template to apply changes to the mongo.conf for replication
 - name: Create MongoDB config file
