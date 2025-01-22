@@ -110,6 +110,13 @@
     name: vm.zone_reclaim_mode
     value: 0
 
+# Tune Kernel parameters (the maximum number of memory map areas a process may have.)
+- name: Adjust the maximum number of memory map areas
+  ansible.posix.sysctl:
+    name: vm.max_map_count
+    value: 512000
+  when: mongodb_replication | bool
+
 - name: Increase throughput settings
   ansible.posix.sysctl:
     name: net.core.somaxconn
