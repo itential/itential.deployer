@@ -15,7 +15,7 @@
 - name: Include Preflight MongoDB
   import_playbook: itential.deployer.preflight_mongodb
   tags: preflight_mongodb
-  
+
 - name: Include Preflight Platform
   import_playbook: itential.deployer.preflight_platform
   tags: preflight_platform
