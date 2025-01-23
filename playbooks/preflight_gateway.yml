@@ -1,0 +1,59 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Set time variables
+  hosts: localhost
+  become: false
+  tags: always
+  tasks:
+    - name: Set date and time
+      delegate_to: localhost
+      ansible.builtin.set_fact:
+        current_date: "{{ ansible_date_time.date }}"
+        current_time: "{{ ansible_date_time.hour }}_{{ ansible_date_time.minute }}"
+
+- name: Run Redis Preflight checks
+  hosts: gateway
+  become: true
+  roles:
+    # Pull in the common vars
+    - role: itential.deployer.common_vars
+      tags:
+        - always
+  tasks:
+    - name: Preflight
+      ansible.builtin.import_role:
+        name: itential.deployer.gateway
+        tasks_from: preflight
+      vars:
+        date: "{{ hostvars['localhost']['current_date'] }}"
+        time: "{{ hostvars['localhost']['current_time'] }}"
+
+- name: Read all data and combines and displays results
+  hosts: localhost
+  become: false
+  tags: always
+  roles:
+    - role: itential.deployer.common_vars
+  tasks:
+    - name: Set date and time
+      delegate_to: localhost
+      ansible.builtin.set_fact:
+        results_file: "{{ preflight_directory }}/{{ current_date }}/Results_Gateway_{{ current_time }}.txt"
+
+    - name: Ensure the destination file exists and is empty
+      ansible.builtin.file:
+        path: "{{ results_file }}"
+        state: absent
+
+    - name: Combine files into the output file
+      ansible.builtin.shell: |
+        echo "GATEWAY RESULTS" >> {{ results_file }}
+        for file in {{ preflight_directory }}/{{ current_date }}/*.txt; do
+          if [[ $(basename "$file") == gateway*{{ current_time }}*.txt ]]; then
+            echo ---------------- >> {{ results_file }}
+            cat "$file" >> {{ results_file }}
+            echo "" >> {{ results_file }}
+          fi
+        done
+      changed_when: true

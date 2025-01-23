@@ -12,9 +12,17 @@
       ansible.builtin.include_tasks:
         file: determine-release-vars.yml
 
+- name: Set date and time
+  ansible.builtin.set_fact:
+    current_date: "{{ ansible_date_time.date }}"
+    current_time: "{{ ansible_date_time.hour }}_{{ ansible_date_time.minute }}"
+
 - name: Run preflight checks
   ansible.builtin.include_tasks:
     file: preflight.yml
+  vars:
+    date: "{{ current_date }}"
+    time: "{{ current_time }}"
   when:
     - preflight_run_checks is defined
     - preflight_run_checks | bool

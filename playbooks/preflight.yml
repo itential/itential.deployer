@@ -8,18 +8,18 @@
     - role: itential.deployer.common_vars
       tags: always
 
-- name: Import Preflight Redis
+- name: Include Preflight Redis
   import_playbook: itential.deployer.preflight_redis
   tags: preflight_redis
 
-- name: Import Preflight MongoDB
+- name: Include Preflight MongoDB
   import_playbook: itential.deployer.preflight_mongodb
   tags: preflight_mongodb
   
-- name: Import Preflight Platform
+- name: Include Preflight Platform
   import_playbook: itential.deployer.preflight_platform
   tags: preflight_platform
 
-- name: Import Preflight Gateway
+- name: Include Preflight Gateway
   import_playbook: itential.deployer.preflight_gateway
   tags: preflight_gateway
