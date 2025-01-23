@@ -43,18 +43,6 @@
     - results.memory >= mongodb_ram
     - results.url_status.values() | unique | length == 1 and results.url_status.values() | unique | first == 200
 
-- name: Write the JSON fact to a file
-  ansible.builtin.copy:
-    content: "{{ results | to_json | indent(2) }}"
-    dest: "{{ workingdir.path }}/mongodbPreflightResults.json"
-    mode: '0777'
-
-- name: Fetch MongoDB results json
-  ansible.builtin.fetch:
-    src: "{{ workingdir.path }}/mongodbPreflightResults.json"
-    dest: "{{ preflight_directory }}/mongodb_{{ inventory_hostname }}_results.json"
-    flat: true
-
 - name: Create MongoDB preflight results
   ansible.builtin.template:
     src: "mongodb.preflight.j2"
@@ -64,7 +52,7 @@
 - name: Fetch MongoDB results
   ansible.builtin.fetch:
     src: "{{ workingdir.path }}/mongodbPreflightResults.txt"
-    dest: "{{ preflight_directory }}/mongodb_{{ inventory_hostname }}_results.txt"
+    dest: "{{ preflight_directory }}/{{ date }}/mongodb_{{ inventory_hostname }}_{{ time }}_results.txt"
     flat: true
 
 - name: Remove temporary working directory
@@ -78,5 +66,5 @@
     fail_msg: "MongoDB host did not pass the preflight checks"
     success_msg: "MongoDB host passed the preflight checks"
   when:
-    - ignore_preflight_checks is defined
-    - not ignore_preflight_checks
+    - preflight_enforce_checks is defined
+    - preflight_enforce_checks

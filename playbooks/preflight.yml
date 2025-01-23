@@ -2,114 +2,24 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
 - name: Run Redis Preflight checks
-  hosts: redis, redis_secondary
+  hosts: redis, redis_secondary, mongodb, mongodb_secondary, gateway, platform, platform_secondary
   become: true
   roles:
-    # Pull in the common vars
     - role: itential.deployer.common_vars
-      tags:
-        - always
-  tasks:
-    - name: Preflight
-      ansible.builtin.import_role:
-        name: itential.deployer.redis
-        tasks_from: preflight
+      tags: always
 
-- name: Run Mongo Preflight checks
-  hosts: mongodb, mongodb_secondary
-  become: true
-  roles:
-    # Pull in the common vars
-    - role: itential.deployer.common_vars
-      tags:
-        - always
-  tasks:
-    - name: Preflight
-      ansible.builtin.import_role:
-        name: itential.deployer.mongodb
-        tasks_from: preflight
+- name: Import Preflight Redis
+  import_playbook: itential.deployer.preflight_redis
+  tags: preflight_redis
 
-- name: Run Gateway Preflight checks
-  hosts: gateway
-  become: true
-  roles:
-    # Pull in the common vars
-    - role: itential.deployer.common_vars
-      tags:
-        - always
-  tasks:
-    - name: Preflight
-      ansible.builtin.import_role:
-        name: itential.deployer.gateway
-        tasks_from: preflight
+- name: Import Preflight MongoDB
+  import_playbook: itential.deployer.preflight_mongodb
+  tags: preflight_mongodb
+  
+- name: Import Preflight Platform
+  import_playbook: itential.deployer.preflight_platform
+  tags: preflight_platform
 
-- name: Run Platform Preflight checks
-  hosts: platform, platform_secondary
-  become: true
-  roles:
-    # Pull in the common vars
-    - role: itential.deployer.common_vars
-      tags:
-        - always
-  tasks:
-    - name: Preflight
-      ansible.builtin.import_role:
-        name: itential.deployer.platform
-        tasks_from: preflight
-
-- name: Read all data and combines and displays results
-  hosts: localhost
-  become: false
-  roles:
-    # Pull in the common vars
-    - role: itential.deployer.common_vars
-      tags:
-        - always
-  tasks:
-    - name: Ensure the destination file exists and is empty
-      ansible.builtin.file:
-        path: "{{ preflight_directory }}/Results.txt"
-        state: absent
-
-    - name: Combine files into the output file
-      ansible.builtin.shell: |
-        echo -------------------------------- >> {{ preflight_directory }}/Results.txt
-        echo "Redis RESULTS" >> {{ preflight_directory }}/Results.txt
-        for file in {{ preflight_directory }}/*.txt; do
-          if [[ $(basename "$file") == redis*.txt ]]; then
-            echo ---------------- >> {{ preflight_directory }}/Results.txt
-            cat "$file" >> {{ preflight_directory }}/Results.txt
-            echo "" >> {{ preflight_directory }}/Results.txt # Adds a blank line for spacing
-          fi
-        done
-        echo "" >> {{ preflight_directory }}/Results.txt # Adds a blank line for spacing
-        echo -------------------------------- >> {{ preflight_directory }}/Results.txt
-        echo "Mongodb RESULTS" >> {{ preflight_directory }}/Results.txt
-        for file in {{ preflight_directory }}/*.txt; do
-          if [[ $(basename "$file") == mongodb*.txt ]]; then
-            echo ---------------- >> {{ preflight_directory }}/Results.txt
-            cat "$file" >> {{ preflight_directory }}/Results.txt
-            echo "" >> {{ preflight_directory }}/Results.txt # Adds a blank line for spacing
-          fi
-        done
-        echo "" >> {{ preflight_directory }}/Results.txt # Adds a blank line for spacing
-        echo -------------------------------- >> {{ preflight_directory }}/Results.txt
-        echo "Platform RESULTS" >> {{ preflight_directory }}/Results.txt
-        for file in {{ preflight_directory }}/*.txt; do
-          if [[ $(basename "$file") == platform*.txt ]]; then
-            echo ---------------- >> {{ preflight_directory }}/Results.txt
-            cat "$file" >> {{ preflight_directory }}/Results.txt
-            echo "" >> {{ preflight_directory }}/Results.txt # Adds a blank line for spacing
-          fi
-        done
-        echo "" >> {{ preflight_directory }}/Results.txt # Adds a blank line for spacing
-        echo -------------------------------- >> {{ preflight_directory }}/Results.txt
-        echo "GATEWAY RESULTS" >> {{ preflight_directory }}/Results.txt
-        for file in {{ preflight_directory }}/*.txt; do
-          if [[ $(basename "$file") == gateway*.txt ]]; then
-            echo ---------------- >> {{ preflight_directory }}/Results.txt
-            cat "$file" >> {{ preflight_directory }}/Results.txt
-            echo "" >> {{ preflight_directory }}/Results.txt # Adds a blank line for spacing
-          fi
-        done
-      changed_when: true
+- name: Import Preflight Gateway
+  import_playbook: itential.deployer.preflight_gateway
+  tags: preflight_gateway

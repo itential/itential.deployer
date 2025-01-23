@@ -6,7 +6,7 @@ The playbook and role in this section are designed to run preflight checks on th
 
 ## General information
 
-This role can be run separately to check the inventory host as well as when running the installation role for the other applications. By default, when installing an application using the deployer, the preflight role will not run the preflight role will not run. This behavior is controlled with the variables `preflight_run_checks` and `preflight_enforce_checks`. When `preflight_enforce_checks` is set to true, and any of the preflight checks fail, installation on the application will not proceed.
+The preflight role can be run separately to check the inventory host as well as when running the installation role for the other applications. By default, when installing an application using the deployer, the preflight role will not run. This behavior is controlled with the variables `preflight_run_checks` and `preflight_enforce_checks`. When `preflight_enforce_checks` is set to true, and any of the preflight checks fail, installation on the application will not proceed.
 
 The following checks will be made against the host. 
 
@@ -20,7 +20,6 @@ The following checks will be made against the host.
 | `IPv6` | Is IPv6 configured | No
 | `HTTP Proxy` | Is there an HTTP proxy | No
 | `HTTPS Proxy` | Is there an HTTPS proxy | No
-| `Ports` | Are ports needed for the application blocked by firewalls | No
 | `URLs` | Does the host have access to required URLs | No
 | `AVX` | Is AVX supported (MongoDB only) | No
 
@@ -44,7 +43,7 @@ The following table lists the default variables, located in `roles/common_vars/d
 | `preflight_mounts` | `all` | String | Which mount to check for the storage requirment | `/`
 | `env` | `all` | String | Which environment specs to check the host against `dev`/`staging`/`prod`   | `dev`
 | `preflight_run_checks` | `all` | Boolean | Flag to run the preflight checks | `true`
-| `ignore_preflight_checks` | `all` | Boolean | Ignore a failed result of preflight checks and proceed with installation  | `true`
+| `preflight_enforce_checks` | `all` | Boolean | When true, a failed result of preflight checks will stop installation. When false, the installation will proceed  | `false`
 
 
 # Building Your Inventory
@@ -61,7 +60,7 @@ all:
         preflight_mounts: "/"
         preflight_env: dev
         preflight_run_checks: true
-        ignore_preflight_checks: true
+        preflight_enforce_checks: false
 
 ```
 
@@ -71,4 +70,16 @@ To execute the preflight role, run the `preflight` playbook:
 
 ```
 ansible-playbook itential.deployer.preflight -i <inventory>
+```
+
+To execute the preflight role on a specific host, run the `preflight_[[application]]` playbook:
+
+```
+ansible-playbook itential.deployer.preflight_redis -i <inventory>
+
+ansible-playbook itential.deployer.preflight_mongodb -i <inventory>
+
+ansible-playbook itential.deployer.preflight_platform -i <inventory>
+
+ansible-playbook itential.deployer.preflight_gateway -i <inventory>
 ```

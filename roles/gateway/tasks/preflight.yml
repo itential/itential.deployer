@@ -29,18 +29,6 @@
     - results.memory >= gateway_ram
     - results.url_status.values() | unique | length == 1 and results.url_status.values() | unique | first == 200
 
-- name: Write the JSON fact to a file
-  ansible.builtin.copy:
-    content: "{{ results | to_json | indent(2) }}"
-    dest: "{{ workingdir.path }}/preflightResults.json"
-    mode: '0777'
-
-- name: Fetch Gateway results json
-  ansible.builtin.fetch:
-    src: "{{ workingdir.path }}/preflightResults.json"
-    dest: "{{ preflight_directory }}/gateway_{{ inventory_hostname }}_results.json"
-    flat: true
-
 - name: Create Gateway preflight results
   ansible.builtin.template:
     src: "gateway.preflight.j2"
@@ -50,7 +38,7 @@
 - name: Fetch Gateway results
   ansible.builtin.fetch:
     src: "{{ workingdir.path }}/preflightResults.txt"
-    dest: "{{ preflight_directory }}/gateway_{{ inventory_hostname }}_results.txt"
+    dest: "{{ preflight_directory }}/{{ date }}/gateway_{{ inventory_hostname }}_{{ time }}_results.txt"
     flat: true
 
 - name: Remove temporary working directory
@@ -64,5 +52,5 @@
     fail_msg: "Platform host did not pass the preflight checks"
     success_msg: "Platform host passed the preflight checks"
   when:
-    - ignore_preflight_checks is defined
-    - not ignore_preflight_checks
+    - preflight_enforce_checks is defined
+    - preflight_enforce_checks

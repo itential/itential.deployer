@@ -11,4 +11,4 @@ preflight_env: dev
 
 # defaults for running and ignoring the preflight checks
 preflight_run_checks: false
-ignore_preflight_checks: true
+preflight_enforce_checks: false
