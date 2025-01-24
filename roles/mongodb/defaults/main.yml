@@ -52,9 +52,6 @@ packages_path: "{{ itential_packages_path }}/{{ iap_release }}/mongodb"
 # The base directory for SSL certs and key files
 mongodb_ssl_root_dir: /etc/ssl
 
-# Key file source
-mongo_auth_keyfile_source: mongo-replicaset-key.pem
-
 # Key file destination location
 # The key file is used to authenticate members of a replica set
 mongodb_auth_keyfile_destination: "{{ mongodb_ssl_root_dir }}/mongodb/mongo-replicaset-key.pem"

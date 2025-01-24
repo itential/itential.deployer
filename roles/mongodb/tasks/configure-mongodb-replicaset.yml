@@ -4,13 +4,15 @@
 
 - name: Initialize replset_exists to false
   ansible.builtin.set_fact:
-    replset_exists: false
+    mongodb_replset_exists: false
 
 # This command against mongo will return some basic information about the database.
 # If there is already a replicaset defined then the output of this command will
 # contain the "setName" field. If there is no replicaset defined then this field
 # will not be present in the output. We can determine if the replicaset has already
-# been configured by the presence of this variable.
+# been configured by the presence of this variable. It must be run against only the
+# first mongo in the mongodb group because that is the only mongo (so far) to have
+# users created against it.
 - name: Check if the replicaset exists
   community.mongodb.mongodb_shell:
     login_host: "{{ inventory_hostname }}"
@@ -21,6 +23,7 @@
     eval: db.runCommand({"hello":1})
     mongo_cmd: auto
   register: rs
+  when: groups.mongodb.index(inventory_hostname) == 0
   vars:
     ansible_python_interpreter: "{{ python_venv }}/bin/python3"
 
@@ -28,7 +31,7 @@
 # replicaset has already been created.
 - name: Set replset_exists to true if it exists
   ansible.builtin.set_fact:
-    replset_exists: true
+    mongodb_replset_exists: true
   when:
     - rs.transformed_output.setName is defined
     - rs.transformed_output.setName == mongo_replset_name
@@ -41,7 +44,7 @@
     owner: "{{ mongo_owner }}"
     group: "{{ mongo_group }}"
     mode: "0644"
-  when: not replset_exists
+  when: not mongodb_replset_exists
   vars:
     stage: "replication"
 
@@ -50,12 +53,12 @@
     name: mongod
     state: restarted
     enabled: true
-  when: not replset_exists
+  when: not mongodb_replset_exists
 
 - name: Set empty array of mongo servers
   ansible.builtin.set_fact:
     mongodb_servers: []
-  when: not replset_exists
+  when: not mongodb_replset_exists
 
 # This task should always run, arbiter or not
 - name: Create the replicaset members list (no arbiter)
@@ -63,7 +66,7 @@
     mongodb_servers: "{{ mongodb_servers + [item + ':' + mongo_port | string] }}"
   with_items: "{{ groups.mongodb }}"
   when:
-    - not replset_exists
+    - not mongodb_replset_exists
     - inventory_hostname in groups.mongodb
     - groups.mongodb.index(inventory_hostname) == 0
 
@@ -73,7 +76,7 @@
     mongodb_servers: "{{ mongodb_servers + [item + ':' + mongo_port | string] }}"
   with_items: "{{ groups.mongodb_arbiter }}"
   when:
-    - not replset_exists
+    - not mongodb_replset_exists
     - inventory_hostname in groups.mongodb
     - groups.mongodb.index(inventory_hostname) == 0
     - groups.mongodb_arbiter is defined
@@ -91,7 +94,7 @@
     replica_set: "{{ mongo_replset_name }}"
     validate: true
   when:
-    - not replset_exists
+    - not mongodb_replset_exists
     - inventory_hostname in groups.mongodb
     - groups.mongodb.index(inventory_hostname) == 0
   vars:
@@ -113,7 +116,7 @@
     - "'Unable to determine if auth is enabled' not in rs.msg"
     - "'replicaset is in a converged state' not in rs.msg"
   when:
-    - not replset_exists
+    - not mongodb_replset_exists
     - inventory_hostname in groups.mongodb
   vars:
     ansible_python_interpreter: "{{ python_venv }}/bin/python3"
@@ -123,7 +126,7 @@
     primary_server: "{{ item.key.split(':')[0] }}"
   loop: "{{ lookup('dict', rs.replicaset) }}"
   when:
-    - not replset_exists
+    - not mongodb_replset_exists
     - inventory_hostname in groups.mongodb
     - rs.replicaset is defined
     - "'PRIMARY' in item.value"
@@ -163,7 +166,7 @@
     login_host: "{{ inventory_hostname }}"
     eval: db.adminCommand({"setDefaultRWConcern":1,"defaultWriteConcern":{"w":1}})
   when:
-    - not replset_exists
+    - not mongodb_replset_exists
     - inventory_hostname in groups.mongodb
     - primary_server is defined
     - inventory_hostname == primary_server

@@ -1,33 +1,30 @@
 # Overview
 
-The playbook and roles in this section install and configure MongoDB for the Itential Automation Platform.  There are currently four MongoDB-related roles:
-
-* `mongodb` – Installs MongoDB and performs a base configuration.
-* `mongodb_auth` – Configures MongoDB authentication.
-* `mongodb_replication` – Configures MongoDB as replica set.
-* `mongodb_tls` - Configures MongoDB SSL.
+The playbook and roles in this section install and configure MongoDB for the Itential Automation Platform.
 
 # Roles
 
 ## MongoDB Role
 
-The `mongodb` role performs a base install of MongoDB including any OS packages required. It includes a few recommended kernel settings and other optimizations recommended by MongoDB. It creates the appropriate Linux users, directories, log files, and systemd services. It will start the mongod service when complete.
+The `mongodb` role performs a base install of MongoDB including any OS packages required. It includes a few recommended kernel settings and other optimizations recommended by MongoDB. It creates the appropriate Linux users, directories, log files, and systemd services. It will start the mongod service when complete. Based on the variables found in the host file this role may perform additional steps of creating a replica set, enabling authorization to the database, and configuring TLS connections. Regardless of the `mongodb_auth` variable this role will create users in MongoDB (see below).
 
-## MongoDB Authentication
+### MongoDB Replication
 
-The `mongodb_auth` role is designed to enable authorization on the MongoDB.  It will modify the MongoDB config file to enable authentication for a single database or a replica set.  When MongoDB is configured as a replica set it requires a key for the members of the replica set to talk to one another.  This key file is uploaded to the appropriate location.  It will restart the mongod service when complete.
-
-More info on the key file: https://www.mongodb.com/docs/manual/tutorial/deploy-replica-set-with-keyfile-access-control/
-
-## MongoDB Replication
-
-The `mongodb_replication` role is responsible for configuring MongoDB as a replica set.  It uses the first host defined in the `mongodb` group in the inventory as the initial primary.  It updates the MongoDB configuration file with the replica set name and enables replication.  It initializes the replica set on the initial primary and then joins the remaining MongoDB nodes to the replica set. It will restart the mongod service when complete.
+When the `mongodb_replication` variable is set to true in the all vars section of the host file, it will instruct the deployer to configure the mongo hosts as a replica set. It uses the first host defined in the `mongodb` group in the inventory as the initial primary.  It updates the MongoDB configuration file with the replica set name and enables replication.  It initializes the replica set on the initial primary and then joins the remaining MongoDB nodes to the replica set. It will restart the mongod service when complete.
 
 More info on replication: https://www.mongodb.com/docs/manual/replication/
 
-## MongoDB TLS
+### MongoDB Authentication
 
-The `mongodb_tls` role is responsible for configuring MongoDB to use a TLS connection when connecting to the database.  It is NOT responsible for creating certificates.  Those must be supplied to this role.  It will copy those certificates to the correct location.  It will make all required changes to enable TLS connections in the Mongo configuration file. It will restart the mongod service when complete.
+When the `mongodb_auth` variable is set to true in the all vars section of the host file, it will instruct the deployer to configure the mongo hosts to require authentication when connecting to it. It will modify the MongoDB config file to enable authentication for a single database or a replica set.  When MongoDB is configured as a replica set it requires a key for the members of the replica set to talk to one another.  This key file is created by the deployer and is copied to all the appropriate servers. It will restart the mongod service when complete.
+
+More info on authentication: https://www.mongodb.com/docs/manual/core/authentication/
+
+More info on the key file: https://www.mongodb.com/docs/manual/tutorial/deploy-replica-set-with-keyfile-access-control/
+
+### MongoDB TLS
+
+When the `mongodb_tls` variable is set to true in the all vars section of the host file, it will instruct the deployer to configure the mongo hosts to require TLS connections. It is NOT responsible for creating certificates. Those must be supplied to this role. It will copy those certificates to the correct location. It will make all required changes to enable TLS connections in the Mongo configuration file. It will restart the mongod service when complete.
 
 # Variables
 
@@ -86,26 +83,7 @@ The following table lists the default variables located in `roles/mongodb/defaul
 | `mongo_admin_db_name` | `mongodb` | String | The name of the admin database. | `admin`
 | `mongodb_bind_ipv6` | `mongodb` | Boolean | Flag to enable binding to IPv6. | `true`
 | `mongodb_bind_addrs` | `mongodb` | String | The hostnames and/or IP addresses and/or full Unix domain socket paths on which mongos or mongod should listen for client connections. You may attach mongos or mongod to any interface. To bind to multiple addresses, enter a list of comma-separated values.  <br>The inventory_hostname will be automatically added to `mongodb_bind_addrs`.  <br>If `mongodb_bind_ipv6` is set to true, '::1' will be added to `mongodb_bind_addrs`. | `127.0.0.1`
-
-## MongoDB Auth Role Variables
-
-The variables in this section may be overridden in the inventory in the `mongodb` group vars.
-
-The following table lists the default variables located in `roles/mongodb_auth/defaults/main.yml`.
-
-| Variable | Group | Type | Description | Default Value
-| :------- | :---- | :--- | :---------- | :------------
-| `mongo_auth_keyfile_source` | `mongodb` | String | The name of the key file. | `mongo-replicaset-key.pem`
-| `mongo_auth_keyfile_destination` | `mongodb` | String | The key file used to authenticate members of a replica set. | `/etc/ssl/{{ mongo_auth_keyfile_source }}`
-
-## MongoDB Replication Role Variables
-
-There are no default variables for the MongoDB Replication role.
-
-## MongoDB TLS Role Variables
-
-| Variable | Group | Type | Description | Default Value
-| :------- | :---- | :--- | :---------- | :------------
+| `mongodb_auth_keyfile_destination` | `mongodb` | String | The key file used to authenticate members of a replica set. | `/etc/ssl/mongodb/mongo-replicaset-key.pem`
 | `mongo_cert_keyfile_source` | `mongodb` | String | The MongoDB SSL cert key file source. | N/A
 | `mongo_cert_keyfile_destination` | `mongodb` | String | The MongoDB SSL cert key file destination. | `/etc/ssl/mongo-certificate.pem`
 | `mongo_root_ca_file_source` | `mongodb` | String | The MongoDB SSL root CA source. | N/A
@@ -113,7 +91,7 @@ There are no default variables for the MongoDB Replication role.
 
 # Configuring TLS
 
-The `mongodb_tls` roles does not generate SSL certificates.  They must be generated by the user and put in the top level `files` directory on the Ansible control node.  The following variables must be defined in the `all` group vars.
+The `mongodb` role does not generate SSL certificates.  They must be generated by the user and put in the top level `files` directory on the Ansible control node.  The following variables must be defined in the `all` group vars.
 
 | File | Variable | Group | Default
 | :--- | :------- | :---- | :------
@@ -197,7 +175,7 @@ all:
     vars:
         iap_release: 2023.1
         mongodb_auth: true
-        mongodb_cluster: true
+        mongodb_replication: true
         mongodb_tls: true
 
     children:
@@ -222,33 +200,41 @@ To execute all MongoDB roles, run the `mongodb` playbook:
 ansible-playbook itential.deployer.mongodb -i <inventory>
 ```
 
-You can also run select MongodDB roles by using the following tags:
+You can also run selectively run portions of the MongodDB role by using the following tags:
 
-* `mongodb_install`
-* `mongodb_replication`
-* `mongodb_auth`
-* `mongodb_tls`
+* `install_mongodb`
+* `configure_mongodb`
+* `initialize_mongo_config`
+* `create_mongo_users`
 
-To execute only the `mongodb` role, run the `itential.deployer.mongodb` playbook with the `mongodb_install` tag:
-
-```
-ansible-playbook itential.deployer.mongodb -i <inventory> --tags mongodb_install
-```
-
-To execute only the MongoDB Replication role, run the `itential.deployer.mongodb` playbook with the `mongodb_replication` tag:
+To execute only the installation steps of the `mongodb` role, run the `itential.deployer.mongodb` playbook with the `install_mongodb` tag:
 
 ```
-ansible-playbook itential.deployer.mongodb -i <inventory> --tags mongodb_replication
+ansible-playbook itential.deployer.mongodb -i <inventory> --tags install_mongodb
 ```
 
-To execute only the MongoDB Authentication role, run the `itential.deployer.mongodb` playbook with the `mongodb_auth` tag:
+To execute only the configuration steps of the role, run the `itential.deployer.mongodb` playbook with the `configure_mongodb` tag:
 
 ```
-ansible-playbook itential.deployer.mongodb -i <inventory> --tags mongodb_auth
+ansible-playbook itential.deployer.mongodb -i <inventory> --tags configure_mongodb
 ```
 
-To execute only the MongoDB TLS role, run the `itential.deployer.mongodb` playbook with the `mongodb_tls` tag:
+To reset the config to its most basic configuration (sometimes useful for troubleshooting), run the `itential.deployer.mongodb` playbook with the `initialize_mongo_config` tag:
 
 ```
-ansible-playbook itential.deployer.mongodb -i <inventory> --tags mongodb_tls
+ansible-playbook itential.deployer.mongodb -i <inventory> --tags initialize_mongo_config
 ```
+
+To recreate the database users, run the `itential.deployer.mongodb` playbook with the `create_mongo_users` tag:
+
+```
+ansible-playbook itential.deployer.mongodb -i <inventory> --tags create_mongo_users
+```
+
+# Created Users
+The following users are created during the installation phase of this role.
+| Account  | Description                                                                                                                                                                                                                                                        |
+|----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| admin    | Has full root access to the mongo database. Can read and write to any logical database. Can be used to issue admin commands like forcing an election and configuring replica sets. This is NOT used by the Itential application but is created for admin purposes. |
+| itential | Has read and write access to the “itential” database only. This is the account used by the IAP application.                                                                                                                                                        |
+| localaaa | Has read and write access to the “LocalAAA” database. This is used by the Local AAA adapter for local, non-LDAP logins.                                                                                                                                            |
