@@ -1,6 +1,21 @@
 # Changelog
 
-## v2.5.0 (November 22, 2024)
+## v2.6.0 (January 22, 2025)
+
+* Add support for installing Ansible collections on IAG servers  https://github.com/itential/itential.deployer/pull/110
+* Allow core to cleanup on systemctl stop  https://github.com/itential/itential.deployer/pull/113
+* Create mongo-key for replication  https://github.com/itential/itential.deployer/pull/114
+* Do not overwrite the Redis Sentinel service script when installing from Remi repo  https://github.com/itential/itential.deployer/pull/111
+* Escape mongo password  https://github.com/itential/itential.deployer/pull/109
+* Readme updates  https://github.com/itential/itential.deployer/pull/108
+* Uninstall build packages after installation  https://github.com/itential/itential.deployer/pull/105
+* Update ansible-lint.yml
+* Update the mongo-key tasks change from single copy to slurp  https://github.com/itential/itential.deployer/pull/118
+
+Full Changelog: https://github.com/itential/itential.deployer/compare/v2.5.0...v2.6.0 
+
+
+## v2.5.0 (December 20, 2024)
 
 * 23.2 RHEL and Rocky 8 now install node 20 instead of 18  https://github.com/itential/itential.deployer/pull/93
 * Add tasks to open prometheus exporter ports in firewalld  https://github.com/itential/itential.deployer/pull/92
@@ -9,6 +24,7 @@
 * Consolidate Redis roles  https://github.com/itential/itential.deployer/pull/99
 * Redefine logic that triggers tasks for the ASA architecture  https://github.com/itential/itential.deployer/pull/101
 * Update Ansible requirements in readme  https://github.com/itential/itential.deployer/pull/96
+* Update galaxy version and changelog for release 2.5.0 [skip ci]
 
 Full Changelog: https://github.com/itential/itential.deployer/compare/v2.4.1...v2.5.0 
 
