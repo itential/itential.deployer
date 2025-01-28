@@ -68,6 +68,17 @@
     extra_args: --log /var/log/pip.log
   when: iag_enable_ansible | bool
 
+- name: Download Ansible collections
+  tags: download_ansible_collections
+  block:
+    - name: Download Ansible collections
+      ansible.builtin.include_tasks:
+        file: download-ansible-collections.yml
+      when:
+        - iag_ansible_collections is defined
+        - iag_ansible_collections is iterable
+        - iag_ansible_collections | length > 0
+
 - name: Copy IAG wheel file to target node
   ansible.builtin.copy:
     src: "{{ iag_whl_file }}"
