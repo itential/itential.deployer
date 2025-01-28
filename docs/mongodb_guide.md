@@ -89,14 +89,7 @@ The following table lists the default variables located in `roles/mongodb/defaul
 
 ## MongoDB Auth Role Variables
 
-The variables in this section may be overridden in the inventory in the `mongodb` group vars.
-
-The following table lists the default variables located in `roles/mongodb_auth/defaults/main.yml`.
-
-| Variable | Group | Type | Description | Default Value
-| :------- | :---- | :--- | :---------- | :------------
-| `mongo_auth_keyfile_source` | `mongodb` | String | The name of the key file. | `mongo-replicaset-key.pem`
-| `mongo_auth_keyfile_destination` | `mongodb` | String | The key file used to authenticate members of a replica set. | `/etc/ssl/{{ mongo_auth_keyfile_source }}`
+There are no default variables for the MongoDB Auth role.
 
 ## MongoDB Replication Role Variables
 
