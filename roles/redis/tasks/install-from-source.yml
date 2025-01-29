@@ -3,7 +3,7 @@
 ---
 - name: Check to see if Redis is already installed
   ansible.builtin.stat:
-    path: /usr/local/bin/redis-server
+    path: "{{ redis_bin_dir }}/redis-server"
   register: redis_installed
 
 - name: Install Redis
@@ -17,20 +17,20 @@
     - name: Online install
       when: not offline_install
       block:
-        - name: Install packages required to build Redis (online)
+        - name: Install packages required to build Redis
           ansible.builtin.package:
-            name: "{{ redis_build_packages[ansible_distribution_major_version] }}"
+            name: "{{ redis_build_packages }}"
             state: present
           register: redis_install_result
 
-        - name: Download Redis source archive (online)
+        - name: Download Redis source archive
           ansible.builtin.get_url:
-            url: "{{ redis_source_url[ansible_distribution_major_version] }}"
+            url: "{{ redis_source_url }}"
             dest: "{{ redis_build_temp_dir.path }}"
             mode: "0644"
           register: redis_download
 
-        - name: Unarchive Redis source archive (online)
+        - name: Unarchive Redis source archive
           ansible.builtin.unarchive:
             src: "{{ redis_download.dest }}"
             dest: "{{ redis_build_temp_dir.path }}"
@@ -74,6 +74,7 @@
         target: install
         params:
           USE_SYSTEMD: true
+          PREFIX: "{{ redis_bin_dir | dirname }}"
       tags: make_redis
 
     - name: Remove temporary working directory
@@ -81,10 +82,10 @@
         path: "{{ redis_build_temp_dir.path }}"
         state: absent
 
-- name: Create Redis systemd file
-  ansible.builtin.template:
-    src: redis.service.j2
-    dest: /usr/lib/systemd/system/redis.service
-    owner: root
-    group: root
-    mode: "0644"
+- name: Set owership of all files in the bin directory
+  ansible.builtin.file:
+    path: "{{ redis_bin_dir }}"
+    owner: "{{ redis_owner }}"
+    group: "{{ redis_group }}"
+    state: directory
+    recurse: true
