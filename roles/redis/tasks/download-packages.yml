@@ -1,45 +1,23 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Validate distribution major version
-  ansible.builtin.fail:
-    msg: Download not supported for version 7
-  when: ansible_distribution_major_version == "7"
+- name: Include tasks to validate variables
+  ansible.builtin.include_tasks:
+    file: validate-vars.yml
 
-- name: Validate offline_install variable
-  ansible.builtin.fail:
-    msg: offline_install must be set to false for download
-  when:
-    - offline_install is defined
-    - offline_install
-
-# - name: Include release vars
-#   ansible.builtin.include_vars:
-#     file: "{{ item }}"
-#   with_first_found:
-#     - "release-{{ iap_release }}.yml"
-#     - "release-undefined.yml"
-
-# - name: Check for valid Redis release
-#   ansible.builtin.fail:
-#     msg: "Deployer does not support installing Redis on IAP version {{ iap_release }}"
-#   when: invalid_redis_release is defined
+- name: Include tasks to validate offline variables
+  ansible.builtin.include_tasks:
+    file: validate-vars-offline.yml
 
 - name: Download package from Remi repo
   when: not redis_install_from_source | bool
   block:
-    - name: Install EPEL repo
-      ansible.builtin.dnf:
-        name: "{{ redis_epel_repo_url }}"
-        state: present
-        update_cache: true
-        disable_gpg_check: true
-
-    - name: Install Remi repo
-      ansible.builtin.dnf:
-        name: "{{ redis_remi_repo_url }}"
-        state: present
-        disable_gpg_check: true
+    - name: Include tasks to install Remi repo
+      ansible.builtin.include_tasks:
+        file: install-remi-repo.yml
+      when:
+        - redis_packages is defined
+        - redis_packages is search('remi')
 
     - name: Download Redis rpms
       ansible.builtin.import_role:

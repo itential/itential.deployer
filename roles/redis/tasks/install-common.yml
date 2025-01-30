@@ -13,20 +13,30 @@
 - name: Gather service facts
   ansible.builtin.service_facts:
 
-- name: Open Ports on FirewallD Public Zone
+- name: Open Redis port on FirewallD Public Zone
   ansible.posix.firewalld:
-    port: "{{ item }}"
+    port: "{{ redis_port }}/tcp"
     permanent: true
     state: enabled
     zone: public
     immediate: true
-  loop:
-    - "{{ redis_port }}/tcp"
-    - "{{ redis_sentinel_port }}/tcp"
   when:
     - ansible_facts.services["firewalld.service"] is defined
     - ansible_facts.services["firewalld.service"].state == "running"
     - ansible_facts.services["firewalld.service"].status == "enabled"
+
+- name: Open Sentinel port on FirewallD Public Zone
+  ansible.posix.firewalld:
+    port: "{{ redis_sentinel_port }}/tcp"
+    permanent: true
+    state: enabled
+    zone: public
+    immediate: true
+  when:
+    - ansible_facts.services["firewalld.service"] is defined
+    - ansible_facts.services["firewalld.service"].state == "running"
+    - ansible_facts.services["firewalld.service"].status == "enabled"
+    - redis_replication | bool
 
 - name: Create Redis group
   ansible.builtin.group:
@@ -54,6 +64,9 @@
     owner: "{{ redis_owner }}"
     group: "{{ redis_group }}"
     mode: "0755"
+    seuser: system_u
+    serole: object_r
+    setype: redis_var_lib_t
   when: redis_data_dir != redis_data_dir_default or redis_install_from_source | bool
 
 - name: Create Redis log directory
@@ -63,6 +76,9 @@
     owner: "{{ redis_owner }}"
     group: "{{ redis_group }}"
     mode: "0755"
+    seuser: system_u
+    serole: object_r
+    setype: redis_log_t
   when: redis_log_dir != redis_log_dir_default or redis_install_from_source | bool
 
 - name: Create Redis pid directory
@@ -72,6 +88,9 @@
     owner: "{{ redis_owner }}"
     group: "{{ redis_group }}"
     mode: "0755"
+    seuser: system_u
+    serole: object_r
+    setype: redis_var_run_t
   when: redis_pid_dir != redis_pid_dir_default or redis_install_from_source | bool
 
 - name: Create Redis configuration directory
@@ -80,5 +99,8 @@
     state: directory
     owner: "{{ redis_owner }}"
     group: "{{ redis_group }}"
-    mode: "0760"
+    mode: "0750"
+    seuser: system_u
+    serole: object_r
+    setype: redis_conf_t
   when: redis_conf_dir != redis_conf_dir_default or redis_install_from_source | bool

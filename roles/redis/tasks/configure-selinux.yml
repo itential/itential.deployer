@@ -26,23 +26,10 @@
 - name: Configure SELinux file context when using non-standard bin directory
   when: redis_bin_dir != redis_bin_dir_default
   block:
-    - name: Set SELinux fcontext on Redis binary
+    - name: Set SELinux fcontext on Redis binaries
       community.general.sefcontext:
-        target: "{{ redis_bin_dir }}/redis-server"
+        target: "{{ redis_bin_dir }}(/.*)?"
         setype: redis_exec_t
-        ftype: f
-
-    - name: Set SELinux fcontext on Redis binary
-      community.general.sefcontext:
-        target: "{{ redis_bin_dir_default }}/redis-sentinel"
-        substitute: "{{ redis_bin_dir }}/redis-sentinel"
-
-    - name: Set SELinux fcontext on Sentinel binary
-      community.general.sefcontext:
-        target: "{{ redis_bin_dir }}/redis-sentinel"
-        setype: redis_exec_t
-        ftype: f
-      when: redis_replication | bool
 
     # To ensure idempotency, a restorecon with the passive check option (-n) is run first
     - name: Check to see if a SELinux restore security contexts on Redis bin directory is required

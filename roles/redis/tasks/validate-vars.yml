@@ -56,12 +56,15 @@
         - redis_packages is not defined
         - not redis_install_from_source | bool
 
-- name: Print installation details when installing from source
-  ansible.builtin.debug:
-    msg: "Installing from source URL {{ redis_source_url }}"
-  when: redis_source_url is defined
+- name: Print installation details for online installation
+  when: not offline_install
+  block:
+    - name: Print installation details when installing from source
+      ansible.builtin.debug:
+        msg: "Installing from source URL {{ redis_source_url }}"
+      when: redis_source_url is defined
 
-- name: Print installation details when installing from repo
-  ansible.builtin.debug:
-    msg: "Installing RPMs {{ redis_packages }}"
-  when: redis_packages is defined
+    - name: Print installation details when installing from repo
+      ansible.builtin.debug:
+        msg: "Installing RPMs {{ redis_packages }}"
+      when: redis_packages is defined

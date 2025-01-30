@@ -87,5 +87,8 @@
     path: "{{ redis_bin_dir }}"
     owner: "{{ redis_owner }}"
     group: "{{ redis_group }}"
+    seuser: system_u
+    serole: object_r
+    setype: redis_exec_t
     state: directory
     recurse: true

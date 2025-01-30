@@ -1,14 +1,14 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Include tasks to set installation variables
+- name: Include tasks to validate variables
   ansible.builtin.include_tasks:
-    file: handle-vars.yml
+    file: validate-vars.yml
 
-# - name: Install base OS packages
-#   ansible.builtin.include_role:
-#     name: os
-#   tags: install_base_os_packages
+- name: Install base OS packages
+  ansible.builtin.include_role:
+    name: os
+  tags: install_base_os_packages
 
 - name: Install and configure Redis
   notify:
