@@ -68,8 +68,8 @@ The following table lists the default variables located in `roles/redis/defaults
 
 | Variable | Group | Type | Description | Default Value
 | :------- | :---- | :--- | :---------- | :------------
-| `redis_conf_path` | `redis` | String | The path to the Redis configuration file. | `/etc/redis`
-| `redis_conf_file` | `redis` | String | The location of the Redis configuration file. | `{{ redis_conf_path }}/redis.conf`
+| `redis_conf_dir` | `redis` | String | The Redis configuration directory. | `/etc/redis`
+| `redis_conf_file` | `redis` | String | The location of the Redis configuration file. | `{{ redis_conf_dir }}/redis.conf`
 | `redis_log_dir` | `redis` | String | The Redis log directory. | `/var/log/redis`
 | `redis_log` | `redis` | String | The location of the Redis log file. | `{{ redis_log_dir }}redis.log`
 | `redis_db_filename` | `redis` | String | The name of the Redis data file. | `dump.rdb`
@@ -83,7 +83,7 @@ The following table lists the default variables located in `roles/redis/defaults
 | `redis_bind_addrs` | `redis` | String | A space-separated list of hostnames/IP addresses on which Redis listeners will be created.  If `redis_bind_ipv6` is set to `true`, `::1` will be added to the addresses.  The `redis_bind_addr_source` will also be added to the addresses. | `127.0.0.1`
 | `redis_install_method` | `redis` | String | The method to use to install Redis.<br>Set to `remi_repo` to use the Remi repo.<br>Set to `source` to install from source. | `remi_repo`
 | `redis_epel_repo_url` | `redis` | String | The URL of the EPEL repo RPM.<br>Note: this is only used when the `redis_install_method` is set to `remi_repo`. | `https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_distribution_major_version }}.noarch.rpm`
-| `redis_sentinel_conf_file` | `redis` | String | The location of the Redis Sentinel configuration file. | `{{ redis_conf_path }}/sentinel.conf`
+| `redis_sentinel_conf_file` | `redis` | String | The location of the Redis Sentinel configuration file. | `{{ redis_conf_dir }}/sentinel.conf`
 | `redis_sentinel_port` | `redis` | Integer | The Redis Sentinel listen port | `26379`
 
 # SELinux

@@ -18,7 +18,7 @@ redis_user_sentineluser_password: sentineluser
 redis_user_prometheus_password: prometheus
 
 # Default redis port
-redis_port: 6379
+redis_port: "{{ redis_port_default }}"
 
 # The default redis sentinel listen port
-redis_sentinel_port: 26379
+redis_sentinel_port: "{{ redis_sentinel_port_default }}"

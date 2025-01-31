@@ -11,5 +11,5 @@
 
 - name: Include tasks to install Redis from source
   ansible.builtin.include_tasks:
-    file: redis-using-source.yml
-  when: redis_install_method == "source"
+    file: install-from-source.yml
+  when: redis_install_from_source | bool

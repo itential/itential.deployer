@@ -1,18 +1,9 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Include release vars
-  ansible.builtin.include_vars:
-    file: "{{ item }}"
-  with_first_found:
-    - "release-{{ iap_release }}.yml"
-    - "release-undefined.yml"
-  tags: always
-
-- name: Check for valid Redis release
-  ansible.builtin.fail:
-    msg: "Deployer does not support installing Redis on IAP version {{ iap_release }}"
-  when: invalid_redis_release is defined
+- name: Include tasks to validate variables
+  ansible.builtin.include_tasks:
+    file: validate-vars.yml
   tags: always
 
 - name: Install base OS packages
@@ -21,53 +12,46 @@
   tags: install_base_os_packages
 
 - name: Install and configure Redis
-  notify: Enable and Start Redis
-  tags: install_configure_redis
+  notify:
+    - Enable and Start Redis
+    - Enable and Start Redis Sentinel
   block:
-    - name: Basic configuration
-      tags: basic_configuration
-      block:
-        - name: Include tasks to perform basic configuration
-          ansible.builtin.include_tasks:
-            file: basic-configuration.yml
-
     - name: Install Redis
       tags: install_redis
       block:
-        - name: Include tasks to install Redis (online)
+        - name: Include common installation tasks
+          ansible.builtin.include_tasks:
+            file: install-common.yml
+
+        - name: Include tasks to perform online installation
           when: not offline_install
           block:
-            - name: Include tasks to install Redis using Remi repo (online)
-              ansible.builtin.include_tasks:
-                file: redis-using-remi-repo.yml
-              when: redis_install_method == "remi_repo"
-
             - name: Include tasks to install Redis using source
               ansible.builtin.include_tasks:
-                file: redis-using-source.yml
-              when: redis_install_method == "source"
+                file: install-from-source.yml
+              when: redis_install_from_source | bool
 
-        - name: Include tasks to install Redis (offline)
+            - name: Include tasks to install Redis using repo
+              ansible.builtin.include_tasks:
+                file: install-from-repo.yml
+              when: not redis_install_from_source | bool
+
+        - name: Include tasks to perform offline installation
           ansible.builtin.include_tasks:
-            file: redis-offline.yml
+            file: install-offline.yml
           when: offline_install
 
-    - name: Use template to generate redis.conf
-      ansible.builtin.template:
-        src: redis.conf.j2
-        dest: "{{ redis_conf_file }}"
-        owner: "{{ redis_owner }}"
-        group: "{{ redis_group }}"
-        mode: "0640"
-        backup: true
+    - name: Configure Redis/Sentinel
+      tags: configure_redis
+      block:
+        - name: Include tasks to configure Redis
+          ansible.builtin.include_tasks:
+            file: configure-redis.yml
 
-- name: Configure Redis Sentinel
-  tags: configure_redis_sentinel
-  when: redis_replication | bool
-  block:
-    - name: Include tasks to configure Sentinel
-      ansible.builtin.include_tasks:
-        file: configure-sentinel.yml
+        - name: Include tasks to configure Sentinel
+          ansible.builtin.include_tasks:
+            file: configure-sentinel.yml
+          when: redis_replication | bool
 
 - name: Update Itential release file
   tags: update_release_file
@@ -80,24 +64,11 @@
       changed_when: false
       failed_when: result.rc != 0
       environment:
-        PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
-
-    - name: Set redis version variable
-      ansible.builtin.set_fact:
-        redis_server_version: "{{ result.stdout }}"
+        PATH: "{{ ansible_env.PATH }}:{{ redis_bin_dir }}"
 
     - name: Write redis release information
       ansible.builtin.lineinfile:
         path: "{{ itential_release_file }}"
-        line: "REDIS={{ redis_server_version }}"
+        line: "REDIS={{ result.stdout }}"
         create: true
         mode: "0644"
-
-- name: Uninstall redis build packages
-  ansible.builtin.dnf:
-    name: "{{ item }}"
-    allowerasing: true
-    autoremove: true
-    state: absent
-  with_items: "{{ redis_build_packages[ansible_distribution_major_version] }}"
-  when: redis_install_method == "source"
