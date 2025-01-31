@@ -11,7 +11,7 @@
     proto: tcp
     setype: redis_port_t
     state: present
-  when: redis_port != redis_default_port
+  when: redis_port != redis_port_default
 
 - name: Configure SELinux port when using non-standard Sentinel port
   community.general.seport:
@@ -21,7 +21,7 @@
     state: present
   when:
     - redis_replication | bool
-    - redis_sentinel_port != redis_sentinel_default_port
+    - redis_sentinel_port != redis_sentinel_port_default
 
 - name: Configure SELinux file context when using non-standard bin directory
   when: redis_bin_dir != redis_bin_dir_default

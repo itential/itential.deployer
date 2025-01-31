@@ -4,6 +4,7 @@
 - name: Include tasks to validate variables
   ansible.builtin.include_tasks:
     file: validate-vars.yml
+  tags: always
 
 - name: Install base OS packages
   ansible.builtin.include_role:
@@ -43,11 +44,6 @@
     - name: Configure Redis/Sentinel
       tags: configure_redis
       block:
-        - name: Include tasks to configure SELinux
-          ansible.builtin.include_tasks:
-            file: configure-selinux.yml
-          when: ansible_selinux.status == "enabled"
-
         - name: Include tasks to configure Redis
           ansible.builtin.include_tasks:
             file: configure-redis.yml
