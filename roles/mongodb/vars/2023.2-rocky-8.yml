@@ -5,16 +5,16 @@ mongodb_version: 7.0
 
 mongodb_packages:
   - mongodb-org
-  - mongodb-org-database
-  - mongodb-org-server
-  - mongodb-org-tools
+  # - mongodb-org-database
+  # - mongodb-org-server
+  # - mongodb-org-tools
 
-python_packages:
+mongodb_python_packages:
   - python39
   - python39-pip
 
-base_python_dependencies:
+mongodb_base_python_dependencies:
   - pip
 
-app_python_dependencies:
+mongodb_app_python_dependencies:
   - pymongo

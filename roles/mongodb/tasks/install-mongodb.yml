@@ -1,0 +1,255 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Include release vars
+  ansible.builtin.include_vars:
+    file: "{{ item }}"
+  with_first_found:
+    - "{{ iap_release }}-{{ ansible_distribution | lower }}-{{ ansible_distribution_major_version }}.yml"
+    - "release-undefined.yml"
+  tags: always
+
+- name: Check for valid MongoDB release
+  ansible.builtin.fail:
+    msg: "Deployer does not support installing MongoDB for IAP version {{ iap_release }} on {{ ansible_distribution }}-{{ ansible_distribution_major_version }}"
+  when: invalid_iag_release is defined
+  tags: always
+
+# - name: Install base OS packages
+#   ansible.builtin.include_role:
+#     name: os
+#   tags: install_base_os_packages
+
+- name: Install MongoDB packages
+  tags: install_mongodb_packages
+  block:
+    - name: Get the list of installed packages
+      ansible.builtin.package_facts:
+        manager: "auto"
+
+    - name: Install MongoDB packages (online)
+      ansible.builtin.include_tasks:
+        file: mongodb-online.yml
+      when: not offline_install
+
+    - name: Install MongoDB packages (offline)
+      ansible.builtin.include_tasks:
+        file: mongodb-offline.yml
+      when: offline_install
+
+- name: Install Python
+  ansible.builtin.include_tasks:
+    file: install-python.yml
+  tags: install_python
+
+# Update yum config to prevent mongodb from getting updated by yum updates
+- name: Prevent yum from updating mongo
+  ansible.builtin.lineinfile:
+    path: /etc/yum.conf
+    line: exclude=mongodb-org*
+
+# Disable Transparent Huge Pages (THP)
+- name: Create systemd unit file
+  ansible.builtin.template:
+    src: thp.service.j2
+    dest: "/etc/systemd/system/disable-transparent-huge-pages.service"
+    mode: "0644"
+
+- name: Reload systemd unit files
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: Start THP service
+  ansible.builtin.systemd:
+    name: disable-transparent-huge-pages.service
+    state: started
+
+- name: Configure system to run THP service on boot
+  ansible.builtin.systemd:
+    name: disable-transparent-huge-pages.service
+    enabled: true
+
+- name: Create custom tuned profile directory
+  ansible.builtin.file:
+    state: directory
+    path: "/etc/tuned/virtual-guest-no-thp"
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Ensure tuned does not re-enable THP
+  ansible.builtin.template:
+    src: tuned.conf.j2
+    dest: "/etc/tuned/virtual-guest-no-thp/tuned.conf"
+    mode: "0644"
+
+- name: Enable tuned profile
+  ansible.builtin.command:
+    cmd: tuned-adm profile virtual-guest-no-thp
+  vars:
+    ansible_python_interpreter: "{{ mongodb_python_venv }}/bin/python3"
+  register: result
+  changed_when: result.rc == 0
+  failed_when: result.rc > 0
+
+# Tune Kernel parameters
+- name: Adjust keepalive
+  ansible.posix.sysctl:
+    name: net.ipv4.tcp_keepalive_time
+    value: 300
+
+- name: Disable zone reclaim mode
+  ansible.posix.sysctl:
+    name: vm.zone_reclaim_mode
+    value: 0
+
+- name: Increase throughput settings
+  ansible.posix.sysctl:
+    name: net.core.somaxconn
+    value: 65535
+
+# Set Soft User Limits
+- name: Set number of procs
+  community.general.pam_limits:
+    domain: mongod
+    limit_type: soft
+    limit_item: nproc
+    value: 32000
+
+- name: Set number of files
+  community.general.pam_limits:
+    domain: mongod
+    limit_type: soft
+    limit_item: nofile
+    value: 64000
+
+- name: Create data directory
+  ansible.builtin.file:
+    state: directory
+    path: "{{ mongodb_data_dir }}"
+    owner: "{{ mongodb_owner }}"
+    group: "{{ mongodb_group }}"
+    mode: "0755"
+
+- name: Create log directory
+  ansible.builtin.file:
+    state: directory
+    path: "{{ mongodb_log_dir }}"
+    owner: "{{ mongodb_owner }}"
+    group: "{{ mongodb_group }}"
+    mode: "0755"
+
+- name: Create pid directory
+  ansible.builtin.file:
+    state: directory
+    path: "{{ mongodb_pid_dir }}"
+    owner: "{{ mongodb_owner }}"
+    group: "{{ mongodb_group }}"
+    mode: "0755"
+
+- name: Configure SELinux
+  ansible.builtin.include_tasks:
+    file: configure-selinux.yml
+  tags: configure_selinux
+  when:
+    - ansible_facts.selinux.status == 'enabled'
+    - ansible_facts.selinux.mode == 'enforcing'
+
+# Check if firewalld is running, if it is then open the appropriate ports
+- name: Gather service facts
+  ansible.builtin.service_facts:
+
+- name: Open Port on FirewallD Public Zone
+  ansible.posix.firewalld:
+    port: "{{ mongodb_port }}/tcp"
+    permanent: true
+    state: enabled
+    zone: public
+    immediate: true
+  when:
+    - ansible_facts.services["firewalld.service"] is defined
+    - ansible_facts.services["firewalld.service"].state == "running"
+    - ansible_facts.services["firewalld.service"].status == "enabled"
+
+# The config file will be generated a few times as we go through the process
+# of configuring MongoDB. This first time we will ignore any of the auth, TLS,
+# and replication settings. The reason is so that we can create the database
+# users. That can not be done if all of these features are enabled. The
+# variable "stage" is used to provide this template context. When stage is
+# "initialize" the template will be forced to create a simple config.
+- name: Create MongoDB config file
+  ansible.builtin.template:
+    src: mongod.conf.j2
+    dest: "{{ mongodb_conf_file }}"
+    owner: "{{ mongodb_owner }}"
+    group: "{{ mongodb_group }}"
+    mode: "0644"
+  vars:
+    stage: initialize
+  tags:
+    - initialize_mongo_config
+    - create_mongo_users
+
+- name: Start mongo
+  ansible.builtin.systemd:
+    name: mongod
+    state: restarted
+    enabled: true
+  tags:
+    - initialize_mongo_config
+    - create_mongo_users
+
+- name: Add users to database
+  when: groups.mongodb.index(inventory_hostname) == 0
+  tags: create_mongo_users
+  block:
+    # The tasks in this file should only run on one host if configuring a replica set
+    # This creates the admin user that has root access to the database
+    - name: Add admin user to database
+      community.mongodb.mongodb_user:
+        login_port: "{{ mongodb_port }}"
+        login_host: "{{ inventory_hostname }}"
+        database: "{{ mongodb_admin_db_name }}"
+        name: admin
+        password: "{{ mongodb_user_admin_password }}"
+        state: present
+        roles:
+          - db: "{{ mongodb_admin_db_name }}"
+            role: root
+        update_password: always
+      vars:
+        ansible_python_interpreter: "{{ python_venv }}/bin/python3"
+
+    # This creates the itential user that only has read & write access to the
+    # itential database.  It is used by IAP to connect to the db.
+    - name: Add itential user to database
+      community.mongodb.mongodb_user:
+        login_port: "{{ mongodb_port }}"
+        login_host: "{{ inventory_hostname }}"
+        database: "{{ mongodb_itential_db_name }}"
+        user: itential
+        password: "{{ mongodb_user_itential_password }}"
+        state: present
+        roles:
+          - db: "{{ mongodb_itential_db_name }}"
+            role: readWrite
+        update_password: always
+      vars:
+        ansible_python_interpreter: "{{ python_venv }}/bin/python3"
+
+    # This creates the localaaa user that only has read & write access to the
+    # LocalAAA database.  It is used by the local AAA adapter to login to IAP.
+    # - name: Add localaaa user to database
+    #   community.mongodb.mongodb_user:
+    #     login_port: "{{ mongodb_port }}"
+    #     login_host: "{{ inventory_hostname }}"
+    #     database: "{{ mongodb_localaaa_db_name }}"
+    #     user: localaaa
+    #     password: "{{ mongodb_user_localaaa_password }}"
+    #     state: present
+    #     roles:
+    #       - db: "{{ mongodb_localaaa_db_name }}"
+    #         role: readWrite
+    #     update_password: always
+    #   vars:
+    #     ansible_python_interpreter: "{{ python_venv }}/bin/python3"

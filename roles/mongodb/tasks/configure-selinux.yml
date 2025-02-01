@@ -10,13 +10,13 @@
 
     - name: Allow mongodb to listen on tcp port when using non-standard mongo port
       community.general.seport:
-        ports: "{{ mongo_port }}"
+        ports: "{{ mongodb_port }}"
         proto: tcp
         setype: mongod_port_t
         state: present
       when:
         - ansible_selinux.status == "enabled"
-        - mongo_port != 27017
+        - mongodb_port != 27017
 
     # MongoDB is configured to use non-default paths for its data and log
     # directories. First, we need to update the SELinux policy to allow the
@@ -30,27 +30,27 @@
         - name: SELinux - Update the policy to allow the mongod service to use the custom data directory
           ansible.builtin.command: "{{ item }}"
           with_items:
-            - semanage fcontext -a -t mongod_var_lib_t '{{ mongo_data_dir }}.*'
-            - chcon -Rv -u system_u -t mongod_var_lib_t '{{ mongo_data_dir }}'
-            - restorecon -R -v '{{ mongo_data_dir }}'
+            - semanage fcontext -a -t mongod_var_lib_t '{{ mongodb_data_dir }}.*'
+            - chcon -Rv -u system_u -t mongod_var_lib_t '{{ mongodb_data_dir }}'
+            - restorecon -R -v '{{ mongodb_data_dir }}'
           register: result
           changed_when: result.rc == 0
           failed_when:
             - result.rc is defined
             - result.rc > 0
             - "'already defined' not in result.stderr"
-          when: mongo_data_dir != "/var/lib/mongo"
+          when: mongodb_data_dir != "/var/lib/mongo"
 
         - name: SELinux - Update the policy to allow the mongod service to use the custom log directory
           ansible.builtin.command: "{{ item }}"
           with_items:
-            - semanage fcontext -a -t mongod_log_t '{{ mongo_log_dir }}'
-            - chcon -Rv -u system_u -t mongod_log_t '{{ mongo_log_dir }}'
-            - restorecon -R -v '{{ mongo_log_dir }}'
+            - semanage fcontext -a -t mongod_log_t '{{ mongodb_log_dir }}'
+            - chcon -Rv -u system_u -t mongod_log_t '{{ mongodb_log_dir }}'
+            - restorecon -R -v '{{ mongodb_log_dir }}'
           register: result
           changed_when: result.rc == 0
           failed_when:
             - result.rc is defined
             - result.rc > 0
             - "'already defined' not in result.stderr"
-          when: mongo_log_dir != "/var/log/mongodb"
+          when: mongodb_log_dir != "/var/log/mongodb"

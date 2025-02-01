@@ -5,11 +5,13 @@
   ansible.builtin.include_role:
     name: python
   tags: install_python
+  vars:
+    python_executable: "{{ mongodb_python_executable }}"
 
 - name: Setup python virtual environment
   ansible.builtin.command:
     chdir: "{{ mongodb_python_venv_root }}"
-    cmd: "{{ python_executable }} -m venv {{ mongodb_python_venv_name }}"
+    cmd: "{{ mongodb_python_executable }} -m venv {{ mongodb_python_venv_name }}"
   changed_when: true
   tags: install_python
 
@@ -18,3 +20,6 @@
     name: python
     tasks_from: install-dependencies
   tags: install_python
+  vars:
+    python_pip_executable: "{{ mongodb_pip_executable }}"
+    python_venv: "{{ mongodb_python_venv }}"

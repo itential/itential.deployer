@@ -9,12 +9,12 @@ mongodb_packages:
   - mongodb-org-server
   - mongodb-org-tools
 
-python_packages:
+mongodb_python_packages:
   - python3
   - python3-pip
 
-base_python_dependencies:
+mongodb_base_python_dependencies:
   - pip
 
-app_python_dependencies:
+mongodb_app_python_dependencies:
   - pymongo
