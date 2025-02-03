@@ -5,9 +5,8 @@
   ansible.builtin.include_vars:
     file: "{{ item }}"
   with_first_found:
-    - "release-{{ iap_release }}.yml"
+    - "{{ iag_release }}-{{ ansible_distribution | lower }}-{{ ansible_distribution_major_version }}.yml"
     - "release-undefined.yml"
-  tags: always
 
 - name: Run common checks
   ansible.builtin.include_role:
@@ -38,7 +37,7 @@
 - name: Fetch Gateway results
   ansible.builtin.fetch:
     src: "{{ workingdir.path }}/preflightResults.txt"
-    dest: "{{ preflight_directory }}/{{ date }}/gateway_{{ inventory_hostname }}_{{ time }}_results.txt"
+    dest: "{{ preflight_directory }}/gateway_{{ inventory_hostname }}_results.txt"
     flat: true
 
 - name: Remove temporary working directory

@@ -8,13 +8,20 @@
     - "release-{{ iap_release }}.yml"
     - "release-undefined.yml"
 
+- name: Check for valid Redis release
+  ansible.builtin.fail:
+    msg: "Deployer does not support installing Redis on IAP version {{ iap_release }}"
+  when: invalid_redis_release is defined
+  tags: always
+
 - name: Run common checks
   ansible.builtin.include_role:
     name: preflight
   vars:
-    preflight_url_checks:
-      - "{{ redis_repo_url[ansible_distribution_major_version] }}"
-      - "{{ redis_epel_repo_url }}"
+    preflight_url_checks: "{{ (redis_install_method is defined and
+                              redis_install_method == 'remi_repo') |
+                              ternary([redis_repo_url[ansible_distribution_major_version], redis_epel_repo_url],
+                              [redis_source_url[ansible_distribution_major_version]]) }}"
 
 - name: Create temporary working directory
   ansible.builtin.tempfile:
@@ -39,7 +46,7 @@
 - name: Fetch Redis results
   ansible.builtin.fetch:
     src: "{{ workingdir.path }}/redisPreflightResults.txt"
-    dest: "{{ preflight_directory }}/{{ date }}/redis_{{ inventory_hostname }}_{{ time }}_results.txt"
+    dest: "{{ preflight_directory }}/redis_{{ inventory_hostname }}_results.txt"
     flat: true
 
 - name: Remove temporary working directory

@@ -16,17 +16,9 @@
         msg: "Deployer does not support installing Gateway version {{ iag_release }} on {{ ansible_distribution }}-{{ ansible_distribution_major_version }}"
       when: invalid_iag_release is defined
 
-- name: Set date and time
-  ansible.builtin.set_fact:
-    current_date: "{{ ansible_date_time.date }}"
-    current_time: "{{ ansible_date_time.hour }}_{{ ansible_date_time.minute }}"
-
 - name: Run preflight checks
   ansible.builtin.include_tasks:
     file: preflight.yml
-  vars:
-    date: "{{ current_date }}"
-    time: "{{ current_time }}"
   when:
     - preflight_run_checks is defined
     - preflight_run_checks | bool

@@ -5,16 +5,18 @@
   ansible.builtin.include_vars:
     file: "{{ item }}"
   with_first_found:
-    - "release-{{ iap_release }}.yml"
+    - "{{ iap_release }}-{{ ansible_distribution | lower }}-{{ ansible_distribution_major_version }}.yml"
     - "release-undefined.yml"
   tags: always
+
 
 - name: Run common checks
   ansible.builtin.include_role:
     name: preflight
   vars:
     preflight_url_checks:
-      - "https://repo.mongodb.org/yum/redhat/"
+      - "{{ mongodb_release_url }}"
+      - "{{ mongodb_gpgkey_url }}"
 
 - name: Get avx cpu info
   ansible.builtin.command: grep avx /proc/cpuinfo
@@ -39,9 +41,10 @@
     results: '{{ results | combine({"pass": true}) }}'
   when:
     - results.cpuCores >= mongodb_cpu_cores
-    - results.get( , 0) >= mongodb_free_disk_space
+    - results.get(mountvarname, 0) >= mongodb_free_disk_space
     - results.memory >= mongodb_ram
     - results.url_status.values() | unique | length == 1 and results.url_status.values() | unique | first == 200
+    - results.avx == 'supported'
 
 - name: Create MongoDB preflight results
   ansible.builtin.template:
@@ -52,7 +55,7 @@
 - name: Fetch MongoDB results
   ansible.builtin.fetch:
     src: "{{ workingdir.path }}/mongodbPreflightResults.txt"
-    dest: "{{ preflight_directory }}/{{ date }}/mongodb_{{ inventory_hostname }}_{{ time }}_results.txt"
+    dest: "{{ preflight_directory }}/mongodb_{{ inventory_hostname }}_results.txt"
     flat: true
 
 - name: Remove temporary working directory
