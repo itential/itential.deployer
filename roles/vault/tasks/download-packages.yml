@@ -1,26 +1,17 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Validate distribution major version
-  ansible.builtin.fail:
-    msg: Download not supported for version 7
-  when: ansible_distribution_major_version == "7"
+- name: Include tasks to validate variables
+  ansible.builtin.include_tasks:
+    file: validate-vars.yml
 
-- name: Validate offline_install variable
-  ansible.builtin.fail:
-    msg: offline_install must be set to false for download
-  when:
-    - offline_install is defined
-    - offline_install
+- name: Include tasks to validate offline variables
+  ansible.builtin.include_tasks:
+    file: validate-vars-offline.yml
 
-- name: Add Hashicorp Vault repo
-  ansible.builtin.yum_repository:
-    name: hashicorp
-    description: Hashicorp Vault repo
-    baseurl: https://rpm.releases.hashicorp.com/RHEL/$releasever/$basearch/stable
-    state: present
-    gpgcheck: false
-  when: install_yum_repos | bool
+- name: Include tasks to install Hashicorp Vault YUM repo
+  ansible.builtin.include_tasks:
+    file: install-vault-repo.yml
 
 - name: Download Vault rpms
   ansible.builtin.import_role:
