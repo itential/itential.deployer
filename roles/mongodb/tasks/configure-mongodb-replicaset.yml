@@ -1,48 +1,65 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Check the auth status
-  ansible.builtin.include_role:
-    name: mongodb_common
-    tasks_from: check-auth-status.yml
 
-# This task should run on ALL hosts when deploying a replica set
-- name: Modify mongod.conf to enable replication
-  ansible.builtin.lineinfile:
-    path: "{{ mongo_conf_file }}"
-    regexp: "^#replication:"
-    line: "replication:"
-  register: result1
+# - name: Initialize replset_exists to false
+#   ansible.builtin.set_fact:
+#     mongodb_replset_exists: false
 
-# This command against mongo will return some basic information about the database.
-# If there is already a replicaset defined then the output of this command will
-# contain the "setName" field. If there is no replicaset defined then this field
-# will not be present in the output. We can determine if the replicaset has already
-# been configured by the presence of this variable. It must be run against only the
-# first mongo in the mongodb group because that is the only mongo (so far) to have
-# users created against it.
-- name: Check if the replicaset exists
-  community.mongodb.mongodb_shell:
+# # This command against mongo will return some basic information about the database.
+# # If there is already a replicaset defined then the output of this command will
+# # contain the "setName" field. If there is no replicaset defined then this field
+# # will not be present in the output. We can determine if the replicaset has already
+# # been configured by the presence of this variable. It must be run against only the
+# # first mongo in the mongodb group because that is the only mongo (so far) to have
+# # users created against it.
+# - name: Check if the replicaset exists
+#   community.mongodb.mongodb_shell:
+#     login_host: "{{ inventory_hostname }}"
+#     login_port: "{{ mongodb_port }}"
+#     login_database: admin
+#     eval: db.runCommand({"hello":1})
+#     mongo_cmd: auto
+#   register: rs
+#   vars:
+#     ansible_python_interpreter: "{{ mongodb_python_venv }}/bin/python3"
+
+# # If setName is present in the output and if it equals the expected value then the
+# # replicaset has already been created.
+# - name: Set replset_exists to true if it exists
+#   ansible.builtin.set_fact:
+#     mongodb_replset_exists: true
+#   when:
+#     - rs.transformed_output.setName is defined
+#     - rs.transformed_output.setName == mongodb_replset_name
+
+# Check the state of the MongoDB servers. This might or might not be a replicaset.
+# This might or might not have authorization enabled. This module returns an
+# object that looks like this:
+# {
+#   "auth_enabled": true,
+#   "changed": false,
+#   "failed": false,
+#   "members": [
+#     "example1.host.com:27017",
+#     "example2.host.com:27017",
+#     "example3.host.com:27017"
+#   ],
+#   "primary": "ip-10-0-0-28.ec2.internal:27017",
+#   "replication_enabled": true
+# }
+- name: Discover MongoDB configuration state
+  itential.deployer.mongodb_config_state:
+    login_database: admin
     login_host: "{{ inventory_hostname }}"
     login_port: "{{ mongodb_port }}"
-    login_user: "{{ mongodb_auth | ternary('admin', omit) }}"
-    login_password: "{{ mongodb_auth | ternary(mongodb_user_admin_password, omit) }}"
-    login_database: admin
-    eval: db.runCommand({"hello":1})
-    mongo_cmd: auto
-  register: rs
-  when: groups.mongodb.index(inventory_hostname) == 0
+  register: mongodb_state
   vars:
     ansible_python_interpreter: "{{ mongodb_python_venv }}/bin/python3"
 
-# If setName is present in the output and if it equals the expected value then the
-# replicaset has already been created.
-- name: Set replset_exists to true if it exists
-  ansible.builtin.set_fact:
-    mongodb_replset_exists: true
-  when:
-    - rs.transformed_output.setName is defined
-    - rs.transformed_output.setName == mongodb_replset_name
+- name: Print MongoDB configuration state
+  ansible.builtin.debug:
+    msg: "{{ mongodb_state }}"
 
 # Execute the template to apply changes to the mongo.conf for replication
 - name: Create MongoDB config file
@@ -52,7 +69,7 @@
     owner: "{{ mongodb_owner }}"
     group: "{{ mongodb_group }}"
     mode: "0644"
-  when: not mongodb_replset_exists
+  when: not mongodb_state.replication_enabled
   vars:
     stage: "replication"
 
@@ -61,11 +78,12 @@
     name: mongod
     state: restarted
     enabled: true
-  when: not mongodb_replset_exists
+  when: not mongodb_state.replication_enabled
 
 - name: Set empty array of mongo servers
   ansible.builtin.set_fact:
     mongodb_servers: []
+  when: not mongodb_state.replication_enabled
 
 # This task should always run, arbiter or not
 - name: Create the replicaset members list (no arbiter)
@@ -73,6 +91,7 @@
     mongodb_servers: "{{ mongodb_servers + [item + ':' + mongodb_port | string] }}"
   with_items: "{{ groups.mongodb }}"
   when:
+    - not mongodb_state.replication_enabled
     - inventory_hostname in groups.mongodb
     - groups.mongodb.index(inventory_hostname) == 0
 
@@ -82,6 +101,7 @@
     mongodb_servers: "{{ mongodb_servers + [item + ':' + mongodb_port | string] }}"
   with_items: "{{ groups.mongodb_arbiter }}"
   when:
+    - not mongodb_state.replication_enabled
     - inventory_hostname in groups.mongodb
     - groups.mongodb.index(inventory_hostname) == 0
     - groups.mongodb_arbiter is defined
@@ -90,8 +110,8 @@
   community.mongodb.mongodb_replicaset:
     arbiter_at_index: "{{ (groups.mongodb_arbiter | default([]) | length > 0) | ternary(mongodb_servers | length - 1, omit) }}"
     auth_mechanism: "SCRAM-SHA-256"
-    login_user: "{{ (mongodb_auth | bool) | ternary('admin', omit) }}"
-    login_password: "{{ (mongodb_auth | bool) | ternary(mongodb_user_admin_password, omit) }}"
+    login_user: "{{ (mongodb_state.auth_enabled | bool) | ternary('admin', omit) }}"
+    login_password: "{{ (mongodb_state.auth_enabled | bool) | ternary(mongodb_user_admin_password, omit) }}"
     login_port: "{{ mongodb_port }}"
     login_database: admin
     login_host: "{{ inventory_hostname }}"
@@ -99,6 +119,7 @@
     replica_set: "{{ mongodb_replset_name }}"
     validate: true
   when:
+    - not mongodb_state.replication_enabled
     - inventory_hostname in groups.mongodb
     - groups.mongodb.index(inventory_hostname) == 0
   vars:
@@ -106,8 +127,8 @@
 
 - name: Ensure replicaset is stable before continuing
   community.mongodb.mongodb_status:
-    login_user: "{{ mongodb_auth | ternary('admin', omit) }}"
-    login_password: "{{ mongodb_auth | ternary(mongodb_user_admin_password, omit) }}"
+    login_user: "{{ mongodb_state.auth_enabled | ternary('admin', omit) }}"
+    login_password: "{{ mongodb_state.auth_enabled | ternary(mongodb_user_admin_password, omit) }}"
     login_port: "{{ mongodb_port }}"
     login_database: admin
     login_host: "{{ inventory_hostname }}"
@@ -120,18 +141,20 @@
     - "'Unable to determine if auth is enabled' not in rs.msg"
     - "'replicaset is in a converged state' not in rs.msg"
   when:
+    - not mongodb_state.replication_enabled
     - inventory_hostname in groups.mongodb
   vars:
     ansible_python_interpreter: "{{ mongodb_python_venv }}/bin/python3"
 
 - name: Lookup PRIMARY replicaset member
   ansible.builtin.set_fact:
-    primary_server: "{{ item.key.split(':')[0] }}"
-  loop: "{{ lookup('dict', rs.replicaset) }}"
+    primary_server: "{{ mongodb_state.primary }}"
+  # loop: "{{ lookup('dict', rs.replicaset) }}"
   when:
-    - inventory_hostname in groups.mongodb
-    - rs.replicaset is defined
-    - "'PRIMARY' in item.value"
+    - not mongodb_state.replication_enabled
+    # - inventory_hostname in groups.mongodb
+    # - rs.replicaset is defined
+    # - "'PRIMARY' in item.value"
 
 # Starting in MongoDB 5.0, the implicit default write concern is w: majority.
 # However, special considerations are made for deployments containing arbiters:
@@ -161,12 +184,14 @@
 - name: Adjust the default writeConcern if there are arbiters
   community.mongodb.mongodb_shell:
     mongo_cmd: auto
-    login_user: "{{ mongodb_auth | ternary('admin', omit) }}"
-    login_password: "{{ mongodb_auth | ternary(mongodb_user_admin_password, omit) }}"
+    login_user: "{{ mongodb_state.auth_enabled | ternary('admin', omit) }}"
+    login_password: "{{ mongodb_state.auth_enabled | ternary(mongodb_user_admin_password, omit) }}"
     login_port: "{{ mongodb_port }}"
     login_database: admin
+    login_host: "{{ inventory_hostname }}"
     eval: db.adminCommand({"setDefaultRWConcern":1,"defaultWriteConcern":{"w":1}})
   when:
+    - not mongodb_state.replication_enabled
     - inventory_hostname in groups.mongodb
     - primary_server is defined
     - inventory_hostname == primary_server

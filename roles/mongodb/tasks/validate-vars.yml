@@ -1,0 +1,60 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Validate and set installation variables
+  tags: always
+  block:
+    - name: Validate installation variables
+      ansible.builtin.assert:
+        that: >
+          (iap_release is defined and mongodb_version is not defined and mongodb_packages is not defined) or
+          (iap_release is not defined and mongodb_version is defined and mongodb_packages is defined)
+        msg: "Variables [iap_release, mongodb_version, mongodb_packages] are mutually exclusive"
+
+    - name: Validate installation variables when not using IAP release defaults
+      when: not iap_release is defined
+      block:
+        - name: Validate mongodb_version
+          ansible.builtin.assert:
+            that: mongodb_version is defined
+            msg: "Variable mongodb_version must be defined when iap_release is not defined"
+
+        - name: Validate mongodb_packages
+          ansible.builtin.assert:
+            that: mongodb_packages is defined
+            msg: "Variable mongodb_packages must be defined when iap_release is not defined"
+
+    - name: Set installation variables when using IAP release defaults
+      when: iap_release is defined
+      block:
+        - name: Load IAP release default variables
+          ansible.builtin.include_vars:
+            file: "{{ item }}"
+          with_first_found:
+            - "iap-release-{{ iap_release }}.yml"
+            - "iap-release-undefined.yml"
+
+        - name: Check for valid MongoDB release
+          ansible.builtin.assert:
+            that: mongodb_invalid_iap_release is not defined
+            msg: "Deployer does not support installing MongoDB for IAP release {{ iap_release }}"
+
+        - name: Set mongodb_version to the default value when not defined in inventory
+          ansible.builtin.set_fact:
+            mongodb_version: "{{ mongodb_version_default }}"
+          when:
+            - mongodb_version is not defined
+
+        - name: Set mongodb_packages to the default value when not defined in inventory
+          ansible.builtin.set_fact:
+            mongodb_packages: "{{ mongodb_packages_default }}"
+          when:
+            - mongodb_packages is not defined
+
+    - name: Print installation details for online installation
+      when: not offline_install
+      block:
+        - name: Print installation details
+          ansible.builtin.debug:
+            msg: "Installing MongoDB version: {{ mongodb_version }} and MongoDB packages: {{ mongodb_packages }}"
+          when: mongodb_version is defined

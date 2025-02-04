@@ -1,0 +1,33 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+mongodb_python_packages:
+  - python3
+  - python3-pip
+
+mongodb_base_python_dependencies:
+  - pip
+
+mongodb_app_python_dependencies:
+  - pymongo
+
+mongodb_version: "{{ mongodb_version_default }}"
+
+mongodb_release_url: "https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/{{ mongodb_version }}/$basearch/"
+mongodb_gpgkey_url: "https://www.mongodb.org/static/pgp/server-{{ mongodb_version }}.asc"
+
+# The mongodb role uses the system python3 executables.
+# MondoDB doesn't require Python or pymongo, but the community.mongodb.mongodb_user
+# role does. The pymongo wheel is defined in the mongodb_python_dependecies
+# variable in the vars directory.
+mongodb_python_executable: /usr/bin/python3
+mongodb_pip_executable: /usr/bin/pip3
+
+# To isolate Python, a virtual environment is used.
+mongodb_python_venv_root: /var/tmp
+mongodb_python_venv_name: mongodb_venv
+mongodb_python_venv: "{{ mongodb_python_venv_root }}/{{ mongodb_python_venv_name }}"
+
+# Offline install settings
+# Refer to the offline variables in common_vars for additional settings
+mongodb_packages_path: "{{ itential_packages_path }}/{{ iap_release }}/mongodb"

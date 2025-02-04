@@ -18,8 +18,8 @@
         - ansible_selinux.status == "enabled"
         - mongodb_port != 27017
 
-    # MongoDB is configured to use non-default paths for its data and log
-    # directories. First, we need to update the SELinux policy to allow the
+    # If MongoDB is configured to use non-default paths for its data and log
+    # directories then we need to update the SELinux policy to allow the
     # mongod service to use the new directory, it’s worth to note that we
     # need to make sure to include the .* at the end of the directory. Then,
     # update the SELinux user policy for the new directory. Finally, apply

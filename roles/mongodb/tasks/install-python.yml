@@ -23,3 +23,4 @@
   vars:
     python_pip_executable: "{{ mongodb_pip_executable }}"
     python_venv: "{{ mongodb_python_venv }}"
+    app_python_dependencies: "{{ mongodb_app_python_dependencies }}"
