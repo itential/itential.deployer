@@ -44,7 +44,7 @@ When set as readOnly: true, the following will occur:
 
 The variables in this section may be overridden in the inventory in the `vault` group vars.
 
-The following table lists the default variables located in `roles/vault/defaults`.
+The following table lists the default variables located in `roles/vault/defaults/main.yml`.
 
 | Variable | Group | Type | Description | Default Value
 | :------- | :---- | :--- | :---------- | :------------
@@ -80,7 +80,7 @@ To execute all Vault roles, run the `vault` playbook:
 ansible-playbook itential.deployer.vault -i <inventory>
 ```
 
-You can also run select Vault roles by using the following tags:
+You can also run select Vault tasks by using the following tags:
 
 * `install_vault`
 * `configure_vault`
