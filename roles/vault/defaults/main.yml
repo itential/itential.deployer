@@ -1,17 +1,20 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-# The default behavior for installing vault
-vault_install: false
-
 # The default directory to store vault data and other config data
 vault_dir: /opt/vault
 
-# The default port used by vault clusters to communicate with eachother
+# The default port used by vault clusters to communicate with each other
 vault_cluster_port: 8201
 
 # The default user that runs vault
 vault_user: vault
+
+# The default group that runs vault
+vault_group: vault
+
+# Default directory to store the unseal keys
+vault_unseal_keys_dir: "{{ vault_dir }}/keys/unseal_keys"
 
 # Offline install settings
 # Refer to the offline variables in common_vars for additional settings
