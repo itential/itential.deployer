@@ -1,0 +1,47 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+# Location of mongo conf file
+mongodb_conf_file: /etc/mongod.conf
+
+# Directory that stores mongodb data files
+mongodb_data_dir: /var/lib/mongo
+
+# Target path for writing mongodb log files
+mongodb_log_dir: /var/log/mongodb
+
+# Directory that stores the mongodb pid file
+mongodb_pid_dir: /var/run/mongodb
+
+# The base directory for SSL certs and key files
+mongodb_ssl_root_dir: /etc/ssl/certs
+
+# Key file destination location
+# The key file is used to authenticate members of a replica set
+mongodb_auth_keyfile_destination: "{{ mongodb_ssl_root_dir }}/mongodb/mongo-replicaset-key.pem"
+
+# Destination location of the certificate key file used for TLS connections
+mongodb_cert_keyfile_destination: "{{ mongodb_ssl_root_dir }}/mongodb/mongo-certificate.pem"
+
+# Destination location of the CA root file used for TLS connections
+mongodb_root_ca_file_destination: "{{ mongodb_ssl_root_dir }}/mongodb/mongo-rootCA.pem"
+
+# The Mongo user and group
+mongodb_owner: mongod
+mongodb_group: mongod
+
+# The default admin database name
+mongodb_admin_db_name: admin
+
+# Flag to enable/disable IPv6
+mongodb_bind_ipv6: true
+
+# The hostnames and/or IP addresses and/or full Unix domain socket paths on
+# which mongos or mongod should listen for client connections. You may attach
+# mongos or mongod to any interface. To bind to multiple addresses, enter a
+# list of comma-separated values.
+#
+# The inventory_hostname will be automatically added to mongodb_bind_addrs.
+#
+# If mongodb_bind_ipv6 is set to true, '::1' will be added to mongodb_bind_addrs.
+mongodb_bind_addrs: 127.0.0.1

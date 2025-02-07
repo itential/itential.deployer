@@ -23,6 +23,6 @@
 - name: Create pip3 symlink to /usr/local/bin/pip3
   ansible.builtin.file:
     state: link
-    src: "{{ pip_executable }}"
+    src: "{{ python_pip_executable }}"
     path: /usr/local/bin/pip3
   when: not pip3_symlink.stat.exists
