@@ -18,23 +18,23 @@
         file: install-mongodb-offline.yml
       when: offline_install
 
-    # Update yum config to prevent mongodb from getting updated by yum updates
-    - name: Prevent yum from updating mongo
-      ansible.builtin.lineinfile:
-        path: /etc/yum.conf
-        line: exclude=mongodb-org*
+# Update yum config to prevent mongodb from getting updated by yum updates
+- name: Prevent yum from updating mongo
+  ansible.builtin.lineinfile:
+    path: /etc/yum.conf
+    line: exclude=mongodb-org*
 
-    - name: Create MongoDB log, data, pid directories
-      ansible.builtin.file:
-        state: directory
-        path: "{{ item }}"
-        owner: "{{ mongodb_owner }}"
-        group: "{{ mongodb_group }}"
-        mode: "0755"
-      loop:
-        - "{{ mongodb_data_dir }}"
-        - "{{ mongodb_log_dir }}"
-        - "{{ mongodb_pid_dir }}"
+- name: Create MongoDB log, data, pid directories
+  ansible.builtin.file:
+    state: directory
+    path: "{{ item }}"
+    owner: "{{ mongodb_owner }}"
+    group: "{{ mongodb_group }}"
+    mode: "0755"
+  loop:
+    - "{{ mongodb_data_dir }}"
+    - "{{ mongodb_log_dir }}"
+    - "{{ mongodb_pid_dir }}"
 
 - name: Install Python
   ansible.builtin.include_tasks:
@@ -43,12 +43,12 @@
 
 - name: Disable Transparent Huge Pages (THP) and configure tuned when mongodb version < 8.0
   ansible.builtin.import_tasks:
-    file: install-disable-thp.yml
+    file: disable-thp.yml
   when: mongodb_version | float < 8.0
 
 - name: Enable Transparent Huge Pages (THP) and configure tuned when mongodb version >= 8.0
   ansible.builtin.import_tasks:
-    file: install-enable-thp.yml
+    file: enable-thp.yml
   when: mongodb_version | float >= 8.0
 
 - name: Adjust Kernel parameters
@@ -94,18 +94,14 @@
     mode: "0644"
   vars:
     stage: initialize
-  tags:
-    - initialize_mongo_config
-    - create_mongo_users
+  tags: initialize_mongo_config
 
 - name: Start mongo
   ansible.builtin.systemd:
     name: mongod
     state: restarted
     enabled: true
-  tags:
-    - initialize_mongo_config
-    - create_mongo_users
+  tags: initialize_mongo_config
 
 - name: Add users to database
   when: groups.mongodb.index(inventory_hostname) == 0

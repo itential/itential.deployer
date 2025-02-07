@@ -29,7 +29,6 @@ author:
 '''
 
 EXAMPLES = r'''
-# Pass in a message
 - name: Determine compatibility
   itential.deployer.os_compatibility:
 '''
@@ -41,11 +40,6 @@ compatible:
     type: bool
     returned: always
     sample: false
-os_version:
-    description: A normalized string representing the OS and major version
-    type: str
-    returned: always
-    sample: 'RedHat8'
 '''
 
 from ansible.module_utils.basic import AnsibleModule
@@ -63,9 +57,6 @@ def run_module():
     result = dict(
         changed=False,
         compatible=False,
-        os_version="",
-        os="",
-        version=""
     )
 
     # the AnsibleModule object will be our abstraction working with Ansible
@@ -85,11 +76,6 @@ def run_module():
 
     # Get the facts from the host
     facts = ansible_facts(module)
-
-    # Normalize the distribution and major version
-    result["os_version"] = facts["distribution"].lower() + "-" + facts["distribution_major_version"]
-    result["os"] = facts["distribution"].lower()
-    result["version"] = facts["distribution_major_version"]
 
     # If its a RedHat family of linux then set compatible to True
     if facts["os_family"].lower() == "redhat":

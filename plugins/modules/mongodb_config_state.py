@@ -9,7 +9,7 @@ DOCUMENTATION = r'''
 ---
 module: mongodb_config_state
 
-short_description: Inspect facts and determine the configuration state of MongoDB.
+short_description: Report the configuration state of MongoDB.
 
 # If this is part of a collection, you need to use semantic versioning,
 # i.e. the version is of the form "2.5.0" and not "2.4".
@@ -20,19 +20,30 @@ description: This module will inspect the configuration of MongoDB and report ba
     example, it will provide boolean values on the state of replication and on the
     state of authorization.
 
-# Specify this value according to your collection
-# in format of namespace.collection.doc_fragment_name
-# extends_documentation_fragment:
-#     - my_namespace.my_collection.my_doc_fragment_name
+options:
+    login_database:
+        description: The database to login in to.
+        required: true
+        type: str
+    login_host:
+        description: The host where the database lives.
+        required: true
+        type: str
+    login_port:
+        description: The port that the database is listening for connections.
+        required: true
+        type: int
 
 author:
     - Steven Schattenberg (@steven-schattenberg-itential)
 '''
 
 EXAMPLES = r'''
-# Pass in a message
 - name: Determine MongoDB config state
   itential.deployer.mongodb_config_state:
+    login_database: admin
+    login_host: example.com
+    login_port: 27017
 '''
 
 RETURN = r'''
@@ -112,9 +123,12 @@ def run_module():
 
     if "setName" in hello:
         result["replication_enabled"] = True
-        result["primary"] = hello["primary"]
+        result["primary"] = hello["primary"].split(":")[0]
         result["members"] = hello["hosts"]
 
+    # This MongoDB command requires an authorized user to execute. This module
+    # is deliberately not authorizing so that we can determine if auth is
+    # enabled.
     try:
         user = database.command('usersInfo')
     except OperationFailure:

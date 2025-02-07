@@ -47,7 +47,7 @@
 
         - name: Set mongodb_packages to the default value when not defined in inventory
           ansible.builtin.set_fact:
-            mongodb_packages: "{{ mongodb_packages_default }}"
+            mongodb_packages: "{{ mongodb_packages_default[ansible_distribution_major_version] }}"
           when:
             - mongodb_packages is not defined
 
