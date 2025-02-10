@@ -49,23 +49,23 @@
   ansible.builtin.file:
     name: "{{ item }}"
     state: directory
-    owner: "{{ iap_user }}"
-    group: "{{ iap_group }}"
+    owner: "{{ platform_user }}"
+    group: "{{ platform_group }}"
     mode: "0775"
   with_items:
-    - "{{ iap_install_dir }}"
-    - "{{ iap_install_dir }}/keys"
-    - "{{ iap_install_dir }}/automation"
-    - "{{ iap_install_dir }}/automation/public"
-    - "{{ iap_log_dir }}"
-    - "{{ iap_log_dir }}/automation"
+    - "{{ platform_install_dir }}"
+    - "{{ platform_install_dir }}/keys"
+    - "{{ platform_install_dir }}/automation"
+    - "{{ platform_install_dir }}/automation/public"
+    - "{{ platform_log_dir }}"
+    - "{{ platform_log_dir }}/automation"
 
 - name: Ensure secure mode for TemplateBuilder
   ansible.builtin.lineinfile:
     path: /etc/sudoers
     insertafter: EOF
     state: present
-    line: "{{ iap_user }} ALL=(ALL) NOPASSWD: /usr/sbin/chroot, /sbin/chroot"
+    line: "{{ platform_user }} ALL=(ALL) NOPASSWD: /usr/sbin/chroot, /sbin/chroot"
 
 - name: Install Platform
   tags: install_platform
@@ -93,12 +93,12 @@
   ansible.builtin.file:
     name: "{{ item }}"
     state: directory
-    owner: "{{ iap_user }}"
-    group: "{{ iap_group }}"
+    owner: "{{ platform_user }}"
+    group: "{{ platform_group }}"
     mode: "0775"
   with_items:
-    - "{{ iap_install_dir }}/current/custom/@itential"
-    - "{{ iap_install_dir }}/current/custom/@itentialopensource"
+    - "{{ platform_install_dir }}/current/custom/@itential"
+    - "{{ platform_install_dir }}/current/custom/@itentialopensource"
 
 - name: Copy certs
   ansible.builtin.include_tasks:
@@ -121,22 +121,22 @@
 
 # This needs to run after set-file-ownership.yml so the permissions don't get over-written
 - name: Configure Vault
-  tags: configure_vault
+  tags: platform_configure_vault
   block:
     - name: Configure Vault
       ansible.builtin.include_tasks:
         file: configure-vault.yml
-      when: configure_vault | bool
+      when: platform_configure_vault | bool
 
 - name: Init MongoDB
   tags: mongo_init
   block:
-    - name: Initialize MongoDB with IAP data
+    - name: Initialize MongoDB with Itential Platform data
       ansible.builtin.include_tasks:
         file: mongo-init.yml
-      when: configure_iap | bool
+      when: platform_bootstrap_configs | bool
 
-- name: Enable and start IAP
+- name: Enable and start Itential Platform
   ansible.builtin.systemd:
     name: automation-platform
     enabled: true

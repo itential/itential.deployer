@@ -33,7 +33,7 @@ The `mongodb_tls` role is responsible for configuring MongoDB to use a TLS conne
 
 ## Static Variables
 
-The variables located in the `vars` directory of each role are "static" and not meant to be overridden by the user.  Since these variable files are included at run-time based on the IAP release and OS major version, they have a higher precedence than the variables in the inventory and are not easily overridden.
+The variables located in the `vars` directory of each role are "static" and not meant to be overridden by the user.  Since these variable files are included at run-time based on the Itential Platform release and OS major version, they have a higher precedence than the variables in the inventory and are not easily overridden.
 
 ## Global Variables
 
@@ -41,10 +41,10 @@ The variables in this section are configured in the inventory in the `all` group
 
 | Variable | Group | Type | Description | Default Value | Required?
 | :------- | :---- | :--- | :---------- | :------------ | :---------
-| `iap_release` | `all` | Fixed-point | Designates the IAP major version. | N/A | Yes
+| `platform_release` | `all` | Fixed-point | Designates the Itential Platform major version. | N/A | Yes
 | `mongo_root_ca_file_source` | `all` | String | The name of the MongoDB Root CA file.| N/A | No
 
-The `iap_release` must be defined in the inventory.  This variable, along with the OS major version, is used to determine the static variables.
+The `platform_release` must be defined in the inventory.  This variable, along with the OS major version, is used to determine the static variables.
 
 ## Common Variables
 
@@ -140,7 +140,7 @@ To install and configure MongoDB, add a `mongodb` group and host to your invento
 ```
 all:
     vars:
-        iap_release: 2023.1
+        platform_release: 2023.1
 
     children:
         mongodb:
@@ -156,7 +156,7 @@ To add authentication, add the `mongodb_auth` variable and set it to `true`.
 ```
 all:
     vars:
-        iap_release: 2023.1
+        platform_release: 2023.1
         mongodb_auth: true
 
     children:
@@ -173,7 +173,7 @@ To configure replication, add two additional nodes to the `mongodb` group and ad
 ```
 all:
     vars:
-        iap_release: 2023.1
+        platform_release: 2023.1
         mongodb_auth: true
         mongodb_replication: true
 
@@ -195,7 +195,7 @@ To configure a MongoDB TLS, add the `mongodb_tls` flag to the `all` group vars a
 ```
 all:
     vars:
-        iap_release: 2023.1
+        platform_release: 2023.1
         mongodb_auth: true
         mongodb_cluster: true
         mongodb_tls: true

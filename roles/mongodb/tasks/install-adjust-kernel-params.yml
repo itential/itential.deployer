@@ -1,0 +1,45 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+# Tune Kernel parameters
+
+# If you experience network timeouts or socket errors in communication between clients and
+# servers, or between members of a sharded cluster or replica set, check the TCP keepalive
+# value for the affected systems.
+#
+# Many operating systems set this value to 7200 seconds (two hours) by default. For MongoDB,
+# you will generally experience better results with a shorter keepalive value, on the order
+# of 120 seconds (two minutes).
+#
+# If your MongoDB deployment experiences keepalive-related issues, you must alter the
+# keepalive value on all affected systems. This includes all machines running mongod or
+# mongos processes and all machines hosting client processes that connect to MongoDB.
+- name: Adjust keepalive
+  ansible.posix.sysctl:
+    name: net.ipv4.tcp_keepalive_time
+    value: 300
+
+- name: Disable zone reclaim mode
+  ansible.posix.sysctl:
+    name: vm.zone_reclaim_mode
+    value: 0
+
+- name: Increase throughput settings
+  ansible.posix.sysctl:
+    name: net.core.somaxconn
+    value: 65535
+
+# Set Soft User Limits
+- name: Set number of procs
+  community.general.pam_limits:
+    domain: mongod
+    limit_type: soft
+    limit_item: nproc
+    value: 32000
+
+- name: Set number of files
+  community.general.pam_limits:
+    domain: mongod
+    limit_type: soft
+    limit_item: nofile
+    value: 64000

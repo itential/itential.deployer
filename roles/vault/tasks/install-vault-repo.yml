@@ -1,0 +1,19 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Install Vault repo
+  when: install_yum_repos | bool
+  block:
+    - name: Install yum-utils RPM to get yum-config-manager
+      ansible.builtin.dnf:
+        name: yum-utils
+        state: present
+        update_cache: true
+
+    - name: Install Hashicorp Vault repo
+      ansible.builtin.yum_repository:
+        name: hashicorp
+        description: Hashicorp Vault repo
+        baseurl: https://rpm.releases.hashicorp.com/RHEL/$releasever/$basearch/stable
+        state: present
+        gpgcheck: false

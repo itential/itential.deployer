@@ -1,20 +1,27 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Install Python
-  ansible.builtin.include_role:
-    name: python
+- name: Install Python and its dependencies
   tags: install_python
+  block:
+    - name: Install Python
+      ansible.builtin.include_role:
+        name: python
+      vars:
+        python_executable: "{{ mongodb_python_executable }}"
+        python_packages: "{{ mongodb_python_packages[ansible_distribution_major_version] }}"
 
-- name: Setup python virtual environment
-  ansible.builtin.command:
-    chdir: "{{ mongodb_python_venv_root }}"
-    cmd: "{{ python_executable }} -m venv {{ mongodb_python_venv_name }}"
-  changed_when: true
-  tags: install_python
+    - name: Setup python virtual environment
+      ansible.builtin.command:
+        chdir: "{{ mongodb_python_venv_root }}"
+        cmd: "{{ mongodb_python_executable }} -m venv {{ mongodb_python_venv_name }}"
+      changed_when: true
 
-- name: Install Python dependencies
-  ansible.builtin.include_role:
-    name: python
-    tasks_from: install-dependencies
-  tags: install_python
+    - name: Install Python dependencies
+      ansible.builtin.include_role:
+        name: python
+        tasks_from: install-dependencies
+      vars:
+        python_venv: "{{ mongodb_python_venv }}"
+        python_base_dependencies: "{{ mongodb_python_base_dependencies[ansible_distribution_major_version] }}"
+        python_app_dependencies: "{{ mongodb_python_app_dependencies[ansible_distribution_major_version] }}"

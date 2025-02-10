@@ -1,12 +1,12 @@
-{% if mongobdb_svc_url_itential is defined %}
-  {% set connection_string = mongobdb_svc_url_itential %}
+{% if platform_mongodb_svc_url_itential is defined %}
+  {% set connection_string = platform_mongodb_svc_url_itential %}
 {% else %}
   {% set mongo_hosts = [] %}
   {% set userpassword = "" %}
   {% set replsetOption = "" %}
   {% set tlsOptions = "" %}
   {% if mongodb_tls | bool %}
-    {% set tlsOptions = "&tls=true&tlsCAFile=" + itential_root_ca_file_destination %}
+    {% set tlsOptions = "&tls=true&tlsCAFile=" + platform_mongodb_root_ca_file_destination %}
   {% endif %}
   {% if mongodb_auth | bool %}
     {% set userpassword = "itential:" + ( mongo_user_itential_password | urlencode | regex_replace("/","%2F") ) + "@" %}

@@ -10,21 +10,21 @@ In the case where the user wants to bring their own database,
 just use that. Else, build the connection string from the properties
 defined in the host file.
 #}
-{% if mongobdb_svc_url_localaaa is defined %}
-  {% set url = mongobdb_svc_url_localaaa %}
+{% if platform_mongobdb_svc_url_localaaa is defined %}
+  {% set url = platform_mongobdb_svc_url_localaaa %}
 {% else %}
-  {% set mongo_hosts = [] %}
+  {% set mongodb_hosts = [] %}
   {% if mongodb_replication | bool %}
     {% for h in groups['mongodb'] %}
-      {{ mongo_hosts.append( h + ":" + mongo_port|string) }}
+      {{ mongodb_hosts.append( h + ":" + mongodb_port|string) }}
     {% endfor %}
     {% if groups["mongodb_arbiter"] is defined and groups["mongodb_arbiter"] | length > 0 %}
-      {{ mongo_hosts.append( hostvars [ groups["mongodb_arbiter"][0] ].inventory_hostname + ":" + mongo_port|string ) }}
+      {{ mongodb_hosts.append( hostvars [ groups["mongodb_arbiter"][0] ].inventory_hostname + ":" + mongodb_port|string ) }}
     {% endif %}
-    {% set mongo_hosts_str = mongo_hosts|join(',') %}
-    {% set url = "mongodb://" + mongo_hosts_str + "/?replicaSet=" + mongo_replset_name %}
+    {% set mongodb_hosts_str = mongodb_hosts|join(',') %}
+    {% set url = "mongodb://" + mongodb_hosts_str + "/?replicaSet=" + mongodb_replset_name %}
   {% else %}
-    {% set url = "mongodb://" + hostvars[ groups['mongodb'][0] ].inventory_hostname + ":" + mongo_port|string %}
+    {% set url = "mongodb://" + hostvars[ groups['mongodb'][0] ].inventory_hostname + ":" + mongodb_port|string %}
   {% endif %}
 {% endif %}
 {# Override TLS defaults if it is enabled #}
@@ -33,10 +33,10 @@ defined in the host file.
   {% set acceptInvalidCerts = False %}
   {% set checkServerIdentity = True %}
   {% set sslValidate = True %}
-  {% if mongo_root_ca_file_source is not defined %}
+  {% if platform_mongodb_root_ca_file_source is not defined %}
     {% set sslCA = "" %}
   {% else %}
-    {% set sslCA = itential_root_ca_file_destination %}
+    {% set sslCA = platform_mongodb_root_ca_file_destination %}
   {% endif %}
 {% endif %}
 {
@@ -44,7 +44,7 @@ defined in the host file.
   "loggerProps": {
     "console_level": "info",
     "description": "Logging",
-    "log_directory": "{{ iap_log_dir }}",
+    "log_directory": "{{ platform_log_dir }}",
     "log_filename": "local_aaa.log",
     "log_level": "info",
     "log_max_file_size": 10485760,
@@ -76,10 +76,10 @@ defined in the host file.
       "database": {
         "credentials": {
           "dbAuth": {{ mongodb_auth | bool | to_json }},
-          "passwd": "{{ mongo_user_localaaa_password }}",
+          "passwd": "{{ mongodb_user_localaaa_password }}",
           "user": "localaaa"
         },
-        "db": "{{ mongo_localaaa_db_name }}",
+        "db": "{{ mongodb_localaaa_db_name }}",
         "ssl": {
           "acceptInvalidCerts": {{ acceptInvalidCerts | bool | to_json }},
           "checkServerIdentity": {{ checkServerIdentity | bool | to_json }},

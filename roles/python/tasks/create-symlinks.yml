@@ -1,6 +1,13 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
+- name: Validate that python_executable and python_pip_executable are set
+  ansible.builtin.assert:
+    that:
+      - python_executable is defined
+      - python_pip_executable is defined
+    msg: python_executable and python_pip_executable must be set
+
 - name: Check if /usr/local/bin/python3 already exists
   ansible.builtin.stat:
     path: /usr/local/bin/python3
@@ -23,6 +30,6 @@
 - name: Create pip3 symlink to /usr/local/bin/pip3
   ansible.builtin.file:
     state: link
-    src: "{{ pip_executable }}"
+    src: "{{ python_pip_executable }}"
     path: /usr/local/bin/pip3
   when: not pip3_symlink.stat.exists

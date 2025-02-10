@@ -1,0 +1,79 @@
+{# Sensible default SSL props #}
+{% set acceptInvalidCerts = True %}
+{% set checkServerIdentity = False %}
+{% set sslCA = "" %}
+{% set sslValidate = False %}
+{% set sslEnabled = False %}
+{#
+Build the MongoDB connection string.
+In the case where the user wants to bring their own database,
+just use that. Else, build the connection string from the properties
+defined in the host file.
+#}
+{% if platform_mongodb_svc_url_itential is defined %}
+  {% set url = platform_mongodb_svc_url_itential %}
+{% else %}
+  {% set url = "mongodb://localhost:" + mongodb_port|string + "/" %}
+  {% set mongodb_hosts = [] %}
+  {% if mongodb_replication | bool %}
+    {% for h in groups['mongodb'] -%}
+      {{ mongodb_hosts.append( h + ":" + mongodb_port|string) }}
+    {%- endfor %}
+    {% if groups["mongodb_arbiter"] is defined and groups["mongodb_arbiter"] | length > 0 -%}
+      {{ mongodb_hosts.append( hostvars [ groups["mongodb_arbiter"][0] ].inventory_hostname + ":" + mongodb_port|string ) }}
+    {%- endif %}
+    {% set mongodb_hosts_str = mongodb_hosts|join(',') %}
+    {% set url = "mongodb://" + mongodb_hosts_str + "/?replicaSet=" + mongodb_replset_name %}
+  {% else %}
+    {% set url = "mongodb://" + hostvars[ groups['mongodb'][0] ].inventory_hostname + ":" + mongodb_port|string %}
+  {% endif %}
+{% endif %}
+{# Override TLS defaults if it is enabled #}
+{% if mongodb_tls | bool %}
+  {% set sslEnabled = True %}
+  {% set acceptInvalidCerts = False %}
+  {% set checkServerIdentity = True %}
+  {% set sslValidate = True %}
+  {% if platform_mongodb_root_ca_file_source is not defined %}
+    {% set sslCA = "" %}
+  {% else %}
+    {% set sslCA = platform_mongodb_root_ca_file_destination %}
+  {% endif %}
+{% endif %}
+{# Build Vault props #}
+{% set vaultProps = None %}
+{% if platform_configure_vault | bool %}
+  {% set vaultProps = dict(url = "http://" ~ hostvars[groups['vault'][0]].inventory_hostname ~ ":" ~ vault_port, token = platform_vault_token_dir ~ "/token.txt", endpoint = vault_name ~ "/data", readOnly = "false" | bool) %}
+  {% if vault_read_only | bool %}
+    {% set vaultProps = dict(vaultProps, **{'readOnly': vault_read_only}) %}
+  {% endif %}
+{% endif %}
+{
+  "id": "{{ profile_name }}",
+  "mongoProps": {
+    "credentials": {
+      "dbAuth": {{ mongodb_auth | bool | to_json }},
+      "passwd": {{ mongodb_user_itential_password | to_json }},
+      "user": "itential"
+    },
+    "db": "{{ mongodb_itential_db_name }}",
+    "ssl": {
+      "acceptInvalidCerts": {{ acceptInvalidCerts | bool | to_json }},
+      "checkServerIdentity": {{ checkServerIdentity | bool | to_json }},
+      "enabled": {{ sslEnabled | bool | to_json }},
+      "sslCA": "{{ sslCA }}",
+      "sslValidate": {{ sslValidate | bool | to_json }}
+    },
+    "url": "{{ url }}"
+  },
+  "pathProps": {
+    "description": "File Path Variables",
+    "encrypted": true,
+    "sdk_dir": "/opt/pronghorn-applications"
+  },
+  "processJobsOnStart": {{ platform_process_jobs_on_start| bool | to_json }},
+  "processTasksOnStart": {{ platform_process_tasks_on_start| bool | to_json }},
+  "serverId": "{{ inventory_hostname }}",
+  "serverName": "{{ inventory_hostname }}",
+  "vaultProps": {{ vaultProps | to_json }}
+}

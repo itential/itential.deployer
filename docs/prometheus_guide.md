@@ -63,11 +63,11 @@ Each exporter is a lightweight Go application that exposes the metrics on a stan
 | Exporter | Default Port | Description |
 | -------- | ------------ | ----------- |
 | [node exporter](https://github.com/prometheus/node_exporter) | 9100 | The node exporter is installed on all Itential-related hosts and will expose system and sysadmin type metrics. |
-| [process exporter](https://github.com/ncabatoff/process-exporter) | 9256 | The process exporter is installed on `platform` and `gateway` hosts and will expose individual processes from IAP and IAG. |
+| [process exporter](https://github.com/ncabatoff/process-exporter) | 9256 | The process exporter is installed on `platform` and `gateway` hosts and will expose individual processes from Itential Platform and IAG. |
 | [mongodb exporter](https://github.com/percona/mongodb_exporter) | 9216 | The mongo exporter is installed on `mongodb` hosts and will expose information about the MongoDB installation and any replica sets. |
 | [redis exporter](https://github.com/oliver006/redis_exporter) | 9121 | The redis exporter is installed on `redis` hosts and will expose information about the Redis installation and any replica sets. |
 | rabbitmq exporter | 15692 | RabbitMQ ships with its own exporter. It will be enabled on `rabbitmq` hosts. |
-| IAP exporter | 3000 | IAP ships with its own exporter already enabled. IAP metrics are exposed at `/prometheus_metrics`. |
+| Itential Platform exporter | 3000 | Itential Platform ships with its own exporter already enabled. Itential Platform metrics are exposed at `/prometheus_metrics`. |
 
 #### Process Exporter Notes
 
@@ -127,7 +127,7 @@ To install and configure Prometheus and Grafana, add `prometheus` and `grafana` 
 ```
 all:
   vars:
-    iap_release: 2023.1
+    platform_release: 2023.1
 
   children:
     platform:

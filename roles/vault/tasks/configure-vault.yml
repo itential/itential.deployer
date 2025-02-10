@@ -1,0 +1,18 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Create vault config file
+  ansible.builtin.template:
+    src: "config.hcl.j2"
+    dest: "{{ vault_dir }}/config.hcl"
+    owner: "{{ vault_user }}"
+    group: "{{ vault_group }}"
+    mode: "0640"
+
+- name: Create service unit file
+  ansible.builtin.template:
+    src: "vault.service.j2"
+    dest: /etc/systemd/system/vault.service
+    owner: root
+    group: root
+    mode: "0644"

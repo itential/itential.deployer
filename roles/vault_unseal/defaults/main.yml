@@ -1,8 +1,0 @@
-# Copyright (c) 2024, Itential, Inc
-# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
----
-# The default behavior for setting up vault
-vault_setup: false
-
-# Default directory to store the unseal keys
-vault_unseal_keys_dir: /opt/vault/keys/unseal_keys

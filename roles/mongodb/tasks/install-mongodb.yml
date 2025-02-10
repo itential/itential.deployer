@@ -1,0 +1,142 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Install MongoDB packages
+  tags: install_mongodb_packages
+  block:
+    - name: Get the list of installed packages
+      ansible.builtin.package_facts:
+        manager: "auto"
+
+    - name: Install MongoDB packages (online)
+      ansible.builtin.include_tasks:
+        file: install-mongodb-online.yml
+      when: not offline_install
+
+    - name: Install MongoDB packages (offline)
+      ansible.builtin.include_tasks:
+        file: install-mongodb-offline.yml
+      when: offline_install
+
+# Update yum config to prevent mongodb from getting updated by yum updates
+- name: Prevent yum from updating mongo
+  ansible.builtin.lineinfile:
+    path: /etc/yum.conf
+    line: exclude=mongodb-org*
+
+- name: Create MongoDB log, data, pid directories
+  ansible.builtin.file:
+    state: directory
+    path: "{{ item }}"
+    owner: "{{ mongodb_owner }}"
+    group: "{{ mongodb_group }}"
+    mode: "0755"
+  loop:
+    - "{{ mongodb_data_dir }}"
+    - "{{ mongodb_log_dir }}"
+    - "{{ mongodb_pid_dir }}"
+
+- name: Install Python
+  ansible.builtin.include_tasks:
+    file: install-python.yml
+  tags: install_python
+
+- name: Disable Transparent Huge Pages (THP) and configure tuned when mongodb version < 8.0
+  ansible.builtin.import_tasks:
+    file: disable-thp.yml
+  when: mongodb_version | float < 8.0
+
+- name: Enable Transparent Huge Pages (THP) and configure tuned when mongodb version >= 8.0
+  ansible.builtin.import_tasks:
+    file: enable-thp.yml
+  when: mongodb_version | float >= 8.0
+
+- name: Adjust Kernel parameters
+  ansible.builtin.import_tasks:
+    file: install-adjust-kernel-params.yml
+
+- name: Configure SELinux
+  ansible.builtin.include_tasks:
+    file: configure-selinux.yml
+  tags: configure_selinux
+  when:
+    - ansible_facts.selinux.status == 'enabled'
+    - ansible_facts.selinux.mode == 'enforcing'
+
+# Check if firewalld is running, if it is then open the appropriate ports
+- name: Gather service facts
+  ansible.builtin.service_facts:
+
+- name: Open Port on FirewallD Public Zone
+  ansible.posix.firewalld:
+    port: "{{ mongodb_port }}/tcp"
+    permanent: true
+    state: enabled
+    zone: public
+    immediate: true
+  when:
+    - ansible_facts.services["firewalld.service"] is defined
+    - ansible_facts.services["firewalld.service"].state == "running"
+    - ansible_facts.services["firewalld.service"].status == "enabled"
+
+# The config file will be generated a few times as we go through the process
+# of configuring MongoDB. This first time we will ignore any of the auth, TLS,
+# and replication settings. The reason is so that we can create the database
+# users. That can not be done if all of these features are enabled. The
+# variable "stage" is used to provide this template context. When stage is
+# "initialize" the template will be forced to create a simple config.
+- name: Create MongoDB config file
+  ansible.builtin.template:
+    src: mongod.conf.j2
+    dest: "{{ mongodb_conf_file }}"
+    owner: "{{ mongodb_owner }}"
+    group: "{{ mongodb_group }}"
+    mode: "0644"
+  vars:
+    stage: initialize
+  tags: initialize_mongo_config
+
+- name: Start mongo
+  ansible.builtin.systemd:
+    name: mongod
+    state: restarted
+    enabled: true
+  tags: initialize_mongo_config
+
+- name: Add users to database
+  when: groups.mongodb.index(inventory_hostname) == 0
+  tags: create_mongo_users
+  block:
+    # The tasks in this file should only run on one host if configuring a replica set
+    # This creates the admin user that has root access to the database
+    - name: Add admin user to database
+      community.mongodb.mongodb_user:
+        login_port: "{{ mongodb_port }}"
+        login_host: "{{ inventory_hostname }}"
+        database: "{{ mongodb_admin_db_name }}"
+        name: admin
+        password: "{{ mongodb_user_admin_password }}"
+        state: present
+        roles:
+          - db: "{{ mongodb_admin_db_name }}"
+            role: root
+        update_password: always
+      vars:
+        ansible_python_interpreter: "{{ mongodb_python_venv }}/bin/python3"
+
+    # This creates the itential user that only has read & write access to the
+    # itential database.  It is used by Itential Platform to connect to the db.
+    - name: Add itential user to database
+      community.mongodb.mongodb_user:
+        login_port: "{{ mongodb_port }}"
+        login_host: "{{ inventory_hostname }}"
+        database: "{{ mongodb_itential_db_name }}"
+        user: itential
+        password: "{{ mongodb_user_itential_password }}"
+        state: present
+        roles:
+          - db: "{{ mongodb_itential_db_name }}"
+            role: readWrite
+        update_password: always
+      vars:
+        ansible_python_interpreter: "{{ mongodb_python_venv }}/bin/python3"
