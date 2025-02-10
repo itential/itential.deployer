@@ -4,12 +4,12 @@
 - name: Download archive files local
   ansible.builtin.include_tasks:
     file: upload-platform-archive-from-local.yml
-  when: iap_bin_file is defined or iap_tar_file is defined
+  when: platform_bin_file is defined or platform_tar_file is defined
 
 - name: Download archive files repository
   ansible.builtin.include_tasks:
     file: download-platform-archive-from-repo.yml
-  when: iap_archive_download_url is defined
+  when: platform_archive_download_url is defined
 
 # Extract bin file contents
 # -e Extract tar archive and exit
@@ -21,37 +21,37 @@
 # exists then do nothing (creates).
 - name: Extract the bin file contents
   ansible.builtin.command:
-    cmd: "{{ iap_install_dir }}/{{ iap_bin_file }} -ey -d {{ iap_install_dir }}"
-    chdir: "{{ iap_install_dir }}"
-    creates: "{{ iap_install_dir }}/{{ iap_package_name }}"
-  when: iap_bin_file is defined
+    cmd: "{{ platform_install_dir }}/{{ platform_bin_file }} -ey -d {{ platform_install_dir }}"
+    chdir: "{{ platform_install_dir }}"
+    creates: "{{ platform_install_dir }}/{{ platform_package_name }}"
+  when: platform_bin_file is defined
 
 - name: Extract the tar file contents
   ansible.builtin.unarchive:
-    src: "{{ iap_install_dir }}/{{ iap_tar_file }}"
-    dest: "{{ iap_install_dir }}"
+    src: "{{ platform_install_dir }}/{{ platform_tar_file }}"
+    dest: "{{ platform_install_dir }}"
     remote_src: true
-  when: iap_tar_file is defined
+  when: platform_tar_file is defined
 
 - name: Create the "current" symlink
   ansible.builtin.file:
-    path: "{{ iap_install_dir }}/current"
-    src: "{{ iap_install_dir }}/{{ iap_package_name }}"
-    owner: "{{ iap_user }}"
-    group: "{{ iap_group }}"
+    path: "{{ platform_install_dir }}/current"
+    src: "{{ platform_install_dir }}/{{ platform_package_name }}"
+    owner: "{{ platform_user }}"
+    group: "{{ platform_group }}"
     state: link
 
 - name: Remove the source file
-  when: remove_iap_source_file | bool
+  when: platform_remove_artifact | bool
   block:
     - name: Remove the bin file
       ansible.builtin.file:
-        path: "{{ iap_install_dir }}/{{ iap_bin_file }}"
+        path: "{{ platform_install_dir }}/{{ platform_bin_file }}"
         state: absent
-      when: iap_bin_file is defined
+      when: platform_bin_file is defined
 
     - name: Remove the tar file
       ansible.builtin.file:
-        path: "{{ iap_install_dir }}/{{ iap_tar_file }}"
+        path: "{{ platform_install_dir }}/{{ platform_tar_file }}"
         state: absent
-      when: iap_tar_file is defined
+      when: platform_tar_file is defined

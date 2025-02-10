@@ -54,7 +54,7 @@
     src_dir: "{{ wheels_download_dir_target_node }}/base"
     dest_dir: "{{ wheels_download_dir_control_node }}/base"
 
-- name: Copy IAP Python dependencies to control node
+- name: Copy Itential Platform Python dependencies to control node
   ansible.builtin.import_role:
     name: offline
     tasks_from: fetch-packages

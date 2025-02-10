@@ -8,12 +8,10 @@
   roles:
     # Pull in the common vars
     - role: itential.deployer.common_vars
-      tags:
-        - always
+      tags: always
 
     # Perform a base installation of MongoDB
-    # Many of the other component's settings with regard to IAP are stored in MongoDB.
+    # Many of the other component's settings with regard to Itential Platform are stored in MongoDB.
     # Run these tasks on any defined arbiters as well.
     - role: itential.deployer.mongodb
-      tags:
-        - mongodb
+      tags: mongodb

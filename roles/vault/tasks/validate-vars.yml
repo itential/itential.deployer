@@ -6,25 +6,25 @@
   block:
     - name: Validate installation variables
       ansible.builtin.assert:
-        that: iap_release is defined or vault_packages is defined
-        msg: "Variables iap_release or vault_packages must be defined"
+        that: platform_release is defined or vault_packages is defined
+        msg: "Variables platform_release or vault_packages must be defined"
 
-    - name: Set installation variables when using IAP release defaults
+    - name: Set installation variables when using Itential Platform release defaults
       when:
-        - iap_release is defined
+        - platform_release is defined
         - vault_packages is not defined
       block:
         - name: Load release default variables
           ansible.builtin.include_vars:
             file: "{{ item }}"
           with_first_found:
-            - "iap-release-{{ iap_release }}.yml"
-            - "iap-release-undefined.yml"
+            - "platform-release-{{ platform_release }}.yml"
+            - "platform-release-undefined.yml"
 
         - name: Check for valid Vault release
           ansible.builtin.assert:
-            that: vault_invalid_iap_release is not defined
-            msg: "Deployer does not support installing Vault for IAP version {{ iap_release }}"
+            that: vault_invalid_platform_release is not defined
+            msg: "Deployer does not support installing Vault for Itential Platform version {{ platform_release }}"
 
         - name: Set vault_packages to the default value when not defined in inventory
           ansible.builtin.set_fact:

@@ -17,12 +17,12 @@ platform_python_packages:
   - python3.11
   - python3.11-pip
 
-platform_base_python_dependencies:
+platform_python_base_dependencies:
   - pip
   - setuptools
   - wheel
 
-platform_app_python_dependencies:
+platform_python_app_dependencies:
   - jinja2==3.1.2
   - markupsafe==2.1.4
   - pymongo

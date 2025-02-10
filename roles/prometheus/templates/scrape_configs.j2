@@ -7,10 +7,10 @@
 {%- set redis_exporter_targets = [] %}
 {%- set rabbitmq_exporter_targets = [] %}
 
-{%- if iap_https -%}
-{%   set iap_port = iap_https_port %}
+{%- if platform_https -%}
+{%   set iap_port = platform_https_port %}
 {% else %}
-{%   set iap_port = iap_http_port %}
+{%   set iap_port = platform_http_port %}
 {% endif %}
 
 {%- if 'platform' in groups -%}

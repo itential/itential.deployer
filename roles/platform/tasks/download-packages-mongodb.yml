@@ -2,7 +2,7 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
 - name: Download MongoDB rpms
-  when: configure_iap | bool
+  when: platform_bootstrap_configs | bool
   block:
     - name: Install MongoDB repo
       ansible.builtin.yum_repository:
@@ -20,5 +20,5 @@
         tasks_from: download-rpms
       vars:
         download_method: yum_module
-        download_packages: "{{ mongodb_tools_packages }}"
+        download_packages: "{{ platform_mongodb_tools_packages }}"
         download_dir: "{{ rpms_download_dir_target_node }}"

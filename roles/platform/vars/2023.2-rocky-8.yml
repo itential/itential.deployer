@@ -7,31 +7,31 @@ platform_packages:
   - openldap-clients
   - openssl
 
-iap_nodejs_package: "@nodejs:20"
+platform_nodejs_package: "@nodejs:20"
 
-python_version: 3.9
-python_executable: "/usr/bin/python{{ python_version }}"
-pip_executable: "/usr/bin/pip{{ python_version }}"
+platform_python_version: 3.9
+platform_python_executable: "/usr/bin/python{{ platform_python_version }}"
+platform_pip_executable: "/usr/bin/pip{{ platform_python_version }}"
 
-python_packages:
+platform_python_packages:
   - python39
   - python39-pip
 
-base_python_dependencies:
+platform_base_python_dependencies:
   - pip
   - setuptools
   - wheel
 
-app_python_dependencies:
+platform_app_python_dependencies:
   - jinja2>=2.11.3,<2.12.0
   - markupsafe==2.0.1
   - pymongo
   - textfsm>=1.1.2,<1.2.0
 
-mongodb_version: 7.0
+platform_mongodb_version: 7.0
 
-mongodb_tools_packages:
+platform_mongodb_tools_packages:
   - mongodb-database-tools
   - mongodb-mongosh
 
-mongo_shell: mongosh
+platform_mongo_shell: mongosh

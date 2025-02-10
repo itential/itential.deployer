@@ -7,7 +7,7 @@
     tasks_from: download-rpms
   vars:
     download_method: yum_module
-    download_packages: "{{ python_packages }}"
+    download_packages: "{{ platform_python_packages }}"
     download_dir: "{{ rpms_download_dir_target_node }}"
 
 - name: Install Python
@@ -20,19 +20,19 @@
     name: offline
     tasks_from: download-wheels
   vars:
-    wheel_files: "{{ base_python_dependencies }}"
+    wheel_files: "{{ platform_base_python_dependencies }}"
     download_dir: "{{ wheels_download_dir_target_node }}/base"
   when:
-    - base_python_dependencies is defined
-    - base_python_dependencies | length > 0
+    - platform_base_python_dependencies is defined
+    - platform_base_python_dependencies | length > 0
 
-- name: Download IAP Python dependencies
+- name: Download Itential Platform Python dependencies
   ansible.builtin.import_role:
     name: offline
     tasks_from: download-wheels
   vars:
     with_deps: true
-    wheel_files: "{{ app_python_dependencies }}"
+    wheel_files: "{{ platform_app_python_dependencies }}"
     download_dir: "{{ wheels_download_dir_target_node }}/app"
 
 - name: Uninstall Python rpms

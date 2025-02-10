@@ -1,5 +1,5 @@
-{% if mongobdb_svc_url_itential is defined %}
-  {% set connection_string = mongobdb_svc_url_itential %}
+{% if platform_mongodb_svc_url_itential is defined %}
+  {% set connection_string = platform_mongodb_svc_url_itential %}
 {% else %}
   {% set mongo_hosts = [] %}
   {% set userpassword = "" %}

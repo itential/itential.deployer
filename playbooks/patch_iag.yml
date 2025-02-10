@@ -8,7 +8,7 @@
   roles:
     - role: itential.deployer.common_vars
   tasks:
-    - name: Patch IAP
+    - name: Patch IAG
       ansible.builtin.import_role:
         name: itential.deployer.gateway
         tasks_from: upgrade-iag

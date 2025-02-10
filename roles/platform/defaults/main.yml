@@ -1,11 +1,11 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-# The directory to install IAP in
-iap_install_dir: /opt/itential
+# The directory to install Itential Platform in
+platform_install_dir: /opt/itential
 
 # The directory to write logs to
-iap_log_dir: /var/log/itential
+platform_log_dir: /var/log/itential
 
 # Should the platform role add necessary docs to mongodb? For a day
 # zero install this would be true. However, a scenario where they
@@ -13,57 +13,61 @@ iap_log_dir: /var/log/itential
 # blue/green style upgrade, would demand that they do NOT put
 # any documents into their database. In that case, this var can
 # be overridden and the mongo_init tasks will be skipped.
-configure_iap: true
+platform_bootstrap_configs: true
 
 # Should the platform configure and add any IAG adapters that it
 # discovers? Based on the presence of devices in the gateway group
 # this will build adapter configs for each that it finds and insert
 # them into the mongo database.
-configure_iag_adapters: true
+platform_configure_iag_adapters: true
 
 # If the IAG adapters are configured, set the token timeout. The
 # default value is 3600000 milliseconds (60 minutes).
-iap_iag_adapter_token_timeout: 3600000
+platform_iag_adapter_token_timeout: 3600000
 
 # The default user that runs the server process
-iap_user: itential
+platform_user: itential
 
 # The default group that runs the server process
-iap_group: itential
+platform_group: itential
 
 # By default, do not configure vault
-configure_vault: false
+platform_configure_vault: false
 
 # The directory to store the vault root key in
-iap_vault_token_dir: "{{ iap_install_dir }}/vault"
+platform_vault_token_dir: "{{ platform_install_dir }}/vault"
 
-# By default, IAP should be configured to process tasks on start
-process_tasks_on_start: true
+# By default, Itential Platform should be configured to process tasks on start
+platform_process_tasks_on_start: true
 
-# By default, IAP should be configured to process jobs on start
-process_jobs_on_start: true
+# By default, Itential Platform should be configured to process jobs on start
+platform_process_jobs_on_start: true
 
 # Flag to determine whether to use rsync when uploading artifacts
-upload_using_rsync: false
+platform_upload_using_rsync: false
 
-# Flag to perform mongo backup when using upgrade-iap role
-mongo_backup: true
+# Flag to perform mongo backup when using upgrade-platform role
+platform_backup_mongo: true
 
-# Flag to remove the IAP bin/tar file when complete
-remove_iap_source_file: true
+# Flag to remove the Itential Platform bin/tar file when complete
+platform_remove_artifact: true
 
 # Flag to remove the package-lock.json file before running the NPM install
-delete_package_lock_file: false
+platform_delete_package_lock_file: false
 
 # Flag to disable Git safe repo check
-disable_git_safe_repo_checks: false
+platform_disable_git_safe_repo_checks: false
 
 # Flag to prevent the NPM scripts from running when running the NPM install
-npm_ignore_scripts: false
+platform_npm_ignore_scripts: false
 
 # Offline install settings
 # Refer to the offline variables in common_vars for additional settings
-packages_path: "{{ itential_packages_path }}/{{ iap_release }}/iap"
+platform_packages_path: "{{ itential_platform_packages_path }}/{{ platform_release }}/platform"
 
 # Redis default db.
-redis_db_number: 0
+platform_redis_db_number: 0
+
+# MongoDB repo settings
+platform_mongodb_release_url: "https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/{{ platform_mongodb_version }}/$basearch/"
+platform_mongodb_gpgkey_url: "https://www.mongodb.org/static/pgp/server-{{ platform_mongodb_version }}.asc"

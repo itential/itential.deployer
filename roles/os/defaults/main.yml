@@ -4,4 +4,4 @@
 
 # Offline install settings
 # Refer to the offline variables in common_vars for additional settings
-packages_path: "{{ itential_packages_path }}/{{ iap_release }}/os"
+packages_path: "{{ itential_packages_path }}/{{ platform_release }}/os"

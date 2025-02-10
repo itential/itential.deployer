@@ -1,18 +1,35 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Install and configure Redis
-  import_playbook: itential.deployer.redis
+### Itential Platform
+- name: Install Itential Platform
+  hosts: platform, platform_secondary
+  become: true
+  roles:
+    # Pull in the common vars
+    - role: itential.deployer.common_vars
+      tags: always
 
-- name: Install and configure RabbitMQ
-  import_playbook: itential.deployer.rabbitmq
-  when: iap_release < 2023.2
+    # Perform a base installation of Itential Platform
+    - role: itential.deployer.platform
+      tags:
+        - platform
+        - platform_install
 
-- name: Install and configure MongoDB
-  import_playbook: itential.deployer.mongodb
+    # Install app-artifact into Itential Platform
+    # This should only be done in a development environment
+    - role: itential.deployer.platform_app_artifact
+      when: app_artifact | bool
+      tags:
+        - platform
+        - platform_app_artifact
 
-- name: Install and configure Vault
-  import_playbook: itential.deployer.vault
-
-- name: Install and configure IAP
-  import_playbook: itential.deployer.iap
+  # Install any listed apps and/or adapters
+  tasks:
+    - name: Install adapters
+      ansible.builtin.import_role:
+        name: itential.deployer.platform
+        tasks_from: install-adapters
+      tags:
+        - platform
+        - platform_adapters

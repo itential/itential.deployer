@@ -11,31 +11,31 @@ platform_packages:
   - openssl-devel
   - zlib-devel
 
-iap_nodejs_package: "@nodejs:16"
+platform_nodejs_package: "@nodejs:16"
 
-python_version: 3.9
-python_executable: "/usr/bin/python{{ python_version }}"
-pip_executable: "/usr/bin/pip{{ python_version }}"
+platform_python_version: 3.9
+platform_python_executable: "/usr/bin/python{{ platform_python_version }}"
+platform_pip_executable: "/usr/bin/pip{{ platform_python_version }}"
 
-python_packages:
+platform_python_packages:
   - python39
   - python39-pip
 
-base_python_dependencies:
+platform_base_python_dependencies:
   - pip
   - setuptools
   - wheel
 
-app_python_dependencies:
+platform_app_python_dependencies:
   - textfsm==1.1.2
   - jinja2==2.11.3
   - markupsafe==2.0.1
   - pymongo
 
-mongodb_version: 5.0
+platform_mongodb_version: 5.0
 
-mongodb_tools_packages:
+platform_mongodb_tools_packages:
   - mongodb-database-tools
   - mongodb-mongosh
 
-mongo_shell: mongosh
+platform_mongo_shell: mongosh

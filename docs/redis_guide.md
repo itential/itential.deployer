@@ -36,7 +36,7 @@ For more information on Redis replication: https://redis.io/docs/manual/replicat
 
 ## Static Variables
 
-The variables located in the `vars` directory of each role are "static" and not meant to be overridden by the user.  Since these variable files are included at run-time based on the IAP release and OS major version, they have a higher precedence than the variables in the inventory and are not easily overridden.
+The variables located in the `vars` directory of each role are "static" and not meant to be overridden by the user.  Since these variable files are included at run-time based on the Itential Platform release and OS major version, they have a higher precedence than the variables in the inventory and are not easily overridden.
 
 ## Global Variables
 
@@ -44,9 +44,9 @@ The variables in this section are configured in the inventory in the `all` group
 
 | Variable | Group | Type | Description | Default Value | Required?
 | :------- | :---- | :--- | :---------- | :------------ | :--------
-| `iap_release` | `all` | Fixed-point | Designates the IAP major version. | N/A | Yes
+| `platform_release` | `all` | Fixed-point | Designates the Itential Platform major version. | N/A | Yes
 
-The `iap_release` must be defined in the inventory.  This variable, along with the OS major version, is used to determine the static variables.
+The `platform_release` must be defined in the inventory.  This variable, along with the OS major version, is used to determine the static variables.
 
 ## Common Variables
 
@@ -99,7 +99,7 @@ To install and configure Redis, add a `redis` group and host(s) to your inventor
 ```
 all:
     vars:
-        iap_release: 2023.1
+        platform_release: 2023.1
 
     children:
         redis:
@@ -115,7 +115,7 @@ To enable authentication, add the `redis_auth` flag to the `all` group and set i
 ```
 all:
     vars:
-        iap_release: 2023.1
+        platform_release: 2023.1
         redis_auth: true
 
     children:
@@ -132,7 +132,7 @@ To configure a Redis replica set, add the `redis_replication` flag to the `all` 
 ```
 all:
     vars:
-        iap_release: 2023.1
+        platform_release: 2023.1
         redis_auth: true
         redis_replication: true
 

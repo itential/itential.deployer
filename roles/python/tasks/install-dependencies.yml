@@ -1,11 +1,11 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Validate pip_executable or python_venv is set
+- name: Validate python_pip_executable or python_venv is set
   ansible.builtin.fail:
-    msg: "either pip_executable or python_venv must be set"
+    msg: "either python_pip_executable or python_venv must be set"
   when:
-    - pip_executable is not defined
+    - python_pip_executable is not defined
     - python_venv is not defined
 
 - name: Install Python dependencies (online)
@@ -17,41 +17,41 @@
       block:
         - name: Install base Python dependencies in virtual env (online)
           ansible.builtin.pip:
-            name: "{{ base_python_dependencies }}"
+            name: "{{ python_base_dependencies }}"
             virtualenv: "{{ python_venv }}"
           when:
-            - base_python_dependencies is defined
-            - base_python_dependencies | length > 0
+            - python_base_dependencies is defined
+            - python_base_dependencies | length > 0
 
         - name: Install application Python dependencies in virtual env (online)
           ansible.builtin.pip:
-            name: "{{ app_python_dependencies }}"
+            name: "{{ python_app_dependencies }}"
             virtualenv: "{{ python_venv }}"
           when:
-            - app_python_dependencies is defined
-            - app_python_dependencies | length > 0
+            - python_app_dependencies is defined
+            - python_app_dependencies | length > 0
 
     - name: Use Python executable
       when:
-        - pip_executable is defined
+        - python_pip_executable is defined
         - python_venv is not defined
       block:
         - name: Install base Python dependencies using pip executable (online)
           ansible.builtin.pip:
-            name: "{{ base_python_dependencies }}"
+            name: "{{ python_base_dependencies }}"
             # state: latest
-            executable: "{{ pip_executable }}"
+            executable: "{{ python_pip_executable }}"
           when:
-            - base_python_dependencies is defined
-            - base_python_dependencies | length > 0
+            - python_base_dependencies is defined
+            - python_base_dependencies | length > 0
 
         - name: Install application Python dependencies using pip executable (online)
           ansible.builtin.pip:
-            name: "{{ app_python_dependencies }}"
-            executable: "{{ pip_executable }}"
+            name: "{{ python_app_dependencies }}"
+            executable: "{{ python_pip_executable }}"
           when:
-            - app_python_dependencies is defined
-            - app_python_dependencies | length > 0
+            - python_app_dependencies is defined
+            - python_app_dependencies | length > 0
 
 - name: Install Python dependencies (offline)
   when: offline_install

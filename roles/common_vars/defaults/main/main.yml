@@ -3,7 +3,7 @@
 ---
 
 # The file containing the installed components and versions
-itential_release_file: /etc/iap-release
+itential_release_file: /etc/itential-release
 
 # Flag to toggle the installation of yum repositories.
 # If set to true (default), repositories will be installed in /etc/yum.repos.d.

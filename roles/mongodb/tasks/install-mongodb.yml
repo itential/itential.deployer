@@ -125,7 +125,7 @@
         ansible_python_interpreter: "{{ mongodb_python_venv }}/bin/python3"
 
     # This creates the itential user that only has read & write access to the
-    # itential database.  It is used by IAP to connect to the db.
+    # itential database.  It is used by Itential Platform to connect to the db.
     - name: Add itential user to database
       community.mongodb.mongodb_user:
         login_port: "{{ mongodb_port }}"
