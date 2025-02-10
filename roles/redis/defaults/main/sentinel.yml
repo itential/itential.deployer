@@ -6,3 +6,6 @@ redis_sentinel_conf_file: "{{ redis_conf_dir }}/sentinel.conf"
 
 # The location of the Redis Sentinel log file
 redis_sentinel_log: "{{ redis_log_dir }}/sentinel.log"
+
+# The Redis Sentinel master name
+redis_master_name: "itentialmaster"
