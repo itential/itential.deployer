@@ -26,7 +26,7 @@
 {% if mongodb_tls | bool %}
   {% set acceptInvalidCerts = False %}
   {% set checkServerIdentity = True %}
-  {% set sslCA = itential_root_ca_file_destination %}
+  {% set sslCA = platform_mongodb_root_ca_file_destination %}
   {% set sslValidate = True %}
 {% endif %}
 {

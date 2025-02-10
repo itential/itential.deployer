@@ -34,7 +34,7 @@ The variables in this section are configured in the inventory in the `all` group
 | Variable | Group | Type | Description | Default Value | Required?
 | :------- | :---- | :--- | :---------- | :------------ | :--------
 | `platform_release` | `all` | Fixed-point | Designates the Itential Platform major version. | N/A | Yes
-| `mongo_root_ca_file_source` | `all` | String | The name of the MongoDB Root CA file.| N/A | No
+| `platform_mongodb_root_ca_file_source` | `all` | String | The name of the MongoDB Root CA file.| N/A | No
 
 The `platform_release` must be defined in the inventory.  This variable, along with the OS major version, is used to determine the static variables.
 
@@ -46,7 +46,7 @@ The following table lists the default variables that are shared between the Plat
 
 | Variable | Group | Type | Description | Default Value
 | :------- | :---- | :--- | :---------- | :------------
-| `itential_root_ca_file_destination` | `all` | String | The location of the Root CA file for MongoDB. | `/opt/itential/keys/mongo-rootCA.pem`
+| `platform_mongodb_root_ca_file_destination` | `all` | String | The location of the Root CA file for MongoDB. | `/opt/itential/keys/mongo-rootCA.pem`
 
 ## Platform Role Variables
 

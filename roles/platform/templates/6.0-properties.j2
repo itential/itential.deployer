@@ -34,10 +34,10 @@ defined in the host file.
   {% set acceptInvalidCerts = False %}
   {% set checkServerIdentity = True %}
   {% set sslValidate = True %}
-  {% if mongodb_root_ca_file_source is not defined %}
+  {% if platform_mongodb_root_ca_file_source is not defined %}
     {% set sslCA = "" %}
   {% else %}
-    {% set sslCA = itential_root_ca_file_destination %}
+    {% set sslCA = platform_mongodb_root_ca_file_destination %}
   {% endif %}
 {% endif %}
 {# Build Vault props #}

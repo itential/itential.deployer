@@ -21,11 +21,11 @@
 
 - name: Copy MongoDB root CA file to the appropriate location
   ansible.builtin.copy:
-    src: "{{ mongo_root_ca_file_source }}"
-    dest: "{{ itential_root_ca_file_destination }}"
+    src: "{{ platform_mongodb_root_ca_file_source }}"
+    dest: "{{ platform_mongodb_root_ca_file_destination }}"
     mode: "0400"
     group: "{{ platform_group }}"
     owner: "{{ platform_user }}"
   when:
     - mongodb_tls | bool
-    - mongo_root_ca_file_source is defined
+    - platform_mongodb_root_ca_file_source is defined

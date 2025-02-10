@@ -33,4 +33,4 @@ platform_mongodb_tools_packages:
   - mongodb-org-tools
   - mongodb-org-shell
 
-platform_mongo_shell: mongo
+platform_mongodb_shell: mongo

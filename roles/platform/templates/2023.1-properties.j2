@@ -37,7 +37,7 @@ defined in the host file.
   {% if mongodb_root_ca_file_source is not defined %}
     {% set sslCA = "" %}
   {% else %}
-    {% set sslCA = itential_root_ca_file_destination %}
+    {% set sslCA = platform_mongodb_root_ca_file_destination %}
   {% endif %}
 {% endif %}
 {# Build Vault props #}
