@@ -5,12 +5,12 @@
   ansible.builtin.include_vars:
     file: "{{ item }}"
   with_first_found:
-    - "release-{{ iap_release }}.yml"
+    - "release-{{ platform_release }}.yml"
     - "release-undefined.yml"
 
 - name: Check for valid RabbitMQ release
   ansible.builtin.fail:
-    msg: "Deployer installer does not support installing RabbitMQ on IAP version {{ iap_release }}"
+    msg: "Deployer installer does not support installing RabbitMQ on Itential Platform version {{ platform_release }}"
   when: invalid_rabbitmq_packages is defined
 
 - name: Install base OS packages

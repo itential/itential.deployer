@@ -5,8 +5,8 @@ Requires=network.target
 
 [Service]
 Type=simple
-User={{ iap_user }}
-WorkingDirectory={{ iap_install_dir }}/current
+User={{ platform_user }}
+WorkingDirectory={{ platform_install_dir }}/current
 ExecStart=/usr/bin/node --max-old-space-size=8192 server.js
 Restart=on-failure
 ExecReload=/bin/kill -USR2 $MAINPID

@@ -3,31 +3,31 @@
 ---
 - name: Determine package name from the tar file name
   ansible.builtin.set_fact:
-    iap_package_name: "{{ iap_tar_file.split('.linux.x86_64.tar.gz')[0] }}"
+    platform_package_name: "{{ platform_tar_file.split('.linux.x86_64.tar.gz')[0] }}"
   when:
-    - iap_package_name is not defined
-    - iap_tar_file is defined
+    - platform_package_name is not defined
+    - platform_tar_file is defined
 
 - name: Determine package name from the bin file name
   ansible.builtin.set_fact:
-    iap_package_name: "{{ iap_bin_file.split('.linux.x86_64.bin')[0] }}"
+    platform_package_name: "{{ platform_bin_file.split('.linux.x86_64.bin')[0] }}"
   when:
-    - iap_package_name is not defined
-    - iap_bin_file is defined
+    - platform_package_name is not defined
+    - platform_bin_file is defined
 
 - name: Determine release from the package name
   ansible.builtin.set_fact:
-    iap_release: "{{ iap_package_name.split('_')[1] }}"
-  when: iap_release is not defined
+    platform_release: "{{ platform_package_name.split('_')[1] }}"
+  when: platform_release is not defined
 
 - name: Include release vars
   ansible.builtin.include_vars:
     file: "{{ item }}"
   with_first_found:
-    - "{{ iap_release }}-{{ ansible_distribution | lower }}-{{ ansible_distribution_major_version }}.yml"
+    - "{{ platform_release }}-{{ ansible_distribution | lower }}-{{ ansible_distribution_major_version }}.yml"
     - "release-undefined.yml"
 
-- name: Check for valid IAP release
+- name: Check for valid Itential Platform release
   ansible.builtin.fail:
-    msg: "Deployer installer does not support installing IAP version {{ iap_release }} on {{ ansible_distribution | lower }}-{{ ansible_distribution_major_version }}"
-  when: invalid_iap_release is defined
+    msg: "Deployer installer does not support installing Itential Platform version {{ platform_release }} on {{ ansible_distribution | lower }}-{{ ansible_distribution_major_version }}"
+  when: platform_invalid_release is defined

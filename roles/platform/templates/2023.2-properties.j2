@@ -10,8 +10,8 @@ In the case where the user wants to bring their own database,
 just use that. Else, build the connection string from the properties
 defined in the host file.
 #}
-{% if mongobdb_svc_url_itential is defined %}
-  {% set url = mongobdb_svc_url_itential %}
+{% if platform_mongodb_svc_url_itential is defined %}
+  {% set url = platform_mongodb_svc_url_itential %}
 {% else %}
   {% set url = "mongodb://localhost:" + mongo_port|string + "/" %}
   {% set mongo_hosts = [] %}
@@ -34,16 +34,16 @@ defined in the host file.
   {% set acceptInvalidCerts = False %}
   {% set checkServerIdentity = True %}
   {% set sslValidate = True %}
-  {% if mongo_root_ca_file_source is not defined %}
+  {% if platform_mongodb_root_ca_file_source is not defined %}
     {% set sslCA = "" %}
   {% else %}
-    {% set sslCA = itential_root_ca_file_destination %}
+    {% set sslCA = platform_mongodb_root_ca_file_destination %}
   {% endif %}
 {% endif %}
 {# Build Vault props #}
 {% set vaultProps = None %}
-{% if configure_vault | bool %}
-  {% set vaultProps = dict(url = "http://" ~ hostvars[groups['vault'][0]].inventory_hostname ~ ":" ~ vault_port, token = iap_vault_token_dir ~ "/token.txt", endpoint = vault_name ~ "/data", readOnly = "false" | bool) %}
+{% if platform_configure_vault | bool %}
+  {% set vaultProps = dict(url = "http://" ~ hostvars[groups['vault'][0]].inventory_hostname ~ ":" ~ vault_port, token = platform_vault_token_dir ~ "/token.txt", endpoint = vault_name ~ "/data", readOnly = "false" | bool) %}
   {% if vault_read_only | bool %}
     {% set vaultProps = dict(vaultProps, **{'readOnly': vault_read_only}) %}
   {% endif %}
@@ -71,8 +71,8 @@ defined in the host file.
     "encrypted": true,
     "sdk_dir": "/opt/pronghorn-applications"
   },
-  "processJobsOnStart": {{ process_jobs_on_start| bool | to_json }},
-  "processTasksOnStart": {{ process_tasks_on_start| bool | to_json }},
+  "processJobsOnStart": {{ platform_process_jobs_on_start| bool | to_json }},
+  "processTasksOnStart": {{ platform_process_tasks_on_start| bool | to_json }},
   "serverId": "{{ inventory_hostname }}",
   "serverName": "{{ inventory_hostname }}",
   "vaultProps": {{ vaultProps | to_json }}

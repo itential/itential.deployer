@@ -1,21 +1,21 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Check if both IAP bin file and tar file are undefined and no download URL is provided
+- name: Check if both Itential Platform bin file and tar file are undefined and no download URL is provided
   ansible.builtin.fail:
-    msg: Either iap_bin_file, iap_tar_file, or a download URL with authentication must be defined.
+    msg: Either platform_bin_file, platform_tar_file, or a download URL with authentication must be defined.
   when:
-    - iap_bin_file is not defined
-    - iap_tar_file is not defined
-    - iap_archive_download_url is not defined
+    - platform_bin_file is not defined
+    - platform_tar_file is not defined
+    - platform_archive_download_url is not defined
 
-- name: Check if more than one of iap_bin_file, iap_tar_file, or iap_archive_download_url is defined
+- name: Check if more than one of platform_bin_file, platform_tar_file, or platform_archive_download_url is defined
   ansible.builtin.fail:
-    msg: Only one of iap_bin_file, iap_tar_file, or iap_archive_download_url should be defined.
+    msg: Only one of platform_bin_file, platform_tar_file, or platform_archive_download_url should be defined.
   when: >
-    (iap_bin_file is defined | int) +
-    (iap_tar_file is defined | int) +
-    (iap_archive_download_url is defined | int) > 1
+    (platform_bin_file is defined | int) +
+    (platform_tar_file is defined | int) +
+    (platform_archive_download_url is defined | int) > 1
 
 - name: Check if both user/password and API key are provided
   ansible.builtin.fail:

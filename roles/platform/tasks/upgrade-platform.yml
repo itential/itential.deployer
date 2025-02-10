@@ -7,19 +7,19 @@
 
 - name: Stat the "current" directory
   ansible.builtin.stat:
-    path: "{{ iap_install_dir }}/current"
+    path: "{{ platform_install_dir }}/current"
   register: prev_current
 
-- name: Determine the previous IAP install directory
+- name: Determine the previous Itential Platform install directory
   ansible.builtin.set_fact:
-    prev_iap_install_dir: "{{ prev_current.stat.lnk_target }}"
+    prev_platform_install_dir: "{{ prev_current.stat.lnk_target }}"
 
 # Stat the previous custom directory within the "current" directory. We need
 # to re-create the symlinks later and we don't want to symlink to the adapters
 # in the previous installation directory.
 - name: Stat the custom directory within the "current" directory
   ansible.builtin.stat:
-    path: "{{ iap_install_dir }}/current/custom"
+    path: "{{ platform_install_dir }}/current/custom"
   register: prev_custom_1
 
 # Find all custom apps/adapters.
@@ -32,7 +32,7 @@
 - name: Find custom apps/adapters
   ansible.builtin.find:
     paths:
-      - "{{ iap_install_dir }}/current/custom"
+      - "{{ platform_install_dir }}/current/custom"
     patterns:
       - "package.json"
     file_type: file
@@ -44,9 +44,9 @@
 - name: Backup mongodb itential database
   ansible.builtin.include_tasks:
     file: backup-mongo.yml
-  when: mongo_backup | bool
+  when: platform_backup_mongo | bool
 
-# Install the new IAP version. Note that the "current" symlink will be
+# Install the new Itential Platform version. Note that the "current" symlink will be
 # pointing to the new release after the installation.
 - name: Install Platform
   ansible.builtin.include_tasks:
@@ -54,18 +54,18 @@
 
 - name: Copy old properties.json file to the new install directory
   ansible.builtin.copy:
-    src: "{{ prev_iap_install_dir }}/properties.json"
-    dest: "{{ iap_install_dir }}/current/properties.json"
+    src: "{{ prev_platform_install_dir }}/properties.json"
+    dest: "{{ platform_install_dir }}/current/properties.json"
     remote_src: true
     mode: "0664"
-    owner: "{{ iap_user }}"
-    group: "{{ iap_group }}"
+    owner: "{{ platform_user }}"
+    group: "{{ platform_group }}"
 
 # Stat the custom directory again, but this time within the previous installation
 # directory, since the "current" symlink has been moved to the new release.
 - name: Stat the custom directory within the previous installation directory
   ansible.builtin.stat:
-    path: "{{ prev_iap_install_dir }}/custom"
+    path: "{{ prev_platform_install_dir }}/custom"
   register: prev_custom_2
 
 # Copy files in old custom directory to new custom directory.
@@ -74,12 +74,12 @@
 # location where the new files have been extracted.
 - name: Copy customizations into new location
   ansible.builtin.copy:
-    src: "{{ prev_iap_install_dir }}/custom/"
-    dest: "{{ iap_install_dir }}/{{ iap_package_name }}/custom"
+    src: "{{ prev_platform_install_dir }}/custom/"
+    dest: "{{ platform_install_dir }}/{{ platform_package_name }}/custom"
     remote_src: true
     mode: "0775"
-    owner: "{{ iap_user }}"
-    group: "{{ iap_group }}"
+    owner: "{{ platform_user }}"
+    group: "{{ platform_group }}"
   when: prev_custom_2.stat.exists
 
 # Make a list of the full paths to the new locations of the apps/adapters
@@ -118,11 +118,11 @@
 # value of item will be something like this: "@itential", so use dirname
 - name: Ensure the directories for the symlinks exist
   ansible.builtin.file:
-    path: "{{ iap_install_dir }}/current/node_modules/{{ item | dirname }}"
+    path: "{{ platform_install_dir }}/current/node_modules/{{ item | dirname }}"
     state: directory
     mode: "0775"
-    owner: "{{ iap_user }}"
-    group: "{{ iap_group }}"
+    owner: "{{ platform_user }}"
+    group: "{{ platform_group }}"
   loop: "{{ links }}"
   when: links is defined
 
@@ -132,7 +132,7 @@
 - name: Make all symlinks for custom apps and adapters
   ansible.builtin.file:
     src: "{{ item | dirname }}"
-    path: "{{ iap_install_dir }}/current/node_modules/{{ links[i] }}"
+    path: "{{ platform_install_dir }}/current/node_modules/{{ links[i] }}"
     force: true
     state: link
   loop: "{{ locations }}"
@@ -144,7 +144,7 @@
   ansible.builtin.include_tasks:
     file: set-file-ownership.yml
 
-- name: Restart IAP
+- name: Restart Itential Platform
   ansible.builtin.command: /bin/true
-  notify: "Restart IAP"
+  notify: "Restart Itential Platform"
   changed_when: true

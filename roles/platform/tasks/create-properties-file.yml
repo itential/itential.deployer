@@ -3,11 +3,11 @@
 ---
 - name: Create the default Itential properties.json file
   ansible.builtin.template:
-    src: "{{ iap_release }}-properties.j2"
-    dest: "{{ iap_install_dir }}/current/properties.json"
+    src: "{{ platform_release }}-properties.j2"
+    dest: "{{ platform_install_dir }}/current/properties.json"
     mode: "0600"
-    owner: "{{ iap_user }}"
-    group: "{{ iap_group }}"
+    owner: "{{ platform_user }}"
+    group: "{{ platform_group }}"
     lstrip_blocks: true
   vars:
     profile_name: Local_AAA
@@ -20,11 +20,11 @@
   block:
     - name: Create the default Itential properties.json file for the primary
       ansible.builtin.template:
-        src: "{{ iap_release }}-properties.j2"
-        dest: "{{ iap_install_dir }}/current/properties.json"
+        src: "{{ platform_release }}-properties.j2"
+        dest: "{{ platform_install_dir }}/current/properties.json"
         mode: "0600"
-        owner: "{{ iap_user }}"
-        group: "{{ iap_group }}"
+        owner: "{{ platform_user }}"
+        group: "{{ platform_group }}"
         lstrip_blocks: true
       vars:
         profile_name: Primary_Local_AAA
@@ -32,11 +32,11 @@
 
     - name: Create the Itential properties.json file for the secondary
       ansible.builtin.template:
-        src: "{{ iap_release }}-properties.j2"
-        dest: "{{ iap_install_dir }}/current/properties.json"
+        src: "{{ platform_release }}-properties.j2"
+        dest: "{{ platform_install_dir }}/current/properties.json"
         mode: "0600"
-        owner: "{{ iap_user }}"
-        group: "{{ iap_group }}"
+        owner: "{{ platform_user }}"
+        group: "{{ platform_group }}"
         lstrip_blocks: true
       vars:
         profile_name: Secondary_Local_AAA

@@ -15,7 +15,7 @@
     name: safe.directory
     scope: global
     value: '*'
-  when: disable_git_safe_repo_checks
+  when: platform_disable_git_safe_repo_checks
 
 - name: Install NodeJS
   ansible.builtin.include_tasks:

@@ -4,10 +4,13 @@
 # The default port of the vault server
 vault_port: 8200
 
+# The default directory to store vault data and other config data
+vault_dir: /opt/vault
+
 # Default default to store the root key
 vault_root_key_dir: "{{ vault_dir }}/keys/root_key"
 
-# Flag to manage how secret data is written to Vault with IAP version 2021.2 and later.
+# Flag to manage how secret data is written to Vault with Itential Platform version 2021.2 and later.
 vault_read_only: true
 
 # default vault name

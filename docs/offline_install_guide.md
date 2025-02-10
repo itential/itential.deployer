@@ -8,7 +8,7 @@ It is not uncommon for customers to have production environments that are air-ga
 | :---------------- | :---------- |
 | Control Node      | The Ansible server.  This is the server where the Deployer is installed and where the inventory files are located. |
 | Target Node       | The servers where the Itential components will be installed.  Sometimes also referred to as managed nodes. |
-| Package Type      | A generic term for the downloaded artifacts.<br>YUM/DNF – rpms<br>Python – wheels<br> Zip files – archives<br>IAG archive – pkgs<br>IAP adapters – adapters |
+| Package Type      | A generic term for the downloaded artifacts.<br>YUM/DNF – rpms<br>Python – wheels<br> Zip files – archives<br>IAG archive – pkgs<br>Itential Platform adapters – adapters |
 
 ## Offline Variables
 
@@ -28,7 +28,7 @@ For example, for a Redhat 9 installation, the control node root download directo
 
 Under the root download directory, there will be subdirectories for each component and package type on both the control node and target nodes.  Not all components have every package type.
 
-For example, here is the directory structure on a target node for an All-in-one deployment (Redis, RabbitMQ, MongoDB, Vault and IAP) on a RedHat 9 server:
+For example, here is the directory structure on a target node for an All-in-one deployment (Redis, RabbitMQ, MongoDB, Vault and Itential Platform) on a RedHat 9 server:
 
 _Example: Directory Structure on Target Node - AIO_
 
@@ -36,7 +36,7 @@ _Example: Directory Structure on Target Node - AIO_
 itential_packages/
 └── redhat_9
     └── 2023.1
-        ├── iap
+        ├── platform
         │   ├── adapters
         │   │   ├── custom
         │   │   └── opensource
@@ -85,7 +85,7 @@ files/itential_packages
         │   ├── pkgs
         │   ├── rpms
         │   └── wheels
-        ├── iap
+        ├── platform
         │   ├── adapters
         │   │   ├── custom
         │   │   └── opensource
@@ -148,7 +148,7 @@ OR
 ansible-playbook itential.deployer.<component> -i <inventory> --extra-vars "offline_install=true"
 ```
 
-In offline mode, the install playbooks will use the packages downloaded to the control node instead of installing from the YUM/DNF, Python or NodeJS repositories, or from Git in the case of IAP adapters.  The packages are copied to the target nodes and placed in an Ansible temporary directory and installed locally.  The temporary directories are deleted automatically.
+In offline mode, the install playbooks will use the packages downloaded to the control node instead of installing from the YUM/DNF, Python or NodeJS repositories, or from Git in the case of Itential Platform adapters.  The packages are copied to the target nodes and placed in an Ansible temporary directory and installed locally.  The temporary directories are deleted automatically.
 
 ## Variable Reference
 
@@ -175,11 +175,11 @@ In offline mode, the install playbooks will use the packages downloaded to the c
 | `archives_download_dir_target_node`   | `all` | String  | Archives download directory on the target node.  | `{{ packages_download_dir_target_node }}/archives` |
 | `adapters_download_dir_target_node`   | `all` | String  | Adapters download directory on the target nodes. | `{{ packages_download_dir_target_node }}/adapters` |
 
-### IAP
+### Itential Platform
 
 | Variable            | Group      | Type   | Description        | Default |
 | :------------------ | :--------- | :----- | :----------------- | :------ |
-| `iap_packages_path` | `platform` | String | IAP packages path. | `{{ itential_packages_path }}/{{ iap_release }}/iap` |
+| `platform_packages_path` | `platform` | String | Itential Platform packages path. | `{{ itential_packages_path }}/{{ platform_release }}/platform` |
 
 ### IAG
 
@@ -191,28 +191,28 @@ In offline mode, the install playbooks will use the packages downloaded to the c
 
 | Variable                | Group     | Type   | Description            | Default |
 | :---------------------- | :-------- | :----- | :--------------------- | :------ |
-| `mongodb_packages_path` | `mongodb` | String | MongoDB packages path. | `{{ itential_packages_path }}/{{ iap_release }}/mongodb` |
+| `mongodb_packages_path` | `mongodb` | String | MongoDB packages path. | `{{ itential_packages_path }}/{{ platform_release }}/mongodb` |
 
 ### OS
 
 | Variable           | Group | Type   | Description       | Default |
 | :----------------- | :---- | :----- | :---------------- | :------ |
-| `os_packages_path` | `all` | String | OS packages path. | `{{ itential_packages_path }}/{{ iap_release }}/os` |
+| `os_packages_path` | `all` | String | OS packages path. | `{{ itential_packages_path }}/{{ platform_release }}/os` |
 
 ### RabbitMQ
 
 | Variable                 | Group | Type   | Description             | Default |
 | :----------------------- | :---- | :----- | :---------------------- | :------ |
-| `rabbitmq_packages_path` | `all` | String | RabbitMQ packages path. | `{{ itential_packages_path }}/{{ iap_release }}/rabbitmq` |
+| `rabbitmq_packages_path` | `all` | String | RabbitMQ packages path. | `{{ itential_packages_path }}/{{ platform_release }}/rabbitmq` |
 
 ### Redis
 
 | Variable              | Group | Type   | Description          | Default |
 | :-------------------- | :---- | :----- | :------------------- | :------ |
-| `redis_packages_path` | `all` | String | Redis packages path. | `{{ itential_packages_path }}/{{ iap_release }}/redis` |
+| `redis_packages_path` | `all` | String | Redis packages path. | `{{ itential_packages_path }}/{{ platform_release }}/redis` |
 
 ### Vault
 
 | Variable              | Group | Type   | Description          | Default |
 | :-------------------- | :---- | :----- | :------------------- | :------ |
-| `vault_packages_path` | `all` | String | Vault packages path. | `{{ itential_packages_path }}/{{ iap_release }}/vault` |
+| `vault_packages_path` | `all` | String | Vault packages path. | `{{ itential_packages_path }}/{{ platform_release }}/vault` |

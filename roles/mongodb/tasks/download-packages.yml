@@ -17,12 +17,12 @@
   ansible.builtin.include_vars:
     file: "{{ item }}"
   with_first_found:
-    - "{{ iap_release }}-{{ ansible_distribution | lower }}-{{ ansible_distribution_major_version }}.yml"
+    - "{{ platform_release }}-{{ ansible_distribution | lower }}-{{ ansible_distribution_major_version }}.yml"
     - "release-undefined.yml"
 
 - name: Check for valid MongoDB release
   ansible.builtin.fail:
-    msg: "Deployer does not support installing MongoDB for IAP version {{ iap_release }} on {{ ansible_distribution | lower }}-{{ ansible_distribution_major_version }}"
+    msg: "Deployer does not support installing MongoDB for Itential Platform version {{ platform_release }} on {{ ansible_distribution | lower }}-{{ ansible_distribution_major_version }}"
   when: invalid_mongodb_release is defined
 
 - name: Install MongoDB repo
