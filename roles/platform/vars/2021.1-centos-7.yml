@@ -11,26 +11,26 @@ platform_packages:
   - openssl-devel
   - zlib-devel
 
-iap_nodejs_url: https://rpm.nodesource.com/setup_14.x
+platform_nodejs_url: https://rpm.nodesource.com/setup_14.x
 
-python_version: 3.9
-python_executable: "/usr/local/bin/python{{ python_version }}"
-pip_executable: "/usr/local/bin/pip{{ python_version }}"
+platform_python_version: 3.9
+platform_python_executable: "/usr/local/bin/python{{ platform_python_version }}"
+platform_pip_executable: "/usr/local/bin/pip{{ platform_python_version }}"
 
 python_src_version: 3.9.5
 python_src_url: "https://www.python.org/ftp/python/{{ python_src_version }}/Python-{{ python_src_version }}.tgz"
 openssl_url: https://www.openssl.org/source/openssl-1.0.2q.tar.gz
 
-app_python_dependencies:
+platform_app_python_dependencies:
   - textfsm==1.1.0
   - jinja2==2.11.3
   - markupsafe==2.0.1
   - pymongo
 
-mongodb_version: 4.2
+platform_mongodb_version: 4.2
 
-mongodb_tools_packages:
+platform_mongodb_tools_packages:
   - mongodb-org-tools
   - mongodb-org-shell
 
-mongo_shell: mongo
+platform_mongodb_shell: mongo

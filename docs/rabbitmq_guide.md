@@ -6,7 +6,7 @@ The playbook and roles in this section install and configure RabbitMQ for the It
 * `rabbitmq_ssl` – Configures RabbitMQ SSL.
 
 **&#9432; Note:**
-This role is used when installing IAP version 2023.1 and older.
+This role is used when installing Itential Platform version 2023.1 and older.
 
 # Roles
 
@@ -21,7 +21,7 @@ More info on rabbit cluster: https://www.rabbitmq.com/clustering.html
 | User Name | Default Password | Description
 | :-------- | :--------------- | :----------
 | admin | admin | The admin user with root permissions in this RabbitMQ install.
-| itential | itential | The itential user used by IAP to connect.
+| itential | itential | The itential user used by Itential Platform to connect.
 
 :::(Warning) (⚠ Warning: ) It is assumed that these default passwords will be changed to meet more rigorous standards. These are intended to be defaults strictly used just for ease of the installation.  It is highly recommended that sensitive data be encrypted using Ansible Vault.
 
@@ -35,7 +35,7 @@ More info on rabbit TLS: https://www.rabbitmq.com/ssl.html
 
 ## Static Variables
 
-The variables located in the `vars` directory of each role are "static" and not meant to be overridden by the user.  Since these variable files are included at run-time based on the IAP release and OS major version, they have a higher precedence than the variables in the inventory and are not easily overridden.
+The variables located in the `vars` directory of each role are "static" and not meant to be overridden by the user.  Since these variable files are included at run-time based on the Itential Platform release and OS major version, they have a higher precedence than the variables in the inventory and are not easily overridden.
 
 ## Global Variables
 
@@ -43,9 +43,9 @@ The variables in this section are configured in the inventory in the `all` group
 
 | Variable | Group | Type | Description | Default Value | Required?
 | :------- | :---- | :--- | :---------- | :------------ | :--------
-| `iap_release` | `all` | Fixed-point | Designates the IAP major version. | N/A | Yes
+| `platform_release` | `all` | Fixed-point | Designates the Itential Platform major version. | N/A | Yes
 
-The `iap_release` must be defined in the inventory.  This variable, along with the OS major version, is used to determine the static variables.
+The `platform_release` must be defined in the inventory.  This variable, along with the OS major version, is used to determine the static variables.
 
 ## Common Variables
 
@@ -76,7 +76,7 @@ The following table lists the default variables located in `roles/rabbitmq/defau
 | `rabbitmq_group` | `rabbitmq` | String | The RabbitMQ Linux group. | `rabbitmq`
 | `rabbitmq_bind_ipv6` | `rabbitmq` | Boolean | Flag to enable binding to IPv6. | `true`
 | `rabbitmq_bind_addr` | `rabbitmq` | String | The hostnames/IP addresses on which RabbitMQ will listen for client connections. | `127.0.0.1`
-| `rabbitmq_user` | `rabbitmq` | String | The user used by IAP to connect to RabbitMQ. | `itential`
+| `rabbitmq_user` | `rabbitmq` | String | The user used by Itential Platform to connect to RabbitMQ. | `itential`
 | `rabbitmq_password` | `rabbitmq` | String | The default password for the RabbitMQ user. | `itential`
 | `rabbitmq_admin_user` | `rabbitmq` | String | The admin user with root permissions in this RabbitMQ install. | `admin`
 | `rabbitmq_admin_password` | `rabbitmq` | String | The default password for the admin user. | `admin`
@@ -123,7 +123,7 @@ To install and configure RabbitMQ, add a `rabbitmq` group and host to your inven
 ```
 all:
     vars:
-        iap_release: 2023.1
+        platform_release: 2023.1
 
     children:
         rabbitmq:
@@ -139,7 +139,7 @@ To enable clustering, add two additional nodes to the `rabbitmq` group and add t
 ```
 all:
     vars:
-        iap_release: 2023.1
+        platform_release: 2023.1
 
     children:
         rabbitmq:
@@ -161,7 +161,7 @@ To configure a RabbitMQ SSL, add the `rabbitmq_ssl` flag to the `all` group vars
 ```
 all:
     vars:
-        iap_release: 2023.1
+        platform_release: 2023.1
         rabbitmq_ssl: true
 
     children:

@@ -15,8 +15,8 @@
 {% endif %}
 {# Build Vault props #}
 {% set vaultProps = None %}
-{% if configure_vault | bool %}
-  {% set vaultProps = dict(url = "http://" ~ hostvars[groups['vault'][0]].inventory_hostname ~ ":" ~ vault_port, token = iap_vault_token_dir ~ "/token.txt", endpoint = vault_name ~ "/data", readOnly = "false" | bool) %}
+{% if platform_configure_vault | bool %}
+  {% set vaultProps = dict(url = "http://" ~ hostvars[groups['vault'][0]].inventory_hostname ~ ":" ~ vault_port, token = platform_vault_token_dir ~ "/token.txt", endpoint = vault_name ~ "/data", readOnly = "false" | bool) %}
   {% if vault_read_only | bool %}
     {% set vaultProps = dict(vaultProps, **{'readOnly': vault_read_only}) %}
   {% endif %}
@@ -29,7 +29,7 @@
 {% if mongodb_tls | bool %}
   {% set acceptInvalidCerts = False %}
   {% set checkServerIdentity = True %}
-  {% set sslCA = itential_root_ca_file_destination %}
+  {% set sslCA = platform_mongodb_root_ca_file_destination %}
   {% set sslValidate = True %}
 {% endif %}
 {
@@ -55,7 +55,7 @@
     "encrypted": true,
     "sdk_dir": "/opt/pronghorn-applications"
   },
-  "processTasksOnStart": {{ process_tasks_on_start| bool | to_json }},
+  "processTasksOnStart": {{ platform_process_tasks_on_start| bool | to_json }},
   "serverName": "{{ inventory_hostname }}",
   "vaultProps": {{ vaultProps | to_json }}
 }

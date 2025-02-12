@@ -18,4 +18,4 @@ mongodb_python_venv: "{{ mongodb_python_venv_root }}/{{ mongodb_python_venv_name
 
 # Offline install settings
 # Refer to the offline variables in common_vars for additional settings
-mongodb_packages_path: "{{ itential_packages_path }}/{{ iap_release }}/mongodb"
+mongodb_packages_path: "{{ itential_packages_path }}/{{ platform_release }}/mongodb"

@@ -3,11 +3,11 @@
 ---
 - name: Create the mongodb backup directory
   ansible.builtin.file:
-    path: "{{ iap_install_dir }}/current/backups"
+    path: "{{ platform_install_dir }}/current/backups"
     state: directory
     mode: "0775"
-    owner: "{{ iap_user }}"
-    group: "{{ iap_group }}"
+    owner: "{{ platform_user }}"
+    group: "{{ platform_group }}"
 
 - name: Build mongo connection string from template, set as fact
   ansible.builtin.set_fact:
@@ -17,7 +17,7 @@
   ansible.builtin.command:
     argv:
       - mongodump
-      - --out="{{ iap_install_dir }}/current/backups"
+      - --out="{{ platform_install_dir }}/current/backups"
       - --gzip
       - "{{ mongo_connection_string }}"
   register: result

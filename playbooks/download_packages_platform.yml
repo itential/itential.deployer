@@ -1,7 +1,7 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Download OS packages
+- name: Download Itential Platform packages
   hosts: platform
   become: true
   vars:
@@ -9,24 +9,9 @@
   roles:
     - role: itential.deployer.common_vars
   tasks:
-    - name: Download OS packages
+    - name: Download Itential Platform packages
       ansible.builtin.import_role:
-        name: itential.deployer.os
+        name: itential.deployer.platform
         tasks_from: download-packages
       run_once: true
-      tags: download_os_packages
-
-- name: Download Redis packages
-  import_playbook: itential.deployer.download_packages_redis
-
-- name: Download RabbitMQ packages
-  import_playbook: itential.deployer.download_packages_rabbitmq
-
-- name: Download MongoDB packages
-  import_playbook: itential.deployer.download_packages_mongodb
-
-- name: Download Vault packages
-  import_playbook: itential.deployer.download_packages_vault
-
-- name: Download IAP packages
-  import_playbook: itential.deployer.download_packages_iap
+      tags: platform

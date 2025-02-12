@@ -38,9 +38,9 @@
     2. [Redis](#redis)
     3. [RabbitMQ](#rabbitmq)
     4. [Hashicorp Vault](#hashicorp-vault)
-    5. [IAP](#iap)
+    5. [Platform](#platform)
     6. [IAG](#iag)
-8. [Patching IAP and IAG](#patching-iap-and-iag)
+8. [Patching Itential Platform and IAG](#patching-itential-platform-and-iag)
 9. [Using Internal YUM Repositories](#using-internal-yum-repositories)
 10. [Running the Deployer in Offline Mode](#running-the-deployer-in-offline-mode)
 11. [Appendix A: Definition of "Highly Available" Dependencies](#appendix-a-definition-of-highly-available-dependencies)
@@ -49,10 +49,10 @@
 
 An Itential environment is composed of several applications working in conjunction with one another, including:
 
-- Itential Automation Platform (IAP)
+- Itential Platform
 - Itential Automation Gateway (IAG)
 - Redis
-- RabbitMQ (when using IAP version 23.1 and older)
+- RabbitMQ (when using Itential Platform version 23.1 and older)
 - MongoDB
 
 In many environments, these applications are installed across multiple systems to improve resiliency and performance. To assist users with such installations, Itential provides the **Itential Deployer**.
@@ -85,10 +85,10 @@ A Highly Available Architecture is an architecture where all or most components 
 
 The ideal HA2 environment will have 12 VMs:
 
-- 2 VMs hosting IAP.
+- 2 VMs hosting Itential Platform.
 - 3 VMs hosting MongoDB configured as a replica set.
 - 3 VMs hosting Redis configured as a highly available replica set using Redis Sentinel.
-- 3 VMs hosting Rabbitmq configured as a rabbit cluster (when installing IAP version 23.1 and older).
+- 3 VMs hosting Rabbitmq configured as a rabbit cluster (when installing Itential Platform version 23.1 and older).
 - 1 VM hosting IAG.
 
 Itential recommends applying sound security principles to ALL environments. This would include configuring all components to use authentication within the HA2. Additionally, we recommend using SSL when communicating with components on other VMs and across clusters.
@@ -172,15 +172,15 @@ In general the Deployer will install packages using the standard YUM repositorie
 | Redis | rpms.remirepo.net | https | When installing Redis from the Remi repository<br>When installing on Redhat/Rocky 8+ |
 | Redis | dl.fedoraproject.org | https | When installing Redis from the Remi repository |
 | Redis | github.com | https | When installing Redis from source |
-| RabbitMQ | packagecloud.io | https | When installing IAP version 23.1 and older |
+| RabbitMQ | packagecloud.io | https | When installing Itential Platform version 23.1 and older |
 | MongoDB | repo.mongodb.org | https | |
 | MongoDB | www.mongodb.org | https | |
 | Vault | rpm.releases.hashicorp.com | https | |
-| IAP | repo.mongodb.org | https | |
-| IAP | www.mongodb.org | https | |
-| IAP | rpm.nodesource.com | https | When installing on Redhat/CentOS 7 |
-| IAP | www.python.org | https | When installing on Redhat/CentOS 7 |
-| IAP | www.openssl.org | https | When installing on Redhat/CentOS 7 |
+| Itential Platform | repo.mongodb.org | https | |
+| Itential Platform | www.mongodb.org | https | |
+| Itential Platform | rpm.nodesource.com | https | When installing on Redhat/CentOS 7 |
+| Itential Platform | www.python.org | https | When installing on Redhat/CentOS 7 |
+| Itential Platform | www.openssl.org | https | When installing on Redhat/CentOS 7 |
 | IAG | www.python.org | https | When installing on Redhat/CentOS 7 |
 | IAG | www.openssl.org | https | When installing on Redhat/CentOS 7 |
 
@@ -191,22 +191,22 @@ If internal YUM repositories are used, refer to the [Using Internal YUM Reposito
   In a clustered environment where components are installed on more than one host, the following network traffic flows need to be allowed.
 | Source | Destination | Port | Protocol | Description |
 | ------ | ----------- | ---- | -------- | ----------- |
-| Desktop Devices | IAP | 3000 | TCP | Web browser connections to IAP over HTTP |
-| Desktop Devices | IAP | 3443 | TCP | Web browser connections to IAP over HTTPS |
+| Desktop Devices | Itential Platform | 3000 | TCP | Web browser connections to Itential Platform over HTTP |
+| Desktop Devices | Itential Platform | 3443 | TCP | Web browser connections to Itential Platform over HTTPS |
 | Desktop Devices | IAG | 8083 | TCP | Web browser connections to IAG over HTTP |
 | Desktop Devices | IAG | 8443 | TCP | Web browser connections to IAG over HTTPS  |
 | Desktop Devices | Vault | 8200 | TCP | Web browser connections to Hashicorp Vault |
-| IAP | MongoDB | 27017 | TCP | IAP connections to MongoDB |
-| IAP | RabbitMQ | 5672 | TCP | IAP connections to RabbitMQ |
-| IAP | RabbitMQ | 5671 | TCP | IAP connections to RabbitMQ with TLS |
-| IAP | Redis | 6379 | TCP | IAP connections to Redis |
-| IAP | Redis | 26379 | TCP | IAP connections to Redis Sentinel |
-| IAP | IAG | 8083 | TCP | IAP connections to IAG over HTTP |
-| IAP | IAG | 8443 | TCP | IAP connections to IAG over HTTPS |
-| IAP | Vault | 8200 | TCP | IAP connections to Hashicorp Vault |
-| IAP | LDAP | 389 | TCP | IAP connections to LDAP<br>When LDAP adapter is used for authentication |
-| IAP | LDAP | 636 | TCP | IAP connections to LDAP with TLS<br>When LDAP adapter is used for authentication |
-| IAP | RADIUS | 1812 | UDP | IAP connections to RADIUS<br>When RADIUS adapter is used for authentication |
+| Itential Platform | MongoDB | 27017 | TCP | Itential Platform connections to MongoDB |
+| Itential Platform | RabbitMQ | 5672 | TCP | Itential Platform connections to RabbitMQ |
+| Itential Platform | RabbitMQ | 5671 | TCP | Itential Platform connections to RabbitMQ with TLS |
+| Itential Platform | Redis | 6379 | TCP | Itential Platform connections to Redis |
+| Itential Platform | Redis | 26379 | TCP | Itential Platform connections to Redis Sentinel |
+| Itential Platform | IAG | 8083 | TCP | Itential Platform connections to IAG over HTTP |
+| Itential Platform | IAG | 8443 | TCP | Itential Platform connections to IAG over HTTPS |
+| Itential Platform | Vault | 8200 | TCP | Itential Platform connections to Hashicorp Vault |
+| Itential Platform | LDAP | 389 | TCP | Itential Platform connections to LDAP<br>When LDAP adapter is used for authentication |
+| Itential Platform | LDAP | 636 | TCP | Itential Platform connections to LDAP with TLS<br>When LDAP adapter is used for authentication |
+| Itential Platform | RADIUS | 1812 | UDP | Itential Platform connections to RADIUS<br>When RADIUS adapter is used for authentication |
 | MongoDB | MongoDB | 27017 | TCP | MongoDB replication |
 | RabbitMQ | RabbitMQ | 5672 | TCP | RabbitMQ AMQP for HA |
 | RabbitMQ | RabbitMQ | 5671 | TCP | RabbitMQ AMQP for HA with TLS |
@@ -220,7 +220,7 @@ If internal YUM repositories are used, refer to the [Using Internal YUM Reposito
 Notes
 * Not all ports will need to be open for every supported architecture
 * Secure ports are only required when explicitly configured in the inventory
-* RabbitMQ ports are only required when installing IAP version 2023.1 and older
+* RabbitMQ ports are only required when installing Itential Platform version 2023.1 and older
 
 ### Certificates
 
@@ -228,7 +228,7 @@ The itential deployer is not responsible for creating any SSL certificates that 
 
 | Certificate | Description |
 |---|---|
-| IAP webserver | Enables HTTPS communications with the IAP webserver. |
+| Itential Platform webserver | Enables HTTPS communications with the Itential Platform webserver. |
 | IAG webserver | Enables HTTPS communications with the IAG webserver. |
 | MongoDB | Enables secure communications with the MongoDB server. Also used for intra-node mongo replication. |
 | Redis | Enables secure communications with the Redis server. Also used for intra-node redis replication. |
@@ -300,7 +300,7 @@ The deployer will create several user accounts in the dependent systems. It uses
     <td>Has access to the minimum set of commands to perform sentinel monitoring: multi, slaveof, ping, exec, subscribe, config|rewrite, role, publish, info, client|setname, client|kill, script|kill.</td>
   </tr>
   <tr>
-    <th colspan="4" style="background-color: grey;">RabbitMQ (When installing IAP version 23.1 and older)</th>
+    <th colspan="4" style="background-color: grey;">RabbitMQ (When installing Itential Platform version 23.1 and older)</th>
   </tr>
   <tr>
     <td>admin</td>
@@ -312,7 +312,7 @@ The deployer will create several user accounts in the dependent systems. It uses
     <td>itential</td>
     <td>itential</td>
     <td>rabbitmq_password</td>
-    <td>The itential user used by IAP to connect. This user is assigned the "monitoring" tag.</td>
+    <td>The itential user used by Itential Platform to connect. This user is assigned the "monitoring" tag.</td>
   </tr>
 </table>
 
@@ -322,7 +322,7 @@ The deployer will create several user accounts in the dependent systems. It uses
 The latest IAG whl file is available to download from hub.itential.io.
 
 #### On prem customers
-The IAP and IAG binary files are hosted on the Itential Nexus repository. An account is required to access Itential Nexus. If you do not have an account, contact your Itential Sales representative.
+The Itential Platform and IAG binary files are hosted on the Itential Nexus repository. An account is required to access Itential Nexus. If you do not have an account, contact your Itential Sales representative.
 
 ## Installing and Upgrading the Deployer
 
@@ -371,7 +371,7 @@ Once you have have installed the Itential Deployer, run it to begin deploying It
 
 Before running the deployer we must ensure the following:
 
-- **Compatible OS**: Any managed nodes to be configured by the Itential Deployer must use an operating system that is compatible with the target version of IAP (and, if applicable, IAG). For more information, refer to the [Itential Dependencies] page.
+- **Compatible OS**: Any managed nodes to be configured by the Itential Deployer must use an operating system that is compatible with the target version of Itential Platform (and, if applicable, IAG). For more information, refer to the [Itential Dependencies] page.
 - **Hostnames**: Any hostnames used by managed nodes must be DNS-resolvable.
 - **Administrative Privileges**: The `ansible` user must have administrative privileges on managed nodes.
 - **SSH Access**: The control node must have SSH connectivity to all managed nodes.
@@ -438,7 +438,7 @@ mkdir files
 
 #### Download Installation Artifacts
 
-Download the IAP binary along with any desired IAP adapters (and, if applicable, the IAG binary) from the [Itential Nexus Repository] to local storage.
+Download the Itential Platform binary along with any desired Itential Platform adapters (and, if applicable, the IAG binary) from the [Itential Nexus Repository] to local storage.
 
 **&#9432; Note:**
 If you are unsure which files should be downloaded for your environment, contact your Itential Professional Services representative.
@@ -473,7 +473,7 @@ You can obtain the download URL from either a **Sonatype Nexus Repository** or *
 - **For Sonatype Nexus**: Navigate to the file you wish to use and locate the **Path** parameter. Copy the link provided in the **Path** field to obtain the download URL.
 - **For JFrog**: Locate the file in the JFrog repository and copy the File URL.
 
-This download method supports both the IAP (bin/tar) files and the IAG (whl) files.
+This download method supports both the Itential Platform (bin/tar) files and the IAG (whl) files.
 
 #### Configure Repository Credentials
 
@@ -509,12 +509,12 @@ vi inventories/dev/hosts
 _Example: Inventory File (YAML Format)_
 
 **&#9432; Note:**
-There will not be a `rabbitmq` group or variables when installing IAP version 2023.2 and newer.
+There will not be a `rabbitmq` group or variables when installing Itential Platform version 2023.2 and newer.
 
 ```yaml
 all:
   vars:
-    iap_release: 2023.1
+    platform_release: 2023.1
 
   children:
     redis:
@@ -533,7 +533,7 @@ all:
         hosts:
             example1.host.com:
         vars:
-            iap_archive_download_url: https://registry.aws.itential.com/repository/itential-premium/2023.2/2023.2.8/itential-premium_2023.2.8.linux.x86_64.tar.gzx
+            platform_archive_download_url: https://registry.aws.itential.com/repository/itential-premium/2023.2/2023.2.8/itential-premium_2023.2.8.linux.x86_64.tar.gzx
             repository_username: user.name
             repository_password: !vault |
                   $ANSIBLE_VAULT;1.1;AES123
@@ -565,13 +565,13 @@ ansible-playbook itential.deployer.site -i inventories/dev -v
 
 After the Itential Deployer is finished running, perform the following checks on each component to confirm successful installation.
 
-#### IAP and IAG
+#### Itential Platform and IAG
 
-Use a web browser to navigate to the login page of your IAP/IAG servers. By default, it is located at `http://<hostname>:3000` or `http://<hostname>:8083`, respectively. If the IAP/IAG login page is displayed, the installation was successful.
+Use a web browser to navigate to the login page of your Itential Platform/IAG servers. By default, it is located at `http://<hostname>:3000` or `http://<hostname>:8083`, respectively. If the Itential Platform/IAG login page is displayed, the installation was successful.
 
 If the login page is not displayed, check that the relevant service is running on the affected server using the `sudo systemctl status automation-platform` or `sudo systemctl status automation-gateway` command, respectively. The output should look similar to the following examples.
 
-_Example Output: IAP System Status_
+_Example Output: Itential Platform System Status_
 
 ```bash
 $ sudo systemctl status automation-platform
@@ -669,7 +669,7 @@ $ sudo systemctl status redis
 _Example Output: RabbitMQ Status_
 
 **&#9432; Note:**
-Valid only when installing IAP version 2023.1 and older.
+Valid only when installing Itential Platform version 2023.1 and older.
 
 ```bash
 $ sudo systemctl status rabbitmq-server
@@ -697,17 +697,17 @@ Below are simplified sample host files that describe the basic configurations to
 
 ### All-in-one Architecture Inventory
 
-Simple environment. IAP and all of its dependencies all on one host.
+Simple environment. Itential Platform and all of its dependencies all on one host.
 
 _Example: All-in-one Inventory File (YAML Format)_
 
 **&#9432; Note:**
-There will not be a `rabbitmq` group or variables when installing IAP version 2023.2 and newer.
+There will not be a `rabbitmq` group or variables when installing Itential Platform version 2023.2 and newer.
 
 ```yaml
 all:
   vars:
-    iap_release: 2023.1
+    platform_release: 2023.1
 
   children:
     redis:
@@ -726,7 +726,7 @@ all:
         hosts:
             example1.host.com:
         vars:
-            iap_bin_file: itential-premium_2023.1.1.linux.x86_64.bin
+            platform_bin_file: itential-premium_2023.1.1.linux.x86_64.bin
 
     gateway:
         hosts:
@@ -743,12 +743,12 @@ Similar to All-in-one but installs components on separate hosts.
 _Example: Minimal Architecture Inventory File (YAML Format)_
 
 **&#9432; Note:**
-There will not be a `rabbitmq` group or variables when installing IAP version 2023.2 and newer.
+There will not be a `rabbitmq` group or variables when installing Itential Platform version 2023.2 and newer.
 
 ```yaml
 all:
   vars:
-    iap_release: 2023.1
+    platform_release: 2023.1
 
   children:
     redis:
@@ -767,7 +767,7 @@ all:
         hosts:
             automation-platform.host.com:
         vars:
-            iap_bin_file: itential-premium_2023.1.1.linux.x86_64.bin
+            platform_bin_file: itential-premium_2023.1.1.linux.x86_64.bin
 
     gateway:
         hosts:
@@ -784,12 +784,12 @@ Fault tolerant architecture.
 _Example: Highly Available Architecture Inventory File (YAML Format)_
 
 **&#9432; Note:**
-There will not be a `rabbitmq` group or variables when installing IAP version 2023.2 and newer.
+There will not be a `rabbitmq` group or variables when installing Itential Platform version 2023.2 and newer.
 
 ```yaml
 all:
   vars:
-    iap_release: 2023.1
+    platform_release: 2023.1
     # Instructs deployer to build a cluster of each
     redis_replication: true
     rabbitmq_cluster: true
@@ -819,7 +819,7 @@ all:
             automation-platform1.host.com:
             automation-platform2.host.com:
         vars:
-            iap_bin_file: itential-premium_2023.1.1.linux.x86_64.bin
+            platform_bin_file: itential-premium_2023.1.1.linux.x86_64.bin
 
     gateway:
         hosts:
@@ -836,31 +836,28 @@ Fault tolerant architecture using external dependencies.
 _Example: Highly Available Architecture Inventory File using external dependencies (YAML Format)_
 
 **&#9432; Note:**
-There will not be a `rabbitmq` group or variables when installing IAP version 2023.2 and newer.
+There will not be a `rabbitmq` group or variables when installing Itential Platform version 2023.2 and newer.
 
 ```yaml
 all:
   vars:
-    iap_release: 2023.1
+    platform_release: 2023.1
     # Instructs deployer to use external dependencies.
     # The replication for each of these should be set to false but the auth and
     # tls properties may be utilised to suit your needs.
     redis_replication: false
     redis_auth: true
     redis_tls: true
-    redis_svc_url: <The-FQDN-to-the-Redis-service>
     redis_user: itential
     redis_password: <The-Redis-password>
     rabbitmq_cluster: false
     rabbitmq_ssl: false
     rabbit_user: itential
     rabbit_password: <The-RabbitMQ-password>
-    rabbit_svc_url: <The-FQDN-to-the-RabbitMQ>
     mongodb_replication: false
     mongodb_auth: false
     mongodb_tls: false
-    mongobdb_svc_url_itential: <The-connection-string-for-the-itential-database>
-    mongobdb_svc_url_localaaa: <The-connection-string-for-the-localaaa-database>
+
   children:
     redis:
     rabbitmq:
@@ -870,8 +867,11 @@ all:
         automation-platform1.host.com:
         automation-platform2.host.com:
       vars:
-        iap_bin_file: itential-premium_2023.1.1.linux.x86_64.bin
-
+        platform_bin_file: itential-premium_2023.1.1.linux.x86_64.bin
+        platform_redis_svc_url: <The-FQDN-to-the-Redis-service>
+        platform_rabbit_svc_url: <The-FQDN-to-the-RabbitMQ>
+        platform_mongodb_svc_url_itential: <The-connection-string-for-the-itential-database>
+        platform_mongobdb_svc_url_localaaa: <The-connection-string-for-the-localaaa-database>
     gateway:
       hosts:
         automation-gateway1.host.com:
@@ -885,12 +885,12 @@ all:
 _Example: Active/Standby Architecture Inventory File (YAML Format)_
 
 **&#9432; Note:**
-There will not be a `rabbitmq` group or variables when installing IAP version 2023.2 and newer.
+There will not be a `rabbitmq` group or variables when installing Itential Platform version 2023.2 and newer.
 
 ```yaml
 all:
   vars:
-    iap_release: 2023.1
+    platform_release: 2023.1
 
   children:
     redis:
@@ -933,14 +933,14 @@ all:
             datacenter1.automation-platform1.host.com:
             datacenter1.automation-platform2.host.com:
         vars:
-            iap_bin_file: itential-premium_2023.1.1.linux.x86_64.bin
+            platform_bin_file: itential-premium_2023.1.1.linux.x86_64.bin
 
     platform_secondary:
         hosts:
             datacenter2.automation-platform3.host.com:
             datacenter2.automation-platform4.host.com:
         vars:
-            iap_bin_file: itential-premium_2023.1.1.linux.x86_64.bin
+            platform_bin_file: itential-premium_2023.1.1.linux.x86_64.bin
 
     gateway:
         hosts:
@@ -956,7 +956,7 @@ _Example: Blue/Green Inventory File (YAML Format)_
 ```yaml
 all:
   vars:
-    iap_release: 2023.1
+    platform_release: 2023.1
 
   children:
     redis:
@@ -975,7 +975,7 @@ all:
         hosts:
             example1.host.com:
         vars:
-            iap_bin_file: itential-premium_2023.1.1.linux.x86_64.bin
+            platform_bin_file: itential-premium_2023.1.1.linux.x86_64.bin
 
     gateway:
         hosts:
@@ -1005,7 +1005,7 @@ Each component installed by the Itential Deployer can be granularly configured b
 ### RabbitMQ
 
 **&#9432; Note:**
-Valid only when installing IAP version 2023.1 and older.
+Valid only when installing Itential Platform version 2023.1 and older.
 
 [RabbitMQ Guide](docs/rabbitmq_guide.md)
 
@@ -1013,19 +1013,19 @@ Valid only when installing IAP version 2023.1 and older.
 
 [Hashicorp Vault Guide](docs/vault_guide.md)
 
-### IAP
+### Itential Platform
 
-[IAP Guide](docs/iap_guide.md)
+[Itential Platform Guide](docs/itential_platform_guide.md)
 
 ### IAG
 
 [IAG Guide](docs/iag_guide.md)
 
-## Patching IAP and IAG
+## Patching Itential Platform and IAG
 
-The Deployer supports patching IAP and IAG.  Refer to the following guide for instructions on running the patch playbooks.
+The Deployer supports patching Itential Platform and IAG.  Refer to the following guide for instructions on running the patch playbooks.
 
-[Patch IAP Guide](docs/patch_iap_guide.md)
+[Patch Itential Platform Guide](docs/patch_platform_guide.md)
 
 [Patch IAG Guide](docs/patch_iag_guide.md)
 

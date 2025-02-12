@@ -1,0 +1,12 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Include tasks to install Hashicorp Vault YUM repo
+  ansible.builtin.include_tasks:
+    file: install-vault-repo.yml
+
+- name: Install vault
+  ansible.builtin.dnf:
+    name: "{{ vault_packages }}"
+    update_cache: true
+    state: present

@@ -6,7 +6,7 @@
     name: safe.directory
     scope: global
     value: '*'
-  when: disable_git_safe_repo_checks
+  when: platform_disable_git_safe_repo_checks
 
 - name: Install any configured opensource adapters
   when:
@@ -17,9 +17,9 @@
     # Create the @itentialopensource directory if it is missing
     - name: Ensure @itentialopensource directory exists
       ansible.builtin.file:
-        path: "{{ iap_install_dir }}/current/custom/@itentialopensource"
-        owner: "{{ iap_user }}"
-        group: "{{ iap_group }}"
+        path: "{{ platform_install_dir }}/current/custom/@itentialopensource"
+        owner: "{{ platform_user }}"
+        group: "{{ platform_group }}"
         mode: '0775'
         state: directory
 
@@ -39,7 +39,7 @@
         - name: Git clone opensource adapters (online) # noqa: latest (always clone the latest)
           ansible.builtin.git:
             repo: "{{ item }}"
-            dest: "{{ iap_install_dir }}/current/custom/@itentialopensource/{{ adapter_names[i] }}"
+            dest: "{{ platform_install_dir }}/current/custom/@itentialopensource/{{ adapter_names[i] }}"
             force: true
           loop: "{{ itential_adapters | default([], true) }}"
           loop_control:
@@ -49,7 +49,7 @@
         - name: Unzip opensource adapter archive (online)
           ansible.builtin.unarchive:
             src: "{{ item }}"
-            dest: "{{ iap_install_dir }}/current/custom/@itentialopensource"
+            dest: "{{ platform_install_dir }}/current/custom/@itentialopensource"
           loop: "{{ itential_adapters | default([], true) }}"
           loop_control:
             index_var: i
@@ -57,15 +57,15 @@
 
         - name: Delete package-lock.json file (online)
           ansible.builtin.file:
-            path: "{{ iap_install_dir }}/current/custom/@itentialopensource/{{ item }}/package-lock.json"
+            path: "{{ platform_install_dir }}/current/custom/@itentialopensource/{{ item }}/package-lock.json"
             state: absent
           loop: "{{ adapter_names }}"
-          when: delete_package_lock_file
+          when: platform_delete_package_lock_file
 
         - name: Run npm install (online)
           community.general.npm:
-            path: "{{ iap_install_dir }}/current/custom/@itentialopensource/{{ item }}"
-            ignore_scripts: "{{ npm_ignore_scripts }}"
+            path: "{{ platform_install_dir }}/current/custom/@itentialopensource/{{ item }}"
+            ignore_scripts: "{{ platform_npm_ignore_scripts }}"
           loop: "{{ adapter_names }}"
 
     - name: Install opensource adapters (offline)
@@ -74,7 +74,7 @@
         tasks_from: install-adapter
       vars:
         src_adapters_path: "{{ adapters_download_dir_control_node }}/opensource"
-        dest_adapters_path: "{{ iap_install_dir }}/current/custom/@itentialopensource"
+        dest_adapters_path: "{{ platform_install_dir }}/current/custom/@itentialopensource"
       loop: "{{ adapter_names }}"
       loop_control:
         loop_var: adapter_name
@@ -85,29 +85,29 @@
     # in the tree, 'chown -R ' does not, it just sets it.
     - name: Set appropriate ownership on all itential files
       ansible.builtin.command:
-        cmd: "chown -R {{ iap_user }}:{{ iap_group }} {{ iap_install_dir }}/current/custom/@itentialopensource/{{ item }}"
+        cmd: "chown -R {{ platform_user }}:{{ platform_group }} {{ platform_install_dir }}/current/custom/@itentialopensource/{{ item }}"
       loop: "{{ adapter_names }}"
       changed_when: true
 
     - name: Set appropriate permissions on all itential files
       ansible.builtin.command:
-        cmd: "chmod -R 775 {{ iap_install_dir }}/current/custom/@itentialopensource/{{ item }}"
+        cmd: "chmod -R 775 {{ platform_install_dir }}/current/custom/@itentialopensource/{{ item }}"
       loop: "{{ adapter_names }}"
       changed_when: true
 
     - name: Add symlink in install directory
       ansible.builtin.file:
-        src: "{{ iap_install_dir }}/current/custom/@itentialopensource/{{ item }}"
-        dest: "{{ iap_install_dir }}/current/node_modules/@itentialopensource/{{ item }}"
-        group: "{{ iap_group }}"
-        owner: "{{ iap_user }}"
+        src: "{{ platform_install_dir }}/current/custom/@itentialopensource/{{ item }}"
+        dest: "{{ platform_install_dir }}/current/node_modules/@itentialopensource/{{ item }}"
+        group: "{{ platform_group }}"
+        owner: "{{ platform_user }}"
         state: link
         follow: false
       loop: "{{ adapter_names }}"
 
     - name: Write adapter names to release file
       ansible.builtin.lineinfile:
-        path: "/etc/iap-release"
+        path: "/etc/itential-release"
         line: "ADAPTER={{ item }}"
         create: true
         mode: '0644'
@@ -124,17 +124,17 @@
   block:
     - name: Ensure defined custom directory exists
       ansible.builtin.file:
-        path: "{{ iap_install_dir }}/current/custom/{{ custom_location }}"
-        owner: "{{ iap_user }}"
-        group: "{{ iap_group }}"
+        path: "{{ platform_install_dir }}/current/custom/{{ custom_location }}"
+        owner: "{{ platform_user }}"
+        group: "{{ platform_group }}"
         mode: '0775'
         state: directory
 
     - name: Ensure defined custom directory exists under node_modules
       ansible.builtin.file:
-        path: "{{ iap_install_dir }}/current/node_modules/{{ custom_location }}"
-        owner: "{{ iap_user }}"
-        group: "{{ iap_group }}"
+        path: "{{ platform_install_dir }}/current/node_modules/{{ custom_location }}"
+        owner: "{{ platform_user }}"
+        group: "{{ platform_group }}"
         mode: '0775'
         state: directory
 
@@ -154,7 +154,7 @@
         - name: Git clone all custom adapters (online) # noqa: latest (always clone the latest)
           ansible.builtin.git:
             repo: "{{ item }}"
-            dest: "{{ iap_install_dir }}/current/custom/{{ custom_location }}/{{ custom_names[i] }}"
+            dest: "{{ platform_install_dir }}/current/custom/{{ custom_location }}/{{ custom_names[i] }}"
             force: true
           loop: "{{ custom_adapters | default([], true) }}"
           loop_control:
@@ -164,7 +164,7 @@
         - name: Unzip custom adapter archive (online)
           ansible.builtin.unarchive:
             src: "{{ item }}"
-            dest: "{{ iap_install_dir }}/current/custom/{{ custom_location }}"
+            dest: "{{ platform_install_dir }}/current/custom/{{ custom_location }}"
           loop: "{{ custom_adapters | default([], true) }}"
           loop_control:
             index_var: i
@@ -172,7 +172,7 @@
 
         - name: Run npm install (online)
           community.general.npm:
-            path: "{{ iap_install_dir }}/current/custom/{{ custom_location }}/{{ item }}"
+            path: "{{ platform_install_dir }}/current/custom/{{ custom_location }}/{{ item }}"
           loop: "{{ custom_names }}"
           when: not offline_install
 
@@ -182,7 +182,7 @@
         tasks_from: install-adapter
       vars:
         src_adapters_path: "{{ adapters_download_dir_control_node }}/custom"
-        dest_adapters_path: "{{ iap_install_dir }}/current/custom/{{ custom_location }}"
+        dest_adapters_path: "{{ platform_install_dir }}/current/custom/{{ custom_location }}"
       loop: "{{ custom_names }}"
       loop_control:
         loop_var: adapter_name
@@ -193,38 +193,38 @@
     # in the tree, 'chown -R ' does not, it just sets it.
     - name: Set appropriate ownership on all itential files
       ansible.builtin.command:
-        cmd: "chown -R {{ iap_user }}:{{ iap_group }} {{ iap_install_dir }}/current/custom/{{ custom_location }}/{{ item }}"
+        cmd: "chown -R {{ platform_user }}:{{ platform_group }} {{ platform_install_dir }}/current/custom/{{ custom_location }}/{{ item }}"
       loop: "{{ custom_names }}"
       changed_when: true
 
     - name: Set appropriate permissions on all itential files
       ansible.builtin.command:
-        cmd: "chmod -R 775 {{ iap_install_dir }}/current/custom/{{ custom_location }}/{{ item }}"
+        cmd: "chmod -R 775 {{ platform_install_dir }}/current/custom/{{ custom_location }}/{{ item }}"
       loop: "{{ custom_names }}"
       changed_when: true
 
     - name: Add symlink in install directory
       ansible.builtin.file:
-        src: "{{ iap_install_dir }}/current/custom/{{ custom_location }}/{{ item }}"
-        dest: "{{ iap_install_dir }}/current/node_modules/{{ custom_location }}/{{ item }}"
-        owner: "{{ iap_user }}"
-        group: "{{ iap_group }}"
+        src: "{{ platform_install_dir }}/current/custom/{{ custom_location }}/{{ item }}"
+        dest: "{{ platform_install_dir }}/current/node_modules/{{ custom_location }}/{{ item }}"
+        owner: "{{ platform_user }}"
+        group: "{{ platform_group }}"
         state: link
         follow: false
       loop: "{{ custom_names }}"
 
     - name: Write adapter names to release file
       ansible.builtin.lineinfile:
-        path: "/etc/iap-release"
+        path: "/etc/itential-release"
         line: "CUSTOM={{ item }}"
         create: true
         mode: '0644'
       loop: "{{ custom_names }}"
       changed_when: true
 
-- name: Restart IAP
+- name: Restart Itential Platform
   ansible.builtin.command: /bin/true
-  notify: Restart IAP
+  notify: Restart Itential Platform
   when: >
     (custom_adapters is defined and (custom_adapters | default([], true)) | length > 0) or
     (itential_adapters is defined and (itential_adapters | default([], true)) | length > 0)

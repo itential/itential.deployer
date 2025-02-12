@@ -1,0 +1,35 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Validate and set installation variables
+  tags: always
+  block:
+    - name: Validate installation variables
+      ansible.builtin.assert:
+        that: platform_release is defined or vault_packages is defined
+        msg: "Variables platform_release or vault_packages must be defined"
+
+    - name: Set installation variables when using Itential Platform release defaults
+      when:
+        - platform_release is defined
+        - vault_packages is not defined
+      block:
+        - name: Load release default variables
+          ansible.builtin.include_vars:
+            file: "{{ item }}"
+          with_first_found:
+            - "platform-release-{{ platform_release }}.yml"
+            - "platform-release-undefined.yml"
+
+        - name: Check for valid Vault release
+          ansible.builtin.assert:
+            that: vault_invalid_platform_release is not defined
+            msg: "Deployer does not support installing Vault for Itential Platform version {{ platform_release }}"
+
+        - name: Set vault_packages to the default value when not defined in inventory
+          ansible.builtin.set_fact:
+            vault_packages: "{{ vault_packages_default[ansible_distribution_major_version] }}"
+
+    - name: Print vault packages
+      ansible.builtin.debug:
+        msg: "Vault packages: {{ vault_packages }}"

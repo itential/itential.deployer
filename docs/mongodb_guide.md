@@ -38,7 +38,7 @@ More info on TLS: https://www.mongodb.com/docs/manual/tutorial/configure-ssl/
 
 ## Static Variables
 
-The variables located in the `vars` directory of each role are "static" and not meant to be overridden by the user.  Since these variable files are included at run-time based on the IAP release and OS major version, they have a higher precedence than the variables in the inventory and are not easily overridden.
+The variables located in the `vars` directory of each role are "static" and not meant to be overridden by the user.  Since these variable files are included at run-time based on the Itential Platform release and OS major version, they have a higher precedence than the variables in the inventory and are not easily overridden.
 
 ## Global Variables
 
@@ -175,7 +175,7 @@ To configure a MongoDB TLS, add the `mongodb_tls` flag to the `all` group vars a
 ```
 all:
   vars:
-    iap_release: 2023.1
+    iap_release: 6.0
     mongodb_auth: true
     mongodb_replication: true
     mongodb_tls: true

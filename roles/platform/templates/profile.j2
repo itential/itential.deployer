@@ -1,14 +1,14 @@
 {# Set the correct express settings for HTTP or HTTPS #}
 {% set http_enable = true %}
 {% set https_enable = false %}
-{% if iap_https | bool %}
+{% if platform_https | bool %}
   {% set http_enable = false %}
   {% set https_enable = true %}
 {% endif %}
 {# Set the correct rabbitmq settings #}
 {% set rabbit_hosts = [] %}
-{% if rabbit_svc_url is defined %}
-  {{ rabbit_hosts.append(rabbit_svc_url) }}
+{% if platform_rabbit_svc_url is defined %}
+  {{ rabbit_hosts.append(platform_rabbit_svc_url) }}
   {% set rabbit_protocol = "amqps" %}
   {% set rabbit_certPath = "" %}
   {% set rabbit_keyPath = "" %}
@@ -37,8 +37,8 @@
 {% set sentinels = None %}
 {% set sentinel_user = None %}
 {% set sentinel_password = None %}
-{% if redis_svc_url is defined %}
-   {% set redis_host = redis_svc_url %}
+{% if platform_redis_svc_url is defined %}
+   {% set redis_host = platform_redis_svc_url %}
 {% else %}
   {% set redis_host = "" %}
   {% set redis_host = hostvars[ groups[vars.redis_group_name][0] ].inventory_hostname %}
@@ -59,7 +59,7 @@
 {% endif %}
 {# Set the correct value for the login page #}
 {% set login_page = "node_modules/@itential/iap-ui/build/index.html" %}
-{% if iap_release == 2021.1 %}
+{% if platform_release == 2021.1 %}
   {% set login_page = "node_modules/@itential/pronghorn-core/ui/views/login.pug" %}
 {% endif %}
 {# Set the correct services list #}
@@ -67,7 +67,7 @@
 {% if discovered_services[0].services is defined %}
   {% set services = discovered_services[0].services %}
 {% endif %}
-{% if configure_iag_adapters | bool and 'gateway' in groups %}
+{% if platform_configure_iag_adapters | bool and 'gateway' in groups %}
   {% for iag in groups["gateway"] %}
     {% set iagAdapterName = "IAG-" + iag %}
     {# Add the name to the list ONLY if it is currently not present #}
@@ -118,7 +118,7 @@
     "cookieName": "token",
     "description": "Authentication",
     "logoutTime": 60,
-    {% if iap_release >= 2023.2 %}
+    {% if platform_release >= 2023.2 %}
     "sso": {
       "enabled": false,
       "config": ""
@@ -133,17 +133,17 @@
     "description": "Express Server",
     "express_http": {
       "enable": {{ http_enable | bool | to_json }},
-      "port": {{ iap_http_port }}
+      "port": {{ platform_http_port }}
     },
     "express_https": {
-      "cert": "{{ iap_install_dir }}/keys/itential.cert",
+      "cert": "{{ platform_install_dir }}/keys/itential.cert",
       "ciphers": "ECDHE-RSA-AES128-GCM-SHA256",
       "client_reneg_limit": 1,
       "client_reneg_window": 600,
       "enable": {{ https_enable | bool | to_json }},
-      "key": "{{ iap_install_dir }}/keys/itential.key",
+      "key": "{{ platform_install_dir }}/keys/itential.key",
       "passPhrase": "",
-      "port": {{ iap_https_port }},
+      "port": {{ platform_https_port }},
       "secureProtocol": "TLSv1_2_method"
     },
     "timeout": 600000
@@ -156,7 +156,7 @@
   "loggerProps": {
     "console_level": "info",
     "description": "Logging",
-    "log_directory": "{{ iap_log_dir }}",
+    "log_directory": "{{ platform_log_dir }}",
     "log_filename": "itential.log",
     "log_level": "info",
     "log_max_file_size": 10485760,
@@ -176,7 +176,7 @@
       "type": "BSD"
     },
     "webserver": {
-      "log_directory": "{{ iap_log_dir }}",
+      "log_directory": "{{ platform_log_dir }}",
       "log_filename": "webserver.log"
     }
   },
@@ -214,7 +214,7 @@
   },
 {% endif %}
   "redisProps": {
-    "db" : {{ redis_db_number }},
+    "db" : {{ platform_redis_db_number }},
     "host": {{ redis_host | to_json }},
     "maxHeartbeatWriteRetries" : 20,
     "maxRetriesPerRequest" : 20,

@@ -9,10 +9,10 @@
     # Enable and install the module if the profile is defined
     # https://dnf.readthedocs.io/en/latest/command_ref.html#module-switch-to-command-label
     - name: DNF switch to the nodejs module (if profile is defined)
-      ansible.builtin.command: dnf module switch-to -y "{{ iap_nodejs_package }}"
+      ansible.builtin.command: dnf module switch-to -y "{{ platform_nodejs_package }}"
       register: result
       changed_when: '"Enabling module streams" in result.stdout'
-      when: "'/' in iap_nodejs_package"
+      when: "'/' in platform_nodejs_package"
 
     # Install the module if the profile is not defined
     - name: DNF install nodejs
@@ -20,8 +20,8 @@
         name: "{{ item }}"
         state: present
       register: nodejs_install_result
-      with_items: "{{ iap_nodejs_package }}"
-      when: "'/' not in iap_nodejs_package"
+      with_items: "{{ platform_nodejs_package }}"
+      when: "'/' not in platform_nodejs_package"
 
 - name: Install nodejs if RHEL7 (online)
   when:
@@ -35,13 +35,13 @@
 
     - name: Download NodeJS repo install script
       ansible.builtin.get_url:
-        url: "{{ iap_nodejs_url }}"
-        dest: "{{ workingdir.path }}/{{ iap_nodejs_url | basename }}"
+        url: "{{ platform_nodejs_url }}"
+        dest: "{{ workingdir.path }}/{{ platform_nodejs_url | basename }}"
         mode: "0755"
 
     # This will install the appropriate yum repo for nodejs
     - name: Install appropriate nodejs yum repo
-      ansible.builtin.command: "{{ workingdir.path }}/{{ iap_nodejs_url | basename }}"
+      ansible.builtin.command: "{{ workingdir.path }}/{{ platform_nodejs_url | basename }}"
       changed_when: true
 
     # This will perform the actual install of nodejs

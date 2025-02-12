@@ -5,23 +5,23 @@
 # will need mongo cmd line tools to import some initial data. It does not install
 # the database, just the cmd line tools and the mongo shell.
 
-- name: Install MongoDB tools (online)
+- name: Install MongoDB tools
   when:
-    - configure_iap | bool
+    - platform_bootstrap_configs | bool
     - not offline_install
   block:
     - name: Install mongodb repo (for cmd line tools)
       ansible.builtin.yum_repository:
         name: "mongodb"
         description: MongoDB Repository
-        baseurl: "{{ mongodb_release_url }}"
+        baseurl: "{{ platform_mongodb_release_url }}"
         enabled: true
         gpgcheck: true
-        gpgkey: "{{ mongodb_gpgkey_url }}"
+        gpgkey: "{{ platform_mongodb_gpgkey_url }}"
       when: install_yum_repos | bool
 
     # Install mongodb tools if they are not already installed
     - name: Install the MongoDB tools packages
       ansible.builtin.dnf:
-        name: "{{ mongodb_tools_packages }}"
+        name: "{{ platform_mongodb_tools_packages }}"
         state: present
