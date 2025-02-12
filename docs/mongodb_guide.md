@@ -46,9 +46,9 @@ The variables in this section are configured in the inventory in the `all` group
 
 | Variable | Group | Type | Description | Default Value | Required?
 | :------- | :---- | :--- | :---------- | :------------ | :---------
-| `iap_release` | `all` | Fixed-point | Designates the IAP major version. If this is not included then the `mongodb` device group must specify the MongoDB packages (the precise Mongo version) to install. | N/A | No
+| `platform_release` | `all` | Fixed-point | Designates the IAP major version. If this is not included then the `mongodb` device group must specify the MongoDB packages (the precise Mongo version) to install. | N/A | No
 
-When the `iap_release` is defined in the inventory then the playbook will use default values for the MongoDB version to install. These defaults are determined by the Itential Platform version and represent our validated design. If this is not included then the `mongodb` device group must specify the MongoDB packages (the precise Mongo version) to install.
+When the `platform_release` is defined in the inventory then the playbook will use default values for the MongoDB version to install. These defaults are determined by the Itential Platform version and represent our validated design. If this is not included then the `mongodb` device group must specify the MongoDB packages (the precise Mongo version) to install.
 
 ## Common Variables
 
@@ -82,7 +82,7 @@ The following table lists the default variables located in `roles/mongodb/defaul
 
 | Variable | Group | Type | Description | Default Value
 | :------- | :---- | :--- | :---------- | :------------
-| `mongodb_version` | `mongodb` | Float | The MongoDB major version being installed. | Depends on `iap_release`
+| `mongodb_version` | `mongodb` | Float | The MongoDB major version being installed. | Depends on `platform_release`
 | `mongodb_release_url` | `mongodb` | String | The fully qualified URL to the repo where the MongoDB RPM packages exist. | Depends on `mongodb_version`
 | `mongodb_gpgkey_url` | `mongodb` | String | The fully qualified URL to the GPG key for the desired RPM file. | Depends on `mongodb_version`
 | `mongodb_python_executable` | `mongodb` | String | The location of the python executable used by the Community.mongodb ansible tasks. | `/usr/bin/python3`
@@ -120,7 +120,7 @@ To install and configure MongoDB, add a `mongodb` group and host to your invento
 ```
 all:
   vars:
-    iap_release: 6.0
+    platform_release: 6.0
 
   children:
     mongodb:
@@ -136,7 +136,7 @@ To add authentication, add the `mongodb_auth` variable and set it to `true`.
 ```
 all:
   vars:
-    iap_release: 6.0
+    platform_release: 6.0
     mongodb_auth: true
 
   children:
@@ -153,7 +153,7 @@ To configure replication, add two additional nodes to the `mongodb` group and ad
 ```
 all:
   vars:
-    iap_release: 6.0
+    platform_release: 6.0
     mongodb_auth: true
     mongodb_replication: true
 
@@ -175,7 +175,7 @@ To configure a MongoDB TLS, add the `mongodb_tls` flag to the `all` group vars a
 ```
 all:
   vars:
-    iap_release: 6.0
+    platform_release: 6.0
     mongodb_auth: true
     mongodb_replication: true
     mongodb_tls: true
@@ -207,6 +207,7 @@ You can also run select MongodDB segments by using the following tags:
 
 * `install_mongodb`
 * `configure_mongodb`
+* `initialize_mongo_config`
 
 The tag `install_mongodb` will run all of the installation tasks which will install MongoDB and start it up in its most basic state. This tag will execute the tasks to configure SELinux. This tag will also create the required database users even if they are not used because authorization is not enabled. Basic installation can be achieved with this command:
 
