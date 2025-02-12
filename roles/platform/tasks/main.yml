@@ -12,6 +12,13 @@
       ansible.builtin.include_tasks:
         file: determine-release-vars.yml
 
+- name: Run preflight checks
+  ansible.builtin.include_tasks:
+    file: preflight.yml
+  when:
+    - preflight_run_checks is defined
+    - preflight_run_checks | bool
+
 - name: Install base OS packages
   ansible.builtin.include_role:
     name: os

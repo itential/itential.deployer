@@ -1,0 +1,56 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Include release vars
+  ansible.builtin.include_vars:
+    file: "{{ item }}"
+  with_first_found:
+    - "{{ iap_release }}-{{ ansible_distribution | lower }}-{{ ansible_distribution_major_version }}.yml"
+    - "release-undefined.yml"
+
+- name: Run common checks
+  ansible.builtin.include_role:
+    name: preflight
+  vars:
+    preflight_url_checks:
+      - "https://gitlab.com/itentialopensource"
+
+- name: Create temporary working directory
+  ansible.builtin.tempfile:
+    state: directory
+  register: workingdir
+
+- name: Set pass to true if all conditions pass
+  ansible.builtin.set_fact:
+    results: '{{ results | combine({"pass": true}) }}'
+  when:
+    - results.cpuCores >= platform_cpu_cores
+    - results.get(mountvarname, 0) >= platform_free_disk_space
+    - results.memory >= platform_ram
+    - results.url_status.values() | unique | length == 1 and results.url_status.values() | unique | first == 200
+
+- name: Create Platform preflight results
+  ansible.builtin.template:
+    src: "platform.preflight.j2"
+    dest: "{{ workingdir.path }}/preflightResults.txt"
+    mode: '0777'
+
+- name: Fetch Platform results
+  ansible.builtin.fetch:
+    src: "{{ workingdir.path }}/preflightResults.txt"
+    dest: "{{ preflight_directory }}/platform_{{ inventory_hostname }}_results.txt"
+    flat: true
+
+- name: Remove temporary working directory
+  ansible.builtin.file:
+    path: "{{ workingdir.path }}"
+    state: absent
+
+- name: Check if host passed preflight checks.
+  ansible.builtin.assert:
+    that: results["pass"] == true
+    fail_msg: "Platform host did not pass the preflight checks"
+    success_msg: "Platform host passed the preflight checks"
+  when:
+    - preflight_enforce_checks is defined
+    - preflight_enforce_checks
