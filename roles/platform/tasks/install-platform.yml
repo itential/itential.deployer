@@ -32,27 +32,27 @@
     patterns: "*.rpm"
   register: downloaded_platform_packages
 
-- name: Install the Itential Platform RPMs (local RPM)
+- name: Install the Itential Platform packages (local)
   ansible.builtin.dnf:
-    name: "{{ item.path }}"
+    name: "{{ downloaded_platform_packages.files | map(attribute='path') | join(',') }}"
     disable_gpg_check: true
     state: present
-  loop: "{{ downloaded_platform_packages.files }}"
   when: downloaded_platform_packages | length > 0
 
-- name: Install the Itential Platform RPMs (YUM repository)
-  ansible.builtin.dnf:
-    name: "{{ item.path }}"
-    disable_gpg_check: true
-    state: present
-  loop: "{{ platform_packages }}"
-  loop_control:
-    loop_var: artifact
-  when:
-    - "'http' not in artifact"
-    - not artifact.endswith('.rpm')
+# Placeholder - we don't support installing from a yum repo yet
+# - name: Install the Itential Platform packages (YUM repository)
+#   ansible.builtin.dnf:
+#     name: "{{ item.path }}"
+#     disable_gpg_check: true
+#     state: present
+#   loop: "{{ platform_packages }}"
+#   loop_control:
+#     loop_var: artifact
+#   when:
+#     - "'http' not in artifact"
+#     - not artifact.endswith('.rpm')
 
-# - name: Remove temporary download directory
-#   ansible.builtin.file:
-#     path: "{{ downloaddir.path }}"
-#     state: absent
+- name: Remove temporary download directory
+  ansible.builtin.file:
+    path: "{{ downloaddir.path }}"
+    state: absent
