@@ -25,7 +25,7 @@ mongodb_localaaa_connection_string: "mongodb://{{ mongodb_host }}:{{ mongodb_por
 # These are meant to be changed by the customer. By default they are meant to
 # be predictable and simple.
 mongodb_user_admin_password: admin
-mongodb_user_itential_password: itential
+mongodb_user_itential_password: itentialPassword
 mongodb_user_localaaa_password: localaaa
 
 # The name of the mongo replica set

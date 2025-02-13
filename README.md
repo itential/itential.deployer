@@ -569,19 +569,19 @@ After the Itential Deployer is finished running, perform the following checks on
 
 Use a web browser to navigate to the login page of your Itential Platform/IAG servers. By default, it is located at `http://<hostname>:3000` or `http://<hostname>:8083`, respectively. If the Itential Platform/IAG login page is displayed, the installation was successful.
 
-If the login page is not displayed, check that the relevant service is running on the affected server using the `sudo systemctl status automation-platform` or `sudo systemctl status automation-gateway` command, respectively. The output should look similar to the following examples.
+If the login page is not displayed, check that the relevant service is running on the affected server using the `sudo systemctl status itential-platform` or `sudo systemctl status automation-gateway` command, respectively. The output should look similar to the following examples.
 
 _Example Output: Itential Platform System Status_
 
 ```bash
-$ sudo systemctl status automation-platform
-● automation-platform.service - Itential Automation Platform Service
-   Loaded: loaded (/usr/lib/systemd/system/automation-platform.service; enabled; vendor preset: disabled)
+$ sudo systemctl status itential-platform
+● itential-platform.service - Itential Automation Platform Service
+   Loaded: loaded (/usr/lib/systemd/system/itential-platform.service; enabled; vendor preset: disabled)
    Active: active (running) since Wed 2023-02-01 15:21:45 UTC; 21h ago
  Main PID: 177517 (Pronghorn core)
     Tasks: 203 (limit: 23501)
    Memory: 1.0G
-   CGroup: /system.slice/automation-platform.service
+   CGroup: /system.slice/itential-platform.service
            ├─177517 Pronghorn core
            ├─177556 Pronghorn AGManager Application
            ├─177577 Pronghorn AdminEssentials Application
@@ -765,7 +765,7 @@ all:
 
     platform:
         hosts:
-            automation-platform.host.com:
+            itential-platform.host.com:
         vars:
             platform_bin_file: itential-premium_2023.1.1.linux.x86_64.bin
 
@@ -816,8 +816,8 @@ all:
 
     platform:
         hosts:
-            automation-platform1.host.com:
-            automation-platform2.host.com:
+            itential-platform1.host.com:
+            itential-platform2.host.com:
         vars:
             platform_bin_file: itential-premium_2023.1.1.linux.x86_64.bin
 
@@ -864,8 +864,8 @@ all:
     mongodb:
     platform:
       hosts:
-        automation-platform1.host.com:
-        automation-platform2.host.com:
+        itential-platform1.host.com:
+        itential-platform2.host.com:
       vars:
         platform_bin_file: itential-premium_2023.1.1.linux.x86_64.bin
         platform_redis_svc_url: <The-FQDN-to-the-Redis-service>
@@ -930,15 +930,15 @@ all:
 
     platform:
         hosts:
-            datacenter1.automation-platform1.host.com:
-            datacenter1.automation-platform2.host.com:
+            datacenter1.itential-platform1.host.com:
+            datacenter1.itential-platform2.host.com:
         vars:
             platform_bin_file: itential-premium_2023.1.1.linux.x86_64.bin
 
     platform_secondary:
         hosts:
-            datacenter2.automation-platform3.host.com:
-            datacenter2.automation-platform4.host.com:
+            datacenter2.itential-platform3.host.com:
+            datacenter2.itential-platform4.host.com:
         vars:
             platform_bin_file: itential-premium_2023.1.1.linux.x86_64.bin
 
