@@ -131,7 +131,7 @@
         login_port: "{{ mongodb_port }}"
         login_host: "{{ inventory_hostname }}"
         database: "{{ mongodb_itential_db_name }}"
-        user: itentialUser
+        user: itential
         password: "{{ mongodb_user_itential_password }}"
         state: present
         roles:
