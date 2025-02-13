@@ -27,6 +27,11 @@ The `platform_app_artifact` role will install app-artifacts, which is an optiona
 
 The variables located in the `vars` directory of each role are "static" and not meant to be overridden by the user.  Since these variable files are included at run-time based on the Itential Platform release and OS major version, they have a higher precedence than the variables in the inventory and are not easily overridden.
 
+| Variable | Group | Type | Description | Default Value
+| :------- | :---- | :--- | :---------- | :------------
+| `platform_install_dir` | `platform` | String | The Itential Platform installation directory. | `/opt/itential/platform/server`
+| `platform_log_dir` | `platform` | String | The Itential Platform log directory. | `/var/log/itential`
+
 ## Global Variables
 
 The variables in this section are configured in the inventory in the `all` group vars.
@@ -54,26 +59,21 @@ The variables in this section may be overridden in the inventory in the `platfor
 
 | Variable | Group | Type | Description | Default Value | Required?
 | :------- | :---- | :--- | :---------- | :------------ | :--------
-| `platform_bin_file` | `platform` | String | The name of the Itential Platform bin file. | N/A | Yes*
-| `platform_tar_file` | `platform` | String | The name of the Itential Platform tar file. | N/A | Yes*
-| `platform_archive_download_url` | `platform` | String | The URL for the download of the bin/tar file from a repository. | N/A | Yes*
-| `repository_username` | `platform` | String | The username for authentication of the repository from platform_archive_download_url. | N/A | No
-| `repository_password` | `platform` | String | The password for authentication of the repository from platform_archive_download_url. | N/A | No
-| `repository_api_key` | `platform` | String | The API for authentication of the repository from platform_archive_download_url. Can be used instead of username/password for authentication.| N/A | No
+| `platform_packages` | `platform` | List of Strings | The Itential Platform RPMs to install.<br>The items can either be filenames or URLs. | N/A | Yes
+| `repository_username` | `platform` | String | The username for authentication of the repository. | N/A | No
+| `repository_password` | `platform` | String | The password for authentication of the repository. | N/A | No
+| `repository_api_key` | `platform` | String | The API for authentication of the repository. Can be used instead of username/password for authentication.| N/A | No
 | `platform_rabbit_svc_url` | `platform` | String | This variable defines the rabbit service url to use when connecting to an externally provided RabbitMQ cluster. It is intended to be used when the architecture demands that rabbit be hosted elsewhere such as when using AmazonMQ or if the demands of an organization require some other external rabbit solution, like a shared service. | N/A | No
 | `platform_redis_svc_url` | `platform` | String | This variable defines the redis service url to use when connecting to an externally provided redis cluster. It is intended to be used when the architecture demands that redis be hosted elsewhere such as when using Elasticache or if the demands of an organization require some other external redis solution, like a shared service. | N/A | No
 | `platform_mongodb_svc_url_itential` | `platform` | String | This variable defines the mongodb connection string to use when connecting to the "itential" database. It is intended to be used when the architecture demands that mongo be hosted elsewhere such as when using Mongo Atlas or if the demands of an organization require some other external mongo solution, like a shared service. | N/A | No
 | `platform_mongobdb_svc_url_localaaa` | `platform` | String | This variable defines the mongodb connection string to use when connecting to the "LocalAAA" database. It is intended to be used when the architecture demands that mongo be hosted elsewhere such as when using Mongo Atlas or if the demands of an organization require some other external mongo solution, like a shared service. | N/A | No
 
-Either `platform_bin_file`, `platform_tar_file`, or `platform_archive_download_url` must be defined in the inventory, but not both.
-If `platform_archive_download_url` is defined, either `repository_api_key` or `repository_username` and `repository_password` should be defined.
+If `platform_packages` contains URLs, either `repository_api_key` or `repository_username` and `repository_password` must be defined.
 
 The following table lists the default variables located in `roles/platform/defaults/main.yml`.
 
 | Variable | Group | Type | Description | Default Value
 | :------- | :---- | :--- | :---------- | :------------
-| `platform_install_dir` | `platform` | String | The Itential Platform installation directory. | `/opt/itential`
-| `platform_log_dir` | `platform` | String | The Itential Platform log directory. | `/var/log/itential`
 | `platform_https` | `platform` | Boolean | Flag to enable HTTPS. | `false`
 | `platform_http_port` | `platform` | Integer | The Itential Platform HTTP listen port. | `3000`
 | `platform_https_port` | `platform` | Integer | The Itential Platform HTTPS listen port. | `3443`
@@ -88,7 +88,6 @@ The following table lists the default variables located in `roles/platform/defau
 | `platform_process_jobs_on_start` | `platform` | Boolean | Flag to enable processing jobs on startup. | `true`
 | `platform_upload_using_rsync` | `platform` | Boolean | Flag to enable using rsync to upload artifacts.  <br>When set to `true`, rsync will be used.  <br>When set to `false`, secure copy will be used. | `false`
 | `platform_backup_mongo` | `platform` | Boolean | Flag to enable performing a MongoDB backup when upgrading Itential Platform. | `true`
-| `platform_remove_artifact` | `platform` | Boolean | Flag to remove the bin/tar file when finished. | `true`
 | `platform_redis_db_number` | `platform` | Integer | Default redis db number. | `0`
 
 ## Platform Adapters Role Variables
@@ -102,10 +101,9 @@ The following table lists the default variables located in `roles/platform_adapt
 | `platform_itential_adapters` | `platform` | List of Strings | The URLs of the Itental adapter Git repos.<br>OR<br>The zip archives from Adapter Builder. | N/A
 | `platform_custom_adapters` | `platform` | List of Strings | The URLs of the custom adapter Git repos.<br>OR<br>The zip archives from Adapter Builder. | N/A
 | `platform_custom_location` | `platform` | String | The directory containing the custom adapters, beginning with `@`. | N/A
-| `platform_delete_package_lock_file` | `platform` | Boolean | Flag to enable deletion of NPM package lock file before installing NPM module. | `false`
-| `platform_disable_git_safe_repo_check` | `platform` | Boolean | Flag to disable the Git safe repo check. | `false`
-| `platform_npm_ignore_scripts` | `platform` | Boolean | Flag to enable ignoring the scripts when installing NPM modules. | `false`
-
+| `platform_delete_package_lock_file` | `platform` | Boolean | Flag to enable deletion of NPM package lock file before installing NPM module. | `true`
+| `platform_disable_git_safe_repo_check` | `platform` | Boolean | Flag to disable the Git safe repo check. | `true`
+| `platform_npm_ignore_scripts` | `platform` | Boolean | Flag to enable ignoring the scripts when installing NPM modules. | `true`
 ## Platform App Artifacts Role Variables
 
 The variables in this section may be overridden in the inventory in the `platform` group vars.
@@ -119,14 +117,14 @@ The following table lists the default variables located in `roles/platform_app_a
 
 # Building the Inventory
 
-To install and configure Itential Platform, add a `platform` group and host(s) to your inventory and configure the `platform_release` and either `platform_bin_file`, `platfrom_tar_file`, or `platform_archive_download_url`. The `platform_archive_download_url` supports Sonatype Nexus and JFrog Artifactory. It is recommended to use `repository_username` and `repository_password` for Nexus and `repository_api_key` for Artifactory.  The following inventory shows a basic Itential Platform configuration with a single node.
+To install and configure Itential Platform, add a `platform` group and host(s) to your inventory and configure the `platform_release` and `platform_packages`. The URLs in `platform_packages` supports Sonatype Nexus, JFrog Artifactory and Gitlab. It is recommended to use `repository_username` and `repository_password` for Nexus and `repository_api_key` for Artifactory and Gitlab.  The following inventory shows a basic Itential Platform configuration with a single node.
 
 ## Example Inventory - Single Itential Platform Node
 
 ```
 all:
     vars:
-        platform_release: 2023.1
+        platform_release: 6.0
 
     children:
         platform:
@@ -134,17 +132,19 @@ all:
                 <host1>:
                     ansible_host: <addr1>
             vars:
-                platform_bin_file: <bin-file>
+                platform_packages:
+                    - <rpm1>
+                    - <rpmN>
 ```
 
-To install Itential adapters, add the `platform_adapters` flag to the `platform` group and set it to `true`, and configure the adapters in the `platform_itential_adapters` variable.  You may also need to configure the `platform_delete_package_lock_file`, `platform_disable_git_safe_repo_checks` and `platform_npm_ignore_scripts` flags and set them to `true`.
+To install Itential adapters, add the `platform_adapters` flag to the `platform` group and set it to `true`, and configure the adapters in the `platform_itential_adapters` variable.
 
 ## Example Inventory - Install Adapters
 
 ```
 all:
     vars:
-        platform_release: 2023.1
+        platform_release: 6.0
 
     children:
         platform:
@@ -152,7 +152,9 @@ all:
                 <host1>:
                     ansible_host: <addr1>
             vars:
-                platform_bin_file: <bin-file>
+                platform_packages:
+                    - <rpm1>
+                    - <rpmN>
                 platform_adapters: true
                 platform_itential_adapters:
                     - <git_repo1>
@@ -165,10 +167,6 @@ all:
                     - <zip_archive1>
                     - <zip_archiveN>
                 platform_custom_location: <location>
-                platform_delete_package_lock_file: true
-                platform_disable_git_safe_repo_checks: true
-                platform_npm_ignore_scripts: true
-```
 
 To install App-Artifacts, add the `platform_app_artifact` flag to the `platform` group and set it to `true` and configure the `platform_app_artifact_source_file`.
 

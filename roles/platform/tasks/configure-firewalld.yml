@@ -5,7 +5,7 @@
 - name: Gather service facts
   ansible.builtin.service_facts:
 
-- name: Open HTTP Port on FirewallD Public Zone
+- name: Open Itential Platform HTTP Port on FirewallD Public Zone
   ansible.posix.firewalld:
     port: "{{ platform_http_port }}/tcp"
     permanent: true
@@ -18,7 +18,7 @@
     - ansible_facts.services["firewalld.service"].status == "enabled"
     - not platform_https | bool
 
-- name: Open HTTPS Port on FirewallD Public Zone
+- name: Open Itential Platform HTTPS Port on FirewallD Public Zone
   ansible.posix.firewalld:
     port: "{{ platform_https_port }}/tcp"
     permanent: true

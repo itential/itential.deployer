@@ -10,15 +10,15 @@
 - name: Configure SELinux when using custom install directory
   when:
     - selinux_status.rc == 0
-    - platform_install_dir != "/opt/itential"
+    - platform_install_dir != "/opt/itential/platform/server"
   block:
     - name: Set SELinux to allow systemd to use custom install directory
       community.general.sefcontext:
-        target: "{{ platform_install_dir }}/current"
+        target: "{{ platform_install_dir }}"
         setype: bin_t
 
     - name: Reload SELinux policy
-      ansible.builtin.command: restorecon -irv "{{ platform_install_dir }}/current"
+      ansible.builtin.command: restorecon -irv "{{ platform_install_dir }}"
       register: restorecon_result
       changed_when: restorecon_result.rc == 0
       failed_when:

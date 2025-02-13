@@ -1,79 +1,802 @@
-{# Sensible default SSL props #}
-{% set acceptInvalidCerts = True %}
-{% set checkServerIdentity = False %}
-{% set sslCA = "" %}
-{% set sslValidate = False %}
-{% set sslEnabled = False %}
-{#
-Build the MongoDB connection string.
-In the case where the user wants to bring their own database,
-just use that. Else, build the connection string from the properties
-defined in the host file.
-#}
-{% if platform_mongodb_svc_url_itential is defined %}
-  {% set url = platform_mongodb_svc_url_itential %}
+##########
+# SERVER #
+##########
+# The name of the profile document to load from the MongoDB where legacy configuration properties are stored. Not required for installations that are using environment variables or a properties file.
+{% if platform_profile_id %}
+profile_id = {{ platform_profile_id }}
 {% else %}
-  {% set url = "mongodb://localhost:" + mongodb_port|string + "/" %}
-  {% set mongodb_hosts = [] %}
-  {% if mongodb_replication | bool %}
-    {% for h in groups['mongodb'] -%}
-      {{ mongodb_hosts.append( h + ":" + mongodb_port|string) }}
-    {%- endfor %}
-    {% if groups["mongodb_arbiter"] is defined and groups["mongodb_arbiter"] | length > 0 -%}
-      {{ mongodb_hosts.append( hostvars [ groups["mongodb_arbiter"][0] ].inventory_hostname + ":" + mongodb_port|string ) }}
-    {%- endif %}
-    {% set mongodb_hosts_str = mongodb_hosts|join(',') %}
-    {% set url = "mongodb://" + mongodb_hosts_str + "/?replicaSet=" + mongodb_replset_name %}
-  {% else %}
-    {% set url = "mongodb://" + hostvars[ groups['mongodb'][0] ].inventory_hostname + ":" + mongodb_port|string %}
-  {% endif %}
+# profile_id =
 {% endif %}
-{# Override TLS defaults if it is enabled #}
-{% if mongodb_tls | bool %}
-  {% set sslEnabled = True %}
-  {% set acceptInvalidCerts = False %}
-  {% set checkServerIdentity = True %}
-  {% set sslValidate = True %}
-  {% if platform_mongodb_root_ca_file_source is not defined %}
-    {% set sslCA = "" %}
-  {% else %}
-    {% set sslCA = platform_mongodb_root_ca_file_destination %}
-  {% endif %}
+
+# The file path to the directory containing additional services (applications and adapters).
+{% if platform_service_directory %}
+service_directory = {{ platform_service_directory }}
+{% else %}
+# service_directory =
 {% endif %}
-{# Build Vault props #}
-{% set vaultProps = None %}
-{% if platform_configure_vault | bool %}
-  {% set vaultProps = dict(url = "http://" ~ hostvars[groups['vault'][0]].inventory_hostname ~ ":" ~ vault_port, token = platform_vault_token_dir ~ "/token.txt", endpoint = vault_name ~ "/data", readOnly = "false" | bool) %}
-  {% if vault_read_only | bool %}
-    {% set vaultProps = dict(vaultProps, **{'readOnly': vault_read_only}) %}
-  {% endif %}
+
+# An identifier for the server instance. This is used to uniquely identify the server in a multi-server environment. If not provided, the server will generate one on startup.
+{% if platform_server_id %}
+server_id = {{ platform_server_id }}
+{% else %}
+# server_id =
 {% endif %}
-{
-  "id": "{{ profile_name }}",
-  "mongoProps": {
-    "credentials": {
-      "dbAuth": {{ mongodb_auth | bool | to_json }},
-      "passwd": {{ mongodb_user_itential_password | to_json }},
-      "user": "itential"
-    },
-    "db": "{{ mongodb_itential_db_name }}",
-    "ssl": {
-      "acceptInvalidCerts": {{ acceptInvalidCerts | bool | to_json }},
-      "checkServerIdentity": {{ checkServerIdentity | bool | to_json }},
-      "enabled": {{ sslEnabled | bool | to_json }},
-      "sslCA": "{{ sslCA }}",
-      "sslValidate": {{ sslValidate | bool | to_json }}
-    },
-    "url": "{{ url }}"
-  },
-  "pathProps": {
-    "description": "File Path Variables",
-    "encrypted": true,
-    "sdk_dir": "/opt/pronghorn-applications"
-  },
-  "processJobsOnStart": {{ platform_process_jobs_on_start| bool | to_json }},
-  "processTasksOnStart": {{ platform_process_tasks_on_start| bool | to_json }},
-  "serverId": "{{ inventory_hostname }}",
-  "serverName": "{{ inventory_hostname }}",
-  "vaultProps": {{ vaultProps | to_json }}
-}
+
+# A whitelist of services (applications/adapters) to initialize on startup of the platform. If no value is given, all services will be initialized.
+{% if platform_services %}
+services = {{ platform_services | join(',') }}
+{% else %}
+# services =
+{% endif %}
+
+# The service type that will be denied CRUD operation access.
+{% if platform_service_blacklist %}
+service_blacklist = {{ platform_service_blacklist }}
+{% else %}
+# service_blacklist =
+{% endif %}
+
+# Indicates whether the platform is using encrypted code files.
+{% if platform_encrypted | string | length > 0 %}
+platform_encrypted = {{ platform_encrypted | to_nice_json }}
+{% else %}
+# platform_encrypted =
+{% endif %}
+
+# 64-length hex string describing a 256 bit encryption key.
+{% if platform_encryption_key %}
+encryption_key = {{ platform_encryption_key }}
+{% else %}
+# encryption_key =
+{% endif %}
+
+# The amount of time a service should wait before shutting down, in seconds.
+{% if platform_shutdown_timeout %}
+platform_shutdown_timeout = {{ platform_shutdown_timeout }}
+{% else %}
+# platform_shutdown_timeout =
+{% endif %}
+
+# The application/adapter launch delay, in seconds.
+{% if platform_service_launch_delay %}
+service_launch_delay = {{ platform_service_launch_delay }}
+{% else %}
+# service_launch_delay =
+{% endif %}
+
+# The application/adapter launch timeout, in seconds.
+{% if platform_service_launch_timeout %}
+service_launch_timeout = {{ platform_service_launch_timeout }}
+{% else %}
+# service_launch_timeout =
+{% endif %}
+
+# How often to update service health, measured in seconds.
+{% if platform_service_health_check_interval %}
+service_health_check_interval = {{ platform_service_health_check_interval }}
+{% else %}
+# service_health_check_interval =
+{% endif %}
+
+# The number of failed health checks in a row before a service is considered to be “unhealthy”.
+{% if platform_service_health_check_unhealthy_threshold %}
+service_health_check_unhealthy_threshold = {{ platform_service_health_check_unhealthy_threshold }}
+{% else %}
+# service_health_check_unhealthy_threshold =
+{% endif %}
+
+# If true, the platform will periodically check for dead processes.
+{% if platform_dead_process_check_enabled | string | length > 0 %}
+dead_process_check_enabled = {{ platform_dead_process_check_enabled | to_nice_json }}
+{% else %}
+# dead_process_check_enabled =
+{% endif %}
+
+# How often to check if application/adapter stopped sending healthcheck pings, in seconds.
+{% if platform_dead_process_check_interval %}
+dead_process_check_interval = {{ platform_dead_process_check_interval }}
+{% else %}
+# dead_process_check_interval =
+{% endif %}
+
+# Maximum time period for application/adapter without sending healthcheck ping, in seconds.
+{% if platform_dead_process_max_period %}
+dead_process_max_period = {{ platform_dead_process_max_period }}
+{% else %}
+# dead_process_max_period =
+{% endif %}
+
+# Specifies the amount of times services will retry on crash before stopping.
+{% if platform_service_crash_recovery_max_retries %}
+service_crash_recovery_max_retries = {{ platform_service_crash_recovery_max_retries }}
+{% else %}
+# service_crash_recovery_max_retries =
+{% endif %}
+
+# Specifies the amount of times between each retry before the count will reset in milliseconds.
+{% if platform_service_crash_recovery_reset_retries_after_ms %}
+service_crash_recovery_reset_retries_after_ms = {{ platform_service_crash_recovery_reset_retries_after_ms }}
+{% else %}
+# service_crash_recovery_reset_retries_after_ms =
+{% endif %}
+
+# The timeout for external API requests, in seconds.
+{% if platform_external_request_timeout %}
+external_request_timeout = {{ platform_external_request_timeout }}
+{% else %}
+# external_request_timeout =
+{% endif %}
+
+# The interval for how often IAP polls for the number of devices, in hours.
+{% if platform_device_count_polling_interval %}
+device_count_polling_interval = {{ platform_device_count_polling_interval }}
+{% else %}
+# device_count_polling_interval =
+{% endif %}
+
+# If true, the platform will track detailed audit events.
+{% if platform_audit_enabled | string | length > 0 %}
+audit_enabled = {{ platform_audit_enabled | to_nice_json }}
+{% else %}
+# audit_enabled =
+{% endif %}
+
+
+#############################
+# MONGO DATABASE CONNECTION #
+#############################
+# Instructs the MongoDB driver to use the configured username/password when connecting to MongoDB.
+{% if platform_mongo_auth_enabled | string | length > 0 %}
+mongo_auth_enabled = {{ platform_mongo_auth_enabled | to_nice_json }}
+{% else %}
+# mongo_auth_enabled =
+{% endif %}
+
+# The username to use when connecting to MongoDB.
+{% if platform_mongo_user %}
+mongo_user = {{ platform_mongo_user }}
+{% else %}
+# mongo_user =
+{% endif %}
+
+# The password to use when connecting to MongoDB.
+{% if platform_mongo_password %}
+mongo_password = {{ platform_mongo_password }}
+{% else %}
+# mongo_password =
+{% endif %}
+
+# The name of the database that the MongoDB user must authenticate against.
+{% if platform_mongo_auth_db %}
+mongo_auth_db = {{ platform_mongo_auth_db }}
+{% else %}
+# mongo_auth_db =
+{% endif %}
+
+# If true, the server will not check if it is connecting to a compatible MongoDB version.
+{% if platform_mongo_bypass_version_check | string | length > 0 %}
+mongo_bypass_version_check = {{ platform_mongo_bypass_version_check | to_nice_json }}
+{% else %}
+# mongo_bypass_version_check =
+{% endif %}
+
+# The name of the MongoDB logical database to connect to.
+{% if platform_mongo_db_name %}
+mongo_db_name = {{ platform_mongo_db_name }}
+{% else %}
+# mongo_db_name =
+{% endif %}
+
+# The MongoDB connection string. For a replica set this will include all members of the replica set. For Mongo Atlas this will be the SRV connection format.
+{% if platform_mongo_url %}
+mongo_url = {{ platform_mongo_url }}
+{% else %}
+# mongo_url =
+{% endif %}
+
+# Instruct the MongoDB driver to use TLS protocols when connecting to the database.
+{% if platform_mongo_tls_enabled | string | length > 0 %}
+mongo_tls_enabled = {{ platform_mongo_tls_enabled | to_nice_json }}
+{% else %}
+# mongo_tls_enabled =
+{% endif %}
+
+# If true, disables the validation checks for TLS certificates on other servers in the cluster and allows the use of invalid or self-signed certificates to connect.
+{% if platform_mongo_tls_allow_invalid_certificates | string | length > 0 %}
+mongo_tls_allow_invalid_certificates = {{ platform_mongo_tls_allow_invalid_certificates | to_nice_json }}
+{% else %}
+# mongo_tls_allow_invalid_certificates =
+{% endif %}
+
+# The .pem file that contains the root certificate chain from the Certificate Authority. Specify the file name of the .pem file using absolute paths.
+{% if platform_mongo_tls_ca_file %}
+mongo_tls_ca_file = {{ platform_mongo_tls_ca_file }}
+{% else %}
+# mongo_tls_ca_file =
+{% endif %}
+
+# Deprecated in favor of the `mongo_tls_enabled` property.
+{% if platform_mongo_ssl_enabled | string | length > 0 %}
+mongo_ssl_enabled = {{ platform_mongo_ssl_enabled | to_nice_json }}
+{% else %}
+# mongo_ssl_enabled =
+{% endif %}
+
+# Deprecated in favor of the `mongo_tls_allow_invalid_certificates` property.
+{% if platform_mongo_ssl_accept_invalid_certs %}
+mongo_ssl_accept_invalid_certs = {{ platform_mongo_ssl_accept_invalid_certs }}
+{% else %}
+# mongo_ssl_accept_invalid_certs =
+{% endif %}
+
+# Deprecated in favor of the `mongo_tls_ca_file` property.
+{% if platform_mongo_ssl_ca_file %}
+mongo_ssl_ca_file = {{ platform_mongo_ssl_ca_file }}
+{% else %}
+# mongo_ssl_ca_file =
+{% endif %}
+
+# The maximum number of connections in a connection pool. Each application/adapter has its own connection pool.
+{% if platform_mongo_max_pool_size %}
+mongo_max_pool_size = {{ platform_mongo_max_pool_size }}
+{% else %}
+# mongo_max_pool_size =
+{% endif %}
+
+
+####################
+# REDIS CONNECTION #
+####################
+# The Redis keyspace (database number) to use for the connection.
+{% if platform_redis_db %}
+redis_db = {{ platform_redis_db }}
+{% else %}
+# redis_db =
+{% endif %}
+
+# The username to use when connecting to Redis.
+{% if platform_redis_username %}
+redis_username = {{ platform_redis_username }}
+{% else %}
+# redis_username =
+{% endif %}
+
+# The password to use when connecting to Redis.
+{% if platform_redis_password %}
+redis_password = {{ platform_redis_password }}
+{% else %}
+# redis_password =
+{% endif %}
+
+# The maximum number of times to retry a request to Redis when the connection is lost.
+{% if platform_redis_max_retries_per_request %}
+redis_max_retries_per_request = {{ platform_redis_max_retries_per_request }}
+{% else %}
+# redis_max_retries_per_request =
+{% endif %}
+
+# The maximum number of times to retry writing a heartbeat message to Redis from a service.
+{% if platform_redis_max_heartbeat_write_retries %}
+redis_max_heartbeat_write_retries = {{ platform_redis_max_heartbeat_write_retries }}
+{% else %}
+# redis_max_heartbeat_write_retries =
+{% endif %}
+
+# The hostname of the Redis server. Not used when connecting to Redis Sentinels.
+{% if platform_redis_host %}
+redis_host = {{ platform_redis_host }}
+{% else %}
+# redis_host =
+{% endif %}
+
+# The port to use when connecting to this Redis instance.
+{% if platform_redis_port %}
+redis_port = {{ platform_redis_port }}
+{% else %}
+# redis_port =
+{% endif %}
+
+# The list of Redis Sentinel servers (hostnames and ports) to use for high availability.
+{% if platform_redis_sentinels %}
+redis_sentinels = {{ platform_redis_sentinels }}
+{% else %}
+# redis_sentinels =
+{% endif %}
+
+# The Redis primary name. This only has meaning when Redis is running with replication enabled. The sentinels will monitor this node and consider it down only when the sentinels agree. Note: The primary name should not include special characters other than: .-_ and no whitespaces.
+{% if platform_redis_name %}
+redis_name = {{ platform_redis_name }}
+{% else %}
+# redis_name =
+{% endif %}
+
+# Redis TLS configuration options for secure connections.  Refer to NodeJS TLS library for all supported options.
+{% if platform_redis_tls %}
+redis_tls = {{ platform_redis_tls }}
+{% else %}
+# redis_tls =
+{% endif %}
+
+
+##############################
+# HASHICORP VAULT CONNECTION #
+##############################
+# The URL to the Hashicorp Vault server.
+{% if platform_vault_url %}
+vault_url = {{ platform_vault_url }}
+{% else %}
+# vault_url =
+{% endif %}
+
+# The authorization method to connect to Hashicorp Vault. Either token or approle.
+{% if platform_vault_auth_method %}
+vault_auth_method = {{ platform_vault_auth_method }}
+{% else %}
+# vault_auth_method =
+{% endif %}
+
+# Hashicorp Vault Role ID used for AppRole authentication.
+{% if platform_vault_role_id %}
+vault_role_id = {{ platform_vault_role_id }}
+{% else %}
+# vault_role_id =
+{% endif %}
+
+# Hashicorp Vault Secret ID used for AppRole login.
+{% if platform_vault_secret_id %}
+vault_secret_id = {{ platform_vault_secret_id }}
+{% else %}
+# vault_secret_id =
+{% endif %}
+
+# The path where the AppRole was enabled.
+{% if platform_vault_approle_path %}
+vault_approle_path = {{ platform_vault_approle_path }}
+{% else %}
+# vault_approle_path =
+{% endif %}
+
+# The file path to a token file. The token is used for authentication to access Vault secrets.
+{% if platform_vault_token %}
+vault_token = {{ platform_vault_token }}
+{% else %}
+# vault_token =
+{% endif %}
+
+# The endpoint for the Secrets Engine that is used.
+{% if platform_vault_secrets_endpoint %}
+vault_secrets_endpoint = {{ platform_vault_secrets_endpoint }}
+{% else %}
+# vault_secrets_endpoint =
+{% endif %}
+
+# If true, only reads secrets from Hashicorp Vault. Otherwise, the platform can write secrets to Vault for storage.
+{% if platform_vault_read_only | string | length > 0 %}
+vault_read_only = {{ platform_vault_read_only | to_nice_json }}
+{% else %}
+# vault_read_only =
+{% endif %}
+
+
+###################
+# WORKFLOW WORKER #
+###################
+# If true, will start working tasks immediately after the server startup process is complete. If false, the task worker must be enabled manually via the UI/API.
+{% if platform_task_worker_enabled | string | length > 0 %}
+task_worker_enabled = {{ platform_task_worker_enabled | to_nice_json }}
+{% else %}
+# task_worker_enabled =
+{% endif %}
+
+# If true, will allow jobs to be started after the server startup process is complete. If false, API calls to start Jobs will return an error until enabled manually via the UI/API.
+{% if platform_job_worker_enabled | string | length > 0 %}
+job_worker_enabled = {{ platform_job_worker_enabled | to_nice_json }}
+{% else %}
+# job_worker_enabled =
+{% endif %}
+
+
+######################
+# INTEGRATION WORKER #
+######################
+# The number of threads available for API requests.
+{% if platform_integration_thread_count %}
+integration_thread_count = {{ platform_integration_thread_count }}
+{% else %}
+# integration_thread_count =
+{% endif %}
+
+# The number of milliseconds until an integration request times out.
+{% if platform_integration_timeout %}
+integration_timeout = {{ platform_integration_timeout }}
+{% else %}
+# integration_timeout =
+{% endif %}
+
+
+###############
+# PLATFORM UI #
+###############
+# Path to the layout file extended in pug templates.
+{% if platform_ui_layout_file %}
+ui_layout_file = {{ platform_ui_layout_file }}
+{% else %}
+# ui_layout_file =
+{% endif %}
+
+# Path to the HTML file that will be displayed as the home page for the UI.
+{% if platform_ui_home_file %}
+ui_home_file = {{ platform_ui_home_file }}
+{% else %}
+# ui_home_file =
+{% endif %}
+
+# Path to the HTML file that will be displayed as the login page for the UI.
+{% if platform_ui_login_file %}
+ui_login_file = {{ platform_ui_login_file }}
+{% else %}
+# ui_login_file =
+{% endif %}
+
+# Path to the HTML file that will be displayed as the profile page for the UI.
+{% if platform_ui_profile_file %}
+ui_profile_file = {{ platform_ui_profile_file }}
+{% else %}
+# ui_profile_file =
+{% endif %}
+
+# Path to the favicon file that will be displayed in the browser tab.
+{% if platform_ui_favicon_file %}
+ui_favicon_file = {{ platform_ui_favicon_file }}
+{% else %}
+# ui_favicon_file =
+{% endif %}
+
+# Path to the apple touch icon file that will be displayed on iOS devices.
+{% if platform_ui_apple_touch_icon_file %}
+ui_apple_touch_icon_file = {{ platform_ui_apple_touch_icon_file }}
+{% else %}
+# ui_apple_touch_icon_file =
+{% endif %}
+
+
+##################
+# AUTHENTICATION #
+##################
+# If true, logs out existing sessions for a user when they log in with a new session.
+{% if platform_auth_unique_sessions_enabled | string | length > 0 %}
+auth_unique_sessions_enabled = {{ platform_auth_unique_sessions_enabled | to_nice_json }}
+{% else %}
+# auth_unique_sessions_enabled =
+{% endif %}
+
+# Members of these groups will be implicitly assigned with admin permissions.
+{% if platform_auth_admin_groups %}
+auth_admin_groups = {{ platform_auth_admin_groups | to_json }}
+{% else %}
+# auth_admin_groups =
+{% endif %}
+
+# Enables a AAA adapter to custom build the principal object for a user with a "buildPrincipal" method.
+{% if platform_auth_broker_principal_enabled | string | length > 0 %}
+auth_broker_principal_enabled = {{ platform_auth_broker_principal_enabled | to_nice_json }}
+{% else %}
+# auth_broker_principal_enabled =
+{% endif %}
+
+# The name of the cookie used for a user session.
+{% if platform_auth_session_cookie_name %}
+auth_session_cookie_name = {{ platform_auth_session_cookie_name }}
+{% else %}
+# auth_session_cookie_name =
+{% endif %}
+
+# The time in minutes before a user session expires.
+{% if platform_auth_session_ttl %}
+auth_session_ttl = {{ platform_auth_session_ttl }}
+{% else %}
+# auth_session_ttl =
+{% endif %}
+
+# Enables a default user to be used for login when SSO is not configured and no AAA Adapter exists.
+{% if platform_default_user_enabled | string | length > 0 %}
+default_user_enabled = {{ platform_default_user_enabled | to_nice_json }}
+{% else %}
+# default_user_enabled =
+{% endif %}
+
+# The username of the default user.
+{% if platform_default_user_username %}
+default_user_username = {{ platform_default_user_username }}
+{% else %}
+# default_user_username =
+{% endif %}
+
+# The password of the default user.
+{% if platform_default_user_password %}
+default_user_password = {{ platform_default_user_password }}
+{% else %}
+# default_user_password =
+{% endif %}
+
+
+#############
+# WEBSERVER #
+#############
+# A toggle to instruct the webserver to include HTTP cache control headers on the response.
+{% if platform_webserver_cache_control_enabled | string | length > 0 %}
+webserver_cache_control_enabled = {{ platform_webserver_cache_control_enabled | to_nice_json }}
+{% else %}
+# webserver_cache_control_enabled =
+{% endif %}
+
+# Timeout to use for incoming HTTP requests to the platform API, in milliseconds.
+{% if platform_webserver_timeout %}
+webserver_timeout = {{ platform_webserver_timeout }}
+{% else %}
+# webserver_timeout =
+{% endif %}
+
+# The value of the HTTP Access-Control-Allow-Origin header returned to clients.
+{% if platform_webserver_response_header_access_control_allow_origin %}
+webserver_response_header_access_control_allow_origin = {{ platform_webserver_response_header_access_control_allow_origin }}
+{% else %}
+# webserver_response_header_access_control_allow_origin =
+{% endif %}
+
+# If true, allows the webserver to respond to insecure HTTP requests.
+{% if platform_webserver_http_enabled | string | length > 0 %}
+webserver_http_enabled = {{ platform_webserver_http_enabled | to_nice_json }}
+{% else %}
+# webserver_http_enabled =
+{% endif %}
+
+# The port on which the webserver listens for HTTP requests.
+{% if platform_webserver_http_port %}
+webserver_http_port = {{ platform_webserver_http_port }}
+{% else %}
+# webserver_http_port =
+{% endif %}
+
+# If true, allows the webserver to respond to secure HTTPS requests.
+{% if platform_webserver_https_enabled | string | length > 0 %}
+webserver_https_enabled = {{ platform_webserver_https_enabled | to_nice_json }}
+{% else %}
+# webserver_https_enabled =
+{% endif %}
+
+# The port on which the webserver listens for HTTPS requests.
+{% if platform_webserver_https_port %}
+webserver_https_port = {{ platform_webserver_https_port }}
+{% else %}
+# webserver_https_port =
+{% endif %}
+
+# The path to the public key file used for HTTPS connections.
+{% if platform_webserver_https_key %}
+webserver_https_key = {{ platform_webserver_https_key }}
+{% else %}
+# webserver_https_key =
+{% endif %}
+
+# The passphrase for the private key used to enable TLS sessions.
+{% if platform_webserver_https_passphrase %}
+webserver_https_passphrase = {{ platform_webserver_https_passphrase }}
+{% else %}
+# webserver_https_passphrase =
+{% endif %}
+
+# The path to the certificate file used for HTTPS connections.
+{% if platform_webserver_https_cert %}
+webserver_https_cert = {{ platform_webserver_https_cert }}
+{% else %}
+# webserver_https_cert =
+{% endif %}
+
+# The set of allowed SSL/TLS protocol versions.
+{% if platform_webserver_https_secure_protocol %}
+webserver_https_secure_protocol = {{ platform_webserver_https_secure_protocol }}
+{% else %}
+# webserver_https_secure_protocol =
+{% endif %}
+
+# The allowed SSL/TLS cipher suite.
+{% if platform_webserver_https_ciphers %}
+webserver_https_ciphers = {{ platform_webserver_https_ciphers }}
+{% else %}
+# webserver_https_ciphers =
+{% endif %}
+
+# Specifies the number of renegotiations that are allowed in a single HTTPS connection.
+{% if platform_webserver_https_client_reneg_limit %}
+webserver_https_client_reneg_limit = {{ platform_webserver_https_client_reneg_limit }}
+{% else %}
+# webserver_https_client_reneg_limit =
+{% endif %}
+
+# Specifies the time renegotiation window in seconds for a single HTTPS connection.
+{% if platform_webserver_https_client_reneg_window %}
+webserver_https_client_reneg_window = {{ platform_webserver_https_client_reneg_window }}
+{% else %}
+# webserver_https_client_reneg_window =
+{% endif %}
+
+# The set of allowed HTTP verbs in addition to those defined in the standard HTTP/1.1 protocol.
+{% if platform_webserver_http_allowed_optional_verbs %}
+webserver_http_allowed_optional_verbs = {{ platform_webserver_http_allowed_optional_verbs }}
+{% else %}
+# webserver_http_allowed_optional_verbs =
+{% endif %}
+
+
+###########
+# LOGGING #
+###########
+# The maximum number of each log file to keep as rotation occurs.
+{% if platform_log_max_files %}
+log_max_files = {{ platform_log_max_files }}
+{% else %}
+# log_max_files =
+{% endif %}
+
+# The maximum file size in bytes of each log file before rotation occurs.
+{% if platform_log_max_file_size %}
+log_max_file_size = {{ platform_log_max_file_size }}
+{% else %}
+# log_max_file_size =
+{% endif %}
+
+# The minimum log level to display in the log file.
+{% if platform_log_level %}
+log_level = {{ platform_log_level }}
+{% else %}
+# log_level =
+{% endif %}
+
+# The absolute directory path where log files are written.
+{% if platform_log_dir %}
+log_directory = {{ platform_log_dir }}
+{% else %}
+# log_directory =
+{% endif %}
+
+# The name of the primary platform log file.
+{% if platform_log_filename %}
+log_filename = {{ platform_log_filename }}
+{% else %}
+# log_filename =
+{% endif %}
+
+# The minimum log level to display in the console (stdout).
+{% if platform_log_level_console %}
+log_level_console = {{ platform_log_level_console }}
+{% else %}
+# log_level_console =
+{% endif %}
+
+# The absolute directory path where webserver log files are written.
+{% if platform_webserver_log_directory %}
+webserver_log_directory = {{ platform_webserver_log_directory }}
+{% else %}
+# webserver_log_directory =
+{% endif %}
+
+# The name of the webserver log file.
+{% if platform_webserver_log_filename %}
+webserver_log_filename = {{ platform_webserver_log_filename }}
+{% else %}
+# webserver_log_filename =
+{% endif %}
+
+# The minimum log level to send to the syslog server.
+{% if platform_log_level_syslog %}
+log_level_syslog = {{ platform_log_level_syslog }}
+{% else %}
+# log_level_syslog =
+{% endif %}
+
+# The hostname or IP address of the syslog server.
+{% if platform_syslog_host %}
+syslog_host = {{ platform_syslog_host }}
+{% else %}
+# syslog_host =
+{% endif %}
+
+# The port number of the syslog server.
+{% if platform_syslog_port %}
+syslog_port = {{ platform_syslog_port }}
+{% else %}
+# syslog_port =
+{% endif %}
+
+# The protocol to use when sending logs to the syslog server.
+{% if platform_syslog_protocol %}
+syslog_protocol = {{ platform_syslog_protocol }}
+{% else %}
+# syslog_protocol =
+{% endif %}
+
+# The syslog facility to use when sending logs to the syslog server.
+{% if platform_syslog_facility %}
+syslog_facility = {{ platform_syslog_facility }}
+{% else %}
+# syslog_facility =
+{% endif %}
+
+# The syslog message format to use when sending logs to the syslog server.
+{% if platform_syslog_type %}
+syslog_type = {{ platform_syslog_type }}
+{% else %}
+# syslog_type =
+{% endif %}
+
+# The path to the syslog server file.
+{% if platform_syslog_path %}
+syslog_path = {{ platform_syslog_path }}
+{% else %}
+# syslog_path =
+{% endif %}
+
+# The process property to include as the process id in the syslog message.
+{% if platform_syslog_pid %}
+syslog_pid = {{ platform_syslog_pid }}
+{% else %}
+# syslog_pid =
+{% endif %}
+
+# The hostname to include in the syslog message.
+{% if platform_syslog_localhost %}
+syslog_localhost = {{ platform_syslog_localhost }}
+{% else %}
+# syslog_localhost =
+{% endif %}
+
+# The process property to include as the application name in the syslog message.
+{% if platform_syslog_app_name %}
+syslog_app_name = {{ platform_syslog_app_name }}
+{% else %}
+# syslog_app_name =
+{% endif %}
+
+# The end of line character to include in the syslog message.
+{% if platform_syslog_eol %}
+syslog_eol = {{ platform_syslog_eol }}
+{% else %}
+# syslog_eol =
+{% endif %}
+
+
+###########
+# BROKERS #
+###########
+# A list of adapter types that manages the devices.
+{% if platform_device_broker_default_adapter_priority %}
+device_broker_default_adapter_priority = {{ platform_device_broker_default_adapter_priority }}
+{% else %}
+# device_broker_default_adapter_priority =
+{% endif %}
+
+# Runs a command on a device.
+{% if platform_device_broker_run_command_adapter_preference %}
+device_broker_run_command_adapter_preference = {{ platform_device_broker_run_command_adapter_preference }}
+{% else %}
+# device_broker_run_command_adapter_preference =
+{% endif %}
+
+# If true, the platform will perform strict JSON Schema validation on messages into the brokers and coming back to the broker layer from adapters.
+{% if platform_broker_validation_enabled | string | length > 0 %}
+broker_validation_enabled = {{ platform_broker_validation_enabled | to_nice_json }}
+{% else %}
+# broker_validation_enabled =
+{% endif %}
+
+
+########
+# SNMP #
+########
+# Remote SNMP destination configuration objects.
+{% if platform_snmp_alarm_configs %}
+snmp_alarm_configs = {{ platform_snmp_alarm_configs | to_json }}
+{% else %}
+# snmp_alarm_configs =
+{% endif %}

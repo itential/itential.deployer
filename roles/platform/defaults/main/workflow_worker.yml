@@ -1,0 +1,10 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+# If true, will start working tasks immediately after the server startup process is complete.
+# If false, the task worker must be enabled manually via the UI/API.
+platform_task_worker_enabled: true
+
+# If true, will allow jobs to be started after the server startup process is complete.
+# If false, API calls to start Jobs will return an error until enabled manually via the UI/API.
+platform_job_worker_enabled: true

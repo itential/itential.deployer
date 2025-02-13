@@ -1,21 +1,18 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Check if both Itential Platform bin file and tar file are undefined and no download URL is provided
-  ansible.builtin.fail:
-    msg: Either platform_bin_file, platform_tar_file, or a download URL with authentication must be defined.
-  when:
-    - platform_bin_file is not defined
-    - platform_tar_file is not defined
-    - platform_archive_download_url is not defined
+- name: Validate Itential Platform artifacts array is populated
+  ansible.builtin.assert:
+    that:
+      - platform_packages is defined
+      - platform_packages is iterable
+      - platform_packages | length > 0
+    msg: platform_packages must be defined and contain as least one artifact
 
-- name: Check if more than one of platform_bin_file, platform_tar_file, or platform_archive_download_url is defined
-  ansible.builtin.fail:
-    msg: Only one of platform_bin_file, platform_tar_file, or platform_archive_download_url should be defined.
-  when: >
-    (platform_bin_file is defined | int) +
-    (platform_tar_file is defined | int) +
-    (platform_archive_download_url is defined | int) > 1
+- name: Validate Itential Platform artifacts array contains only RPMs
+  ansible.builtin.assert:
+    that: "{{ item.endswith('.rpm') }}"
+  loop: "{{ platform_packages }}"
 
 - name: Check if both user/password and API key are provided
   ansible.builtin.fail:
