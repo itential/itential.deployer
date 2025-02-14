@@ -1,7 +1,8 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-mongodb_version: "{{ mongodb_version_default }}"
+mongodb_packages:
+  - mongodb-org
 
 mongodb_release_url: "https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/{{ mongodb_version }}/$basearch/"
 mongodb_gpgkey_url: "https://www.mongodb.org/static/pgp/server-{{ mongodb_version }}.asc"
@@ -9,6 +10,10 @@ mongodb_gpgkey_url: "https://www.mongodb.org/static/pgp/server-{{ mongodb_versio
 # The mongodb role uses the system python3 executables.
 mongodb_python_executable: /usr/bin/python3
 mongodb_pip_executable: /usr/bin/pip3
+mongodb_python_base_dependencies:
+  - pip
+mongodb_python_app_dependencies:
+  - pymongo
 
 # To isolate Python, a virtual environment is used.
 mongodb_python_venv_root: /var/tmp

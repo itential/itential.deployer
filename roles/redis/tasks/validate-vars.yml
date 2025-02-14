@@ -1,31 +1,58 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
+
+
 - name: Validate and set installation variables
   tags: always
   block:
-    - name: Validate installation variables
+    - name: Validate at least one installation variable exists
       ansible.builtin.assert:
         that: >
-          (platform_release is defined and redis_source_url is not defined and redis_packages is not defined) or
-          (platform_release is not defined and redis_source_url is defined and redis_packages is not defined) or
-          (platform_release is not defined and redis_source_url is not defined and redis_packages is defined)
-        msg: "Variables [platform_release, redis_source_url, redis_packages] are mutually exclusive"
+          (platform_release is defined) or
+          (redis_packages is defined) or
+          (redis_source_url is defined)
+        fail_msg: "At least one Redis installation variable [platform_release,redis_packages,redis_source_url] must be defined"
 
-    - name: Validate installation variables when not using Itential Platform release defaults
-      when: not platform_release is defined
+    - name: Validate redis_source_url and redis_packages exclusivity
+      ansible.builtin.assert:
+        that: >
+          (redis_source_url is defined and redis_packages is not defined) or
+          (redis_source_url is not defined and redis_packages is defined) or
+          (redis_source_url is not defined and redis_packages is not defined)
+        msg: "Variables redis_source_url and redis_packages are mutually exclusive"
+
+    - name: Validate either redis_source_url or redis_packages is defined when not using platform_release
+      ansible.builtin.assert:
+        that: redis_source_url is defined or redis_packages is defined
+        msg: "Either redis_source_url or redis_packages must be defined when platform_release is not defined"
+      when: platform_release is not defined
+
+    - name: Validate installation variables when installing from source
+      when: redis_install_from_source | bool
       block:
-        - name: Validate redis_packages when installing from YUM repo
+        - name: Validate either redis_source_url or platform_release is defined when installing from source
           ansible.builtin.assert:
-            that: redis_packages is defined
-            msg: "Variable redis_packages must be defined when redis_install_from_source is false"
-          when: not redis_install_from_source | bool
+            that: redis_source_url is defined or platform_release is defined
+            msg: "Either redis_source_url or platform_release must be defined when redis_install_from_source is set to true"
 
-        - name: Validate redis_source_url when installing from source
+        - name: Validate redis_packages is not set when installing from source
           ansible.builtin.assert:
-            that: redis_source_url is defined
-            msg: "Variable redis_source_url must be defined when redis_install_from_source is true"
-          when: redis_install_from_source | bool
+            that: redis_packages is not defined
+            msg: "redis_packages cannot be defined when redis_install_from_source is set to true"
+
+    - name: Validate installation variables when installing from packages
+      when: not redis_install_from_source | bool
+      block:
+        - name: Validate either redis_packages or platform_release is defined when installing from packages
+          ansible.builtin.assert:
+            that: redis_packages is defined or platform_release is defined
+            msg: "Either redis_packages or platform_release must be defined when redis_install_from_source is set to false"
+
+        - name: Validate redis_source_url is not set when installing from packages
+          ansible.builtin.assert:
+            that: redis_source_url is not defined
+            msg: "redis_source_url cannot be defined when redis_install_from_source is set to false"
 
     - name: Set installation variables when using Itential Platform release defaults
       when: platform_release is defined
@@ -40,7 +67,7 @@
         - name: Check for valid Redis release
           ansible.builtin.assert:
             that: redis_invalid_platform_release is not defined
-            msg: "Deployer does not support installing Redis for Itential Platform release {{ platform_release }}"
+            fail_msg: "Deployer does not support installing Redis for Itential Platform release {{ platform_release }}"
 
         - name: Set redis_source_url to the default value when not defined in inventory
           ansible.builtin.set_fact:
@@ -56,15 +83,15 @@
             - redis_packages is not defined
             - not redis_install_from_source | bool
 
-    - name: Print installation details for online installation
+    - name: Print Redis installation details
       when: not offline_install
       block:
-        - name: Print installation details when installing from source
+        - name: Print Redis installation details when installing from source
           ansible.builtin.debug:
-            msg: "Installing from source URL {{ redis_source_url }}"
-          when: redis_source_url is defined
+            msg: "Redis source URL: {{ redis_source_url }}"
+          when: redis_install_from_source | bool
 
-        - name: Print installation details when installing from repo
+        - name: Print Redis installation details when installing from repo
           ansible.builtin.debug:
-            msg: "Installing RPMs {{ redis_packages }}"
-          when: redis_packages is defined
+            msg: "Redis packages: {{ redis_packages }}"
+          when: not redis_install_from_source | bool
