@@ -3,12 +3,9 @@
 ---
 
 mongodb_version_default:
-  "8":
-    - 7.0
-  "9":
-    - 7.0
-  "2023":
-    - 7.0
+  "8": 7.0
+  "9": 7.0
+  "2023": 7.0
 
 mongodb_packages_default:
   "8":
