@@ -98,9 +98,7 @@ The following table lists the default variables located in `roles/platform_adapt
 
 | Variable | Group | Type | Description | Default Value
 | :------- | :---- | :--- | :---------- | :------------
-| `platform_itential_adapters` | `platform` | List of Strings | The URLs of the Itental adapter Git repos.<br>OR<br>The zip archives from Adapter Builder. | N/A
-| `platform_custom_adapters` | `platform` | List of Strings | The URLs of the custom adapter Git repos.<br>OR<br>The zip archives from Adapter Builder. | N/A
-| `platform_custom_location` | `platform` | String | The directory containing the custom adapters, beginning with `@`. | N/A
+| `platform_adapters` | `platform` | List of Strings | The URLs of the Itental adapter Git repo.<br>OR<br>The zip archives from Adapter Builder. | N/A
 | `platform_delete_package_lock_file` | `platform` | Boolean | Flag to enable deletion of NPM package lock file before installing NPM module. | `true`
 | `platform_disable_git_safe_repo_check` | `platform` | Boolean | Flag to disable the Git safe repo check. | `true`
 | `platform_npm_ignore_scripts` | `platform` | Boolean | Flag to enable ignoring the scripts when installing NPM modules. | `true`
@@ -137,7 +135,7 @@ all:
                     - <rpmN>
 ```
 
-To install Itential adapters, add the `platform_adapters` flag to the `platform` group and set it to `true`, and configure the adapters in the `platform_itential_adapters` variable.
+To install Itential adapters, add the `platform_adapters` flag to the `platform` group and set it to `true`, and configure the adapters in the `platform_adapters` variable.
 
 ## Example Inventory - Install Adapters
 
@@ -156,7 +154,7 @@ all:
                     - <rpm1>
                     - <rpmN>
                 platform_adapters: true
-                platform_itential_adapters:
+                platform_adapters:
                     - <git_repo1>
                     - <git_repoN>
                     - <zip_archive1>
