@@ -114,7 +114,7 @@
     - name: Write adapter names to release file
       ansible.builtin.lineinfile:
         path: "/etc/itential-release"
-        line: "adapter={{ item }}"
+        line: "ADAPTER={{ item }}"
         create: true
         mode: '0644'
       loop: "{{ adapter_names }}"
