@@ -89,8 +89,8 @@
         name: offline
         tasks_from: install-adapter
       vars:
-        offline_src_adapters_path: "{{ adapters_download_dir_control_node }}"
-        offline_dest_adapters_path: "{{ platform_service_directory }}"
+        src_adapters_path: "{{ adapters_download_dir_control_node }}"
+        dest_adapters_path: "{{ platform_service_directory }}"
       loop: "{{ adapter_names }}"
       loop_control:
         loop_var: adapter_name

@@ -1,15 +1,15 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Validate offline_src_adapters_path is set
+- name: Validate src_adapters_path is set
   ansible.builtin.fail:
-    msg: "offline_src_adapters_path is not set"
-  when: offline_src_adapters_path is not defined
+    msg: "src_adapters_path is not set"
+  when: src_adapters_path is not defined
 
-- name: Validate offline_src_adapters_path is set
+- name: Validate dest_adapters_path is set
   ansible.builtin.fail:
-    msg: "offline_src_adapters_path is not set"
-  when: offline_src_adapters_path is not defined
+    msg: "dest_adapters_path is not set"
+  when: dest_adapters_path is not defined
 
 - name: Create temporary working directory
   ansible.builtin.tempfile:
@@ -21,7 +21,7 @@
     src: "{{ item }}"
     dest: "{{ install_adapters_temp_dir.path }}"
     mode: '0644'
-  with_fileglob: "{{ offline_src_adapters_path }}/*{{ adapter_name }}*.tgz"
+  with_fileglob: "{{ src_adapters_path }}/*{{ adapter_name }}*.tgz"
 
 - name: Find adapter on target node
   ansible.builtin.find:
@@ -31,12 +31,12 @@
 
 - name: Validate adapter exists
   ansible.builtin.fail:
-    msg: "{{ adapter_name }} does not exist in {{ offline_src_adapters_path }}, re-run download"
+    msg: "{{ adapter_name }} does not exist in {{ src_adapters_path }}, re-run download"
   when: adapter_list.files | length == 0
 
 - name: Create adapter destination
   ansible.builtin.file:
-    name: "{{ offline_src_adapters_path }}/{{ adapter_name }}"
+    name: "{{ dest_adapters_path }}/{{ adapter_name }}"
     owner: "{{ platform_user }}"
     group: "{{ platform_group }}"
     mode: '0775'
@@ -48,7 +48,7 @@
 - name: Extract adapter
   ansible.builtin.unarchive:
     src: "{{ adapter_list.files[0].path }}"
-    dest: "{{ offline_src_adapters_path }}/"
+    dest: "{{ dest_adapters_path }}/"
     remote_src: true
     extra_opts:
       - --transform
