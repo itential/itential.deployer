@@ -7,7 +7,7 @@
     - name: Validate installation variables
       ansible.builtin.assert:
         that: platform_release is defined or vault_packages is defined
-        msg: "Variables platform_release or vault_packages must be defined"
+        msg: "Either platform_release or vault_packages must be defined"
 
     - name: Set installation variables when using Itential Platform release defaults
       when:
@@ -30,6 +30,7 @@
           ansible.builtin.set_fact:
             vault_packages: "{{ vault_packages_default[ansible_distribution_major_version] }}"
 
-    - name: Print vault packages
+    - name: Print Vault installation details
       ansible.builtin.debug:
         msg: "Vault packages: {{ vault_packages }}"
+      when: not offline_install
