@@ -32,10 +32,10 @@ platform_redis_sentinels:
 platform_sentinel_port: 26379
 
 # The username to use when connecting to Sentinel.
-platform_sentinel_user:
+platform_sentinel_username: sentineluser
 
 # The password to use when connecting to Sentinel.
-platform_sentinel_password:
+platform_sentinel_password: sentineluser
 
 # The Redis primary name. This only has meaning when Redis is running with replication enabled.
 # The sentinels will monitor this node and consider it down only when the sentinels agree.
