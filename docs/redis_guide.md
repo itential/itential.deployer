@@ -84,7 +84,9 @@ The following table lists the default variables located in `roles/redis/defaults
 | `redis_install_method` | `redis` | String | The method to use to install Redis.<br>Set to `remi_repo` to use the Remi repo.<br>Set to `source` to install from source. | `remi_repo`
 | `redis_epel_repo_url` | `redis` | String | The URL of the EPEL repo RPM.<br>Note: this is only used when the `redis_install_method` is set to `remi_repo`. | `https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_distribution_major_version }}.noarch.rpm`
 | `redis_sentinel_conf_file` | `redis` | String | The location of the Redis Sentinel configuration file. | `{{ redis_conf_dir }}/sentinel.conf`
+| `redis_sentinel_log` | `redis` | String | The location of the Redis Sentinel log file. | `{{ redis_log_dir }}/sentinel.log`
 | `redis_sentinel_port` | `redis` | Integer | The Redis Sentinel listen port | `26379`
+| `redis_master_name` | `redis` | String | The Redis master name | `itentialmaster`
 
 # SELinux
 
