@@ -248,21 +248,21 @@ mongo_max_pool_size = {{ platform_mongo_max_pool_size }}
 # REDIS CONNECTION #
 ####################
 # The Redis keyspace (database number) to use for the connection.
-{% if platform_redis_db %}
+{% if platform_redis_db is defined and platform_redis_db | string | length > 0 %}
 redis_db = {{ platform_redis_db }}
 {% else %}
 # redis_db =
 {% endif %}
 
 # The username to use when connecting to Redis.
-{% if platform_redis_username %}
+{% if platform_redis_username and platform_redis_auth_enabled | bool %}
 redis_username = {{ platform_redis_username }}
 {% else %}
 # redis_username =
 {% endif %}
 
 # The password to use when connecting to Redis.
-{% if platform_redis_password %}
+{% if platform_redis_password and platform_redis_auth_enabled | bool %}
 redis_password = {{ platform_redis_password }}
 {% else %}
 # redis_password =
@@ -283,7 +283,7 @@ redis_max_heartbeat_write_retries = {{ platform_redis_max_heartbeat_write_retrie
 {% endif %}
 
 # The hostname of the Redis server. Not used when connecting to Redis Sentinels.
-{% if platform_redis_host %}
+{% if platform_redis_host and not platform_redis_sentinels %}
 redis_host = {{ platform_redis_host }}
 {% else %}
 # redis_host =
@@ -298,7 +298,7 @@ redis_port = {{ platform_redis_port }}
 
 # The list of Redis Sentinel servers (hostnames and ports) to use for high availability.
 {% if platform_redis_sentinels %}
-redis_sentinels = {{ platform_redis_sentinels }}
+redis_sentinels = {{ platform_redis_sentinels | to_json }}
 {% else %}
 # redis_sentinels =
 {% endif %}
