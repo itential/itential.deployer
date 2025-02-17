@@ -20,8 +20,6 @@
   when:
     - groups['redis'] is defined
     - inventory_hostname in groups['redis']
-  vars:
-    master_name: "{{ hostvars[groups['redis'][0]].inventory_hostname }}"
 
 - name: Use template to generate sentinel.conf for secondary DR
   ansible.builtin.template:
@@ -34,5 +32,3 @@
   when:
     - groups['redis_secondary'] is defined
     - inventory_hostname in groups['redis_secondary']
-  vars:
-    master_name: "{{ hostvars[groups['redis_secondary'][0]].inventory_hostname }}"
