@@ -1,9 +1,9 @@
 {%- set authMode = "disabled" %}
 {%- set tlsMode = "disabled" %}
-{%- if (stage != "initialize" and stage != "replication") and mongodb_auth | bool %}
+{%- if (stage != "initialize" and stage != "replication") and mongodb_auth_enabled | bool %}
   {%- set authMode = "enabled" %}
 {%- endif %}
-{%- if stage == "tls" and mongodb_tls | bool %}
+{%- if stage == "tls" and mongodb_tls_enabled | bool %}
   {%- set tlsMode = "requireTLS" %}
 {%- endif %}
 # mongod.conf
@@ -40,7 +40,7 @@ processManagement:
 # Security
 security:
   authorization: {{ authMode }}
-{% if (stage != "initialize" and stage != "replication") and mongodb_auth | bool and mongodb_replication | bool %}
+{% if (stage != "initialize" and stage != "replication") and mongodb_auth_enabled | bool and mongodb_replication_enabled | bool %}
   # The path to a key file that stores the shared secret that MongoDB
   # instances use to authenticate to each other in a sharded cluster
   # or replica set. Not required for standalone instance.
@@ -71,7 +71,7 @@ net:
   tls:
     mode: {{ tlsMode }}
 
-{% if stage == "tls" and mongodb_tls | bool %}
+{% if stage == "tls" and mongodb_tls_enabled | bool %}
     # The .pem file that contains both the TLS certificate and key.
     certificateKeyFile: {{ mongodb_cert_keyfile_destination }}
 
@@ -96,7 +96,7 @@ net:
     allowInvalidHostnames: true
 {% endif %}
 
-{% if stage != "initialize" and mongodb_replication | bool %}
+{% if stage != "initialize" and mongodb_replication_enabled | bool %}
 # Replication Settings
 replication:
   # The name of the replica set that the mongod is part of. All hosts

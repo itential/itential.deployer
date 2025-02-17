@@ -311,8 +311,8 @@ redis_name = {{ platform_redis_name }}
 {% endif %}
 
 # Redis TLS configuration options for secure connections.  Refer to NodeJS TLS library for all supported options.
-{% if platform_redis_tls %}
-redis_tls = {{ platform_redis_tls }}
+{% if platform_redis_tls_enabled %}
+redis_tls = {{ platform_redis_tls_enabled }}
 {% else %}
 # redis_tls =
 {% endif %}

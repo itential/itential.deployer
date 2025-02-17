@@ -32,4 +32,4 @@ platform_redis_name:
 
 # Redis TLS configuration options for secure connections.
 # Refer to NodeJS TLS library for all supported options.
-platform_redis_tls:
+platform_redis_tls_enabled:
