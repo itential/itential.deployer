@@ -9,3 +9,5 @@ redis_sentinel_log: "{{ redis_log_dir }}/sentinel.log"
 
 # The Redis Sentinel master name
 redis_master_name: "itentialmaster"
+
+redis_master_host: "{{ hostvars[groups['redis'][0]].inventory_hostname }}"
