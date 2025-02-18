@@ -8,9 +8,9 @@
       ansible.builtin.include_tasks:
         file: validate-vars.yml
 
-    - name: Determine release vars
-      ansible.builtin.include_tasks:
-        file: determine-release-vars.yml
+    # - name: Determine release vars
+    #   ansible.builtin.include_tasks:
+    #     file: determine-release-vars.yml
 
 - name: Install base OS packages
   ansible.builtin.include_role:
