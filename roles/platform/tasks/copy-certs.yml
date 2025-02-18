@@ -27,5 +27,5 @@
     group: "{{ platform_group }}"
     owner: "{{ platform_user }}"
   when:
-    - mongodb_tls | bool
+    - mongodb_tls_enabled | bool
     - platform_mongodb_root_ca_file_source is defined

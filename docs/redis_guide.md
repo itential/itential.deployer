@@ -56,9 +56,9 @@ The following table lists the default variables that are shared between the Redi
 
 | Variable | Group | Type | Description | Default Value
 | :------- | :---- | :--- | :---------- | :------------
-| `redis_auth` | `all` | Boolean | Flag to enable Redis authentication. When set to to `true`, Redis authentication will be configured. | `false`
-| `redis_replication` | `all` | Boolean | Flag to enable Redis replication. When set to `true`, Redis replication will be configured and the Redis Sentinel service started. | `false`
-| `redis_tls` | `all` | Boolean | Flag to enable TLS connections. | `false`
+| `redis_auth_enabled` | `all` | Boolean | Flag to enable Redis authentication. When set to to `true`, Redis authentication will be configured. | `false`
+| `redis_replication_enabled` | `all` | Boolean | Flag to enable Redis replication. When set to `true`, Redis replication will be configured and the Redis Sentinel service started. | `false`
+| `redis_tls_enabled` | `all` | Boolean | Flag to enable TLS connections. | `false`
 
 ## Redis Role Variables
 
@@ -110,7 +110,7 @@ all:
                     ansible_host: <addr1>
 ```
 
-To enable authentication, add the `redis_auth` flag to the `all` group and set it to `true`.
+To enable authentication, add the `redis_auth_enabled` flag to the `all` group and set it to `true`.
 
 ## Example Inventory - Configure Redis Authentication
 
@@ -118,7 +118,7 @@ To enable authentication, add the `redis_auth` flag to the `all` group and set i
 all:
     vars:
         platform_release: 2023.1
-        redis_auth: true
+        redis_auth_enabled: true
 
     children:
         redis:
@@ -127,7 +127,7 @@ all:
                     ansible_host: <addr1>
 ```
 
-To configure a Redis replica set, add the `redis_replication` flag to the `all` group and set it to `true` and add the additional hosts.
+To configure a Redis replica set, add the `redis_replication_enabled` flag to the `all` group and set it to `true` and add the additional hosts.
 
 ## Example Inventory - Configure Redis Replication
 
@@ -135,8 +135,8 @@ To configure a Redis replica set, add the `redis_replication` flag to the `all` 
 all:
     vars:
         platform_release: 2023.1
-        redis_auth: true
-        redis_replication: true
+        redis_auth_enabled: true
+        redis_replication_enabled: true
 
     children:
         redis:

@@ -791,9 +791,9 @@ all:
   vars:
     platform_release: 2023.1
     # Instructs deployer to build a cluster of each
-    redis_replication: true
+    redis_replication_enabled: true
     rabbitmq_cluster: true
-    mongodb_replication: true
+    mongodb_replication_enabled: true
 
   children:
     redis:
@@ -845,18 +845,18 @@ all:
     # Instructs deployer to use external dependencies.
     # The replication for each of these should be set to false but the auth and
     # tls properties may be utilised to suit your needs.
-    redis_replication: false
-    redis_auth: true
-    redis_tls: true
+    redis_replication_enabled: false
+    redis_auth_enabled: true
+    redis_tls_enabled: true
     redis_user: itential
     redis_password: <The-Redis-password>
     rabbitmq_cluster: false
     rabbitmq_ssl: false
     rabbit_user: itential
     rabbit_password: <The-RabbitMQ-password>
-    mongodb_replication: false
-    mongodb_auth: false
-    mongodb_tls: false
+    mongodb_replication_enabled: false
+    mongodb_auth_enabled: false
+    mongodb_tls_enabled: false
 
   children:
     redis:
