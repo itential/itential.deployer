@@ -8,10 +8,6 @@
       ansible.builtin.include_tasks:
         file: validate-vars.yml
 
-    - name: Determine release vars
-      ansible.builtin.include_tasks:
-        file: determine-release-vars.yml
-
 - name: Install base OS packages
   ansible.builtin.include_role:
     name: os
@@ -85,17 +81,6 @@
     - name: Create properties.json file
       ansible.builtin.include_tasks:
         file: create-properties-file.yml
-
-# - name: Make the "custom" directories
-#   ansible.builtin.file:
-#     name: "{{ item }}"
-#     state: directory
-#     owner: "{{ platform_user }}"
-#     group: "{{ platform_group }}"
-#     mode: "0775"
-#   with_items:
-#     - "{{ platform_install_dir }}/custom/@itential"
-#     - "{{ platform_install_dir }}/custom/@itentialopensource"
 
 - name: Copy certs
   ansible.builtin.include_tasks:
