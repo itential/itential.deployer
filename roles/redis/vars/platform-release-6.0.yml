@@ -16,6 +16,6 @@ redis_source_url_default:
   "9": "https://github.com/redis/redis/archive/7.2.4.tar.gz"
 
 
-redis_application_dependencies:
+redis_package_dependencies_default:
   - selinux-policy
   - selinux-policy-targeted
