@@ -74,9 +74,11 @@
 
         - name: SELinux - Compile the modules
           ansible.builtin.command:
-            cmd: "checkmodule -M -m -o {{ workingdir.path }}/{{ item.path | basename | splitext | first }}.mod {{ item.path }}"
-          with_items:
-            - "{{ selinux_policies.files }}"
+            argv:
+              - checkmodule -M -m -o
+              - "{{ workingdir.path }}/{{ item.path | basename | splitext | first }}.mod"
+              - "{{ item.path }}"
+          with_items: "{{ selinux_policies.files }}"
           register: result
           changed_when: result.rc == 0
           failed_when: result.rc > 0
@@ -89,9 +91,11 @@
 
         - name: SELinux - Package the modules
           ansible.builtin.command:
-            cmd: "semodule_package -o {{ workingdir.path }}/{{ item.path | basename | splitext | first }}.pp -m {{ item.path }}"
-          with_items:
-            - "{{ compiled_modules.files }}"
+            argv:
+              - semodule_package -o
+              - "{{ workingdir.path }}/{{ item.path | basename | splitext | first }}.pp"
+              - "-m {{ item.path }}"
+          with_items: "{{ compiled_modules.files }}"
           register: result
           changed_when: result.rc == 0
           failed_when: result.rc > 0
