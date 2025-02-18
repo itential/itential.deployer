@@ -16,10 +16,14 @@
         msg: "Deployer does not support installing Gateway version {{ iag_release }} on {{ ansible_distribution }}-{{ ansible_distribution_major_version }}"
       when: invalid_iag_release is defined
 
-- name: Install base OS packages
-  ansible.builtin.include_role:
-    name: os
-  tags: install_base_os_packages
+- name: Install Gateway dependency packages
+  ansible.builtin.dnf:
+    name:
+      - selinux-policy
+      - selinux-policy-targeted
+    state: present
+    validate_certs: false
+    update_cache: true
 
 - name: Create temporary working directory
   ansible.builtin.tempfile:

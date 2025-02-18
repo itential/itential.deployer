@@ -9,17 +9,12 @@ os_packages:
   - openssl
 
 security_packages:
-  - audit
   - checkpolicy
-  - iptables
   - libselinux
   - libselinux-utils
   - policycoreutils
   - policycoreutils-python
-  - selinux-policy
   - selinux-policy-mls
-  - selinux-policy-targeted
-  - setools-console
 
 operational_packages:
   - bind-utils
@@ -31,7 +26,6 @@ operational_packages:
   - sysstat
   - tcpdump
   - telnet
-  - tuned
   - unzip
   - wget
   - zip

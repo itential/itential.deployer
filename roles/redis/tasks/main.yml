@@ -6,10 +6,14 @@
     file: validate-vars.yml
   tags: always
 
-- name: Install base OS packages
-  ansible.builtin.include_role:
-    name: os
-  tags: install_base_os_packages
+- name: Install Redis dependency packages
+  ansible.builtin.dnf:
+    name:
+      - selinux-policy
+      - selinux-policy-targeted
+    state: present
+    validate_certs: false
+    update_cache: true
 
 - name: Install and configure Redis
   notify:
