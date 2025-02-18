@@ -81,6 +81,13 @@
             - redis_packages is not defined
             - not redis_install_from_source | bool
 
+        - name: Set redis_package_dependencies to the default value when not defined in inventory
+          ansible.builtin.set_fact:
+            redis_package_dependencies: "{{ redis_package_dependencies_default }}"
+          when:
+            - redis_package_dependencies is not defined
+            - not redis_install_from_source | bool
+
     - name: Print Redis installation details
       when: not offline_install
       block:
