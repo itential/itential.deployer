@@ -8,11 +8,6 @@
       ansible.builtin.include_tasks:
         file: validate-vars.yml
 
-- name: Install base OS packages
-  ansible.builtin.include_role:
-    name: os
-  tags: install_base_os_packages
-
 - name: Gather the package facts
   ansible.builtin.package_facts:
     manager: auto
