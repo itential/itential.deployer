@@ -5,13 +5,13 @@
   {% set userpassword = "" %}
   {% set replsetOption = "" %}
   {% set tlsOptions = "" %}
-  {% if mongodb_tls | bool %}
+  {% if mongodb_tls_enabled | bool %}
     {% set tlsOptions = "&tls=true&tlsCAFile=" + platform_mongodb_root_ca_file_destination %}
   {% endif %}
-  {% if mongodb_auth | bool %}
+  {% if mongodb_auth_enabled | bool %}
     {% set userpassword = "itential:" + ( mongo_user_itential_password | urlencode | regex_replace("/","%2F") ) + "@" %}
   {% endif %}
-  {% if mongodb_replication | bool %}
+  {% if mongodb_replication_enabled | bool %}
     {% for h in groups['mongodb'] -%}
       {{ mongo_hosts.append( h + ":" + mongo_port|string) }}
     {%- endfor %}

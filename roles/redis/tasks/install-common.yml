@@ -36,7 +36,7 @@
     - ansible_facts.services["firewalld.service"] is defined
     - ansible_facts.services["firewalld.service"].state == "running"
     - ansible_facts.services["firewalld.service"].status == "enabled"
-    - redis_replication | bool
+    - redis_replication_enabled | bool
 
 - name: Create Redis group
   ansible.builtin.group:

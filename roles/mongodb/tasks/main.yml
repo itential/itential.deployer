@@ -25,7 +25,7 @@
   ansible.builtin.import_tasks:
     file: configure-mongodb.yml
   tags: configure_mongodb
-  when: mongodb_auth | bool or mongodb_tls | bool or mongodb_replication | bool
+  when: mongodb_auth_enabled | bool or mongodb_tls_enabled | bool or mongodb_replication_enabled | bool
 
 - name: Determine MongoDB version
   ansible.builtin.shell:

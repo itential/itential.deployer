@@ -20,7 +20,7 @@
     setype: redis_port_t
     state: present
   when:
-    - redis_replication | bool
+    - redis_replication_enabled | bool
     - redis_sentinel_port != redis_sentinel_port_default
 
 - name: Configure SELinux file context when using non-standard bin directory
