@@ -3,7 +3,7 @@
 ---
 - name: Install Mongo dependency packages
   ansible.builtin.dnf:
-    name: {{ mongodb_application_dependencies }} 
+    name: {{ mongodb_package_dependencies }} 
     state: present
     validate_certs: false
     update_cache: true
