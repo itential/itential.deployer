@@ -102,7 +102,7 @@ sentinel monitor {{ redis_master_name }} {{ redis_master_host }} {{ redis_port }
 # Example:
 #
 # sentinel auth-pass mymaster MySUPER--secret-0123passw0rd
-{% if redis_auth %}
+{% if redis_auth_enabled %}
 sentinel auth-pass {{ redis_master_name }} {{ redis_user_sentineluser_password }}
 {% endif %}
 
@@ -117,7 +117,7 @@ sentinel auth-pass {{ redis_master_name }} {{ redis_user_sentineluser_password }
 #
 #     user sentinel-user >somepassword +client +subscribe +publish \
 #                        +ping +info +multi +slaveof +config +client +exec on
-{% if redis_auth %}
+{% if redis_auth_enabled %}
 sentinel auth-user {{ redis_master_name }} sentineluser
 
 user default off
@@ -196,7 +196,7 @@ acllog-max-len 128
 #
 # You can configure Sentinel to authenticate with other Sentinels with specific
 # user name.
-{% if redis_auth %}
+{% if redis_auth_enabled %}
 sentinel sentinel-user sentineluser
 sentinel sentinel-pass {{ redis_user_sentineluser_password }}
 {% endif %}

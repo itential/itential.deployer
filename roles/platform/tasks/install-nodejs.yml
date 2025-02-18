@@ -2,9 +2,7 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
 - name: Install nodejs if RHEL 8 or 9 (online)
-  when:
-    - ansible_distribution_major_version == "8" or ansible_distribution_major_version == "9"
-    - not offline_install
+  when: not offline_install
   block:
     # Enable and install the module if the profile is defined
     # https://dnf.readthedocs.io/en/latest/command_ref.html#module-switch-to-command-label
@@ -22,35 +20,3 @@
       register: nodejs_install_result
       with_items: "{{ platform_nodejs_package }}"
       when: "'/' not in platform_nodejs_package"
-
-- name: Install nodejs if RHEL7 (online)
-  when:
-    - ansible_distribution_major_version == "7"
-    - not offline_install
-  block:
-    - name: Create temp working dir
-      ansible.builtin.tempfile:
-        state: directory
-      register: workingdir
-
-    - name: Download NodeJS repo install script
-      ansible.builtin.get_url:
-        url: "{{ platform_nodejs_url }}"
-        dest: "{{ workingdir.path }}/{{ platform_nodejs_url | basename }}"
-        mode: "0755"
-
-    # This will install the appropriate yum repo for nodejs
-    - name: Install appropriate nodejs yum repo
-      ansible.builtin.command: "{{ workingdir.path }}/{{ platform_nodejs_url | basename }}"
-      changed_when: true
-
-    # This will perform the actual install of nodejs
-    - name: Yum install nodejs
-      ansible.builtin.dnf:
-        name: nodejs
-        state: present
-
-    - name: Remove workingdir
-      ansible.builtin.file:
-        path: "{{ workingdir.path }}"
-        state: absent

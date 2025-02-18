@@ -4,7 +4,7 @@
 - name: Put the HTTPS key file in the correct location
   ansible.builtin.copy:
     remote_src: true
-    src: "{{ platform_install_dir }}/current/keys/key.pem"
+    src: "{{ platform_install_dir }}/keys/key.pem"
     dest: "{{ platform_install_dir }}/keys/itential.key"
     mode: "0400"
     owner: "{{ platform_user }}"
@@ -13,7 +13,7 @@
 - name: Put the HTTPS cert file in the correct location
   ansible.builtin.copy:
     remote_src: true
-    src: "{{ platform_install_dir }}/current/keys/cert.pem"
+    src: "{{ platform_install_dir }}/keys/cert.pem"
     dest: "{{ platform_install_dir }}/keys/itential.cert"
     mode: "0400"
     owner: "{{ platform_user }}"
@@ -27,5 +27,5 @@
     group: "{{ platform_group }}"
     owner: "{{ platform_user }}"
   when:
-    - mongodb_tls | bool
+    - mongodb_tls_enabled | bool
     - platform_mongodb_root_ca_file_source is defined

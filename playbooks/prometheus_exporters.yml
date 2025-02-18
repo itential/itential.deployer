@@ -97,7 +97,7 @@
             path: /etc/systemd/system/mongodb_exporter.service
             insertafter: '^\[Service\]'
             line: 'Environment="MONGODB_USER=admin"'
-          when: mongodb_auth | bool
+          when: mongodb_auth_enabled | bool
           notify: Restart mongodb_exporter
 
         - name: Add the MongoDB password to the systemd service file
@@ -105,7 +105,7 @@
             path: /etc/systemd/system/mongodb_exporter.service
             insertafter: 'Environment="MONGODB_USER=admin"'
             line: 'Environment="MONGODB_PASSWORD={{ mongo_user_admin_password }}"'
-          when: mongodb_auth | bool
+          when: mongodb_auth_enabled | bool
           notify: Restart mongodb_exporter
 
         - name: Gather service facts

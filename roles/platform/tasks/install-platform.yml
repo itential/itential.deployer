@@ -1,57 +1,58 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Download archive files local
+- name: Create temporary download directory
+  ansible.builtin.tempfile:
+    state: directory
+  register: downloaddir
+
+- name: Upload artifacts from control node
   ansible.builtin.include_tasks:
     file: upload-platform-archive-from-local.yml
-  when: platform_bin_file is defined or platform_tar_file is defined
+  loop: "{{ platform_packages }}"
+  loop_control:
+    loop_var: artifact
+  when:
+    - "'http' not in artifact"
+    - artifact.endswith('.rpm')
 
-- name: Download archive files repository
+- name: Download artifacts from repository
   ansible.builtin.include_tasks:
     file: download-platform-archive-from-repo.yml
-  when: platform_archive_download_url is defined
+  loop: "{{ platform_packages }}"
+  loop_control:
+    loop_var: artifact
+  when:
+    - "'http' in artifact"
+    - artifact.endswith('.rpm')
 
-# Extract bin file contents
-# -e Extract tar archive and exit
-# -y Assume defaults for all prompts & run non-interactively
-# -d Installation directory, where to extract the files
-# We are no longer going to depend on the shell code that is contained within
-# the bin file. Just extract the tar from the bin and perform the rest of the
-# upgrade with this role for transparency. If the extracted directory already
-# exists then do nothing (creates).
-- name: Extract the bin file contents
-  ansible.builtin.command:
-    cmd: "{{ platform_install_dir }}/{{ platform_bin_file }} -ey -d {{ platform_install_dir }}"
-    chdir: "{{ platform_install_dir }}"
-    creates: "{{ platform_install_dir }}/{{ platform_package_name }}"
-  when: platform_bin_file is defined
+- name: Find downloaded artifacts
+  ansible.builtin.find:
+    paths: "{{ downloaddir.path }}"
+    patterns: "*.rpm"
+  register: downloaded_platform_packages
 
-- name: Extract the tar file contents
-  ansible.builtin.unarchive:
-    src: "{{ platform_install_dir }}/{{ platform_tar_file }}"
-    dest: "{{ platform_install_dir }}"
-    remote_src: true
-  when: platform_tar_file is defined
+- name: Install the Itential Platform packages (local)
+  ansible.builtin.dnf:
+    name: "{{ downloaded_platform_packages.files | map(attribute='path') | join(',') }}"
+    disable_gpg_check: true
+    state: present
+  when: downloaded_platform_packages | length > 0
 
-- name: Create the "current" symlink
+# Placeholder - we don't support installing from a yum repo yet
+# - name: Install the Itential Platform packages (YUM repository)
+#   ansible.builtin.dnf:
+#     name: "{{ item.path }}"
+#     disable_gpg_check: true
+#     state: present
+#   loop: "{{ platform_packages }}"
+#   loop_control:
+#     loop_var: artifact
+#   when:
+#     - "'http' not in artifact"
+#     - not artifact.endswith('.rpm')
+
+- name: Remove temporary download directory
   ansible.builtin.file:
-    path: "{{ platform_install_dir }}/current"
-    src: "{{ platform_install_dir }}/{{ platform_package_name }}"
-    owner: "{{ platform_user }}"
-    group: "{{ platform_group }}"
-    state: link
-
-- name: Remove the source file
-  when: platform_remove_artifact | bool
-  block:
-    - name: Remove the bin file
-      ansible.builtin.file:
-        path: "{{ platform_install_dir }}/{{ platform_bin_file }}"
-        state: absent
-      when: platform_bin_file is defined
-
-    - name: Remove the tar file
-      ansible.builtin.file:
-        path: "{{ platform_install_dir }}/{{ platform_tar_file }}"
-        state: absent
-      when: platform_tar_file is defined
+    path: "{{ downloaddir.path }}"
+    state: absent

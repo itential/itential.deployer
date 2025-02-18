@@ -4,12 +4,12 @@
 - name: Validate src_dir is set
   ansible.builtin.fail:
     msg: "src_dir is not set"
-  when: not src_dir
+  when: not src_dir is defined
 
 - name: Validate dest_dir is set
   ansible.builtin.fail:
     msg: "dest_dir is not set"
-  when: not dest_dir
+  when: not dest_dir is defined
 
 - name: Find downloaded packages
   ansible.builtin.find:

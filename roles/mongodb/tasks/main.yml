@@ -1,11 +1,15 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-
 - name: Include tasks to validate variables
   ansible.builtin.include_tasks:
     file: validate-vars.yml
   tags: always
+
+- name: Install base OS packages
+  ansible.builtin.include_role:
+    name: os
+  tags: install_base_os_packages
 
 # Installs all the necessary components and dependencies for MongoDB.
 # This will start the server with the simplest config.
@@ -21,7 +25,7 @@
   ansible.builtin.import_tasks:
     file: configure-mongodb.yml
   tags: configure_mongodb
-  when: mongodb_auth | bool or mongodb_tls | bool or mongodb_replication | bool
+  when: mongodb_auth_enabled | bool or mongodb_tls_enabled | bool or mongodb_replication_enabled | bool
 
 - name: Determine MongoDB version
   ansible.builtin.shell:

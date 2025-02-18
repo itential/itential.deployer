@@ -55,7 +55,7 @@
         - name: Include tasks to configure Sentinel
           ansible.builtin.include_tasks:
             file: configure-sentinel.yml
-          when: redis_replication | bool
+          when: redis_replication_enabled | bool
 
 - name: Update Itential release file
   tags: update_release_file

@@ -8,28 +8,14 @@
       - python_pip_executable is defined
     msg: python_executable and python_pip_executable must be set
 
-- name: Check if /usr/local/bin/python3 already exists
-  ansible.builtin.stat:
-    path: /usr/local/bin/python3
-  register: python3_symlink
-  changed_when: false
-
 - name: Create python3 symlink to /usr/local/bin/python3
   ansible.builtin.file:
     state: link
     src: "{{ python_executable }}"
     path: /usr/local/bin/python3
-  when: not python3_symlink.stat.exists
-
-- name: Check if /usr/local/bin/pip3 already exists
-  ansible.builtin.stat:
-    path: /usr/local/bin/pip3
-  register: pip3_symlink
-  changed_when: false
 
 - name: Create pip3 symlink to /usr/local/bin/pip3
   ansible.builtin.file:
     state: link
     src: "{{ python_pip_executable }}"
     path: /usr/local/bin/pip3
-  when: not pip3_symlink.stat.exists

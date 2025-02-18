@@ -19,7 +19,7 @@
     tasks_from: download-rpms
   vars:
     download_method: yum_module
-    download_packages: "{{ vault_version }}"
+    download_packages: "{{ vault_packages }}"
     download_dir: "{{ rpms_download_dir_target_node }}"
 
 - name: Copy rpms to control node

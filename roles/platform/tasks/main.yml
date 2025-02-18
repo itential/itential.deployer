@@ -1,16 +1,12 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Validate vars
-  ansible.builtin.include_tasks:
-    file: validate-vars.yml
-
-- name: Determine release vars
+- name: Handle vars
   tags: always
   block:
-    - name: Determine release vars
+    - name: Validate vars
       ansible.builtin.include_tasks:
-        file: determine-release-vars.yml
+        file: validate-vars.yml
 
 - name: Gather the package facts
   ansible.builtin.package_facts:
@@ -20,9 +16,9 @@
   ansible.builtin.include_tasks:
     file: install-platform-packages.yml
 
-- name: Install MongoDB tools
-  ansible.builtin.include_tasks:
-    file: install-mongodb-tools.yml
+# - name: Install MongoDB tools
+#   ansible.builtin.include_tasks:
+#     file: install-mongodb-tools.yml
 
 - name: Install NodeJS
   ansible.builtin.include_tasks:
@@ -49,11 +45,8 @@
     mode: "0775"
   with_items:
     - "{{ platform_install_dir }}"
-    - "{{ platform_install_dir }}/keys"
-    - "{{ platform_install_dir }}/automation"
-    - "{{ platform_install_dir }}/automation/public"
+    - "{{ platform_config_dir }}"
     - "{{ platform_log_dir }}"
-    - "{{ platform_log_dir }}/automation"
 
 - name: Ensure secure mode for TemplateBuilder
   ansible.builtin.lineinfile:
@@ -71,8 +64,8 @@
 
 - name: Create systemd file
   ansible.builtin.template:
-    src: automation-platform.service.j2
-    dest: /usr/lib/systemd/system/automation-platform.service
+    src: itential-platform.service.j2
+    dest: /usr/lib/systemd/system/itential-platform.service
     owner: root
     group: root
     mode: "0644"
@@ -83,17 +76,6 @@
     - name: Create properties.json file
       ansible.builtin.include_tasks:
         file: create-properties-file.yml
-
-- name: Make the "custom" directories
-  ansible.builtin.file:
-    name: "{{ item }}"
-    state: directory
-    owner: "{{ platform_user }}"
-    group: "{{ platform_group }}"
-    mode: "0775"
-  with_items:
-    - "{{ platform_install_dir }}/current/custom/@itential"
-    - "{{ platform_install_dir }}/current/custom/@itentialopensource"
 
 - name: Copy certs
   ansible.builtin.include_tasks:
@@ -108,36 +90,39 @@
   block:
     - name: Configure SELinux
       ansible.builtin.include_tasks:
-        file: configure_selinux.yml
+        file: configure-selinux.yml
 
-- name: Set file ownership and permissions
-  ansible.builtin.include_tasks:
-    file: set-file-ownership.yml
+# - name: Set file ownership and permissions
+#   ansible.builtin.include_tasks:
+#     file: set-file-ownership.yml
 
 # This needs to run after set-file-ownership.yml so the permissions don't get over-written
 - name: Configure Vault
-  tags: platform_configure_vault
+  tags: configure_vault
   block:
     - name: Configure Vault
       ansible.builtin.include_tasks:
         file: configure-vault.yml
       when: platform_configure_vault | bool
 
-- name: Init MongoDB
-  tags: mongo_init
-  block:
-    - name: Initialize MongoDB with Itential Platform data
-      ansible.builtin.include_tasks:
-        file: mongo-init.yml
-      when: platform_bootstrap_configs | bool
+# - name: Init MongoDB
+#   tags: mongo_init
+#   block:
+#     - name: Initialize MongoDB with Itential Platform data
+#       ansible.builtin.include_tasks:
+#         file: mongo-init.yml
+#       when: platform_bootstrap_configs | bool
 
 - name: Enable and start Itential Platform
   ansible.builtin.systemd:
-    name: automation-platform
+    name: itential-platform
     enabled: true
     state: restarted
   tags: always
 
 - name: Update release file
-  ansible.builtin.include_tasks:
-    file: update-release-file.yml
+  tags: update_release_file
+  block:
+    - name: Update release file
+      ansible.builtin.include_tasks:
+        file: update-release-file.yml

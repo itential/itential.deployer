@@ -94,7 +94,7 @@ We recommend setting the `mongodb_exporter_global_conn_pool` variable to `true` 
 ```
 all:
     vars:
-        mongodb_replication: true
+        mongodb_replication_enabled: true
 
     children:
         mongodb:

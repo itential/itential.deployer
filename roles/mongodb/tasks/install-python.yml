@@ -9,7 +9,7 @@
         name: python
       vars:
         python_executable: "{{ mongodb_python_executable }}"
-        python_packages: "{{ mongodb_python_packages[ansible_distribution_major_version] }}"
+        python_packages: "{{ mongodb_python_packages }}"
 
     - name: Setup python virtual environment
       ansible.builtin.command:
@@ -23,5 +23,5 @@
         tasks_from: install-dependencies
       vars:
         python_venv: "{{ mongodb_python_venv }}"
-        python_base_dependencies: "{{ mongodb_python_base_dependencies[ansible_distribution_major_version] }}"
-        python_app_dependencies: "{{ mongodb_python_app_dependencies[ansible_distribution_major_version] }}"
+        python_base_dependencies: "{{ mongodb_python_base_dependencies }}"
+        python_app_dependencies: "{{ mongodb_python_app_dependencies }}"

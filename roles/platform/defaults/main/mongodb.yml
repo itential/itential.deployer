@@ -1,0 +1,48 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+# Instructs the MongoDB driver to use the configured username/password when connecting to MongoDB.
+platform_mongo_auth_enabled: false
+
+# The username to use when connecting to MongoDB.
+platform_mongo_user: itential
+
+# The password to use when connecting to MongoDB.
+platform_mongo_password: itential
+
+# The name of the database that the MongoDB user must authenticate against.
+platform_mongo_auth_db: admin
+
+# If true, the server will not check if it is connecting to a compatible MongoDB version.
+platform_mongo_bypass_version_check: false
+
+# The name of the MongoDB logical database to connect to.
+platform_mongo_db_name: itential
+
+# The MongoDB connection string. For a replica set this will include all members of the replica set.
+# For Mongo Atlas this will be the SRV connection format.
+platform_mongo_url: mongodb://localhost:27017
+
+# Instruct the MongoDB driver to use TLS protocols when connecting to the database.
+platform_mongo_tls_enabled: false
+
+# If true, disables the validation checks for TLS certificates on other servers in the cluster
+# and allows the use of invalid or self-signed certificates to connect.
+platform_mongo_tls_allow_invalid_certificates: false
+
+# The .pem file that contains the root certificate chain from the Certificate Authority.
+# Specify the file name of the .pem file using absolute paths.
+platform_mongo_tls_ca_file:
+
+# Deprecated in favor of the `mongo_tls_enabled` property.
+platform_mongo_ssl_enabled: false
+
+# Deprecated in favor of the `mongo_tls_allow_invalid_certificates` property.
+platform_mongo_ssl_accept_invalid_certs:
+
+# Deprecated in favor of the `mongo_tls_ca_file` property.
+platform_mongo_ssl_ca_file:
+
+# The maximum number of connections in a connection pool.
+# Each application/adapter has its own connection pool.
+platform_mongo_max_pool_size:
