@@ -8,7 +8,7 @@
 
 - name: Install Redis dependency packages
   ansible.builtin.dnf:
-    name: {{ redis_application_dependencies }} 
+    name: {{ redis_package_dependencies }} 
     state: present
     validate_certs: false
     update_cache: true
