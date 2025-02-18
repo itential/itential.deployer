@@ -25,3 +25,9 @@ mongodb_python_packages_default:
   "2023":
     - python3
     - python3-pip
+
+mongodb_application_dependencies:
+  - selinux-policy
+  - selinux-policy-targeted
+  - tuned
+  - audit

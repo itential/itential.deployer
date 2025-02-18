@@ -5,6 +5,8 @@ gateway_packages:
   - gcc-c++
   - make
   - sqlite-devel
+  - selinux-policy
+  - selinux-policy-targeted
 
 gateway_build_packages:
   - gcc-c++

@@ -3,11 +3,7 @@
 ---
 - name: Install Mongo dependency packages
   ansible.builtin.dnf:
-    name:
-      - selinux-policy
-      - selinux-policy-targeted
-      - tuned
-      - audit
+    name: {{ mongodb_application_dependencies }} 
     state: present
     validate_certs: false
     update_cache: true
