@@ -1,4 +1,4 @@
-module mongodb_cgroup_memory 1.0;
+module itential_mongodb_cgroup_memory 1.0;
 
 require {
     type cgroup_t;
