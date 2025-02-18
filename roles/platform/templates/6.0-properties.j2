@@ -368,8 +368,8 @@ vault_approle_path = {{ platform_vault_approle_path }}
 {% endif %}
 
 # The file path to a token file. The token is used for authentication to access Vault secrets.
-{% if platform_vault_token %}
-vault_token = {{ platform_vault_token }}
+{% if platform_vault_token_file %}
+vault_token = {{ platform_vault_token_file }}
 {% else %}
 # vault_token =
 {% endif %}
