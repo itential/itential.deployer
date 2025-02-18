@@ -1,7 +1,9 @@
 ##########
 # SERVER #
 ##########
-# The name of the profile document to load from the MongoDB where legacy configuration properties are stored. Not required for installations that are using environment variables or a properties file.
+# The name of the profile document to load from the MongoDB where legacy configuration
+# properties are stored. Not required for installations that are using environment
+# variables or a properties file.
 {% if platform_profile_id %}
 profile_id = {{ platform_profile_id }}
 {% else %}
@@ -15,14 +17,16 @@ service_directory = {{ platform_service_directory }}
 # service_directory =
 {% endif %}
 
-# An identifier for the server instance. This is used to uniquely identify the server in a multi-server environment. If not provided, the server will generate one on startup.
+# An identifier for the server instance. This is used to uniquely identify the server in a
+# multi-server environment. If not provided, the server will generate one on startup.
 {% if platform_server_id %}
 server_id = {{ platform_server_id }}
 {% else %}
 # server_id =
 {% endif %}
 
-# A whitelist of services (applications/adapters) to initialize on startup of the platform. If no value is given, all services will be initialized.
+# A whitelist of services (applications/adapters) to initialize on startup of the platform.
+# If no value is given, all services will be initialized.
 {% if platform_services %}
 services = {{ platform_services | join(',') }}
 {% else %}
@@ -187,7 +191,8 @@ mongo_db_name = {{ platform_mongo_db_name }}
 # mongo_db_name =
 {% endif %}
 
-# The MongoDB connection string. For a replica set this will include all members of the replica set. For Mongo Atlas this will be the SRV connection format.
+# The MongoDB connection string. For a replica set this will include all members of the
+# replica set. For Mongo Atlas this will be the SRV connection format.
 {% if platform_mongo_url %}
 mongo_url = {{ platform_mongo_url }}
 {% else %}
@@ -201,14 +206,16 @@ mongo_tls_enabled = {{ platform_mongo_tls_enabled | to_nice_json }}
 # mongo_tls_enabled =
 {% endif %}
 
-# If true, disables the validation checks for TLS certificates on other servers in the cluster and allows the use of invalid or self-signed certificates to connect.
+# If true, disables the validation checks for TLS certificates on other servers in the cluster
+# and allows the use of invalid or self-signed certificates to connect.
 {% if platform_mongo_tls_allow_invalid_certificates | string | length > 0 %}
 mongo_tls_allow_invalid_certificates = {{ platform_mongo_tls_allow_invalid_certificates | to_nice_json }}
 {% else %}
 # mongo_tls_allow_invalid_certificates =
 {% endif %}
 
-# The .pem file that contains the root certificate chain from the Certificate Authority. Specify the file name of the .pem file using absolute paths.
+# The .pem file that contains the root certificate chain from the Certificate Authority.
+# Specify the file name of the .pem file using absolute paths.
 {% if platform_mongo_tls_ca_file %}
 mongo_tls_ca_file = {{ platform_mongo_tls_ca_file }}
 {% else %}
@@ -236,7 +243,8 @@ mongo_ssl_ca_file = {{ platform_mongo_ssl_ca_file }}
 # mongo_ssl_ca_file =
 {% endif %}
 
-# The maximum number of connections in a connection pool. Each application/adapter has its own connection pool.
+# The maximum number of connections in a connection pool.
+# Each application/adapter has its own connection pool.
 {% if platform_mongo_max_pool_size %}
 mongo_max_pool_size = {{ platform_mongo_max_pool_size }}
 {% else %}
@@ -303,14 +311,17 @@ redis_sentinels = {{ platform_redis_sentinels | to_json }}
 # redis_sentinels =
 {% endif %}
 
-# The Redis primary name. This only has meaning when Redis is running with replication enabled. The sentinels will monitor this node and consider it down only when the sentinels agree. Note: The primary name should not include special characters other than: .-_ and no whitespaces.
+# The Redis primary name. This only has meaning when Redis is running with replication enabled.
+# The sentinels will monitor this node and consider it down only when the sentinels agree.
+# Note: The primary name should not include special characters other than: .-_ and no whitespaces.
 {% if platform_redis_name %}
 redis_name = {{ platform_redis_name }}
 {% else %}
 # redis_name =
 {% endif %}
 
-# Redis TLS configuration options for secure connections.  Refer to NodeJS TLS library for all supported options.
+# Redis TLS configuration options for secure connections.
+# Refer to NodeJS TLS library for all supported options.
 {% if platform_redis_tls_enabled %}
 redis_tls = {{ platform_redis_tls_enabled }}
 {% else %}
@@ -370,7 +381,8 @@ vault_secrets_endpoint = {{ platform_vault_secrets_endpoint }}
 # vault_secrets_endpoint =
 {% endif %}
 
-# If true, only reads secrets from Hashicorp Vault. Otherwise, the platform can write secrets to Vault for storage.
+# If true, only reads secrets from Hashicorp Vault. Otherwise, the platform can write secrets
+# to Vault for storage.
 {% if platform_vault_read_only | string | length > 0 %}
 vault_read_only = {{ platform_vault_read_only | to_nice_json }}
 {% else %}
@@ -381,14 +393,16 @@ vault_read_only = {{ platform_vault_read_only | to_nice_json }}
 ###################
 # WORKFLOW WORKER #
 ###################
-# If true, will start working tasks immediately after the server startup process is complete. If false, the task worker must be enabled manually via the UI/API.
+# If true, will start working tasks immediately after the server startup process is complete.
+# If false, the task worker must be enabled manually via the UI/API.
 {% if platform_task_worker_enabled | string | length > 0 %}
 task_worker_enabled = {{ platform_task_worker_enabled | to_nice_json }}
 {% else %}
 # task_worker_enabled =
 {% endif %}
 
-# If true, will allow jobs to be started after the server startup process is complete. If false, API calls to start Jobs will return an error until enabled manually via the UI/API.
+# If true, will allow jobs to be started after the server startup process is complete.
+# If false, API calls to start Jobs will return an error until enabled manually via the UI/API.
 {% if platform_job_worker_enabled | string | length > 0 %}
 job_worker_enabled = {{ platform_job_worker_enabled | to_nice_json }}
 {% else %}
@@ -477,7 +491,8 @@ auth_admin_groups = {{ platform_auth_admin_groups | to_json }}
 # auth_admin_groups =
 {% endif %}
 
-# Enables a AAA adapter to custom build the principal object for a user with a "buildPrincipal" method.
+# Enables a AAA adapter to custom build the principal object for a user with
+# a "buildPrincipal" method.
 {% if platform_auth_broker_principal_enabled | string | length > 0 %}
 auth_broker_principal_enabled = {{ platform_auth_broker_principal_enabled | to_nice_json }}
 {% else %}
@@ -783,7 +798,8 @@ device_broker_run_command_adapter_preference = {{ platform_device_broker_run_com
 # device_broker_run_command_adapter_preference =
 {% endif %}
 
-# If true, the platform will perform strict JSON Schema validation on messages into the brokers and coming back to the broker layer from adapters.
+# If true, the platform will perform strict JSON Schema validation on messages into the brokers
+# and coming back to the broker layer from adapters.
 {% if platform_broker_validation_enabled | string | length > 0 %}
 broker_validation_enabled = {{ platform_broker_validation_enabled | to_nice_json }}
 {% else %}
