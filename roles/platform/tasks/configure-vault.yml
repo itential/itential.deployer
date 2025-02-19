@@ -17,7 +17,7 @@
 
 - name: Create the token file
   ansible.builtin.copy:
-    dest: "{{ platform_vault_token_dir }}/token.txt"
+    dest: "{{ platform_vault_token_file }}"
     content: "{{ root_key.content | b64decode }}"
     owner: "{{ platform_user }}"
     group: "{{ platform_group }}"

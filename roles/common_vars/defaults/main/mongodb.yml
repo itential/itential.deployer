@@ -11,9 +11,9 @@ mongodb_localaaa_db_name: LocalAAA
 # Feature flags that can be overriden in the hosts file
 # Essentially, a default installation will not have replication, authorization,
 # or TLS settings applied.
-mongodb_replication: false
-mongodb_auth: false
-mongodb_tls: false
+mongodb_replication_enabled: false
+mongodb_auth_enabled: false
+mongodb_tls_enabled: false
 
 # Default mongo connection string. This can be overridden if a customer brings
 # their own mongo database.

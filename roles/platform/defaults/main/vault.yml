@@ -5,13 +5,13 @@
 platform_configure_vault: false
 
 # The directory to store the vault root key in
-platform_vault_token_dir: "{{ platform_install_dir }}/vault"
+platform_vault_token_dir: "{{ platform_install_dir }}/keys"
 
 # The URL to the Hashicorp Vault server.
-platform_vault_url:
+platform_vault_url: http://localhost:8200
 
 # The authorization method to connect to Hashicorp Vault. Either token or approle.
-platform_vault_auth_method:
+platform_vault_auth_method: token
 
 # Hashicorp Vault Role ID used for AppRole authentication.
 platform_vault_role_id:
@@ -23,10 +23,11 @@ platform_vault_secret_id:
 platform_vault_approle_path:
 
 # The file path to a token file. The token is used for authentication to access Vault secrets.
-platform_vault_token:
+platform_vault_token_file: "{{ platform_vault_token_dir }}/vault.token"
 
 # The endpoint for the Secrets Engine that is used.
-platform_vault_secrets_endpoint:
+platform_vault_secrets_endpoint: itential/data
 
-# If true, only reads secrets from Hashicorp Vault. Otherwise, the platform can write secrets to Vault for storage.
+# If true, only reads secrets from Hashicorp Vault. Otherwise, the platform can write secrets
+# to Vault for storage.
 platform_vault_read_only: true

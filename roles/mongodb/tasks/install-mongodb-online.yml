@@ -1,6 +1,11 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
+- name: Install Mongo dependency packages
+  ansible.builtin.dnf:
+    name: "{{ mongodb_package_dependencies }}"
+    state: present
+    update_cache: true
 
 # Install the mongodb repo if mongodb is not already installed
 - name: Install MongoDB repo
@@ -16,7 +21,7 @@
     - "'mongodb-org' not in ansible_facts.packages"
 
 # Install mongodb if mongodb is not already installed
-- name: Install MongoDB packages (online)
+- name: Install MongoDB packages
   ansible.builtin.dnf:
     name: "{{ mongodb_packages }}"
     state: present

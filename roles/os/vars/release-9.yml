@@ -2,25 +2,16 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
 os_packages:
-  - chrony
   - coreutils
   - openssl
-  - yum-utils
-  - dnf-plugins-core
-  - python3-dnf-plugins-core
 
 security_packages:
-  - audit
   - checkpolicy
-  - iptables
   - libselinux
   - libselinux-utils
   - policycoreutils
   - policycoreutils-python-utils
-  - selinux-policy
   - selinux-policy-mls
-  - selinux-policy-targeted
-  - setools-console
 
 operational_packages:
   - bind-utils
@@ -36,7 +27,6 @@ operational_packages:
   - tar
   - tcpdump
   - telnet
-  - tuned
   - unzip
   - wget
   - which

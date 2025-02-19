@@ -18,6 +18,8 @@ gateway_packages:
   - yaml-cpp
   - yaml-cpp-devel
   - zlib-devel
+  - selinux-policy
+  - selinux-policy-targeted
 
 python_version: 3.9
 python_executable: "/usr/local/bin/python{{ python_version }}"

@@ -25,7 +25,7 @@
         tasks_from: download-rpms
       vars:
         download_method: yum_module
-        download_packages: "{{ redis_packages }}"
+        download_packages: "{{ redis_packages + redis_package_dependencies }} "
         download_dir: "{{ rpms_download_dir_target_node }}"
 
 - name: Download source packages

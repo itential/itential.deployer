@@ -4,12 +4,16 @@
 - name: Validate and set installation variables
   tags: always
   block:
-    - name: Validate installation variables are defined
+    - name: Validate an installation variable is set
       ansible.builtin.assert:
         that: >
           (platform_release is defined) or
-          (mongodb_version is defined and mongodb_packages is defined and mongodb_python_packages is defined)
-        fail_msg: "Either platform_release or [mongodb_version,mongodb_packages,mongodb_python_packages] must be defined"
+          (mongodb_version is defined and
+           mongodb_packages is defined and
+           mongodb_python_packages is defined)
+        fail_msg: >-
+          platform_release must be defined OR
+          mongodb_version, mongodb_packages, and mongodb_python_packages must be defined
 
     - name: Validate installation variables when not using platform_release
       ansible.builtin.assert:
@@ -17,7 +21,9 @@
           - mongodb_version is defined
           - mongodb_packages is defined
           - mongodb_python_packages is defined
-        fail_msg: "Variables [mongodb_version,mongodb_packages,mongodb_python_packages] must be defined when platform_release is not defined"
+        fail_msg: >-
+          mongodb_version, mongodb_packages, and mongodb_python_packages
+          must be defined when platform_release is not defined
       when: platform_release is not defined
 
     - name: Set installation variables when using Itential Platform release defaults
@@ -33,7 +39,9 @@
         - name: Check for valid MongoDB release
           ansible.builtin.assert:
             that: mongodb_invalid_platform_release is not defined
-            fail_msg: "Deployer does not support installing MongoDB for Itential Platform release {{ platform_release }}"
+            fail_msg: >-
+              Deployer does not support installing MongoDB
+              for Itential Platform release {{ platform_release }}
 
         - name: Set mongodb_version to the default value when not defined in inventory
           ansible.builtin.set_fact:
@@ -55,5 +63,6 @@
         msg:
           - "MongoDB version: {{ mongodb_version }}"
           - "MongoDB packages: {{ mongodb_packages }}"
+          - "MongoDB dependency packages: {{ mongodb_package_dependencies }}"
           - "Python packages: {{ mongodb_python_packages }}"
       when: not offline_install

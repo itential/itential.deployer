@@ -4,6 +4,7 @@
 - name: Update release file with Itential Platform version
   ansible.builtin.lineinfile:
     path: "{{ itential_release_file }}"
+    regexp: "^PLATFORM="
     line: "PLATFORM={{ platform_release }}"
     mode: "0644"
     create: true
@@ -17,6 +18,7 @@
 - name: Update release file with Python version
   ansible.builtin.lineinfile:
     path: "{{ itential_release_file }}"
+    regexp: "^PYTHON="
     line: "PYTHON={{ python_installed_version.stdout }}"
     mode: "0644"
     create: true
@@ -30,6 +32,7 @@
 - name: Update release file with Pip version
   ansible.builtin.lineinfile:
     path: "{{ itential_release_file }}"
+    regexp: "^PIP="
     line: "PIP={{ pip_installed_version.stdout }}"
     mode: "0644"
     create: true
@@ -38,13 +41,14 @@
   ansible.builtin.shell:
     cmd: "set -o pipefail && {{ platform_pip_executable }} list --retries 1 --timeout 1 | grep -i jinja2 | awk '{print $2}'"
   become: true
-  become_user: itential
+  become_user: "{{ platform_user }}"
   register: jinja2_installed_version
   changed_when: false
 
 - name: Update release file with Jinja2 version
   ansible.builtin.lineinfile:
     path: "{{ itential_release_file }}"
+    regexp: "^JINJA2="
     line: "JINJA2={{ jinja2_installed_version.stdout }}"
     mode: "0644"
     create: true
@@ -53,13 +57,14 @@
   ansible.builtin.shell:
     cmd: "set -o pipefail && {{ platform_pip_executable }} list --retries 1 --timeout 1 | grep -i markupsafe | awk '{print $2}'"
   become: true
-  become_user: itential
+  become_user: "{{ platform_user }}"
   register: markupsafe_installed_version
   changed_when: false
 
 - name: Update release file with MarkupSafe version
   ansible.builtin.lineinfile:
     path: "{{ itential_release_file }}"
+    regexp: "^MARKUPSAFE="
     line: "MARKUPSAFE={{ markupsafe_installed_version.stdout }}"
     mode: "0644"
     create: true
@@ -68,13 +73,14 @@
   ansible.builtin.shell:
     cmd: "set -o pipefail && {{ platform_pip_executable }} list --retries 1 --timeout 1 | grep -i textfsm | awk '{print $2}'"
   become: true
-  become_user: itential
+  become_user: "{{ platform_user }}"
   register: textfsm_installed_version
   changed_when: false
 
 - name: Update release file with TextFMS version
   ansible.builtin.lineinfile:
     path: "{{ itential_release_file }}"
+    regexp: "^TEXTFSM="
     line: "TEXTFSM={{ textfsm_installed_version.stdout }}"
     mode: "0644"
     create: true
@@ -88,6 +94,7 @@
 - name: Update release file with NodeJS version
   ansible.builtin.lineinfile:
     path: "{{ itential_release_file }}"
+    regexp: "^NODEJS="
     line: "NODEJS={{ nodejs_installed_version.stdout }}"
     mode: "0644"
     create: true

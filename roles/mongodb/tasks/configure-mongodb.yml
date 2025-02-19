@@ -8,16 +8,16 @@
 - name: Configure MongoDB replica set
   ansible.builtin.include_tasks:
     file: configure-mongodb-replicaset.yml
-  when: mongodb_replication | bool
+  when: mongodb_replication_enabled | bool
 
 # Configure auth
 - name: Configure MongoDB Auth
   ansible.builtin.include_tasks:
     file: configure-mongodb-auth.yml
-  when: mongodb_auth | bool
+  when: mongodb_auth_enabled | bool
 
 # Configure TLS
 - name: Configure MongoDB TLS
   ansible.builtin.include_tasks:
     file: configure-mongodb-tls.yml
-  when: mongodb_tls | bool
+  when: mongodb_tls_enabled | bool

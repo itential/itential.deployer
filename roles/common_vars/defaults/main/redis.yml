@@ -3,9 +3,9 @@
 ---
 # Feature flags that can be overriden in the hosts file
 # Essentially, a default installation will not have auth, replication or tls
-redis_auth: false
-redis_replication: false
-redis_tls: false
+redis_auth_enabled: false
+redis_replication_enabled: false
+redis_tls_enabled: false
 
 # Default redis user passwords
 # These are meant to be changed by the customer. By default they are meant to
