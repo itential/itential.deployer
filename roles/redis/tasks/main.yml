@@ -6,13 +6,6 @@
     file: validate-vars.yml
   tags: always
 
-- name: Install Redis dependency packages
-  ansible.builtin.dnf:
-    name: {{ redis_package_dependencies }} 
-    state: present
-    validate_certs: false
-    update_cache: true
-
 - name: Install and configure Redis
   notify:
     - Enable and Start Redis
