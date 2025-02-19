@@ -3,9 +3,8 @@
 ---
 - name: Install Mongo dependency packages
   ansible.builtin.dnf:
-    name: {{ mongodb_package_dependencies }} 
+    name: "{{ mongodb_package_dependencies }}"
     state: present
-    validate_certs: false
     update_cache: true
 
 # Install the mongodb repo if mongodb is not already installed
@@ -22,7 +21,7 @@
     - "'mongodb-org' not in ansible_facts.packages"
 
 # Install mongodb if mongodb is not already installed
-- name: Install MongoDB packages (online)
+- name: Install MongoDB packages
   ansible.builtin.dnf:
     name: "{{ mongodb_packages }}"
     state: present

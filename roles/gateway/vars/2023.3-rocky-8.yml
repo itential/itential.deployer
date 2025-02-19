@@ -48,4 +48,3 @@ iag_ansible_version: ansible==8.7.0
 gateway_application_dependencies:
   - selinux-policy
   - selinux-policy-targeted
-  

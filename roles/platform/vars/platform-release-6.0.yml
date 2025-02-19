@@ -1,23 +1,6 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-platform_package_dependencies_default:
-  "8":
-    - glibc-common
-    - openldap
-    - openldap-clients
-    - openssl
-  "9":
-    - glibc-common
-    - openldap
-    - openldap-clients
-    - openssl
-  "2023":
-    - glibc-common
-    - openldap
-    - openldap-clients
-    - openssl
-
 platform_nodejs_package_default:
   "8": "@nodejs:20"
   "9": "@nodejs:20"
@@ -38,20 +21,6 @@ platform_python_packages_default:
   "2023":
     - python3.11
     - python3.11-pip
-
-platform_python_base_dependencies_default:
-  "8":
-    - pip
-    - setuptools
-    - wheel
-  "9":
-    - pip
-    - setuptools
-    - wheel
-  "2023":
-    - pip
-    - setuptools
-    - wheel
 
 platform_python_app_dependencies_default:
   "8":
