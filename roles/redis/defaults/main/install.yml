@@ -1,6 +1,10 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
+redis_package_dependencies:
+  - selinux-policy
+  - selinux-policy-targeted
+
 # Redis install from source - boolean
 # When set to 'true' Redis will be installed from source.  Otherwise Redis will be installed from YUM.
 redis_install_from_source: true
