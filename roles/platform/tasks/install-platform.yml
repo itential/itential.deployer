@@ -5,6 +5,7 @@
   ansible.builtin.tempfile:
     state: directory
   register: downloaddir
+  changed_when: false
 
 - name: Upload artifacts from control node
   ansible.builtin.include_tasks:
@@ -31,6 +32,7 @@
     paths: "{{ downloaddir.path }}"
     patterns: "*.rpm"
   register: downloaded_platform_packages
+  changed_when: false
 
 - name: Install the Itential Platform packages (local)
   ansible.builtin.dnf:
@@ -56,3 +58,4 @@
   ansible.builtin.file:
     path: "{{ downloaddir.path }}"
     state: absent
+  changed_when: false

@@ -1,124 +1,115 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Handle vars
+- name: Validate vars
+  ansible.builtin.include_tasks:
+    file: validate-vars.yml
   tags: always
+
+- name: Install and configure Redis
+  notify: Enable and Start Platform
   block:
-    - name: Validate vars
-      ansible.builtin.include_tasks:
-        file: validate-vars.yml
+    # - name: Gather the package facts
+    #   ansible.builtin.package_facts:
+    #     manager: auto
+    #   tags: always
 
-- name: Gather the package facts
-  ansible.builtin.package_facts:
-    manager: auto
+    - name: Install Dependencies
+      tags: install_dependencies
+      block:
+        - name: Install Platform package dependencies
+          ansible.builtin.include_tasks:
+            file: install-platform-packages.yml
 
-- name: Install Platform packages
-  ansible.builtin.include_tasks:
-    file: install-platform-packages.yml
+        # - name: Install MongoDB tools
+        #   ansible.builtin.include_tasks:
+        #     file: install-mongodb-tools.yml
 
-# - name: Install MongoDB tools
-#   ansible.builtin.include_tasks:
-#     file: install-mongodb-tools.yml
+        - name: Install NodeJS
+          ansible.builtin.include_tasks:
+            file: install-nodejs.yml
 
-- name: Install NodeJS
-  ansible.builtin.include_tasks:
-    file: install-nodejs.yml
-  tags: install_nodejs
+        - name: Install Python
+          ansible.builtin.include_tasks:
+            file: install-python.yml
 
-- name: Install Python
-  tags: install_python
-  block:
-    - name: Install Python
-      ansible.builtin.include_tasks:
-        file: install-python.yml
+    - name: Configure System
+      tags: configure_system
+      block:
+        - name: Create itential user
+          ansible.builtin.include_tasks:
+            file: create-itential-user.yml
 
-- name: Create itential user
-  ansible.builtin.include_tasks:
-    file: create-itential-user.yml
+        - name: Create itential directories
+          ansible.builtin.file:
+            name: "{{ item }}"
+            state: directory
+            owner: "{{ platform_user }}"
+            group: "{{ platform_group }}"
+            mode: "0775"
+          with_items:
+            - "{{ platform_install_dir }}"
+            - "{{ platform_config_dir }}"
+            - "{{ platform_log_dir }}"
 
-- name: Create itential directories
-  ansible.builtin.file:
-    name: "{{ item }}"
-    state: directory
-    owner: "{{ platform_user }}"
-    group: "{{ platform_group }}"
-    mode: "0775"
-  with_items:
-    - "{{ platform_install_dir }}"
-    - "{{ platform_config_dir }}"
-    - "{{ platform_log_dir }}"
+        - name: Ensure secure mode for TemplateBuilder
+          ansible.builtin.lineinfile:
+            path: /etc/sudoers
+            insertafter: EOF
+            state: present
+            line: "{{ platform_user }} ALL=(ALL) NOPASSWD: /usr/sbin/chroot, /sbin/chroot"
 
-- name: Ensure secure mode for TemplateBuilder
-  ansible.builtin.lineinfile:
-    path: /etc/sudoers
-    insertafter: EOF
-    state: present
-    line: "{{ platform_user }} ALL=(ALL) NOPASSWD: /usr/sbin/chroot, /sbin/chroot"
+        - name: Copy certs
+          ansible.builtin.include_tasks:
+            file: copy-certs.yml
 
-- name: Install Platform
-  tags: install_platform
-  block:
+        - name: Configure firewalld
+          ansible.builtin.include_tasks:
+            file: configure-firewalld.yml
+
+        - name: Configure SELinux
+          ansible.builtin.include_tasks:
+            file: configure-selinux.yml
+
     - name: Install Platform
-      ansible.builtin.include_tasks:
-        file: install-platform.yml
+      tags: install_platform
+      block:
+        - name: Install Platform
+          ansible.builtin.include_tasks:
+            file: install-platform.yml
 
-- name: Create systemd file
-  ansible.builtin.template:
-    src: itential-platform.service.j2
-    dest: /usr/lib/systemd/system/itential-platform.service
-    owner: root
-    group: root
-    mode: "0644"
+    - name: Configure Platform
+      tags: configure_platform
+      block:
+        - name: Create systemd file
+          ansible.builtin.template:
+            src: itential-platform.service.j2
+            dest: /usr/lib/systemd/system/itential-platform.service
+            owner: root
+            group: root
+            mode: "0644"
 
-- name: Configure properties.json file
-  tags: configure_properties
-  block:
-    - name: Create properties.json file
-      ansible.builtin.include_tasks:
-        file: create-properties-file.yml
+        - name: Create properties.json file
+          ansible.builtin.include_tasks:
+            file: create-properties-file.yml
 
-- name: Copy certs
-  ansible.builtin.include_tasks:
-    file: copy-certs.yml
+        # - name: Set file ownership and permissions
+        #   ansible.builtin.include_tasks:
+        #     file: set-file-ownership.yml
 
-- name: Configure firewalld
-  ansible.builtin.include_tasks:
-    file: configure-firewalld.yml
+        # This needs to run after set-file-ownership.yml so the permissions don't get over-written
+        - name: Configure Vault
+          ansible.builtin.include_tasks:
+            file: configure-vault.yml
+          when: platform_configure_vault | bool
 
-- name: Configure SELinux
-  tags: configure_selinux
-  block:
-    - name: Configure SELinux
-      ansible.builtin.include_tasks:
-        file: configure-selinux.yml
-
-# - name: Set file ownership and permissions
-#   ansible.builtin.include_tasks:
-#     file: set-file-ownership.yml
-
-# This needs to run after set-file-ownership.yml so the permissions don't get over-written
-- name: Configure Vault
-  tags: configure_vault
-  block:
-    - name: Configure Vault
-      ansible.builtin.include_tasks:
-        file: configure-vault.yml
-      when: platform_configure_vault | bool
-
-# - name: Init MongoDB
-#   tags: mongo_init
-#   block:
-#     - name: Initialize MongoDB with Itential Platform data
-#       ansible.builtin.include_tasks:
-#         file: mongo-init.yml
-#       when: platform_bootstrap_configs | bool
-
-- name: Enable and start Itential Platform
-  ansible.builtin.systemd:
-    name: itential-platform
-    enabled: true
-    state: restarted
-  tags: always
+  # - name: Bootstrap Database
+  #   tags: bootstrap
+  #   block:
+  #     - name: Initialize MongoDB with Itential Platform data
+  #       ansible.builtin.include_tasks:
+  #         file: mongo-init.yml
+  #       when: platform_bootstrap_configs | bool
 
 - name: Update release file
   tags: update_release_file
