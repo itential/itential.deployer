@@ -13,6 +13,7 @@
   block:
     - name: Install Redis
       tags: install_redis
+      notify: Update Itential release file
       block:
         - name: Include common installation tasks
           ansible.builtin.include_tasks:
@@ -36,6 +37,11 @@
             file: install-offline.yml
           when: offline_install
 
+        - name: Include tasks to configure SELinux
+          ansible.builtin.include_tasks:
+            file: configure-selinux.yml
+          when: ansible_selinux.status == "enabled"
+
     - name: Configure Redis/Sentinel
       tags: configure_redis
       block:
@@ -47,23 +53,3 @@
           ansible.builtin.include_tasks:
             file: configure-sentinel.yml
           when: redis_replication_enabled | bool
-
-- name: Update Itential release file
-  tags: update_release_file
-  block:
-    - name: Determine redis version
-      ansible.builtin.shell:
-        cmd: 'set -o pipefail && redis-server --version | cut -d" " -f3 | cut -d"=" -f2'
-      register: result
-      check_mode: false
-      changed_when: false
-      failed_when: result.rc != 0
-      environment:
-        PATH: "{{ ansible_env.PATH }}:{{ redis_bin_dir }}"
-
-    - name: Write redis release information
-      ansible.builtin.lineinfile:
-        path: "{{ itential_release_file }}"
-        line: "REDIS={{ result.stdout }}"
-        create: true
-        mode: "0644"

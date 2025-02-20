@@ -9,30 +9,6 @@
 - name: Install and configure Redis
   notify: Enable and Start Platform
   block:
-    # - name: Gather the package facts
-    #   ansible.builtin.package_facts:
-    #     manager: auto
-    #   tags: always
-
-    - name: Install Dependencies
-      tags: install_dependencies
-      block:
-        - name: Install Platform package dependencies
-          ansible.builtin.include_tasks:
-            file: install-platform-packages.yml
-
-        # - name: Install MongoDB tools
-        #   ansible.builtin.include_tasks:
-        #     file: install-mongodb-tools.yml
-
-        - name: Install NodeJS
-          ansible.builtin.include_tasks:
-            file: install-nodejs.yml
-
-        - name: Install Python
-          ansible.builtin.include_tasks:
-            file: install-python.yml
-
     - name: Configure System
       tags: configure_system
       block:
@@ -59,24 +35,41 @@
             state: present
             line: "{{ platform_user }} ALL=(ALL) NOPASSWD: /usr/sbin/chroot, /sbin/chroot"
 
-        - name: Copy certs
-          ansible.builtin.include_tasks:
-            file: copy-certs.yml
-
         - name: Configure firewalld
           ansible.builtin.include_tasks:
             file: configure-firewalld.yml
 
-        - name: Configure SELinux
+    - name: Install Dependencies
+      tags: install_dependencies
+      notify: Update Itential release file
+      block:
+        - name: Install Platform package dependencies
           ansible.builtin.include_tasks:
-            file: configure-selinux.yml
+            file: install-platform-packages.yml
+
+        # - name: Install MongoDB tools
+        #   ansible.builtin.include_tasks:
+        #     file: install-mongodb-tools.yml
+
+        - name: Install NodeJS
+          ansible.builtin.include_tasks:
+            file: install-nodejs.yml
+
+        - name: Install Python
+          ansible.builtin.include_tasks:
+            file: install-python.yml
 
     - name: Install Platform
       tags: install_platform
+      notify: Update Itential release file
       block:
         - name: Install Platform
           ansible.builtin.include_tasks:
             file: install-platform.yml
+
+    - name: Configure SELinux
+      ansible.builtin.include_tasks:
+        file: configure-selinux.yml
 
     - name: Configure Platform
       tags: configure_platform
@@ -103,6 +96,10 @@
             file: configure-vault.yml
           when: platform_configure_vault | bool
 
+        # - name: Copy certs
+        #   ansible.builtin.include_tasks:
+        #     file: copy-certs.yml
+
   # - name: Bootstrap Database
   #   tags: bootstrap
   #   block:
@@ -110,10 +107,3 @@
   #       ansible.builtin.include_tasks:
   #         file: mongo-init.yml
   #       when: platform_bootstrap_configs | bool
-
-- name: Update release file
-  tags: update_release_file
-  block:
-    - name: Update release file
-      ansible.builtin.include_tasks:
-        file: update-release-file.yml
