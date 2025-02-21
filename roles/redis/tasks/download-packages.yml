@@ -4,6 +4,7 @@
 - name: Include tasks to validate variables
   ansible.builtin.include_tasks:
     file: validate-vars.yml
+  tags: always
 
 - name: Include tasks to validate offline variables
   ansible.builtin.include_tasks:

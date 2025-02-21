@@ -39,8 +39,8 @@
         - name: Install base Python dependencies using pip executable (online)
           ansible.builtin.pip:
             name: "{{ python_base_dependencies }}"
-            # state: latest
             executable: "{{ python_pip_executable }}"
+            umask: "0022"
           when:
             - python_base_dependencies is defined
             - python_base_dependencies | length > 0

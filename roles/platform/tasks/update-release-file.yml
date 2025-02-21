@@ -9,6 +9,23 @@
     mode: "0644"
     create: true
 
+- name: Gather the package facts
+  ansible.builtin.package_facts:
+    manager: auto
+
+- name: Capture Platform packages
+  ansible.builtin.set_fact:
+    filtered_package_names: "{{ ansible_facts.packages | list
+      | select('match', '^itential.*') | list }}"
+
+- name: Update release file with Itential packages
+  ansible.builtin.lineinfile:
+    path: "{{ itential_release_file }}"
+    regexp: "^PLATFORM_PACKAGES="
+    line: "PLATFORM_PACKAGES={{ filtered_package_names }}"
+    mode: "0644"
+    create: true
+
 - name: Capture Python version
   ansible.builtin.command:
     cmd: "{{ platform_python_executable }} -V"
@@ -39,7 +56,8 @@
 
 - name: Capture Jinja2 version
   ansible.builtin.shell:
-    cmd: "set -o pipefail && {{ platform_pip_executable }} list --retries 1 --timeout 1 | grep -i jinja2 | awk '{print $2}'"
+    cmd: "set -o pipefail && {{ platform_pip_executable }} list --retries 1 --timeout 1
+      | grep -i jinja2 | awk '{print $2}'"
   become: true
   become_user: "{{ platform_user }}"
   register: jinja2_installed_version
@@ -55,7 +73,8 @@
 
 - name: Capture MarkupSafe version
   ansible.builtin.shell:
-    cmd: "set -o pipefail && {{ platform_pip_executable }} list --retries 1 --timeout 1 | grep -i markupsafe | awk '{print $2}'"
+    cmd: "set -o pipefail && {{ platform_pip_executable }} list --retries 1 --timeout 1
+      | grep -i markupsafe | awk '{print $2}'"
   become: true
   become_user: "{{ platform_user }}"
   register: markupsafe_installed_version
@@ -71,7 +90,8 @@
 
 - name: Capture TextFSM version
   ansible.builtin.shell:
-    cmd: "set -o pipefail && {{ platform_pip_executable }} list --retries 1 --timeout 1 | grep -i textfsm | awk '{print $2}'"
+    cmd: "set -o pipefail && {{ platform_pip_executable }} list --retries 1 --timeout 1
+      | grep -i textfsm | awk '{print $2}'"
   become: true
   become_user: "{{ platform_user }}"
   register: textfsm_installed_version

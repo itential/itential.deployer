@@ -7,6 +7,7 @@
     dest: "{{ downloaddir.path }}/{{ artifact }}"
     rsync_opts: "--copy-links"
   when: platform_upload_using_rsync
+  changed_when: false
 
 - name: Upload the Itential Platform artifact file using copy
   ansible.builtin.copy:
@@ -17,3 +18,4 @@
     mode: "0775"
     force: false
   when: not platform_upload_using_rsync
+  changed_when: false

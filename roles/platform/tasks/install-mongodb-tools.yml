@@ -1,10 +1,12 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
+
+# TODO:  Can this file be removed?
+
 # Install the mongodb repo if mongodb is not already installed. The platform role
 # will need mongo cmd line tools to import some initial data. It does not install
 # the database, just the cmd line tools and the mongo shell.
-
 - name: Install MongoDB tools
   when:
     - platform_bootstrap_configs | bool
