@@ -6,8 +6,7 @@
     file: validate-vars.yml
   tags: always
 
-# Install the new Itential Platform version. Note that the "current" symlink will be
-# pointing to the new release after the installation.
+# Install the new Itential Platform packages.
 - name: Install Platform
   ansible.builtin.include_tasks:
     file: install-platform.yml

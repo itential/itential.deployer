@@ -9,13 +9,15 @@
 - name: Install and configure Redis
   notify: Enable and Start Platform
   block:
-    - name: Configure System
-      tags: configure_system
+    - name: Configure OS
+      tags: configure_os
       block:
+        # TODO: Remove once the Itential RPM is creating the directories correctly
         - name: Create itential user
           ansible.builtin.include_tasks:
             file: create-itential-user.yml
 
+        # TODO: Remove once the Itential RPM is creating the directories correctly
         - name: Create itential directories
           ansible.builtin.file:
             name: "{{ item }}"
@@ -47,10 +49,6 @@
           ansible.builtin.include_tasks:
             file: install-platform-packages.yml
 
-        # - name: Install MongoDB tools
-        #   ansible.builtin.include_tasks:
-        #     file: install-mongodb-tools.yml
-
         - name: Install NodeJS
           ansible.builtin.include_tasks:
             file: install-nodejs.yml
@@ -68,8 +66,27 @@
             file: install-platform.yml
 
     - name: Configure SELinux
-      ansible.builtin.include_tasks:
-        file: configure-selinux.yml
+      tags: configure_selinux
+      block:
+        - name: Configure SELinux
+          ansible.builtin.include_tasks:
+            file: configure-selinux.yml
+
+    - name: Configure Vault
+      when: platform_configure_vault | bool
+      tags: configure_vault
+      block:
+        - name: Configure Vault
+          ansible.builtin.include_tasks:
+            file: configure-vault.yml
+
+    # TODO: Re-work the copy certs tasks
+    # - name: Copy certs
+    #   tags: copy_certs
+    #   block:
+    #     - name: Copy certs
+    #       ansible.builtin.include_tasks:
+    #         file: copy-certs.yml
 
     - name: Configure Platform
       tags: configure_platform
@@ -85,25 +102,3 @@
         - name: Create properties.json file
           ansible.builtin.include_tasks:
             file: create-properties-file.yml
-
-        # - name: Set file ownership and permissions
-        #   ansible.builtin.include_tasks:
-        #     file: set-file-ownership.yml
-
-        # This needs to run after set-file-ownership.yml so the permissions don't get over-written
-        - name: Configure Vault
-          ansible.builtin.include_tasks:
-            file: configure-vault.yml
-          when: platform_configure_vault | bool
-
-        # - name: Copy certs
-        #   ansible.builtin.include_tasks:
-        #     file: copy-certs.yml
-
-  # - name: Bootstrap Database
-  #   tags: bootstrap
-  #   block:
-  #     - name: Initialize MongoDB with Itential Platform data
-  #       ansible.builtin.include_tasks:
-  #         file: mongo-init.yml
-  #       when: platform_bootstrap_configs | bool
