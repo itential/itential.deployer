@@ -304,6 +304,20 @@ redis_port = {{ platform_redis_port }}
 # redis_port =
 {% endif %}
 
+# The username to use when authenticating with a Redis Sentinel cluster
+{% if platform_redis_sentinel_user %}
+redis_sentinel_username = {{ platform_redis_sentinel_user }}
+{% else %}
+# redis_sentinel_username =
+{% endif %}
+
+# The password to use when authenticating with a Redis Sentinel cluster
+{% if platform_redis_sentinel_password %}
+redis_sentinel_password = {{ platform_redis_sentinel_password }}
+{% else %}
+# redis_sentinel_password =
+{% endif %}
+
 # The list of Redis Sentinel servers (hostnames and ports) to use for high availability.
 {% if platform_redis_sentinels %}
 redis_sentinels = {{ platform_redis_sentinels | to_json }}
@@ -333,49 +347,49 @@ redis_tls = {{ platform_redis_tls_enabled }}
 # HASHICORP VAULT CONNECTION #
 ##############################
 # The URL to the Hashicorp Vault server.
-{% if platform_vault_url %}
+{% if platform_configure_vault | bool and platform_vault_url %}
 vault_url = {{ platform_vault_url }}
 {% else %}
 # vault_url =
 {% endif %}
 
 # The authorization method to connect to Hashicorp Vault. Either token or approle.
-{% if platform_vault_auth_method %}
+{% if platform_configure_vault | bool and platform_vault_auth_method %}
 vault_auth_method = {{ platform_vault_auth_method }}
 {% else %}
 # vault_auth_method =
 {% endif %}
 
 # Hashicorp Vault Role ID used for AppRole authentication.
-{% if platform_vault_role_id %}
+{% if platform_configure_vault and platform_vault_role_id %}
 vault_role_id = {{ platform_vault_role_id }}
 {% else %}
 # vault_role_id =
 {% endif %}
 
 # Hashicorp Vault Secret ID used for AppRole login.
-{% if platform_vault_secret_id %}
+{% if platform_configure_vault and platform_vault_secret_id %}
 vault_secret_id = {{ platform_vault_secret_id }}
 {% else %}
 # vault_secret_id =
 {% endif %}
 
 # The path where the AppRole was enabled.
-{% if platform_vault_approle_path %}
+{% if platform_configure_vault and platform_vault_approle_path %}
 vault_approle_path = {{ platform_vault_approle_path }}
 {% else %}
 # vault_approle_path =
 {% endif %}
 
 # The file path to a token file. The token is used for authentication to access Vault secrets.
-{% if platform_vault_token_file %}
+{% if platform_configure_vault and platform_vault_token_file %}
 vault_token = {{ platform_vault_token_file }}
 {% else %}
 # vault_token =
 {% endif %}
 
 # The endpoint for the Secrets Engine that is used.
-{% if platform_vault_secrets_endpoint %}
+{% if platform_configure_vault and platform_vault_secrets_endpoint %}
 vault_secrets_endpoint = {{ platform_vault_secrets_endpoint }}
 {% else %}
 # vault_secrets_endpoint =
@@ -383,7 +397,7 @@ vault_secrets_endpoint = {{ platform_vault_secrets_endpoint }}
 
 # If true, only reads secrets from Hashicorp Vault. Otherwise, the platform can write secrets
 # to Vault for storage.
-{% if platform_vault_read_only | string | length > 0 %}
+{% if platform_configure_vault and (platform_vault_read_only | string | length > 0) %}
 vault_read_only = {{ platform_vault_read_only | to_nice_json }}
 {% else %}
 # vault_read_only =
