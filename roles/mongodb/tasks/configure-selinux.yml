@@ -3,10 +3,14 @@
 ---
 - name: Configure SELinux
   tags: configure_selinux
+  when: ansible_selinux.status == "enabled"
   block:
     - name: Install custom SELinux profiles
       ansible.builtin.include_role:
         name: selinux
+      when: >
+        (mongodb_data_dir != "/var/lib/mongo") or
+        (mongodb_log_dir != "/var/log/mongodb")
 
     - name: Allow mongodb to listen on tcp port when using non-standard mongo port
       community.general.seport:
@@ -14,9 +18,7 @@
         proto: tcp
         setype: mongod_port_t
         state: present
-      when:
-        - ansible_selinux.status == "enabled"
-        - mongodb_port != 27017
+      when: mongodb_port != 27017
 
     # If MongoDB is configured to use non-default paths for its data and log
     # directories then we need to update the SELinux policy to allow the
@@ -25,7 +27,6 @@
     # update the SELinux user policy for the new directory. Finally, apply
     # the updated SELinux policies to the directory. Do this for data and logs.
     - name: Configure SELinux when using custom directories
-      when: selinux_status.rc == 0
       block:
         - name: SELinux - Update the policy to allow the mongod service to use the custom data directory
           ansible.builtin.command: "{{ item }}"

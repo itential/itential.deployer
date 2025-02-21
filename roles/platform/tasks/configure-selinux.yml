@@ -1,15 +1,9 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Check whether SELinux is enabled
-  ansible.builtin.command: /usr/sbin/selinuxenabled
-  changed_when: false
-  register: selinux_status
-  failed_when: selinux_status.rc > 1
-
 - name: Configure SELinux when using custom install directory
   when:
-    - selinux_status.rc == 0
+    - ansible_selinux.status == "enabled"
     - platform_install_dir != "/opt/itential/platform/server"
   block:
     - name: Set SELinux to allow systemd to use custom install directory

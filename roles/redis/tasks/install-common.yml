@@ -104,8 +104,3 @@
     serole: object_r
     setype: redis_conf_t
   when: redis_conf_dir != redis_conf_dir_default or redis_install_from_source | bool
-
-- name: Include tasks to configure SELinux
-  ansible.builtin.include_tasks:
-    file: configure-selinux.yml
-  when: ansible_selinux.status == "enabled"

@@ -9,7 +9,7 @@
   when: platform_disable_git_safe_repo_checks
 
 - name: Install any configured adapters
-  notify: Restart Itential Platform
+  notify: Enable and Start Platform
   when:
     - platform_adapters is defined
     - platform_adapters is iterable

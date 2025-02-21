@@ -6,8 +6,26 @@
     path: "{{ redis_bin_dir }}/redis-server"
   register: redis_installed
 
+- name: Determine if a rebuild is required
+  when: redis_installed.stat.exists
+  block:
+    - name: Determine current Redis version
+      ansible.builtin.shell:
+        cmd: 'set -o pipefail && redis-server --version | cut -d" " -f3 | cut -d"=" -f2'
+      register: current_redis_result
+      check_mode: false
+      changed_when: false
+      failed_when: current_redis_result.rc != 0
+      environment:
+        PATH: "{{ ansible_env.PATH }}:{{ redis_bin_dir }}"
+
+    - name: Set requires build flag if this is a new Redis version
+      ansible.builtin.set_fact:
+        requires_rebuild: "{{ current_redis_result.stdout != (redis_source_url
+          | basename | split('.tar.gz') | first) }}"
+
 - name: Install Redis
-  when: not redis_installed.stat.exists
+  when: (not redis_installed.stat.exists) or (requires_rebuild | default(false))
   block:
     - name: Create temporary working directory
       ansible.builtin.tempfile:
@@ -81,14 +99,3 @@
       ansible.builtin.file:
         path: "{{ redis_build_temp_dir.path }}"
         state: absent
-
-- name: Set owership of all files in the bin directory
-  ansible.builtin.file:
-    path: "{{ redis_bin_dir }}"
-    owner: "{{ redis_owner }}"
-    group: "{{ redis_group }}"
-    seuser: system_u
-    serole: object_r
-    setype: redis_exec_t
-    state: directory
-    recurse: true

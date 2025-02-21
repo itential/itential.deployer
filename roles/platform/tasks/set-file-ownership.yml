@@ -1,6 +1,9 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
+
+# TODO: Remove this file once the RPM is creating the directories correctly
+
 # Using chown and chmod is a faster way to enforce the file ownership and
 # permissions. The file module in ansible checks each and every file/dir
 # in the tree, 'chown -R' does not, it just sets it.

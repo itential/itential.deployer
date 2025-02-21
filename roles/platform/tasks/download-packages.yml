@@ -1,21 +1,19 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Validate distribution major version
-  ansible.builtin.fail:
-    msg: Download not supported for version 7
-  when: ansible_distribution_major_version == "7"
+- name: Validate offline and role vars
+  tags: always
+  block:
+    - name: Validate offline_install variable
+      ansible.builtin.fail:
+        msg: offline_install must be set to false for download
+      when:
+        - offline_install is defined
+        - offline_install
 
-- name: Validate offline_install variable
-  ansible.builtin.fail:
-    msg: offline_install must be set to false for download
-  when:
-    - offline_install is defined
-    - offline_install
-
-- name: Determine release vars
-  ansible.builtin.include_tasks:
-    file: determine-release-vars.yml
+    - name: Validate role vars
+      ansible.builtin.include_tasks:
+        file: validate-vars.yml
 
 - name: Download OS packages
   ansible.builtin.include_tasks:
