@@ -5,10 +5,10 @@
 platform_mongo_auth_enabled: false
 
 # The username to use when connecting to MongoDB.
-platform_mongo_user: itential
+platform_mongo_user: admin
 
 # The password to use when connecting to MongoDB.
-platform_mongo_password: itential
+platform_mongo_password: admin
 
 # The name of the database that the MongoDB user must authenticate against.
 platform_mongo_auth_db: admin

@@ -41,7 +41,7 @@
     state: present
   when: downloaded_platform_packages | length > 0
 
-# Placeholder - we don't support installing from a yum repo yet
+# TODO: Implement installing from a yum repo
 # - name: Install the Itential Platform packages (YUM repository)
 #   ansible.builtin.dnf:
 #     name: "{{ item.path }}"

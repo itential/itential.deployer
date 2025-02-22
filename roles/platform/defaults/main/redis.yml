@@ -28,14 +28,11 @@ platform_redis_port: 6379
 # The list of Redis Sentinel servers (hostnames and ports) to use for high availability.
 platform_redis_sentinels:
 
-# The port to use when connecting to Sentinel.
-platform_sentinel_port: 26379
-
 # The username to use when connecting to Sentinel.
-platform_sentinel_username: sentineluser
+platform_redis_sentinel_username: sentineluser
 
 # The password to use when connecting to Sentinel.
-platform_sentinel_password: sentineluser
+platform_redis_sentinel_password: sentineluser
 
 # The Redis primary name. This only has meaning when Redis is running with replication enabled.
 # The sentinels will monitor this node and consider it down only when the sentinels agree.

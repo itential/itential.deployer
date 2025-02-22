@@ -6,10 +6,25 @@
     file: validate-vars.yml
   tags: always
 
-# Install the new Itential Platform packages.
-- name: Install Platform
-  ansible.builtin.include_tasks:
-    file: install-platform.yml
+# Install the new Itential Platform packages and update properties
+- name: Upgrade platform and update service and properties
   notify:
     - Enable and Start Platform
     - Update Itential release file
+  block:
+    - name: Install Platform packages
+      ansible.builtin.include_tasks:
+        file: install-platform.yml
+
+    # TODO: Move these tasks to a common file
+    - name: Create systemd file
+      ansible.builtin.template:
+        src: itential-platform.service.j2
+        dest: /usr/lib/systemd/system/itential-platform.service
+        owner: root
+        group: root
+        mode: "0644"
+
+    - name: Create properties.json file
+      ansible.builtin.include_tasks:
+        file: create-properties-file.yml

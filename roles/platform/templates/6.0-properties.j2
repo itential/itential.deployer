@@ -305,8 +305,8 @@ redis_port = {{ platform_redis_port }}
 {% endif %}
 
 # The username to use when authenticating with a Redis Sentinel cluster
-{% if platform_redis_sentinel_user %}
-redis_sentinel_username = {{ platform_redis_sentinel_user }}
+{% if platform_redis_sentinel_username %}
+redis_sentinel_username = {{ platform_redis_sentinel_username }}
 {% else %}
 # redis_sentinel_username =
 {% endif %}
