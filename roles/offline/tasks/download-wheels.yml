@@ -2,9 +2,19 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
 - name: Validate offline_download_dir is set
-  ansible.builtin.fail:
-    msg: "offline_download_dir is not set"
-  when: offline_download_dir is not defined
+  ansible.builtin.assert:
+    that: offline_download_dir is defined
+    msg: "offline_download_dir must be set"
+
+- name: Validate offline_pip_executable is set
+  ansible.builtin.assert:
+    that: offline_pip_executable is defined
+    msg: "offline_pip_executable must be set"
+
+- name: Validate offline_wheel_files is set
+  ansible.builtin.assert:
+    that: offline_wheel_files is defined
+    msg: "offline_wheel_files must be set"
 
 - name: Create download directory
   ansible.builtin.file:

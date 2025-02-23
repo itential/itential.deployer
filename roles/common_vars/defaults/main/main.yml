@@ -11,30 +11,3 @@ itential_release_file: /etc/itential-release
 # required to configure them.  This will allow customers to use internal
 # repositories.
 install_yum_repos: true
-
-# Offline install variables
-offline_install_enabled: false
-
-# Note that the packages_path is set in the defaults for each role
-itential_packages_path: "itential_packages/{{ ansible_distribution | lower }}_{{ ansible_distribution_major_version }}"
-offline_rpms_path: "{{ packages_path }}/rpms"
-offline_wheels_path: "{{ packages_path }}/wheels"
-archives_path: "{{ packages_path }}/archives"
-adapters_path: "{{ packages_path }}/adapters"
-ansible_collections_path: "{{ packages_path }}/ansible_collections"
-
-packages_download_root_control_node: "{{ playbook_dir }}/files"
-packages_download_dir_control_node: "{{ packages_download_root_control_node }}/{{ packages_path }}"
-rpms_download_dir_control_node: "{{ packages_download_dir_control_node }}/rpms"
-wheels_download_dir_control_node: "{{ packages_download_dir_control_node }}/wheels"
-archives_download_dir_control_node: "{{ packages_download_dir_control_node }}/archives"
-adapters_download_dir_control_node: "{{ packages_download_dir_control_node }}/adapters"
-ansible_collections_download_dir_control_node: "{{ packages_download_dir_control_node }}/ansible_collections"
-
-packages_download_root_target_node: /var/tmp
-packages_download_dir_target_node: "{{ packages_download_root_target_node }}/{{ packages_path }}"
-rpms_download_dir_target_node: "{{ packages_download_dir_target_node }}/rpms"
-wheels_download_dir_target_node: "{{ packages_download_dir_target_node }}/wheels"
-archives_download_dir_target_node: "{{ packages_download_dir_target_node }}/archives"
-adapters_download_dir_target_node: "{{ packages_download_dir_target_node }}/adapters"
-ansible_collections_download_dir_target_node: "{{ packages_download_dir_target_node }}/ansible_collections"

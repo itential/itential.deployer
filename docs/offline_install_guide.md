@@ -120,7 +120,7 @@ The download playbooks must be executed on non air-gapped servers.  It is critic
 
 When the download playbooks are executed, the relevant packages will first be downloaded to the target node and then copied to the control node.
 
-Like the installation playbooks, there are download playbooks for each component.  The playbook are named `download-packages-<component>.yml`, for example, `download-packages-gateway.yml`.
+Like the installation playbooks, there are download playbooks for each component.  The playbook are named `download_packages_<component>.yml`, for example, `download_packages_gateway.yml`.
 
 For a basic execution, use the following command:
 

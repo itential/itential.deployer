@@ -3,13 +3,13 @@
 ---
 - name: Create Ansible collections download directory
   ansible.builtin.file:
-    path: "{{ ansible_collections_download_dir_target_node }}"
+    path: "{{ offline_ansible_collections_download_dir_target_node }}"
     state: directory
     mode: '0755'
 
 - name: Download Ansible collections
   ansible.builtin.command:
-    chdir: "{{ ansible_collections_download_dir_target_node }}"
+    chdir: "{{ offline_ansible_collections_download_dir_target_node }}"
     cmd: "{{ iag_pkgs_temp_dir.path }}/offline_install/bin/ansible-galaxy collection download {{ item }}"
   with_items: "{{ iag_ansible_collections }}"
   changed_when: true
@@ -19,5 +19,5 @@
     name: offline
     tasks_from: fetch-packages
   vars:
-    offline_src_dir: "{{ ansible_collections_download_dir_target_node }}/collections"
-    offline_dest_dir: "{{ ansible_collections_download_dir_control_node }}"
+    offline_src_dir: "{{ offline_ansible_collections_download_dir_target_node }}/collections"
+    offline_dest_dir: "{{ offline_ansible_collections_download_dir_control_node }}"

@@ -8,7 +8,7 @@
       ansible.builtin.package_facts:
         manager: "auto"
 
-    - name: Install MongoDB packages (online)
+    - name: Install MongoDB packages
       ansible.builtin.include_tasks:
         file: install-mongodb-online.yml
       when: not offline_install_enabled

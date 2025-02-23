@@ -2,9 +2,14 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
 - name: Validate offline_wheels_path is set
-  ansible.builtin.fail:
-    msg: "offline_wheels_path is not set"
-  when: not offline_wheels_path
+  ansible.builtin.assert:
+    that: offline_wheels_path is defined
+    msg: "offline_wheels_path must be set"
+
+- name: Validate offline_wheels_archive is set
+  ansible.builtin.assert:
+    that: offline_wheels_archive is defined
+    msg: "offline_wheels_archive must be set"
 
 - name: Create temporary working directory
   ansible.builtin.tempfile:

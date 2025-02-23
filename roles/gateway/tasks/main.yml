@@ -21,7 +21,7 @@
     state: directory
   register: workingdir
 
-- name: Install Gateway packages (online)
+- name: Install Gateway packages
   ansible.builtin.dnf:
     name: "{{ item }}"
     state: present

@@ -14,19 +14,19 @@
   ansible.builtin.include_tasks:
     file: install-vault-repo.yml
 
-- name: Download Vault rpms
+- name: Download Vault RPMs
   ansible.builtin.import_role:
     name: offline
     tasks_from: download-rpms
   vars:
     offline_download_method: yum_module
     offline_download_packages: "{{ vault_packages }}"
-    offline_download_dir: "{{ rpms_download_dir_target_node }}"
+    offline_download_dir: "{{ offline_rpms_download_dir_target_node }}"
 
-- name: Copy rpms to control node
+- name: Copy RPMs to control node
   ansible.builtin.import_role:
     name: offline
     tasks_from: fetch-packages
   vars:
-    offline_src_dir: "{{ rpms_download_dir_target_node }}"
-    offline_dest_dir: "{{ rpms_download_dir_control_node }}"
+    offline_src_dir: "{{ offline_rpms_download_dir_target_node }}"
+    offline_dest_dir: "{{ offline_rpms_download_dir_control_node }}"

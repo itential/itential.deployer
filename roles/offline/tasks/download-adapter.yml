@@ -2,14 +2,14 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
 - name: Validate offline_download_dir is set
-  ansible.builtin.fail:
-    msg: "offline_download_dir is not set"
-  when: offline_download_dir is not defined
+  ansible.builtin.assert:
+    that: offline_download_dir is defined
+    msg: "offline_download_dir must be set"
 
 - name: Validate offline_adapter is set
-  ansible.builtin.fail:
-    msg: "offline_adapter is not set"
-  when: offline_adapter is not defined
+  ansible.builtin.assert:
+    that: offline_adapter is defined
+    msg: "offline_adapter must be set"
 
 - name: Parse adapter name
   ansible.builtin.set_fact:

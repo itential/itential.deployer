@@ -8,14 +8,14 @@
     - python_pip_executable is not defined
     - python_venv is not defined
 
-- name: Install Python dependencies (online)
+- name: Install Python dependencies
   when: not offline_install_enabled
   tags: install_python_dependencies
   block:
     - name: Use Python virtual env
       when: python_venv is defined
       block:
-        - name: Install base Python dependencies in virtual env (online)
+        - name: Install base Python dependencies in virtual env
           ansible.builtin.pip:
             name: "{{ python_base_dependencies }}"
             virtualenv: "{{ python_venv }}"
@@ -23,7 +23,7 @@
             - python_base_dependencies is defined
             - python_base_dependencies | length > 0
 
-        - name: Install application Python dependencies in virtual env (online)
+        - name: Install application Python dependencies in virtual env
           ansible.builtin.pip:
             name: "{{ python_app_dependencies }}"
             virtualenv: "{{ python_venv }}"
@@ -36,7 +36,7 @@
         - python_pip_executable is defined
         - python_venv is not defined
       block:
-        - name: Install base Python dependencies using pip executable (online)
+        - name: Install base Python dependencies using pip executable
           ansible.builtin.pip:
             name: "{{ python_base_dependencies }}"
             executable: "{{ python_pip_executable }}"
@@ -45,7 +45,7 @@
             - python_base_dependencies is defined
             - python_base_dependencies | length > 0
 
-        - name: Install application Python dependencies using pip executable (online)
+        - name: Install application Python dependencies using pip executable
           ansible.builtin.pip:
             name: "{{ python_app_dependencies }}"
             executable: "{{ python_pip_executable }}"
@@ -70,3 +70,4 @@
         tasks_from: install-wheels
       vars:
         offline_wheels_dir: "{{ wheels_download_dir_control_node }}/app"
+        offline_pip_executable: "{{ python_pip_executable }}"

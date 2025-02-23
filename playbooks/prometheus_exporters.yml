@@ -61,7 +61,9 @@
 
         - name: Set the Redis exporter listen port from inventory
           ansible.builtin.set_fact:
-            redis_exporter_listen_port: "{{ hostvars[inventory_hostname].redis_exporter_web_listen_address.split(':') | last }}"
+            redis_exporter_listen_port:
+              "{{ hostvars[inventory_hostname].redis_exporter_web_listen_address.split(':')
+                  | last }}"
           when: "'redis_exporter_web_listen_address' in hostvars[inventory_hostname]"
 
         - name: Open Port on FirewallD Public Zone
@@ -117,7 +119,9 @@
 
         - name: Set the MongoDB exporter listen port from inventory
           ansible.builtin.set_fact:
-            mongodb_exporter_listen_port: "{{ hostvars[inventory_hostname].mongodb_exporter_web_listen_address.split(':') | last }}"
+            mongodb_exporter_listen_port:
+              "{{ hostvars[inventory_hostname].mongodb_exporter_web_listen_address.split(':')
+                  | last }}"
           when: "'mongodb_exporter_web_listen_address' in hostvars[inventory_hostname]"
 
         - name: Open Port on FirewallD Public Zone
@@ -155,7 +159,9 @@
 
         - name: Set the node exporter listen port from inventory
           ansible.builtin.set_fact:
-            node_exporter_listen_port: "{{ hostvars[inventory_hostname].node_exporter_web_listen_address.split(':') | last }}"
+            node_exporter_listen_port:
+              "{{ hostvars[inventory_hostname].node_exporter_web_listen_address.split(':')
+                  | last }}"
           when: "'node_exporter_web_listen_address' in hostvars[inventory_hostname]"
 
         - name: Open Port on FirewallD Public Zone
@@ -193,7 +199,9 @@
 
         - name: Set the process exporter listen port from inventory
           ansible.builtin.set_fact:
-            process_exporter_listen_port: "{{ hostvars[inventory_hostname].process_exporter_web_listen_address.split(':') | last }}"
+            process_exporter_listen_port:
+              "{{ hostvars[inventory_hostname].process_exporter_web_listen_address.split(':')
+                  | last }}"
           when: "'process_exporter_web_listen_address' in hostvars[inventory_hostname]"
 
         - name: Open Port on FirewallD Public Zone

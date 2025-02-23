@@ -29,7 +29,7 @@
     - ansible_facts.services["rabbitmq-server.service"] is defined
     - ansible_facts.services["rabbitmq-server.service"].state == "running"
 
-- name: Include tasks to install RabbitMQ (online)
+- name: Include tasks to install RabbitMQ
   ansible.builtin.include_tasks:
     file: rabbitmq-online.yml
   when: not offline_install_enabled

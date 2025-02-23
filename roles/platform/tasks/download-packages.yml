@@ -15,13 +15,10 @@
       ansible.builtin.include_tasks:
         file: validate-vars.yml
 
-- name: Download OS packages
-  ansible.builtin.include_tasks:
-    file: download-packages-os.yml
-
-- name: Download MongoDB packages
-  ansible.builtin.include_tasks:
-    file: download-packages-mongodb.yml
+# TODO: Remove?
+# - name: Download MongoDB packages
+#   ansible.builtin.include_tasks:
+#     file: download-packages-mongodb.yml
 
 - name: Download NodeJS packages
   ansible.builtin.include_tasks:
@@ -34,28 +31,28 @@
 - name: Download Adapter packages
   ansible.builtin.include_tasks:
     file: download-adapters.yml
-  when: itential_adapters is defined or custom_adapters is defined
+  when: itential_adapters is defined
 
-- name: Copy rpms to control node
+- name: Copy RPMs to control node
   ansible.builtin.import_role:
     name: offline
     tasks_from: fetch-packages
   vars:
-    offline_src_dir: "{{ rpms_download_dir_target_node }}"
-    offline_dest_dir: "{{ rpms_download_dir_control_node }}"
+    offline_src_dir: "{{ offline_rpms_download_dir_target_node }}"
+    offline_dest_dir: "{{ offline_rpms_download_dir_control_node }}"
 
 - name: Copy base Python dependencies to control node
   ansible.builtin.import_role:
     name: offline
     tasks_from: fetch-packages
   vars:
-    offline_src_dir: "{{ wheels_download_dir_target_node }}/base"
-    offline_dest_dir: "{{ wheels_download_dir_control_node }}/base"
+    offline_src_dir: "{{ offline_wheels_download_dir_target_node }}/base"
+    offline_dest_dir: "{{ offline_wheels_download_dir_control_node }}/base"
 
 - name: Copy Itential Platform Python dependencies to control node
   ansible.builtin.import_role:
     name: offline
     tasks_from: fetch-packages
   vars:
-    offline_src_dir: "{{ wheels_download_dir_target_node }}/app"
-    offline_dest_dir: "{{ wheels_download_dir_control_node }}/app"
+    offline_src_dir: "{{ offline_wheels_download_dir_target_node }}/app"
+    offline_dest_dir: "{{ offline_wheels_download_dir_control_node }}/app"

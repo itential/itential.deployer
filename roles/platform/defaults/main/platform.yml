@@ -48,4 +48,5 @@ platform_npm_ignore_scripts: true
 
 # Offline install settings
 # Refer to the offline variables in common_vars for additional settings
-packages_path: "{{ itential_platform_packages_path }}/{{ platform_release }}/platform"  # noqa: var-naming[no-role-prefix]
+offline_packages_path:  # noqa: var-naming[no-role-prefix]
+  "{{ offline_itential_packages_path }}/{{ platform_release }}/platform"

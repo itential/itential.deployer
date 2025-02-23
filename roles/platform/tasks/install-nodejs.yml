@@ -1,7 +1,7 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Install nodejs if RHEL 8 or 9 (online)
+- name: Install nodejs if RHEL 8 or 9
   when: not offline_install_enabled
   block:
     # Enable and install the module if the profile is defined

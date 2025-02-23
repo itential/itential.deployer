@@ -8,8 +8,9 @@
     offline_install_enabled: false
   roles:
     - role: itential.deployer.common_vars
+    - role: itential.deployer.offline
   tasks:
-    - name: Download MongoDB packages
+    - name: Download MongoDB packages  # noqa run-once
       ansible.builtin.import_role:
         name: itential.deployer.mongodb
         tasks_from: download-packages

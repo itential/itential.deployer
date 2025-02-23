@@ -2,16 +2,14 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
 - name: Validate offline_pip_executable or offline_python_venv is set
-  ansible.builtin.fail:
-    msg: "either offline_pip_executable or offline_python_venv must be set"
-  when:
-    - offline_pip_executable is not defined
-    - offline_python_venv is not defined
+  ansible.builtin.assert:
+    that: offline_pip_executable is defined or offline_python_venv is defined
+    msg: "offline_pip_executable or offline_python_venv must be set"
 
 - name: Validate offline_wheels_dir is set
-  ansible.builtin.fail:
+  ansible.builtin.assert:
+    that: offline_wheels_dir is defined
     msg: "offline_wheels_dir must be set"
-  when: offline_wheels_dir is not defined
 
 - name: Create temporary working directory
   ansible.builtin.tempfile:

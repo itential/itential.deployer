@@ -1,11 +1,6 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Validate distribution major version
-  ansible.builtin.fail:
-    msg: Download not supported for version 7
-  when: ansible_distribution_major_version == "7"
-
 - name: Validate offline_install_enabled variable
   ansible.builtin.fail:
     msg: offline_install_enabled must be set to false for download
@@ -30,40 +25,40 @@
     msg: "Deployer does not support installing on {{ ansible_distribution }} {{ ansible_distribution_major_version }}!"
   when: invalid_os_release is defined
 
-- name: Download OS rpms
+- name: Download OS RPMs
   ansible.builtin.import_role:
     name: offline
     tasks_from: download-rpms
   vars:
     offline_download_method: yum_module
     offline_download_packages: "{{ os_packages }}"
-    offline_download_dir: "{{ rpms_download_dir_target_node }}"
+    offline_download_dir: "{{ offline_rpms_download_dir_target_node }}"
 
-- name: Download security rpms
+- name: Download security RPMs
   ansible.builtin.import_role:
     name: offline
     tasks_from: download-rpms
   vars:
     offline_download_method: yum_module
     offline_download_packages: "{{ security_packages }}"
-    offline_download_dir: "{{ rpms_download_dir_target_node }}"
+    offline_download_dir: "{{ offline_rpms_download_dir_target_node }}"
 
-- name: Download operations rpms
+- name: Download operations RPMs
   ansible.builtin.import_role:
     name: offline
     tasks_from: download-rpms
   vars:
     offline_download_method: yum_module
     offline_download_packages: "{{ operational_packages }}"
-    offline_download_dir: "{{ rpms_download_dir_target_node }}"
+    offline_download_dir: "{{ offline_rpms_download_dir_target_node }}"
 
-- name: Copy rpms to control node
+- name: Copy RPMs to control node
   ansible.builtin.import_role:
     name: offline
     tasks_from: fetch-packages
   vars:
-    offline_src_dir: "{{ rpms_download_dir_target_node }}"
-    offline_dest_dir: "{{ rpms_download_dir_control_node }}"
+    offline_src_dir: "{{ offline_rpms_download_dir_target_node }}"
+    offline_dest_dir: "{{ offline_rpms_download_dir_control_node }}"
 
 - name: Set OS packages downloaded flag
   ansible.builtin.set_fact:

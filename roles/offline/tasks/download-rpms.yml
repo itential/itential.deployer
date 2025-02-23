@@ -2,14 +2,19 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
 - name: Validate offline_download_dir is set
-  ansible.builtin.fail:
-    msg: "offline_download_dir is not set"
-  when: offline_download_dir is not defined
+  ansible.builtin.assert:
+    that: offline_download_dir is defined
+    msg: "offline_download_dir must be set"
 
 - name: Validate offline_download_method is set
-  ansible.builtin.fail:
-    msg: "offline_download_method is not set"
-  when: offline_download_method is not defined
+  ansible.builtin.assert:
+    that: offline_download_method is defined
+    msg: "offline_download_method must be set"
+
+- name: Validate offline_download_packages is set
+  ansible.builtin.assert:
+    that: offline_download_packages is defined
+    msg: "offline_download_packages must be set"
 
 - name: Download packages
   when:
@@ -20,7 +25,9 @@
     - name: Validate download method
       ansible.builtin.fail:
         msg: "invalid download method"
-      when: offline_download_method is not defined or offline_download_method not in ['yum_module', 'yum_install', 'yum_reinstall', 'repotrack', 'yumdownloader']
+      when: offline_download_method is not defined or
+            offline_download_method not in
+            ['yum_module', 'yum_install', 'yum_reinstall', 'repotrack', 'yumdownloader']
 
     - name: Create download directory
       ansible.builtin.file:
@@ -33,18 +40,20 @@
         name: "{{ offline_download_packages }}"
         state: present
         download_only: true
-        offline_download_dir: "{{ offline_download_dir }}"
+        download_dir: "{{ offline_download_dir }}"
       when: offline_download_method == "yum_module"
 
-    - name: Download packages (yum install) # noqa command-instead-of-module (yum module does not support downloadonly)
+    - name: Download packages (yum install) # noqa command-instead-of-module
       ansible.builtin.command:
-        cmd: yum install --downloadonly --downloaddir "{{ offline_download_dir }}" -y "{{ offline_download_packages }}"
+        cmd: "yum install --downloadonly --downloaddir {{ offline_download_dir }}
+              -y {{ offline_download_packages }}"
       changed_when: true
       when: offline_download_method == "yum_install"
 
-    - name: Download packages (yum reinstall) # noqa command-instead-of-module (yum module does not support downloadonly)
+    - name: Download packages (yum reinstall) # noqa command-instead-of-module
       ansible.builtin.command:
-        cmd: yum reinstall --downloadonly --downloaddir "{{ offline_download_dir }}" -y "{{ offline_download_packages }}"
+        cmd: "yum reinstall --downloadonly --downloaddir {{ offline_download_dir }}
+              -y {{ offline_download_packages }}"
       changed_when: true
       when: offline_download_method == "yum_reinstall"
 
@@ -66,6 +75,7 @@
 
         - name: Download packages (yumdownloader)
           ansible.builtin.command:
-            cmd: "yumdownloader --resolve --downloaddir {{ offline_download_dir }} {{ offline_download_packages | join(' ') }}"
+            cmd: "yumdownloader --resolve --downloaddir {{ offline_download_dir }}
+                  {{ offline_download_packages | join(' ') }}"
           changed_when: true
           failed_when: false

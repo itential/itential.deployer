@@ -2,14 +2,19 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
 - name: Validate offline_src_adapters_path is set
-  ansible.builtin.fail:
-    msg: "offline_src_adapters_path is not set"
-  when: offline_src_adapters_path is not defined
+  ansible.builtin.assert:
+    that: offline_src_adapters_path is defined
+    msg: "offline_src_adapters_path must be set"
 
 - name: Validate offline_dest_adapters_path is set
-  ansible.builtin.fail:
-    msg: "offline_dest_adapters_path is not set"
-  when: offline_dest_adapters_path is not defined
+  ansible.builtin.assert:
+    that: offline_dest_adapters_path is defined
+    msg: "offline_dest_adapters_path must be set"
+
+- name: Validate adapter_name is set
+  ansible.builtin.assert:
+    that: adapter_name is defined
+    msg: "adapter_name must be set"
 
 - name: Create temporary working directory
   ansible.builtin.tempfile:

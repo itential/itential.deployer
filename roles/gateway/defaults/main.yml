@@ -60,4 +60,5 @@ python_venv: "{{ iag_install_dir }}/{{ iag_venv_name }}"
 
 # Offline install settings
 # Refer to the offline variables in common_vars for additional settings
-packages_path: "{{ itential_packages_path }}/{{ iag_release }}/iag"
+offline_packages_path: # noqa: var-naming[no-role-prefix]
+  "{{ offline_itential_packages_path }}/{{ iag_release }}/gateway"

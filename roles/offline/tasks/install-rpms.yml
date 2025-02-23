@@ -2,9 +2,9 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
 - name: Validate offline_rpms_path is set
-  ansible.builtin.fail:
-    msg: "offline_rpms_path is not set"
-  when: offline_rpms_path is not defined
+  ansible.builtin.assert:
+    that: offline_rpms_path is defined
+    msg: "offline_rpms_path must be set"
 
 - name: Create temporary working directory
   ansible.builtin.tempfile:
@@ -28,7 +28,7 @@
   ansible.builtin.command: rpmdb --rebuilddb
   changed_when: false
 
-- name: Get list of yum repos (to disable temporarily) # noqa command-instead-of-module (yum module does not support repolist)
+- name: Get list of yum repos (to disable temporarily) # noqa command-instead-of-module
   ansible.builtin.command: yum -q repolist
   register: repolist_result
   changed_when: false

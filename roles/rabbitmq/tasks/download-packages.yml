@@ -1,11 +1,6 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Validate distribution major version
-  ansible.builtin.fail:
-    msg: Download not supported for version 7
-  when: ansible_distribution_major_version == "7"
-
 - name: Validate offline_install_enabled variable
   ansible.builtin.fail:
     msg: offline_install_enabled must be set to false for download
@@ -22,7 +17,8 @@
 
 - name: Check for valid RabbitMQ release
   ansible.builtin.fail:
-    msg: "Deployer installer does not support installing RabbitMQ on Itential Platform version {{ platform_release }}"
+    msg: "Deployer installer does not support installing RabbitMQ
+          on Itential Platform version {{ platform_release }}"
   when: invalid_rabbitmq_packages is defined
 
 - name: Import PackageCloud signing key
@@ -85,7 +81,7 @@
     offline_download_packages: "{{ rabbitmq_packages[ansible_distribution_major_version] }}"
     offline_download_dir: "{{ rpms_download_dir_target_node }}"
 
-- name: Copy rpms to control node
+- name: Copy RPMs to control node
   ansible.builtin.import_role:
     name: offline
     tasks_from: fetch-packages

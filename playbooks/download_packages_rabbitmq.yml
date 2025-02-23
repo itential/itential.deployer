@@ -9,9 +9,8 @@
   roles:
     - role: itential.deployer.common_vars
   tasks:
-    - name: Download RabbitMQ packages
+    - name: Download RabbitMQ packages  # noqa run-once
       ansible.builtin.import_role:
         name: itential.deployer.rabbitmq
         tasks_from: download-packages
-      when: platform_release | float < 2023.2
       run_once: true

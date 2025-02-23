@@ -33,18 +33,18 @@
         tasks_from: download-adapters
       vars:
         offline_adapters: "{{ platform_adapters }}"
-        offline_download_dir: "{{ adapters_download_dir_target_node }}"
+        offline_download_dir: "{{ offline_adapters_download_dir_target_node }}"
 
     - name: Find all downloaded adapters
       ansible.builtin.find:
-        paths: "{{ adapters_download_dir_target_node }}"
+        paths: "{{ offline_adapters_download_dir_target_node }}"
         patterns: "*.tgz"
       register: found_adapters
 
     - name: Copy adapters to control node
       ansible.builtin.fetch:
         src: "{{ item.path }}"
-        dest: "{{ adapters_download_dir_control_node }}/"
+        dest: "{{ offline_adapters_download_dir_control_node }}/"
         flat: true
       with_items: "{{ found_adapters.files }}"
 

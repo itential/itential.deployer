@@ -16,7 +16,8 @@
     tasks_from: download-wheels
   vars:
     offline_wheel_files: "{{ base_python_dependencies }}"
-    offline_download_dir: "{{ wheels_download_dir_target_node }}/base"
+    offline_download_dir: "{{ offline_wheels_download_dir_target_node }}/base"
+    offline_pip_executable: "{{ pip_executable }}"
   when:
     - base_python_dependencies is defined
     - base_python_dependencies | length > 0
@@ -26,8 +27,8 @@
     name: offline
     tasks_from: fetch-packages
   vars:
-    offline_src_dir: "{{ wheels_download_dir_target_node }}/base"
-    offline_dest_dir: "{{ wheels_download_dir_control_node }}/base"
+    offline_src_dir: "{{ offline_wheels_download_dir_target_node }}/base"
+    offline_dest_dir: "{{ offline_wheels_download_dir_control_node }}/base"
 
 - name: Create temporary working directory
   ansible.builtin.tempfile:
@@ -106,7 +107,8 @@
 
 - name: Download wheel files
   ansible.builtin.command:
-    cmd: offline_install/bin/pip3 download -r requirements.txt -d "{{ wheels_download_dir_target_node }}/app"
+    cmd: offline_install/bin/pip3 download -r requirements.txt
+           -d "{{ offline_wheels_download_dir_target_node }}/app"
   args:
     chdir: "{{ iag_pkgs_temp_dir.path }}"
   changed_when: true
@@ -116,8 +118,8 @@
     name: offline
     tasks_from: fetch-packages
   vars:
-    offline_src_dir: "{{ wheels_download_dir_target_node }}/app"
-    offline_dest_dir: "{{ wheels_download_dir_control_node }}/app"
+    offline_src_dir: "{{ offline_wheels_download_dir_target_node }}/app"
+    offline_dest_dir: "{{ offline_wheels_download_dir_control_node }}/app"
 
 - name: Remove temporary working directory
   ansible.builtin.file:

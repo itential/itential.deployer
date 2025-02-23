@@ -8,10 +8,10 @@
     offline_install_enabled: false
   roles:
     - role: itential.deployer.common_vars
+    - role: itential.deployer.offline
   tasks:
-    - name: Download Itential Platform packages
+    - name: Download Itential Platform packages  # noqa run-once
       ansible.builtin.import_role:
         name: itential.deployer.platform
         tasks_from: download-packages
       run_once: true
-      tags: platform
