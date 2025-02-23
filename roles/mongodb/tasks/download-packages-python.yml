@@ -6,9 +6,17 @@
     name: offline
     tasks_from: download-rpms
   vars:
-    download_method: yum_module
-    download_packages: "{{ python_packages }}"
-    download_dir: "{{ rpms_download_dir_target_node }}"
+    offline_download_method: yum_module
+    offline_download_packages: "{{ python_packages }}"
+    offline_download_dir: "{{ rpms_download_dir_target_node }}"
+
+- name: Copy rpms to control node
+  ansible.builtin.import_role:
+    name: offline
+    tasks_from: fetch-packages
+  vars:
+    offline_src_dir: "{{ rpms_download_dir_target_node }}"
+    offline_dest_dir: "{{ rpms_download_dir_control_node }}"
 
 - name: Install Python
   ansible.builtin.include_role:
@@ -22,8 +30,8 @@
     name: offline
     tasks_from: download-wheels
   vars:
-    wheel_files: "{{ base_python_dependencies }}"
-    download_dir: "{{ wheels_download_dir_target_node }}/base"
+    offline_wheel_files: "{{ base_python_dependencies }}"
+    offline_download_dir: "{{ wheels_download_dir_target_node }}/base"
   when:
     - base_python_dependencies is defined
     - base_python_dependencies | length > 0
@@ -33,9 +41,9 @@
     name: offline
     tasks_from: download-wheels
   vars:
-    with_deps: true
-    wheel_files: "{{ app_python_dependencies }}"
-    download_dir: "{{ wheels_download_dir_target_node }}/app"
+    offline_with_deps: true
+    offline_wheel_files: "{{ app_python_dependencies }}"
+    offline_download_dir: "{{ wheels_download_dir_target_node }}/app"
   when:
     - app_python_dependencies is defined
     - app_python_dependencies | length > 0

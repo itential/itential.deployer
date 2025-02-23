@@ -19,6 +19,14 @@
         name: offline
         tasks_from: download-rpms
       vars:
-        download_method: yum_module
-        download_packages: "{{ platform_mongodb_tools_packages }}"
-        download_dir: "{{ rpms_download_dir_target_node }}"
+        offline_download_method: yum_module
+        offline_download_packages: "{{ platform_mongodb_tools_packages }}"
+        offline_download_dir: "{{ rpms_download_dir_target_node }}"
+
+    - name: Copy rpms to control node
+      ansible.builtin.import_role:
+        name: offline
+        tasks_from: fetch-packages
+      vars:
+        offline_src_dir: "{{ rpms_download_dir_target_node }}"
+        offline_dest_dir: "{{ rpms_download_dir_control_node }}"

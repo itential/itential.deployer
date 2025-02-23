@@ -1,63 +1,63 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Validate download_dir is set
+- name: Validate offline_download_dir is set
   ansible.builtin.fail:
-    msg: "download_dir is not set"
-  when: download_dir is not defined
+    msg: "offline_download_dir is not set"
+  when: offline_download_dir is not defined
 
-- name: Validate download_method is set
+- name: Validate offline_download_method is set
   ansible.builtin.fail:
-    msg: "download_method is not set"
-  when: download_method is not defined
+    msg: "offline_download_method is not set"
+  when: offline_download_method is not defined
 
 - name: Download packages
   when:
-    - download_packages is defined
-    - download_packages is iterable
-    - download_packages | length > 0
+    - offline_download_packages is defined
+    - offline_download_packages is iterable
+    - offline_download_packages | length > 0
   block:
     - name: Validate download method
       ansible.builtin.fail:
         msg: "invalid download method"
-      when: download_method is not defined or download_method not in ['yum_module', 'yum_install', 'yum_reinstall', 'repotrack', 'yumdownloader']
+      when: offline_download_method is not defined or offline_download_method not in ['yum_module', 'yum_install', 'yum_reinstall', 'repotrack', 'yumdownloader']
 
     - name: Create download directory
       ansible.builtin.file:
-        path: "{{ download_dir }}"
+        path: "{{ offline_download_dir }}"
         state: directory
         mode: '0755'
 
     - name: Download packages (ansible yum module)
       ansible.builtin.dnf:
-        name: "{{ download_packages }}"
+        name: "{{ offline_download_packages }}"
         state: present
         download_only: true
-        download_dir: "{{ download_dir }}"
-      when: download_method == "yum_module"
+        offline_download_dir: "{{ offline_download_dir }}"
+      when: offline_download_method == "yum_module"
 
     - name: Download packages (yum install) # noqa command-instead-of-module (yum module does not support downloadonly)
       ansible.builtin.command:
-        cmd: yum install --downloadonly --downloaddir "{{ download_dir }}" -y "{{ download_packages }}"
+        cmd: yum install --downloadonly --downloaddir "{{ offline_download_dir }}" -y "{{ offline_download_packages }}"
       changed_when: true
-      when: download_method == "yum_install"
+      when: offline_download_method == "yum_install"
 
     - name: Download packages (yum reinstall) # noqa command-instead-of-module (yum module does not support downloadonly)
       ansible.builtin.command:
-        cmd: yum reinstall --downloadonly --downloaddir "{{ download_dir }}" -y "{{ download_packages }}"
+        cmd: yum reinstall --downloadonly --downloaddir "{{ offline_download_dir }}" -y "{{ offline_download_packages }}"
       changed_when: true
-      when: download_method == "yum_reinstall"
+      when: offline_download_method == "yum_reinstall"
 
     - name: Download packages (repotrack)
       ansible.builtin.command:
-        cmd: repotrack "{{ download_packages }}"
+        cmd: repotrack "{{ offline_download_packages }}"
       args:
-        chdir: "{{ download_dir }}"
+        chdir: "{{ offline_download_dir }}"
       changed_when: true
-      when: download_method == "repotrack"
+      when: offline_download_method == "repotrack"
 
     - name: Use yumdownloader
-      when: download_method == "yumdownloader"
+      when: offline_download_method == "yumdownloader"
       block:
         - name: Install Yum utils
           ansible.builtin.dnf:
@@ -66,6 +66,6 @@
 
         - name: Download packages (yumdownloader)
           ansible.builtin.command:
-            cmd: "yumdownloader --resolve --downloaddir {{ download_dir }} {{ download_packages | join(' ') }}"
+            cmd: "yumdownloader --resolve --downloaddir {{ offline_download_dir }} {{ offline_download_packages | join(' ') }}"
           changed_when: true
           failed_when: false

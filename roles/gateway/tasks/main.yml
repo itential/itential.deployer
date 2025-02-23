@@ -27,7 +27,7 @@
     state: present
   with_items: "{{ gateway_packages }}"
   when:
-    - not offline_install
+    - not offline_install_enabled
     - gateway_packages is defined
     - gateway_packages is iterable
     - gateway_packages | length > 0
@@ -37,7 +37,7 @@
   ansible.builtin.import_role:
     name: offline
     tasks_from: install-rpms
-  when: offline_install
+  when: offline_install_enabled
   tags: install_gateway_packages
 
 - name: Create itential group
@@ -108,7 +108,7 @@
   when: iag_enable_ansible | bool
   block:
     - name: Install Ansible and Ansible collections
-      when: not offline_install
+      when: not offline_install_enabled
       block:
         - name: Install Ansible into the python virtual environment
           ansible.builtin.pip:
@@ -129,7 +129,7 @@
     - name: Install Ansible collections (offline)
       ansible.builtin.include_tasks:
         file: install-ansible-collections-offline.yml
-      when: offline_install
+      when: offline_install_enabled
 
     - name: Create Ansible config file
       ansible.builtin.template:

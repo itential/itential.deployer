@@ -7,9 +7,9 @@
     name: offline
     tasks_from: download-rpms
   vars:
-    download_method: yum_module
-    download_packages: "{{ python_packages }}"
-    download_dir: "{{ rpms_download_dir_target_node }}"
+    offline_download_method: yum_module
+    offline_download_packages: "{{ python_packages }}"
+    offline_download_dir: "{{ rpms_download_dir_target_node }}"
   tags: download_gateway_python_packages
 
 - name: Copy Gateway Python rpms to control node
@@ -17,8 +17,8 @@
     name: offline
     tasks_from: fetch-packages
   vars:
-    src_dir: "{{ rpms_download_dir_target_node }}"
-    dest_dir: "{{ rpms_download_dir_control_node }}"
+    offline_src_dir: "{{ rpms_download_dir_target_node }}"
+    offline_dest_dir: "{{ rpms_download_dir_control_node }}"
 
 - name: Install Python
   ansible.builtin.include_role:

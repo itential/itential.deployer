@@ -9,12 +9,12 @@
         msg: Download not supported for version 7
       when: ansible_distribution_major_version == "7"
 
-    - name: Validate offline_install variable
+    - name: Validate offline_install_enabled variable
       ansible.builtin.fail:
-        msg: offline_install must be set to false for download
+        msg: offline_install_enabled must be set to false for download
       when:
-        - offline_install is defined
-        - offline_install
+        - offline_install_enabled is defined
+        - offline_install_enabled
 
     - name: Include release vars
       ansible.builtin.include_vars:
@@ -33,9 +33,9 @@
     name: offline
     tasks_from: download-rpms
   vars:
-    download_method: yum_module
-    download_packages: "{{ gateway_packages }}"
-    download_dir: "{{ rpms_download_dir_target_node }}"
+    offline_download_method: yum_module
+    offline_download_packages: "{{ gateway_packages }}"
+    offline_download_dir: "{{ rpms_download_dir_target_node }}"
   tags: download_gateway_packages
 
 - name: Copy rpms to control node
@@ -43,8 +43,8 @@
     name: offline
     tasks_from: fetch-packages
   vars:
-    src_dir: "{{ rpms_download_dir_target_node }}"
-    dest_dir: "{{ rpms_download_dir_control_node }}"
+    offline_src_dir: "{{ rpms_download_dir_target_node }}"
+    offline_dest_dir: "{{ rpms_download_dir_control_node }}"
 
 - name: Install Gateway rpms
   ansible.builtin.dnf:
@@ -73,8 +73,8 @@
     name: offline
     tasks_from: fetch-packages
   vars:
-    src_dir: "{{ archives_download_dir_target_node }}"
-    dest_dir: "{{ archives_download_dir_control_node }}"
+    offline_src_dir: "{{ archives_download_dir_target_node }}"
+    offline_dest_dir: "{{ archives_download_dir_control_node }}"
 
 - name: Uninstall Gateway packages
   ansible.builtin.dnf:

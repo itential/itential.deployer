@@ -9,7 +9,7 @@
     - python_venv is not defined
 
 - name: Install Python dependencies (online)
-  when: not offline_install
+  when: not offline_install_enabled
   tags: install_python_dependencies
   block:
     - name: Use Python virtual env
@@ -54,7 +54,7 @@
             - python_app_dependencies | length > 0
 
 - name: Install Python dependencies (offline)
-  when: offline_install
+  when: offline_install_enabled
   tags: install_python_dependencies
   block:
     - name: Install base Python dependencies (offline)
@@ -62,11 +62,11 @@
         name: offline
         tasks_from: install-wheels
       vars:
-        wheels_dir: "{{ wheels_download_dir_control_node }}/base"
+        offline_wheels_dir: "{{ wheels_download_dir_control_node }}/base"
 
     - name: Install application Python dependencies (offline)
       ansible.builtin.include_role:
         name: offline
         tasks_from: install-wheels
       vars:
-        wheels_dir: "{{ wheels_download_dir_control_node }}/app"
+        offline_wheels_dir: "{{ wheels_download_dir_control_node }}/app"

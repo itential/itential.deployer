@@ -10,7 +10,7 @@
 - name: Install MongoDB tools
   when:
     - platform_bootstrap_configs | bool
-    - not offline_install
+    - not offline_install_enabled
   block:
     - name: Install mongodb repo (for cmd line tools)
       ansible.builtin.yum_repository:

@@ -1,24 +1,24 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Validate src_dir is set
+- name: Validate offline_src_dir is set
   ansible.builtin.fail:
-    msg: "src_dir is not set"
-  when: not src_dir is defined
+    msg: "offline_src_dir is not set"
+  when: not offline_src_dir is defined
 
-- name: Validate dest_dir is set
+- name: Validate offline_dest_dir is set
   ansible.builtin.fail:
-    msg: "dest_dir is not set"
-  when: not dest_dir is defined
+    msg: "offline_dest_dir is not set"
+  when: not offline_dest_dir is defined
 
 - name: Find downloaded packages
   ansible.builtin.find:
-    paths: "{{ src_dir }}"
+    paths: "{{ offline_src_dir }}"
   register: packages
 
 - name: Copy packages to control node
   ansible.builtin.fetch:
     src: "{{ item.path }}"
-    dest: "{{ dest_dir }}/"
+    dest: "{{ offline_dest_dir }}/"
     flat: true
   with_items: "{{ packages.files }}"

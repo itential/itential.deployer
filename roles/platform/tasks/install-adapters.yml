@@ -50,7 +50,7 @@
         adapter_names: []
 
     - name: Install adapters
-      when: not offline_install
+      when: not offline_install_enabled
       block:
         - name: Git clone adapter # noqa: latest (always clone the latest)
           ansible.builtin.git:
@@ -89,12 +89,12 @@
         name: offline
         tasks_from: install-adapter
       vars:
-        src_adapters_path: "{{ adapters_download_dir_control_node }}"
-        dest_adapters_path: "{{ platform_service_directory }}"
+        offline_src_adapters_path: "{{ adapters_download_dir_control_node }}"
+        offline_dest_adapters_path: "{{ platform_service_directory }}"
       loop: "{{ adapter_names }}"
       loop_control:
         loop_var: adapter_name
-      when: offline_install
+      when: offline_install_enabled
 
     # Using chown and chmod is a faster way to enforce the file ownership and
     # permissions. The file module in ansible checks each and every file/dir

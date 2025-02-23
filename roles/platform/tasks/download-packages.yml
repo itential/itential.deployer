@@ -4,12 +4,12 @@
 - name: Validate offline and role vars
   tags: always
   block:
-    - name: Validate offline_install variable
+    - name: Validate offline_install_enabled variable
       ansible.builtin.fail:
-        msg: offline_install must be set to false for download
+        msg: offline_install_enabled must be set to false for download
       when:
-        - offline_install is defined
-        - offline_install
+        - offline_install_enabled is defined
+        - offline_install_enabled
 
     - name: Validate role vars
       ansible.builtin.include_tasks:
@@ -41,21 +41,21 @@
     name: offline
     tasks_from: fetch-packages
   vars:
-    src_dir: "{{ rpms_download_dir_target_node }}"
-    dest_dir: "{{ rpms_download_dir_control_node }}"
+    offline_src_dir: "{{ rpms_download_dir_target_node }}"
+    offline_dest_dir: "{{ rpms_download_dir_control_node }}"
 
 - name: Copy base Python dependencies to control node
   ansible.builtin.import_role:
     name: offline
     tasks_from: fetch-packages
   vars:
-    src_dir: "{{ wheels_download_dir_target_node }}/base"
-    dest_dir: "{{ wheels_download_dir_control_node }}/base"
+    offline_src_dir: "{{ wheels_download_dir_target_node }}/base"
+    offline_dest_dir: "{{ wheels_download_dir_control_node }}/base"
 
 - name: Copy Itential Platform Python dependencies to control node
   ansible.builtin.import_role:
     name: offline
     tasks_from: fetch-packages
   vars:
-    src_dir: "{{ wheels_download_dir_target_node }}/app"
-    dest_dir: "{{ wheels_download_dir_control_node }}/app"
+    offline_src_dir: "{{ wheels_download_dir_target_node }}/app"
+    offline_dest_dir: "{{ wheels_download_dir_control_node }}/app"

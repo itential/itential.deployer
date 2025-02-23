@@ -1,20 +1,20 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Validate download_dir is set
+- name: Validate offline_download_dir is set
   ansible.builtin.fail:
-    msg: "download_dir is not set"
-  when: download_dir is not defined
+    msg: "offline_download_dir is not set"
+  when: offline_download_dir is not defined
 
 - name: Create download directory
   ansible.builtin.file:
-    path: "{{ download_dir }}"
+    path: "{{ offline_download_dir }}"
     state: directory
     mode: '0755'
 
 - name: Download adapter
   ansible.builtin.include_tasks:
     file: download-adapter.yml
-  loop: "{{ adapters }}"
+  loop: "{{ offline_adapters }}"
   loop_control:
-    loop_var: adapter
+    loop_var: offline_adapter

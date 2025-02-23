@@ -33,9 +33,17 @@
     name: offline
     tasks_from: download-rpms
   vars:
-    download_method: yum_module
-    download_packages: "{{ mongodb_packages + mongodb_package_dependencies }}"
-    download_dir: "{{ rpms_download_dir_target_node }}"
+    offline_download_method: yum_module
+    offline_download_packages: "{{ mongodb_packages + mongodb_package_dependencies }}"
+    offline_download_dir: "{{ rpms_download_dir_target_node }}"
+
+- name: Copy rpms to control node
+  ansible.builtin.import_role:
+    name: offline
+    tasks_from: fetch-packages
+  vars:
+    offline_src_dir: "{{ rpms_download_dir_target_node }}"
+    offline_dest_dir: "{{ rpms_download_dir_control_node }}"
 
 - name: Download Python packages
   ansible.builtin.include_tasks:
@@ -46,21 +54,21 @@
     name: offline
     tasks_from: fetch-packages
   vars:
-    src_dir: "{{ rpms_download_dir_target_node }}"
-    dest_dir: "{{ rpms_download_dir_control_node }}"
+    offline_src_dir: "{{ rpms_download_dir_target_node }}"
+    offline_dest_dir: "{{ rpms_download_dir_control_node }}"
 
 - name: Copy base Python dependencies to control node
   ansible.builtin.import_role:
     name: offline
     tasks_from: fetch-packages
   vars:
-    src_dir: "{{ wheels_download_dir_target_node }}/base"
-    dest_dir: "{{ wheels_download_dir_control_node }}/base"
+    offline_src_dir: "{{ wheels_download_dir_target_node }}/base"
+    offline_dest_dir: "{{ wheels_download_dir_control_node }}/base"
 
 - name: Copy MongoDB Python dependencies to control node
   ansible.builtin.import_role:
     name: offline
     tasks_from: fetch-packages
   vars:
-    src_dir: "{{ wheels_download_dir_target_node }}/app"
-    dest_dir: "{{ wheels_download_dir_control_node }}/app"
+    offline_src_dir: "{{ wheels_download_dir_target_node }}/app"
+    offline_dest_dir: "{{ wheels_download_dir_control_node }}/app"

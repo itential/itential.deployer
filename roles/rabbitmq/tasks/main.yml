@@ -32,12 +32,12 @@
 - name: Include tasks to install RabbitMQ (online)
   ansible.builtin.include_tasks:
     file: rabbitmq-online.yml
-  when: not offline_install
+  when: not offline_install_enabled
 
 - name: Include tasks to install RabbitMQ (offline)
   ansible.builtin.include_tasks:
     file: rabbitmq-offline.yml
-  when: offline_install
+  when: offline_install_enabled
 
 - name: Set rabbitmq user home directory
   ansible.builtin.user:

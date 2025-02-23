@@ -2,7 +2,7 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
 - name: Install nodejs if RHEL 8 or 9 (online)
-  when: not offline_install
+  when: not offline_install_enabled
   block:
     # Enable and install the module if the profile is defined
     # https://dnf.readthedocs.io/en/latest/command_ref.html#module-switch-to-command-label

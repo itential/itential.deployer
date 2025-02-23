@@ -1,10 +1,10 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Validate wheels_archive is set
+- name: Validate offline_wheels_archive is set
   ansible.builtin.fail:
-    msg: "wheels_archive is not set"
-  when: not wheels_archive
+    msg: "offline_wheels_archive is not set"
+  when: not offline_wheels_archive
 
 - name: Create temporary working directory
   ansible.builtin.tempfile:
@@ -13,7 +13,7 @@
 
 - name: Extract wheel archive
   ansible.builtin.unarchive:
-    src: "{{ wheels_archive.path }}"
+    src: "{{ offline_wheels_archive.path }}"
     dest: "{{ install_wheel_archive_temp_dir.path }}"
     remote_src: true
 

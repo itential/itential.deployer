@@ -7,4 +7,4 @@
     state: present
   with_items: "{{ python_packages }}"
   register: python_install_result
-  when: not offline_install
+  when: not offline_install_enabled

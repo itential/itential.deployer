@@ -33,7 +33,7 @@
       register: redis_build_temp_dir
 
     - name: Online install
-      when: not offline_install
+      when: not offline_install_enabled
       block:
         - name: Install packages required to build Redis
           ansible.builtin.package:
@@ -60,7 +60,7 @@
             redis_build_dir: "{{ unarchive_result.src.split('.tar.gz')[0] }}"
 
     - name: Offline install
-      when: offline_install
+      when: offline_install_enabled
       block:
         - name: Copy Redis archive (offline)
           ansible.builtin.copy:

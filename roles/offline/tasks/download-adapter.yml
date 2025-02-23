@@ -1,38 +1,38 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Validate download_dir is set
+- name: Validate offline_download_dir is set
   ansible.builtin.fail:
-    msg: "download_dir is not set"
-  when: download_dir is not defined
+    msg: "offline_download_dir is not set"
+  when: offline_download_dir is not defined
 
-- name: Validate adapter is set
+- name: Validate offline_adapter is set
   ansible.builtin.fail:
-    msg: "adapter is not set"
-  when: adapter is not defined
+    msg: "offline_adapter is not set"
+  when: offline_adapter is not defined
 
 - name: Parse adapter name
   ansible.builtin.set_fact:
-    adapter_name: "{{ adapter | basename | split('.') | first }}"
+    adapter_name: "{{ offline_adapter | basename | split('.') | first }}"
 
 - name: Git clone adapter # noqa: latest (always clone the latest)
   ansible.builtin.git:
-    repo: "{{ adapter }}"
-    dest: "{{ download_dir }}/{{ adapter_name }}"
+    repo: "{{ offline_adapter }}"
+    dest: "{{ offline_download_dir }}/{{ adapter_name }}"
     force: true
-  when: (adapter | basename | split('.') | last) == "git"
+  when: (offline_adapter | basename | split('.') | last) == "git"
 
-- name: Unzip {{ adapter }}
+- name: Unzip {{ offline_adapter }}
   ansible.builtin.unarchive:
-    src: "{{ adapter }}"
-    dest: "{{ download_dir }}"
-  when: (adapter | basename | split('.') | last) == "zip"
+    src: "{{ offline_adapter }}"
+    dest: "{{ offline_download_dir }}"
+  when: (offline_adapter | basename | split('.') | last) == "zip"
 
 - name: Install {{ adapter_name }}
   ansible.builtin.command:
     cmd: npm install
   args:
-    chdir: "{{ download_dir }}/{{ adapter_name }}"
+    chdir: "{{ offline_download_dir }}/{{ adapter_name }}"
   changed_when: true
 
 # The bundleDependencies defines an array of package names that will be bundled
@@ -42,7 +42,7 @@
 - name: Check if bundleDependencies is already defined in package.json
   ansible.builtin.lineinfile:
     state: absent
-    path: "{{ download_dir }}/{{ adapter_name }}/package.json"
+    path: "{{ offline_download_dir }}/{{ adapter_name }}/package.json"
     regexp: '"bundleDependencies":'
   check_mode: true
   changed_when: false
@@ -51,7 +51,7 @@
 - name: Define bundleDependencies if undefined
   ansible.builtin.lineinfile:
     state: present
-    path: "{{ download_dir }}/{{ adapter_name }}/package.json"
+    path: "{{ offline_download_dir }}/{{ adapter_name }}/package.json"
     line: '  "bundleDependencies": true,'
     insertbefore: '"dependencies"'
   when: bundle_dependencies_check.found == 0
@@ -60,5 +60,5 @@
   ansible.builtin.command:
     cmd: npm pack "{{ adapter_name }}/"
   args:
-    chdir: "{{ download_dir }}"
+    chdir: "{{ offline_download_dir }}"
   changed_when: true

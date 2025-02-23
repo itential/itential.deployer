@@ -1,10 +1,10 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Validate rpms_path is set
+- name: Validate offline_rpms_path is set
   ansible.builtin.fail:
-    msg: "rpms_path is not set"
-  when: rpms_path is not defined
+    msg: "offline_rpms_path is not set"
+  when: offline_rpms_path is not defined
 
 - name: Create temporary working directory
   ansible.builtin.tempfile:
@@ -16,7 +16,7 @@
     src: "{{ item }}"
     dest: "{{ install_packages_temp_dir.path }}/{{ item | basename }}"
     mode: '0644'
-  with_fileglob: "{{ rpms_path }}/*.rpm"
+  with_fileglob: "{{ offline_rpms_path }}/*.rpm"
 
 - name: Find RPMs on target node
   ansible.builtin.find:

@@ -1,17 +1,17 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Validate pip_executable or python_venv is set
+- name: Validate offline_pip_executable or offline_python_venv is set
   ansible.builtin.fail:
-    msg: "either pip_executable or python_venv must be set"
+    msg: "either offline_pip_executable or offline_python_venv must be set"
   when:
-    - pip_executable is not defined
-    - python_venv is not defined
+    - offline_pip_executable is not defined
+    - offline_python_venv is not defined
 
-- name: Validate wheels_dir is set
+- name: Validate offline_wheels_dir is set
   ansible.builtin.fail:
-    msg: "wheels_dir must be set"
-  when: wheels_dir is not defined
+    msg: "offline_wheels_dir must be set"
+  when: offline_wheels_dir is not defined
 
 - name: Create temporary working directory
   ansible.builtin.tempfile:
@@ -24,8 +24,8 @@
     dest: "{{ install_wheels_temp_dir.path }}/{{ item | basename }}"
     mode: '0644'
   with_fileglob:
-    - "{{ wheels_dir }}/*.whl"
-    - "{{ wheels_dir }}/*.tar.gz"
+    - "{{ offline_wheels_dir }}/*.whl"
+    - "{{ offline_wheels_dir }}/*.tar.gz"
 
 - name: Find wheel files on target node
   ansible.builtin.find:
@@ -38,16 +38,16 @@
 - name: Install wheel files in virtual env
   ansible.builtin.pip:
     name: "{{ wheel_list.files | map(attribute='path') | list | sort }}"
-    virtualenv: "{{ python_venv }}"
+    virtualenv: "{{ offline_python_venv }}"
     extra_args: --no-index
-  when: python_venv is defined
+  when: offline_python_venv is defined
 
 - name: Install wheel files using pip executable
   ansible.builtin.pip:
     name: "{{ wheel_list.files | map(attribute='path') | list | sort }}"
-    executable: "{{ pip_executable }}"
+    executable: "{{ offline_pip_executable }}"
     extra_args: --no-index
-  when: python_venv is not defined
+  when: offline_python_venv is not defined
 
 - name: Remove temporary working directory
   ansible.builtin.file:
