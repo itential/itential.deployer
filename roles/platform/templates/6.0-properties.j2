@@ -41,7 +41,8 @@ service_blacklist = {{ platform_service_blacklist }}
 {% endif %}
 
 # Indicates whether the platform is using encrypted code files.
-{% if platform_encrypted | string | length > 0 %}
+{% if ( (platform_encrypted is defined) and
+        (platform_encrypted is boolean) ) %}
 platform_encrypted = {{ platform_encrypted | to_nice_json }}
 {% else %}
 # platform_encrypted =
@@ -90,7 +91,8 @@ service_health_check_unhealthy_threshold = {{ platform_service_health_check_unhe
 {% endif %}
 
 # If true, the platform will periodically check for dead processes.
-{% if platform_dead_process_check_enabled | string | length > 0 %}
+{% if ( (platform_dead_process_check_enabled is defined) and
+        (platform_dead_process_check_enabled is boolean) ) %}
 dead_process_check_enabled = {{ platform_dead_process_check_enabled | to_nice_json }}
 {% else %}
 # dead_process_check_enabled =
@@ -139,7 +141,8 @@ device_count_polling_interval = {{ platform_device_count_polling_interval }}
 {% endif %}
 
 # If true, the platform will track detailed audit events.
-{% if platform_audit_enabled | string | length > 0 %}
+{% if ( (platform_audit_enabled is defined) and
+        (platform_audit_enabled is boolean) ) %}
 audit_enabled = {{ platform_audit_enabled | to_nice_json }}
 {% else %}
 # audit_enabled =
@@ -150,7 +153,8 @@ audit_enabled = {{ platform_audit_enabled | to_nice_json }}
 # MONGO DATABASE CONNECTION #
 #############################
 # Instructs the MongoDB driver to use the configured username/password when connecting to MongoDB.
-{% if platform_mongo_auth_enabled | string | length > 0 %}
+{% if ( (platform_mongo_auth_enabled is defined) and
+        (platform_mongo_auth_enabled is boolean) ) %}
 mongo_auth_enabled = {{ platform_mongo_auth_enabled | to_nice_json }}
 {% else %}
 # mongo_auth_enabled =
@@ -178,7 +182,8 @@ mongo_auth_db = {{ platform_mongo_auth_db }}
 {% endif %}
 
 # If true, the server will not check if it is connecting to a compatible MongoDB version.
-{% if platform_mongo_bypass_version_check | string | length > 0 %}
+{% if ( (platform_mongo_bypass_version_check is defined) and
+        (platform_mongo_bypass_version_check is boolean) ) %}
 mongo_bypass_version_check = {{ platform_mongo_bypass_version_check | to_nice_json }}
 {% else %}
 # mongo_bypass_version_check =
@@ -200,7 +205,8 @@ mongo_url = {{ platform_mongo_url }}
 {% endif %}
 
 # Instruct the MongoDB driver to use TLS protocols when connecting to the database.
-{% if platform_mongo_tls_enabled | string | length > 0 %}
+{% if ( (platform_mongo_tls_enabled is defined) and
+        (platform_mongo_tls_enabled is boolean) ) %}
 mongo_tls_enabled = {{ platform_mongo_tls_enabled | to_nice_json }}
 {% else %}
 # mongo_tls_enabled =
@@ -208,7 +214,8 @@ mongo_tls_enabled = {{ platform_mongo_tls_enabled | to_nice_json }}
 
 # If true, disables the validation checks for TLS certificates on other servers in the cluster
 # and allows the use of invalid or self-signed certificates to connect.
-{% if platform_mongo_tls_allow_invalid_certificates | string | length > 0 %}
+{% if ( (platform_mongo_tls_allow_invalid_certificates is defined) and
+        (platform_mongo_tls_allow_invalid_certificates is boolean) ) %}
 mongo_tls_allow_invalid_certificates = {{ platform_mongo_tls_allow_invalid_certificates | to_nice_json }}
 {% else %}
 # mongo_tls_allow_invalid_certificates =
@@ -223,15 +230,17 @@ mongo_tls_ca_file = {{ platform_mongo_tls_ca_file }}
 {% endif %}
 
 # Deprecated in favor of the `mongo_tls_enabled` property.
-{% if platform_mongo_ssl_enabled | string | length > 0 %}
+{% if ( (platform_mongo_ssl_enabled is defined) and
+        (platform_mongo_ssl_enabled is boolean) ) %}
 mongo_ssl_enabled = {{ platform_mongo_ssl_enabled | to_nice_json }}
 {% else %}
 # mongo_ssl_enabled =
 {% endif %}
 
 # Deprecated in favor of the `mongo_tls_allow_invalid_certificates` property.
-{% if platform_mongo_ssl_accept_invalid_certs %}
-mongo_ssl_accept_invalid_certs = {{ platform_mongo_ssl_accept_invalid_certs }}
+{% if ( (platform_mongo_ssl_accept_invalid_certs is defined ) and
+        (platform_mongo_ssl_accept_invalid_certs is boolean) ) %}
+mongo_ssl_accept_invalid_certs = {{ platform_mongo_ssl_accept_invalid_certs | to_nice_json }}
 {% else %}
 # mongo_ssl_accept_invalid_certs =
 {% endif %}
@@ -256,7 +265,7 @@ mongo_max_pool_size = {{ platform_mongo_max_pool_size }}
 # REDIS CONNECTION #
 ####################
 # The Redis keyspace (database number) to use for the connection.
-{% if platform_redis_db is defined and platform_redis_db | string | length > 0 %}
+{% if platform_redis_db and platform_redis_db is boolean %}
 redis_db = {{ platform_redis_db }}
 {% else %}
 # redis_db =
@@ -305,14 +314,14 @@ redis_port = {{ platform_redis_port }}
 {% endif %}
 
 # The username to use when authenticating with a Redis Sentinel cluster
-{% if platform_redis_sentinel_username %}
+{% if platform_redis_sentinel_username and platform_redis_auth_enabled | bool %}
 redis_sentinel_username = {{ platform_redis_sentinel_username }}
 {% else %}
 # redis_sentinel_username =
 {% endif %}
 
 # The password to use when authenticating with a Redis Sentinel cluster
-{% if platform_redis_sentinel_password %}
+{% if platform_redis_sentinel_password and platform_redis_auth_enabled | bool %}
 redis_sentinel_password = {{ platform_redis_sentinel_password }}
 {% else %}
 # redis_sentinel_password =
@@ -397,7 +406,8 @@ vault_secrets_endpoint = {{ platform_vault_secrets_endpoint }}
 
 # If true, only reads secrets from Hashicorp Vault. Otherwise, the platform can write secrets
 # to Vault for storage.
-{% if platform_configure_vault and (platform_vault_read_only | string | length > 0) %}
+{% if ( (platform_configure_vault is defined) and
+        (platform_vault_read_only is boolean) ) %}
 vault_read_only = {{ platform_vault_read_only | to_nice_json }}
 {% else %}
 # vault_read_only =
@@ -409,7 +419,8 @@ vault_read_only = {{ platform_vault_read_only | to_nice_json }}
 ###################
 # If true, will start working tasks immediately after the server startup process is complete.
 # If false, the task worker must be enabled manually via the UI/API.
-{% if platform_task_worker_enabled | string | length > 0 %}
+{% if ( (platform_task_worker_enabled is defined) and
+        (platform_task_worker_enabled is boolean) ) %}
 task_worker_enabled = {{ platform_task_worker_enabled | to_nice_json }}
 {% else %}
 # task_worker_enabled =
@@ -417,7 +428,8 @@ task_worker_enabled = {{ platform_task_worker_enabled | to_nice_json }}
 
 # If true, will allow jobs to be started after the server startup process is complete.
 # If false, API calls to start Jobs will return an error until enabled manually via the UI/API.
-{% if platform_job_worker_enabled | string | length > 0 %}
+{% if ( (platform_job_worker_enabled is defined) and
+        (platform_job_worker_enabled is boolean) ) %}
 job_worker_enabled = {{ platform_job_worker_enabled | to_nice_json }}
 {% else %}
 # job_worker_enabled =
@@ -492,7 +504,8 @@ ui_apple_touch_icon_file = {{ platform_ui_apple_touch_icon_file }}
 # AUTHENTICATION #
 ##################
 # If true, logs out existing sessions for a user when they log in with a new session.
-{% if platform_auth_unique_sessions_enabled | string | length > 0 %}
+{% if ( (platform_auth_unique_sessions_enabled is defined) and
+        (platform_auth_unique_sessions_enabled is boolean) ) %}
 auth_unique_sessions_enabled = {{ platform_auth_unique_sessions_enabled | to_nice_json }}
 {% else %}
 # auth_unique_sessions_enabled =
@@ -507,7 +520,8 @@ auth_admin_groups = {{ platform_auth_admin_groups | to_json }}
 
 # Enables a AAA adapter to custom build the principal object for a user with
 # a "buildPrincipal" method.
-{% if platform_auth_broker_principal_enabled | string | length > 0 %}
+{% if ( (platform_auth_broker_principal_enabled is defined) and
+        (platform_auth_broker_principal_enabled is boolean) ) %}
 auth_broker_principal_enabled = {{ platform_auth_broker_principal_enabled | to_nice_json }}
 {% else %}
 # auth_broker_principal_enabled =
@@ -528,7 +542,8 @@ auth_session_ttl = {{ platform_auth_session_ttl }}
 {% endif %}
 
 # Enables a default user to be used for login when SSO is not configured and no AAA Adapter exists.
-{% if platform_default_user_enabled | string | length > 0 %}
+{% if ( (platform_default_user_enabled is defined) and
+        (platform_default_user_enabled is boolean) ) %}
 default_user_enabled = {{ platform_default_user_enabled | to_nice_json }}
 {% else %}
 # default_user_enabled =
@@ -553,7 +568,8 @@ default_user_password = {{ platform_default_user_password }}
 # WEBSERVER #
 #############
 # A toggle to instruct the webserver to include HTTP cache control headers on the response.
-{% if platform_webserver_cache_control_enabled | string | length > 0 %}
+{% if ( (platform_webserver_cache_control_enabled is defined) and
+        (platform_webserver_cache_control_enabled is boolean) ) %}
 webserver_cache_control_enabled = {{ platform_webserver_cache_control_enabled | to_nice_json }}
 {% else %}
 # webserver_cache_control_enabled =
@@ -574,7 +590,8 @@ webserver_response_header_access_control_allow_origin = {{ platform_webserver_re
 {% endif %}
 
 # If true, allows the webserver to respond to insecure HTTP requests.
-{% if platform_webserver_http_enabled | string | length > 0 %}
+{% if ( (platform_webserver_http_enabled is defined) and
+        (platform_webserver_http_enabled is boolean) ) %}
 webserver_http_enabled = {{ platform_webserver_http_enabled | to_nice_json }}
 {% else %}
 # webserver_http_enabled =
@@ -588,7 +605,8 @@ webserver_http_port = {{ platform_webserver_http_port }}
 {% endif %}
 
 # If true, allows the webserver to respond to secure HTTPS requests.
-{% if platform_webserver_https_enabled | string | length > 0 %}
+{% if ( (platform_webserver_https_enabled is defined) and
+        (platform_webserver_https_enabled is boolean) ) %}
 webserver_https_enabled = {{ platform_webserver_https_enabled | to_nice_json }}
 {% else %}
 # webserver_https_enabled =
@@ -814,7 +832,8 @@ device_broker_run_command_adapter_preference = {{ platform_device_broker_run_com
 
 # If true, the platform will perform strict JSON Schema validation on messages into the brokers
 # and coming back to the broker layer from adapters.
-{% if platform_broker_validation_enabled | string | length > 0 %}
+{% if ( (platform_broker_validation_enabled is defined) and
+        (platform_broker_validation_enabled is boolean) ) %}
 broker_validation_enabled = {{ platform_broker_validation_enabled | to_nice_json }}
 {% else %}
 # broker_validation_enabled =
