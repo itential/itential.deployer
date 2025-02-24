@@ -26,15 +26,15 @@
       vars:
         offline_download_method: yum_module
         offline_download_packages: "{{ mongodb_packages + mongodb_package_dependencies }}"
-        offline_download_dir: "{{ offline_rpms_download_dir_target_node }}"
+        offline_download_dir: "{{ mongodb_target_node_rpms_dir }}"
 
     - name: Copy RPMs to control node
       ansible.builtin.import_role:
         name: offline
         tasks_from: fetch-packages
       vars:
-        offline_src_dir: "{{ offline_rpms_download_dir_target_node }}"
-        offline_dest_dir: "{{ offline_rpms_download_dir_control_node }}"
+        offline_src_dir: "{{ mongodb_target_node_rpms_dir }}"
+        offline_dest_dir: "{{ mongodb_control_node_rpms_dir }}"
 
 - name: Download Python packages
   tags: download_python_packages
@@ -48,21 +48,21 @@
         name: offline
         tasks_from: fetch-packages
       vars:
-        offline_src_dir: "{{ offline_rpms_download_dir_target_node }}"
-        offline_dest_dir: "{{ offline_rpms_download_dir_control_node }}"
+        offline_src_dir: "{{ mongodb_target_node_rpms_dir }}"
+        offline_dest_dir: "{{ mongodb_control_node_rpms_dir }}"
 
     - name: Copy base Python dependencies to control node
       ansible.builtin.import_role:
         name: offline
         tasks_from: fetch-packages
       vars:
-        offline_src_dir: "{{ offline_wheels_download_dir_target_node }}/base"
-        offline_dest_dir: "{{ offline_wheels_download_dir_control_node }}/base"
+        offline_src_dir: "{{ mongodb_target_node_wheels_dir }}/base"
+        offline_dest_dir: "{{ mongodb_control_node_wheels_dir }}/base"
 
     - name: Copy MongoDB Python dependencies to control node
       ansible.builtin.import_role:
         name: offline
         tasks_from: fetch-packages
       vars:
-        offline_src_dir: "{{ offline_wheels_download_dir_target_node }}/app"
-        offline_dest_dir: "{{ offline_wheels_download_dir_control_node }}/app"
+        offline_src_dir: "{{ mongodb_target_node_wheels_dir }}/app"
+        offline_dest_dir: "{{ mongodb_control_node_wheels_dir }}/app"

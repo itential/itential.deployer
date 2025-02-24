@@ -23,7 +23,10 @@ mongodb_python_venv_root: /var/tmp
 mongodb_python_venv_name: mongodb_venv
 mongodb_python_venv: "{{ mongodb_python_venv_root }}/{{ mongodb_python_venv_name }}"
 
-# Offline install settings
-# Refer to the offline variables in common_vars for additional settings
-offline_packages_path:  # noqa: var-naming[no-role-prefix]
-  "{{ offline_itential_packages_path }}/{{ platform_release }}/mongodb"
+# Offline directories
+mongodb_packages_root: "{{ offline_itential_packages_path }}/{{ platform_release }}/mongodb"
+
+mongodb_target_node_rpms_dir: "/var/tmp/{{ mongodb_packages_root }}/rpms"
+mongodb_control_node_rpms_dir: "{{ playbook_dir }}/files/{{ mongodb_packages_root }}/rpms"
+mongodb_target_node_wheels_dir: "/var/tmp/{{ mongodb_packages_root }}/wheels"
+mongodb_control_node_wheels_dir: "{{ playbook_dir }}/files/{{ mongodb_packages_root }}/wheels"
