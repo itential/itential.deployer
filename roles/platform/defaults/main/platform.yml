@@ -45,8 +45,3 @@ platform_disable_git_safe_repo_checks: true
 
 # Flag to prevent the NPM scripts from running when running the NPM install
 platform_npm_ignore_scripts: true
-
-# Offline install settings
-# Refer to the offline variables in common_vars for additional settings
-offline_packages_path:  # noqa: var-naming[no-role-prefix]
-  "{{ offline_itential_packages_path }}/{{ platform_release }}/platform"

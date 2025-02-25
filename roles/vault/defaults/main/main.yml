@@ -12,8 +12,3 @@ vault_group: vault
 
 # Default directory to store the unseal keys
 vault_unseal_keys_dir: "{{ vault_dir }}/keys/unseal_keys"
-
-# Offline install settings
-# Refer to the offline variables in common_vars for additional settings
-offline_packages_path:  # noqa: var-naming[no-role-prefix]
-  "{{ offline_itential_packages_path }}/{{ platform_release }}/vault"

@@ -67,7 +67,7 @@
             src: "{{ item }}"
             dest: "{{ redis_build_temp_dir.path }}/{{ item | basename }}"
             mode: '0644'
-          with_fileglob: "{{ archives_path }}/redis*.tar.gz"
+          with_fileglob: "{{ redis_offline_control_node_archives_dir }}/redis*.tar.gz"
 
         - name: Find Redis archive (offline)
           ansible.builtin.find:

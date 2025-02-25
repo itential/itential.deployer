@@ -8,15 +8,15 @@
   vars:
     offline_download_method: yum_module
     offline_download_packages: "{{ mongodb_python_packages }}"
-    offline_download_dir: "{{ mongodb_target_node_rpms_dir }}"
+    offline_download_dir: "{{ mongodb_offline_target_node_rpms_dir }}"
 
 - name: Copy RPMs to control node
   ansible.builtin.import_role:
     name: offline
     tasks_from: fetch-packages
   vars:
-    offline_src_dir: "{{ mongodb_target_node_rpms_dir }}"
-    offline_dest_dir: "{{ mongodb_control_node_rpms_dir }}"
+    offline_src_dir: "{{ mongodb_offline_target_node_rpms_dir }}"
+    offline_dest_dir: "{{ mongodb_offline_control_node_rpms_dir }}"
 
 - name: Install Python
   ansible.builtin.include_role:
@@ -31,7 +31,7 @@
     tasks_from: download-wheels
   vars:
     offline_wheel_files: "{{ mongodb_python_base_dependencies }}"
-    offline_download_dir: "{{ mongodb_target_node_wheels_dir }}/base"
+    offline_download_dir: "{{ mongodb_offline_target_node_wheels_dir }}/base"
     offline_pip_executable: "{{ mongodb_pip_executable }}"
   when:
     - mongodb_python_base_dependencies is defined
@@ -44,7 +44,7 @@
   vars:
     offline_with_deps: true
     offline_wheel_files: "{{ mongodb_python_app_dependencies }}"
-    offline_download_dir: "{{ mongodb_target_node_wheels_dir }}/app"
+    offline_download_dir: "{{ mongodb_offline_target_node_wheels_dir }}/app"
     offline_pip_executable: "{{ mongodb_pip_executable }}"
   when:
     - mongodb_python_app_dependencies is defined
@@ -56,4 +56,4 @@
     state: absent
     autoremove: true
   with_items: "{{ python_install_result.results | selectattr('changed', 'equalto', true)
-                  | map(attribute='item') }}"
+              | map(attribute='item') }}"

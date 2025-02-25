@@ -1,20 +1,19 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Validate offline_download_dir is set
+- name: Validate required variables are set
   ansible.builtin.assert:
-    that: offline_download_dir is defined
-    msg: "offline_download_dir must be set"
+    that:
+      - offline_download_dir is defined
+      - offline_download_method is defined
+      - offline_download_packages is defined
+    msg: offline_download_dir, offline_download_method and offline_download_packages must be set
 
-- name: Validate offline_download_method is set
+- name: Validate offline_download_method method
   ansible.builtin.assert:
-    that: offline_download_method is defined
-    msg: "offline_download_method must be set"
-
-- name: Validate offline_download_packages is set
-  ansible.builtin.assert:
-    that: offline_download_packages is defined
-    msg: "offline_download_packages must be set"
+    that: offline_download_method in
+          ['yum_module', 'yum_install', 'yum_reinstall', 'repotrack', 'yumdownloader', 'get_url']
+    msg: invalid download method
 
 - name: Download packages
   when:
@@ -22,20 +21,13 @@
     - offline_download_packages is iterable
     - offline_download_packages | length > 0
   block:
-    - name: Validate download method
-      ansible.builtin.fail:
-        msg: "invalid download method"
-      when: offline_download_method is not defined or
-            offline_download_method not in
-            ['yum_module', 'yum_install', 'yum_reinstall', 'repotrack', 'yumdownloader']
-
     - name: Create download directory
       ansible.builtin.file:
         path: "{{ offline_download_dir }}"
         state: directory
         mode: '0755'
 
-    - name: Download packages (ansible yum module)
+    - name: Download packages (ansible dnf module)
       ansible.builtin.dnf:
         name: "{{ offline_download_packages }}"
         state: present
@@ -79,3 +71,34 @@
                   {{ offline_download_packages | join(' ') }}"
           changed_when: true
           failed_when: false
+
+    - name: Download packages (get_url)
+      ansible.builtin.get_url:
+        url: "{{ package }}"
+        dest: "{{ offline_download_dir }}"
+        mode: '0755'
+        # Sets the appropriate header based on the repository type:
+        # - For JFrog: Uses the "X-JFrog-Art-Api" header with the API key if
+        #   "repository_api_key" is defined and "jfrog" is part of the download URL.
+        # - For Gitlab: Uses the "PRIVATE-TOKEN" header with the API key if
+        #   "repository_api_key" is defined and "gitlab" is part of the download URL.
+        # - For Nexus: Uses a default header ("Accept: application/octet-stream") since
+        #   Nexus doesn't support API key authentication.
+        headers: >-
+          {%- if repository_api_key is defined and package is search("jfrog") -%}
+            {"X-JFrog-Art-Api": "{{ repository_api_key }}", "Accept": "application/octet-stream"}
+          {%- elif repository_api_key is defined and package is search("gitlab") -%}
+            {"PRIVATE-TOKEN": "{{ repository_api_key }}", "Accept": "application/octet-stream"}
+          {%- else -%}
+            {"Accept": "application/octet-stream"}
+          {%- endif -%}
+        url_username: "{{ repository_username | default(omit) }}"
+        url_password: "{{ repository_password | default(omit) }}"
+        validate_certs: true
+      loop: "{{ offline_download_packages }}"
+      loop_control:
+        loop_var: package
+      when:
+        - offline_download_method == "get_url"
+        - "'http' in package"
+        - package.endswith('.rpm')

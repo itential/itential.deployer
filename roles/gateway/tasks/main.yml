@@ -37,6 +37,8 @@
   ansible.builtin.import_role:
     name: offline
     tasks_from: install-rpms
+  vars:
+    offline_rpms_path: "{{ gateway_offline_control_node_rpms_dir }}"
   when: offline_install_enabled
   tags: install_gateway_packages
 
@@ -117,7 +119,8 @@
 
         - name: Install collections
           ansible.builtin.command:
-            cmd: "ansible-galaxy collection install -p {{ iag_ansible_collections_path }} {{  iag_ansible_collections | join(' ') }}"
+            cmd: "ansible-galaxy collection install -p {{ iag_ansible_collections_path }}
+                 {{  iag_ansible_collections | join(' ') }}"
           register: install_result
           changed_when: '"Nothing to do" not in install_result.stdout'
           failed_when: install_result.failed
@@ -181,8 +184,10 @@
         dest: "{{ workingdir.path }}/"
         mode: '0644'
         # Sets the appropriate header based on the repository type:
-        # - For JFrog: Uses the "X-JFrog-Art-Api" header with the API key if "repository_api_key" is defined and "jfrog" is part of the download URL.
-        # - For Nexus: Uses a default header ("Accept: application/octet-stream") since Nexus doesn't support API key authentication.
+        # - For JFrog: Uses the "X-JFrog-Art-Api" header with the API key if "repository_api_key"
+        #   is defined and "jfrog" is part of the download URL.
+        # - For Nexus: Uses a default header ("Accept: application/octet-stream") since Nexus
+        #   doesn't support API key authentication.
         headers: >-
           {%- if repository_api_key is defined and iag_archive_download_url is search("jfrog") -%}
             {"X-JFrog-Art-Api": "{{ repository_api_key }}", "Accept": "application/octet-stream"}
@@ -320,3 +325,4 @@
     - gateway_build_packages is defined
     - gateway_build_packages is iterable
     - gateway_build_packages | length > 0
+    - not offline_install_enabled

@@ -11,4 +11,6 @@
   ansible.builtin.include_role:
     name: offline
     tasks_from: install-rpms
+  vars:
+    offline_rpms_path: "{{ platform_offline_control_node_rpms_dir }}/dependencies"
   when: offline_install_enabled

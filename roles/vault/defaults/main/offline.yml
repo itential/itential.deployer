@@ -1,0 +1,13 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+# Base directories
+vault_offline_packages_root: "{{ offline_itential_packages_path }}/{{ platform_release }}/vault"
+vault_offline_target_node_root: "/var/tmp/{{ vault_offline_packages_root }}"
+vault_offline_control_node_root: "{{ playbook_dir }}/files/{{ vault_offline_packages_root }}"
+
+# Target node download directories
+vault_offline_target_node_rpms_dir: "{{ vault_offline_target_node_root }}/rpms"
+
+# Control node download directories
+vault_offline_control_node_rpms_dir: "{{ vault_offline_control_node_root }}/rpms"

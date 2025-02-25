@@ -12,4 +12,4 @@
     name: offline
     tasks_from: install-rpms
   vars:
-    offline_rpms_path: "{{ mongodb_control_node_rpms_dir }}"
+    offline_rpms_path: "{{ mongodb_offline_control_node_rpms_dir }}"

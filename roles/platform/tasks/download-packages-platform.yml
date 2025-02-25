@@ -1,0 +1,19 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Download Itential Platform RPMs
+  ansible.builtin.import_role:
+    name: offline
+    tasks_from: download-rpms
+  vars:
+    offline_download_method: get_url
+    offline_download_packages: "{{ platform_packages }}"
+    offline_download_dir: "{{ platform_offline_target_node_rpms_dir }}/platform"
+
+- name: Copy Itential Platform RPMs to control node
+  ansible.builtin.import_role:
+    name: offline
+    tasks_from: fetch-packages
+  vars:
+    offline_src_dir: "{{ platform_offline_target_node_rpms_dir }}/platform"
+    offline_dest_dir: "{{ platform_offline_control_node_rpms_dir }}/platform"

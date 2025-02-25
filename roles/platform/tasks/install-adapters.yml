@@ -39,6 +39,10 @@
       ansible.builtin.set_fact:
         platform_adapters: "{{ platform_adapters | reject('search', item) }}"
       loop: "{{ installed_adapters }}"
+      when:
+        - installed_adapters is defined
+        - installed_adapters is iterable
+        - installed_adapters | length > 0
 
     # From the list of repos provided, extract the name of the adapter. This name
     # will be used in a later step to perform the npm install.
@@ -89,7 +93,7 @@
         name: offline
         tasks_from: install-adapter
       vars:
-        offline_src_adapters_path: "{{ adapters_download_dir_control_node }}"
+        offline_src_adapters_path: "{{ platform_offline_control_node_adapters_dir }}"
         offline_dest_adapters_path: "{{ platform_service_directory }}"
       loop: "{{ adapter_names }}"
       loop_control:
@@ -101,7 +105,8 @@
     # in the tree, 'chown -R ' does not, it just sets it.
     - name: Set appropriate ownership on all itential files
       ansible.builtin.command:
-        cmd: "chown -R {{ platform_user }}:{{ platform_group }} {{ platform_service_directory }}/{{ item }}"
+        cmd: "chown -R {{ platform_user }}:{{ platform_group }}
+             {{ platform_service_directory }}/{{ item }}"
       loop: "{{ adapter_names }}"
       changed_when: true
 

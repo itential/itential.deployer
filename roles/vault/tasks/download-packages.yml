@@ -20,13 +20,13 @@
     tasks_from: download-rpms
   vars:
     offline_download_method: yum_module
-    offline_download_packages: "{{ vault_packages }}"
-    offline_download_dir: "{{ offline_rpms_download_dir_target_node }}"
+    offline_download_packages: "{{ vault_packages | split }}"
+    offline_download_dir: "{{ vault_offline_target_node_rpms_dir }}"
 
 - name: Copy RPMs to control node
   ansible.builtin.import_role:
     name: offline
     tasks_from: fetch-packages
   vars:
-    offline_src_dir: "{{ offline_rpms_download_dir_target_node }}"
-    offline_dest_dir: "{{ offline_rpms_download_dir_control_node }}"
+    offline_src_dir: "{{ vault_offline_target_node_rpms_dir }}"
+    offline_dest_dir: "{{ vault_offline_control_node_rpms_dir }}"

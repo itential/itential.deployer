@@ -36,7 +36,7 @@
             name: offline
             tasks_from: install-wheels
           vars:
-            offline_wheels_dir: "{{ mongodb_control_node_wheels_dir }}/base"
+            offline_wheels_dir: "{{ mongodb_offline_control_node_wheels_dir }}/base"
             offline_python_venv: "{{ mongodb_python_venv }}"
 
         - name: Install application Python dependencies (offline)
@@ -44,5 +44,5 @@
             name: offline
             tasks_from: install-wheels
           vars:
-            offline_wheels_dir: "{{ mongodb_control_node_wheels_dir }}/app"
+            offline_wheels_dir: "{{ mongodb_offline_control_node_wheels_dir }}/app"
             offline_python_venv: "{{ mongodb_python_venv }}"

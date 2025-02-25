@@ -20,28 +20,53 @@
         - redis_packages is defined
         - redis_packages is search('remi')
 
+    - name: Download Redis dependency RPMs
+      ansible.builtin.import_role:
+        name: offline
+        tasks_from: download-rpms
+      vars:
+        offline_download_method: yum_module
+        offline_download_packages: "{{ redis_package_dependencies }} "
+        offline_download_dir: "{{ redis_offline_target_node_rpms_dir }}/dependencies"
+
+    - name: Copy Redis dependency RPMs to control node
+      ansible.builtin.import_role:
+        name: offline
+        tasks_from: fetch-packages
+      vars:
+        offline_src_dir: "{{ redis_offline_target_node_rpms_dir }}/dependencies"
+        offline_dest_dir: "{{ redis_offline_control_node_rpms_dir }}/dependencies"
+
     - name: Download Redis RPMs
       ansible.builtin.import_role:
         name: offline
         tasks_from: download-rpms
       vars:
         offline_download_method: yum_module
-        offline_download_packages: "{{ redis_packages + redis_package_dependencies }} "
-        offline_download_dir: "{{ offline_rpms_download_dir_target_node }}"
+        offline_download_packages: "{{ redis_packages }} "
+        offline_download_dir: "{{ redis_offline_target_node_rpms_dir }}/redis"
+
+    - name: Copy Redis RPMs to control node
+      ansible.builtin.import_role:
+        name: offline
+        tasks_from: fetch-packages
+      vars:
+        offline_src_dir: "{{ redis_offline_target_node_rpms_dir }}/redis"
+        offline_dest_dir: "{{ redis_offline_control_node_rpms_dir }}/redis"
 
 - name: Download source packages
   when: redis_install_from_source | bool
   block:
     - name: Create archives directory
       ansible.builtin.file:
-        path: "{{ offline_archives_download_dir_target_node }}"
+        path: "{{ redis_offline_target_node_archives_dir }}"
         state: directory
         mode: '0755'
 
     - name: Download Redis archive
       ansible.builtin.get_url:
         url: "{{ redis_source_url }}"
-        dest: "{{ offline_archives_download_dir_target_node }}"
+        dest: "{{ redis_offline_target_node_archives_dir }}"
         mode: "0644"
 
     - name: Copy Redis archive to control node
@@ -49,8 +74,8 @@
         name: offline
         tasks_from: fetch-packages
       vars:
-        offline_src_dir: "{{ offline_archives_download_dir_target_node }}"
-        offline_dest_dir: "{{ offline_archives_download_dir_control_node }}"
+        offline_src_dir: "{{ redis_offline_target_node_archives_dir }}"
+        offline_dest_dir: "{{ redis_offline_control_node_archives_dir }}"
 
     - name: Download Redis build RPMs
       ansible.builtin.import_role:
@@ -59,12 +84,12 @@
       vars:
         offline_download_method: yum_module
         offline_download_packages: "{{ redis_build_packages }}"
-        offline_download_dir: "{{ offline_rpms_download_dir_target_node }}"
+        offline_download_dir: "{{ redis_offline_target_node_rpms_dir }}/build"
 
-- name: Copy RPMs to control node
-  ansible.builtin.import_role:
-    name: offline
-    tasks_from: fetch-packages
-  vars:
-    offline_src_dir: "{{ offline_rpms_download_dir_target_node }}"
-    offline_dest_dir: "{{ offline_rpms_download_dir_control_node }}"
+    - name: Copy Redis build RPMs to control node
+      ansible.builtin.import_role:
+        name: offline
+        tasks_from: fetch-packages
+      vars:
+        offline_src_dir: "{{ redis_offline_target_node_rpms_dir }}/build"
+        offline_dest_dir: "{{ redis_offline_control_node_rpms_dir }}/build"

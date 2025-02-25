@@ -33,7 +33,7 @@
   register: repolist_result
   changed_when: false
 
-- name: Install RPMs
+- name: Install RPMs (ansible dnf module)
   ansible.builtin.dnf:
     name: "{{ rpm_list.files | map(attribute='path') | list | sort }}"
     state: present
@@ -42,6 +42,17 @@
     install_weak_deps: false
     enablerepo: []
     disablerepo: "{{ repolist_result.stdout_lines[1:] | map('split', ' ') | map('first') | list }}"
+  when: offline_use_rpm_cmd is not defined or not offline_use_rpm_cmd | bool
+
+- name: Install RPMs (rpm)  # noqa command-instead-of-module
+  ansible.builtin.command:
+    cmd: "rpm -i {{ offline_rpm_cmd_opts }}
+         {{ rpm_list.files | map(attribute='path') | list | sort | join(' ') }}"
+  register: install_result
+  changed_when: install_result.rc == 0
+  when:
+    - offline_use_rpm_cmd is defined
+    - offline_use_rpm_cmd | bool
 
 - name: Remove temporary working directory
   ansible.builtin.file:

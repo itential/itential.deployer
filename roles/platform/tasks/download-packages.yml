@@ -15,44 +15,38 @@
       ansible.builtin.include_tasks:
         file: validate-vars.yml
 
-# TODO: Remove?
-# - name: Download MongoDB packages
-#   ansible.builtin.include_tasks:
-#     file: download-packages-mongodb.yml
+- name: Download Platform packages
+  tags: download_platform
+  block:
+    - name: Download Platform packages
+      ansible.builtin.include_tasks:
+        file: download-packages-platform.yml
+
+- name: Download Platform dependency packages
+  tags: download_dependencies
+  block:
+    - name: Download Platform dependency packages
+      ansible.builtin.include_tasks:
+        file: download-packages-os.yml
 
 - name: Download NodeJS packages
-  ansible.builtin.include_tasks:
-    file: download-packages-nodejs.yml
+  tags: download_nodejs
+  block:
+    - name: Download NodeJS packages
+      ansible.builtin.include_tasks:
+        file: download-packages-nodejs.yml
 
 - name: Download Python packages
-  ansible.builtin.include_tasks:
-    file: download-packages-python.yml
+  tags: download_python
+  block:
+    - name: Download Python packages
+      ansible.builtin.include_tasks:
+        file: download-packages-python.yml
 
 - name: Download Adapter packages
-  ansible.builtin.include_tasks:
-    file: download-adapters.yml
-  when: itential_adapters is defined
-
-- name: Copy RPMs to control node
-  ansible.builtin.import_role:
-    name: offline
-    tasks_from: fetch-packages
-  vars:
-    offline_src_dir: "{{ offline_rpms_download_dir_target_node }}"
-    offline_dest_dir: "{{ offline_rpms_download_dir_control_node }}"
-
-- name: Copy base Python dependencies to control node
-  ansible.builtin.import_role:
-    name: offline
-    tasks_from: fetch-packages
-  vars:
-    offline_src_dir: "{{ offline_wheels_download_dir_target_node }}/base"
-    offline_dest_dir: "{{ offline_wheels_download_dir_control_node }}/base"
-
-- name: Copy Itential Platform Python dependencies to control node
-  ansible.builtin.import_role:
-    name: offline
-    tasks_from: fetch-packages
-  vars:
-    offline_src_dir: "{{ offline_wheels_download_dir_target_node }}/app"
-    offline_dest_dir: "{{ offline_wheels_download_dir_control_node }}/app"
+  tags: download_adapters
+  block:
+    - name: Download Adapter packages
+      ansible.builtin.include_tasks:
+        file: download-adapters.yml
+      when: platform_adapters is defined

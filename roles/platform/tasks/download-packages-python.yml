@@ -8,15 +8,15 @@
   vars:
     offline_download_method: yum_module
     offline_download_packages: "{{ platform_python_packages }}"
-    offline_download_dir: "{{ offline_rpms_download_dir_target_node }}"
+    offline_download_dir: "{{ platform_offline_target_node_rpms_dir }}/python"
 
-- name: Copy RPMs to control node
+- name: Copy Python RPMs to control node
   ansible.builtin.import_role:
     name: offline
     tasks_from: fetch-packages
   vars:
-    offline_src_dir: "{{ offline_rpms_download_dir_target_node }}"
-    offline_dest_dir: "{{ offline_rpms_download_dir_control_node }}"
+    offline_src_dir: "{{ platform_offline_target_node_rpms_dir }}/python"
+    offline_dest_dir: "{{ platform_offline_control_node_rpms_dir }}/python"
 
 - name: Install Python
   ansible.builtin.include_tasks:
@@ -29,11 +29,19 @@
     tasks_from: download-wheels
   vars:
     offline_wheel_files: "{{ platform_python_base_dependencies }}"
-    offline_download_dir: "{{ offline_wheels_download_dir_target_node }}/base"
+    offline_download_dir: "{{ platform_offline_target_node_wheels_dir }}/base"
     offline_pip_executable: "{{ platform_pip_executable }}"
   when:
     - platform_python_base_dependencies is defined
     - platform_python_base_dependencies | length > 0
+
+- name: Copy base Python dependencies to control node
+  ansible.builtin.import_role:
+    name: offline
+    tasks_from: fetch-packages
+  vars:
+    offline_src_dir: "{{ platform_offline_target_node_wheels_dir }}/base"
+    offline_dest_dir: "{{ platform_offline_control_node_wheels_dir }}/base"
 
 - name: Download Itential Platform Python dependencies
   ansible.builtin.import_role:
@@ -42,11 +50,19 @@
   vars:
     offline_with_deps: true
     offline_wheel_files: "{{ platform_python_app_dependencies }}"
-    offline_download_dir: "{{ offline_wheels_download_dir_target_node }}/app"
+    offline_download_dir: "{{ platform_offline_target_node_wheels_dir }}/app"
     offline_pip_executable: "{{ platform_pip_executable }}"
   when:
     - platform_python_app_dependencies is defined
     - platform_python_app_dependencies | length > 0
+
+- name: Copy Itential Platform Python dependencies to control node
+  ansible.builtin.import_role:
+    name: offline
+    tasks_from: fetch-packages
+  vars:
+    offline_src_dir: "{{ platform_offline_target_node_wheels_dir }}/app"
+    offline_dest_dir: "{{ platform_offline_control_node_wheels_dir }}/app"
 
 - name: Uninstall Python RPMs
   ansible.builtin.dnf:
@@ -54,4 +70,4 @@
     state: absent
     autoremove: true
   with_items: "{{ python_install_result.results | selectattr('changed', 'equalto', true)
-                    | map(attribute='item') }}"
+              | map(attribute='item') }}"
