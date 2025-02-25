@@ -57,7 +57,3 @@ iag_http_server_threads: "{{ ansible_processor_cores * 4 }}"
 # Python virtual environment settings
 iag_venv_name: venv
 python_venv: "{{ iag_install_dir }}/{{ iag_venv_name }}"
-
-# Offline install settings
-# Refer to the offline variables in common_vars for additional settings
-packages_path: "{{ itential_packages_path }}/{{ iag_release }}/iag"

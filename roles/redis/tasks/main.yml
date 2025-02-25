@@ -20,7 +20,7 @@
             file: install-common.yml
 
         - name: Include tasks to perform online installation
-          when: not offline_install
+          when: not offline_install_enabled
           block:
             - name: Include tasks to install Redis using source
               ansible.builtin.include_tasks:
@@ -35,7 +35,7 @@
         - name: Include tasks to perform offline installation
           ansible.builtin.include_tasks:
             file: install-offline.yml
-          when: offline_install
+          when: offline_install_enabled
 
         - name: Include tasks to configure SELinux
           ansible.builtin.include_tasks:

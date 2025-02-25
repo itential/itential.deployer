@@ -34,4 +34,4 @@
     - name: Print Vault installation details
       ansible.builtin.debug:
         msg: "Vault packages: {{ vault_packages }}"
-      when: not offline_install
+      when: not offline_install_enabled

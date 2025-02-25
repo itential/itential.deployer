@@ -4,58 +4,49 @@
 - name: Validate offline and role vars
   tags: always
   block:
-    - name: Validate offline_install variable
+    - name: Validate offline_install_enabled variable
       ansible.builtin.fail:
-        msg: offline_install must be set to false for download
+        msg: offline_install_enabled must be set to false for download
       when:
-        - offline_install is defined
-        - offline_install
+        - offline_install_enabled is defined
+        - offline_install_enabled
 
     - name: Validate role vars
       ansible.builtin.include_tasks:
         file: validate-vars.yml
 
-- name: Download OS packages
-  ansible.builtin.include_tasks:
-    file: download-packages-os.yml
+- name: Download Platform packages
+  tags: download_platform
+  block:
+    - name: Download Platform packages
+      ansible.builtin.include_tasks:
+        file: download-packages-platform.yml
 
-- name: Download MongoDB packages
-  ansible.builtin.include_tasks:
-    file: download-packages-mongodb.yml
+- name: Download Platform dependency packages
+  tags: download_dependencies
+  block:
+    - name: Download Platform dependency packages
+      ansible.builtin.include_tasks:
+        file: download-packages-os.yml
 
 - name: Download NodeJS packages
-  ansible.builtin.include_tasks:
-    file: download-packages-nodejs.yml
+  tags: download_nodejs
+  block:
+    - name: Download NodeJS packages
+      ansible.builtin.include_tasks:
+        file: download-packages-nodejs.yml
 
 - name: Download Python packages
-  ansible.builtin.include_tasks:
-    file: download-packages-python.yml
+  tags: download_python
+  block:
+    - name: Download Python packages
+      ansible.builtin.include_tasks:
+        file: download-packages-python.yml
 
 - name: Download Adapter packages
-  ansible.builtin.include_tasks:
-    file: download-adapters.yml
-  when: itential_adapters is defined or custom_adapters is defined
-
-- name: Copy rpms to control node
-  ansible.builtin.import_role:
-    name: offline
-    tasks_from: fetch-packages
-  vars:
-    src_dir: "{{ rpms_download_dir_target_node }}"
-    dest_dir: "{{ rpms_download_dir_control_node }}"
-
-- name: Copy base Python dependencies to control node
-  ansible.builtin.import_role:
-    name: offline
-    tasks_from: fetch-packages
-  vars:
-    src_dir: "{{ wheels_download_dir_target_node }}/base"
-    dest_dir: "{{ wheels_download_dir_control_node }}/base"
-
-- name: Copy Itential Platform Python dependencies to control node
-  ansible.builtin.import_role:
-    name: offline
-    tasks_from: fetch-packages
-  vars:
-    src_dir: "{{ wheels_download_dir_target_node }}/app"
-    dest_dir: "{{ wheels_download_dir_control_node }}/app"
+  tags: download_adapters
+  block:
+    - name: Download Adapter packages
+      ansible.builtin.include_tasks:
+        file: download-adapters.yml
+      when: platform_adapters is defined

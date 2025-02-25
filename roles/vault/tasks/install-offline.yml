@@ -5,3 +5,5 @@
   ansible.builtin.import_role:
     name: offline
     tasks_from: install-rpms
+  vars:
+    offline_rpms_path: "{{ vault_offline_control_node_rpms_dir }}"
