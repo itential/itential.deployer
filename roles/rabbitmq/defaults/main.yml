@@ -63,4 +63,5 @@ rabbitmq_epmd_port: "{{ rabbitmq_default_epmd_port }}"
 
 # Offline install settings
 # Refer to the offline variables in common_vars for additional settings
-packages_path: "{{ itential_packages_path }}/{{ platform_release }}/rabbitmq"
+packages_path:  # noqa: var-naming[no-role-prefix]
+  "{{ offline_itential_packages_path }}/{{ platform_release }}/rabbitmq"

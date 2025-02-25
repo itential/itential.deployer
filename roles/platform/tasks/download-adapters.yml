@@ -33,18 +33,18 @@
         tasks_from: download-adapters
       vars:
         offline_adapters: "{{ platform_adapters }}"
-        offline_download_dir: "{{ adapters_download_dir_target_node }}"
+        offline_download_dir: "{{ platform_offline_target_node_adapters_dir }}"
 
     - name: Find all downloaded adapters
       ansible.builtin.find:
-        paths: "{{ adapters_download_dir_target_node }}"
+        paths: "{{ platform_offline_target_node_adapters_dir }}"
         patterns: "*.tgz"
       register: found_adapters
 
     - name: Copy adapters to control node
       ansible.builtin.fetch:
         src: "{{ item.path }}"
-        dest: "{{ adapters_download_dir_control_node }}/"
+        dest: "{{ platform_offline_control_node_adapters_dir }}/"
         flat: true
       with_items: "{{ found_adapters.files }}"
 
@@ -53,11 +53,13 @@
     name: "{{ item }}"
     state: absent
     autoremove: true
-  with_items: "{{ install_result.results | selectattr('changed', 'equalto', true) | map(attribute='item') }}"
+  with_items: "{{ install_result.results | selectattr('changed', 'equalto', true)
+              | map(attribute='item') }}"
 
 - name: Uninstall nodejs packages
   ansible.builtin.dnf:
     name: "{{ item }}"
     state: absent
     autoremove: true
-  with_items: "{{ nodejs_install_result.results | selectattr('changed', 'equalto', true) | map(attribute='item') }}"
+  with_items: "{{ nodejs_install_result.results | selectattr('changed', 'equalto', true)
+              | map(attribute='item') }}"

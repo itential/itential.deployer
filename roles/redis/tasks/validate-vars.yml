@@ -92,7 +92,7 @@
             - not redis_install_from_source | bool
 
     - name: Print Redis installation details
-      when: not offline_install
+      when: not offline_install_enabled
       block:
         - name: Print Redis installation details when installing from source
           ansible.builtin.debug:

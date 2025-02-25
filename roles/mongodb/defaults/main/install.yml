@@ -22,7 +22,3 @@ mongodb_python_app_dependencies:
 mongodb_python_venv_root: /var/tmp
 mongodb_python_venv_name: mongodb_venv
 mongodb_python_venv: "{{ mongodb_python_venv_root }}/{{ mongodb_python_venv_name }}"
-
-# Offline install settings
-# Refer to the offline variables in common_vars for additional settings
-packages_path: "{{ itential_packages_path }}/{{ platform_release }}/mongodb"  # noqa: var-naming[no-role-prefix]
