@@ -107,8 +107,8 @@
 
 - name: Download wheel files
   ansible.builtin.command:
-    cmd: offline_install/bin/pip3 download -r requirements.txt
-         -d "{{ gateway_offline_target_node_wheels_dir }}/app"
+    cmd: "offline_install/bin/pip3 download -r requirements.txt
+         -d {{ gateway_offline_target_node_wheels_dir }}/app"
   args:
     chdir: "{{ iag_pkgs_temp_dir.path }}"
   changed_when: true

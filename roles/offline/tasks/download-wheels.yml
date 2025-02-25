@@ -29,7 +29,7 @@
   args:
     chdir: "{{ offline_download_dir }}"
   changed_when: true
-  when: offline_with_deps is not defined or not offline_with_deps
+  when: offline_with_deps is not defined or not offline_with_deps | bool
 
 # Package dependencies will be downloaded.
 - name: Download wheel files (with deps)
@@ -40,4 +40,4 @@
   changed_when: true
   when:
     - offline_with_deps is defined
-    - offline_with_deps
+    - offline_with_deps | bool

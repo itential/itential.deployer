@@ -22,8 +22,3 @@ redis_build_packages:
 #  - redis_packages contains 'remi'
 redis_remi_repo_url: "http://rpms.remirepo.net/enterprise/remi-release-{{ ansible_distribution_major_version }}.rpm"
 redis_epel_repo_url: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_distribution_major_version }}.noarch.rpm"
-
-# Offline install settings
-# Refer to the offline variables in common_vars for additional settings
-offline_packages_path:  # noqa: var-naming[no-role-prefix]
-  "{{ offline_itential_packages_path }}/{{ platform_release }}/redis"
