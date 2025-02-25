@@ -9,11 +9,8 @@ redis_packages_default:
     - "@redis:remi-7.2"
   "9":
     - "@redis:remi-7.2"
-  "2023":
-    - "@redis:remi-7.2"
 
 # The redis_source_url_default is used when the redis_install_from_source is set to 'false'
 redis_source_url_default:
   "8": "https://github.com/redis/redis/archive/7.2.4.tar.gz"
   "9": "https://github.com/redis/redis/archive/7.2.4.tar.gz"
-  "2023": "https://github.com/redis/redis/archive/7.2.4.tar.gz"
