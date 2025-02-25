@@ -4,30 +4,38 @@
 - name: Validate and set installation variables
   tags: always
   block:
-    - name: Validate an installation variable is set
-      ansible.builtin.assert:
-        that: >
-          (platform_release is defined) or
-          (mongodb_version is defined and
-           mongodb_packages is defined and
-           mongodb_python_packages is defined)
-        fail_msg: >-
-          platform_release must be defined OR
-          mongodb_version, mongodb_packages, and mongodb_python_packages must be defined
+    # - name: Validate an installation variable is set
+    #   ansible.builtin.assert:
+    #     that: >
+    #       (platform_release is defined) or
+    #       (mongodb_version is defined and
+    #        mongodb_packages is defined and
+    #        mongodb_python_packages is defined)
+    #     fail_msg: >-
+    #       platform_release must be defined OR
+    #       mongodb_version, mongodb_packages, and mongodb_python_packages must be defined
 
-    - name: Validate installation variables when not using platform_release
-      ansible.builtin.assert:
-        that:
-          - mongodb_version is defined
-          - mongodb_packages is defined
-          - mongodb_python_packages is defined
-        fail_msg: >-
-          mongodb_version, mongodb_packages, and mongodb_python_packages
-          must be defined when platform_release is not defined
-      when: platform_release is not defined
+    # - name: Validate installation variables when not using platform_release
+    #   ansible.builtin.assert:
+    #     that:
+    #       - mongodb_version is defined
+    #       - mongodb_packages is defined
+    #       - mongodb_python_packages is defined
+    #     fail_msg: >-
+    #       mongodb_version, mongodb_packages, and mongodb_python_packages
+    #       must be defined when platform_release is not defined
+    #   when: platform_release is not defined
+    - name: Validate MongoDB vars
+      itential.deployer.mongodb_validate_vars:
+        platform_release: "{{ platform_release | default(omit) }}"
+        mongodb_version: "{{ mongodb_version | default(omit) }}"
+        mongodb_packages: "{{ mongodb_packages | default(omit) }}"
+        mongodb_python_packages: "{{ mongodb_python_packages | default(omit) }}"
+      register: validate
 
     - name: Set installation variables when using Itential Platform release defaults
-      when: platform_release is defined
+      # when: platform_release is defined
+      when: not validate.override_defaults
       block:
         - name: Load Itential Platform release default variables
           ansible.builtin.include_vars:
