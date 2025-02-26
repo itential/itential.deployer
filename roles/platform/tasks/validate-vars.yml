@@ -71,24 +71,32 @@
             fail_msg: >-
               Deployer does not support installing Itential Platform release {{ platform_release }}"
 
-        - name: Set platform_nodejs_package to the default value when not defined in inventory
+        - name: Set platform_nodejs_package to the default value
+                when not defined in inventory
           ansible.builtin.set_fact:
-            platform_nodejs_package: "{{ platform_nodejs_package_default[ansible_distribution_major_version] }}"
+            platform_nodejs_package:
+              "{{ platform_nodejs_package_default[ansible_distribution_major_version] }}"
           when: platform_nodejs_package is not defined
 
-        - name: Set platform_python_version to the default value when not defined in inventory
+        - name: Set platform_python_version to the default value
+                when not defined in inventory
           ansible.builtin.set_fact:
-            platform_python_version: "{{ platform_python_version_default[ansible_distribution_major_version] }}"
+            platform_python_version:
+              "{{ platform_python_version_default[ansible_distribution_major_version] }}"
           when: platform_python_version is not defined
 
-        - name: Set platform_python_packages to the default value when not defined in inventory
+        - name: Set platform_python_packages to the default value
+                when not defined in inventory
           ansible.builtin.set_fact:
-            platform_python_packages: "{{ platform_python_packages_default[ansible_distribution_major_version] }}"
+            platform_python_packages:
+              "{{ platform_python_packages_default[ansible_distribution_major_version] }}"
           when: platform_python_packages is not defined
 
-        - name: Set platform_python_app_dependencies to the default value when not defined in inventory
+        - name: Set platform_python_app_dependencies to the default value
+                when not defined in inventory
           ansible.builtin.set_fact:
-            platform_python_app_dependencies: "{{ platform_python_app_dependencies_default[ansible_distribution_major_version] }}"
+            platform_python_app_dependencies:
+              "{{ platform_python_app_dependencies_default[ansible_distribution_major_version] }}"
           when: platform_python_app_dependencies is not defined
 
     - name: Print Itential Platform installation details
