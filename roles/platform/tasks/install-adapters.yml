@@ -39,6 +39,10 @@
       ansible.builtin.set_fact:
         platform_adapters: "{{ platform_adapters | reject('search', item) }}"
       loop: "{{ installed_adapters }}"
+      when:
+        - installed_adapters is defined
+        - installed_adapters is iterable
+        - installed_adapters | length > 0
 
     # From the list of repos provided, extract the name of the adapter. This name
     # will be used in a later step to perform the npm install.
@@ -50,7 +54,7 @@
         adapter_names: []
 
     - name: Install adapters
-      when: not offline_install
+      when: not offline_install_enabled
       block:
         - name: Git clone adapter # noqa: latest (always clone the latest)
           ansible.builtin.git:
@@ -89,19 +93,20 @@
         name: offline
         tasks_from: install-adapter
       vars:
-        src_adapters_path: "{{ adapters_download_dir_control_node }}"
-        dest_adapters_path: "{{ platform_service_directory }}"
+        offline_src_adapters_path: "{{ platform_offline_control_node_adapters_dir }}"
+        offline_dest_adapters_path: "{{ platform_service_directory }}"
       loop: "{{ adapter_names }}"
       loop_control:
         loop_var: adapter_name
-      when: offline_install
+      when: offline_install_enabled
 
     # Using chown and chmod is a faster way to enforce the file ownership and
     # permissions. The file module in ansible checks each and every file/dir
     # in the tree, 'chown -R ' does not, it just sets it.
     - name: Set appropriate ownership on all itential files
       ansible.builtin.command:
-        cmd: "chown -R {{ platform_user }}:{{ platform_group }} {{ platform_service_directory }}/{{ item }}"
+        cmd: "chown -R {{ platform_user }}:{{ platform_group }}
+             {{ platform_service_directory }}/{{ item }}"
       loop: "{{ adapter_names }}"
       changed_when: true
 

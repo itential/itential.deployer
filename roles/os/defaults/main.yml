@@ -1,7 +1,0 @@
-# Copyright (c) 2024, Itential, Inc
-# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
----
-
-# Offline install settings
-# Refer to the offline variables in common_vars for additional settings
-packages_path: "{{ itential_packages_path }}/{{ platform_release }}/os"

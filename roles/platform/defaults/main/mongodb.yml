@@ -11,7 +11,7 @@ platform_mongo_user: itential
 platform_mongo_password: itential
 
 # The name of the database that the MongoDB user must authenticate against.
-platform_mongo_auth_db: admin
+platform_mongo_auth_db:
 
 # If true, the server will not check if it is connecting to a compatible MongoDB version.
 platform_mongo_bypass_version_check: false
@@ -35,7 +35,7 @@ platform_mongo_tls_allow_invalid_certificates: false
 platform_mongo_tls_ca_file:
 
 # Deprecated in favor of the `mongo_tls_enabled` property.
-platform_mongo_ssl_enabled: false
+platform_mongo_ssl_enabled:
 
 # Deprecated in favor of the `mongo_tls_allow_invalid_certificates` property.
 platform_mongo_ssl_accept_invalid_certs:

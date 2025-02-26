@@ -101,4 +101,4 @@
           - "Python packages: {{ platform_python_packages }}"
           - "Python base dependencies: {{ platform_python_base_dependencies }}"
           - "Python Platform dependencies: {{ platform_python_app_dependencies }}"
-      when: not offline_install
+      when: not offline_install_enabled

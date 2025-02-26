@@ -8,15 +8,15 @@
       ansible.builtin.package_facts:
         manager: "auto"
 
-    - name: Install MongoDB packages (online)
+    - name: Install MongoDB packages
       ansible.builtin.include_tasks:
         file: install-mongodb-online.yml
-      when: not offline_install
+      when: not offline_install_enabled
 
     - name: Install MongoDB packages (offline)
       ansible.builtin.include_tasks:
         file: install-mongodb-offline.yml
-      when: offline_install
+      when: offline_install_enabled
 
 # Update yum config to prevent mongodb from getting updated by yum updates
 - name: Prevent yum from updating mongo

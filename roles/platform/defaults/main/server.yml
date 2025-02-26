@@ -15,20 +15,6 @@ platform_server_id: "{{ inventory_hostname }}"
 # A whitelist of services (applications/adapters) to initialize on startup of the platform.
 # If no value is given, all services will be initialized.
 platform_services:
-  - AGManager
-  - FormBuilder
-  - WorkFlowEngine
-  - MOP,OperationsManager
-  - LifecycleManager
-  - ConfigurationManager
-  - Search
-  - Jst
-  - Tags
-  - TemplateBuilder
-  - JsonForms
-  - WorkflowBuilder
-  - AutomationStudio
-  - Local AAA
 
 # The service type that will be denied CRUD operation access.
 platform_service_blacklist:

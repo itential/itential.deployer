@@ -1,11 +1,19 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Download NodeJS rpm
+- name: Download NodeJS RPMs
   ansible.builtin.import_role:
     name: offline
     tasks_from: download-rpms
   vars:
-    download_method: yum_module
-    download_packages: "{{ platform_nodejs_package }}"
-    download_dir: "{{ rpms_download_dir_target_node }}"
+    offline_download_method: yum_module
+    offline_download_packages: "{{ platform_nodejs_package | split }}"
+    offline_download_dir: "{{ platform_offline_target_node_rpms_dir }}/nodejs"
+
+- name: Copy RPMs to control node
+  ansible.builtin.import_role:
+    name: offline
+    tasks_from: fetch-packages
+  vars:
+    offline_src_dir: "{{ platform_offline_target_node_rpms_dir }}/nodejs"
+    offline_dest_dir: "{{ platform_offline_control_node_rpms_dir }}/nodejs"

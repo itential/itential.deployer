@@ -5,11 +5,12 @@
   hosts: all
   become: true
   vars:
-    offline_install: false
+    offline_install_enabled: false
   roles:
     - role: itential.deployer.common_vars
+    - role: itential.deployer.offline
   tasks:
-    - name: Download OS packages
+    - name: Download OS packages  # noqa run-once
       ansible.builtin.import_role:
         name: itential.deployer.os
         tasks_from: download-packages

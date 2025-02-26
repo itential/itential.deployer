@@ -1,61 +1,74 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Create temporary download directory
-  ansible.builtin.tempfile:
-    state: directory
-  register: downloaddir
-  changed_when: false
+- name: Online install
+  when: not offline_install_enabled
+  block:
+    - name: Create temporary download directory
+      ansible.builtin.tempfile:
+        state: directory
+      register: downloaddir
+      changed_when: false
 
-- name: Upload artifacts from control node
-  ansible.builtin.include_tasks:
-    file: upload-platform-archive-from-local.yml
-  loop: "{{ platform_packages }}"
-  loop_control:
-    loop_var: artifact
-  when:
-    - "'http' not in artifact"
-    - artifact.endswith('.rpm')
+    - name: Upload packages from control node
+      ansible.builtin.include_tasks:
+        file: upload-platform-archive-from-local.yml
+      loop: "{{ platform_packages }}"
+      loop_control:
+        loop_var: artifact
+      when:
+        - "'http' not in artifact"
+        - artifact.endswith('.rpm')
 
-- name: Download artifacts from repository
-  ansible.builtin.include_tasks:
-    file: download-platform-archive-from-repo.yml
-  loop: "{{ platform_packages }}"
-  loop_control:
-    loop_var: artifact
-  when:
-    - "'http' in artifact"
-    - artifact.endswith('.rpm')
+    - name: Download packages from repository
+      ansible.builtin.include_tasks:
+        file: download-platform-archive-from-repo.yml
+      loop: "{{ platform_packages }}"
+      loop_control:
+        loop_var: artifact
+      when:
+        - "'http' in artifact"
+        - artifact.endswith('.rpm')
 
-- name: Find downloaded artifacts
-  ansible.builtin.find:
-    paths: "{{ downloaddir.path }}"
-    patterns: "*.rpm"
-  register: downloaded_platform_packages
-  changed_when: false
+    - name: Find downloaded packages
+      ansible.builtin.find:
+        paths: "{{ downloaddir.path }}"
+        patterns: "*.rpm"
+      register: downloaded_platform_packages
+      changed_when: false
 
-- name: Install the Itential Platform packages (local)
-  ansible.builtin.dnf:
-    name: "{{ downloaded_platform_packages.files | map(attribute='path') | join(',') }}"
-    disable_gpg_check: true
-    state: present
-  when: downloaded_platform_packages | length > 0
+    - name: Install the Itential Platform packages (local)
+      ansible.builtin.dnf:
+        name: "{{ downloaded_platform_packages.files | map(attribute='path') | join(',') }}"
+        disable_gpg_check: true
+        state: present
+      when: downloaded_platform_packages | length > 0
 
-# Placeholder - we don't support installing from a yum repo yet
-# - name: Install the Itential Platform packages (YUM repository)
-#   ansible.builtin.dnf:
-#     name: "{{ item.path }}"
-#     disable_gpg_check: true
-#     state: present
-#   loop: "{{ platform_packages }}"
-#   loop_control:
-#     loop_var: artifact
-#   when:
-#     - "'http' not in artifact"
-#     - not artifact.endswith('.rpm')
+    # TODO: Implement installing from a yum repo
+    # - name: Install the Itential Platform packages (YUM repository)
+    #   ansible.builtin.dnf:
+    #     name: "{{ item.path }}"
+    #     disable_gpg_check: true
+    #     state: present
+    #   loop: "{{ platform_packages }}"
+    #   loop_control:
+    #     loop_var: artifact
+    #   when:
+    #     - "'http' not in artifact"
+    #     - not artifact.endswith('.rpm')
 
-- name: Remove temporary download directory
-  ansible.builtin.file:
-    path: "{{ downloaddir.path }}"
-    state: absent
-  changed_when: false
+    - name: Remove temporary download directory
+      ansible.builtin.file:
+        path: "{{ downloaddir.path }}"
+        state: absent
+      changed_when: false
+
+- name: Install Platform (offline)
+  ansible.builtin.include_role:
+    name: offline
+    tasks_from: install-rpms
+  vars:
+    offline_rpms_path: "{{ platform_offline_control_node_rpms_dir }}/platform"
+    offline_use_rpm_cmd: true
+    offline_rpm_cmd_opts: --noscripts
+  when: offline_install_enabled
