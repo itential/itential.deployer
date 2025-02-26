@@ -1,8 +1,10 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Install NodeJS
-  when: not offline_install_enabled
+- name: Install NodeJS on RedHat (online)
+  when:
+    - ansible_distribution == "RedHat"
+    - not offline_install
   block:
     # Enable and install the module if the profile is defined
     # https://dnf.readthedocs.io/en/latest/command_ref.html#module-switch-to-command-label
@@ -13,7 +15,7 @@
       when: "'/' in platform_nodejs_package"
 
     # Install the module if the profile is not defined
-    - name: DNF install NodeJS
+    - name: DNF install nodejs
       ansible.builtin.dnf:
         name: "{{ item }}"
         state: present
@@ -21,10 +23,42 @@
       with_items: "{{ platform_nodejs_package }}"
       when: "'/' not in platform_nodejs_package"
 
+- name: Install nodejs AL23 on Amazon Linux (online)
+  when:
+    - ansible_distribution == "Amazon"
+    - not offline_install
+  block:
+    - name: Create temp working dir
+      ansible.builtin.tempfile:
+        state: directory
+      register: workingdir
+
+    - name: Download NodeJS repo install script
+      ansible.builtin.get_url:
+        url: "{{ platform_nodejs_url }}"
+        dest: "{{ workingdir.path }}/{{ platform_nodejs_url | basename }}"
+        mode: "0755"
+
+    # This will install the appropriate yum repo for nodejs
+    - name: Install appropriate nodejs yum repo
+      ansible.builtin.command: "{{ workingdir.path }}/{{ platform_nodejs_url | basename }}"
+      changed_when: true
+
+    # This will perform the actual install of nodejs
+    - name: Yum install nodejs
+      ansible.builtin.dnf:
+        name: nodejs
+        state: present
+
+    - name: Remove workingdir
+      ansible.builtin.file:
+        path: "{{ workingdir.path }}"
+        state: absent
+
 - name: Install NodeJS (offline)
   ansible.builtin.include_role:
     name: offline
     tasks_from: install-rpms
   vars:
     offline_rpms_path: "{{ platform_offline_control_node_rpms_dir }}/nodejs"
-  when: offline_install_enabled
+  when: offline_install
