@@ -23,7 +23,7 @@
       with_items: "{{ platform_nodejs_package }}"
       when: "'/' not in platform_nodejs_package"
 
-- name: Install NodeJS AL23 on Amazon Linux (online)
+- name: Install NodeJS AL23 on Amazon Linux
   when:
     - ansible_distribution == "Amazon"
     - not offline_install_enabled
