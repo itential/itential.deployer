@@ -69,6 +69,4 @@
     tasks_from: install-rpms
   vars:
     offline_rpms_path: "{{ platform_offline_control_node_rpms_dir }}/platform"
-    offline_use_rpm_cmd: true
-    offline_rpm_cmd_opts: --noscripts
   when: offline_install_enabled
