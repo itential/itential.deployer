@@ -4,7 +4,7 @@
 - name: Install NodeJS on RedHat (online)
   when:
     - ansible_distribution == "RedHat"
-    - not offline_install
+    - not offline_install_enabled
   block:
     # Enable and install the module if the profile is defined
     # https://dnf.readthedocs.io/en/latest/command_ref.html#module-switch-to-command-label
@@ -15,7 +15,7 @@
       when: "'/' in platform_nodejs_package"
 
     # Install the module if the profile is not defined
-    - name: DNF install nodejs
+    - name: DNF install NodeJS
       ansible.builtin.dnf:
         name: "{{ item }}"
         state: present
@@ -23,10 +23,10 @@
       with_items: "{{ platform_nodejs_package }}"
       when: "'/' not in platform_nodejs_package"
 
-- name: Install nodejs AL23 on Amazon Linux (online)
+- name: Install NodeJS AL23 on Amazon Linux (online)
   when:
     - ansible_distribution == "Amazon"
-    - not offline_install
+    - not offline_install_enabled
   block:
     - name: Create temp working dir
       ansible.builtin.tempfile:
@@ -39,15 +39,13 @@
         dest: "{{ workingdir.path }}/{{ platform_nodejs_url | basename }}"
         mode: "0755"
 
-    # This will install the appropriate yum repo for nodejs
-    - name: Install appropriate nodejs yum repo
+    - name: Install nodejs yum repo
       ansible.builtin.command: "{{ workingdir.path }}/{{ platform_nodejs_url | basename }}"
       changed_when: true
 
-    # This will perform the actual install of nodejs
-    - name: Yum install nodejs
+    - name: Install NodeJS
       ansible.builtin.dnf:
-        name: nodejs
+        name: "{{ platform_nodejs_package }}"
         state: present
 
     - name: Remove workingdir
@@ -61,4 +59,4 @@
     tasks_from: install-rpms
   vars:
     offline_rpms_path: "{{ platform_offline_control_node_rpms_dir }}/nodejs"
-  when: offline_install
+  when: offline_install_enabled

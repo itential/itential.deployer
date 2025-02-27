@@ -93,7 +93,7 @@
 
         - name: Set platform_nodejs_url to the default value when not defined in inventory
           ansible.builtin.set_fact:
-            platform_nodejs_url: "{{ platform_nodejs_url_default }}"
+            platform_nodejs_url: "{{ platform_nodejs_url_default[ansible_distribution_major_version] }}"
           when: platform_nodejs_url is not defined
 
     - name: Print Itential Platform installation details
@@ -106,5 +106,5 @@
           - "Python packages: {{ platform_python_packages }}"
           - "Python base dependencies: {{ platform_python_base_dependencies }}"
           - "Python Platform dependencies: {{ platform_python_app_dependencies }}"
-          - "Platform nodejs URL: {{ platform_nodejs_url }}"
+          - "Platform NodeJS URL: {{ platform_nodejs_url }}"
       when: not offline_install_enabled
