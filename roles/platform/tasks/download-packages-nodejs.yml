@@ -15,7 +15,7 @@
         dest: "{{ workingdir.path }}/{{ platform_nodejs_url | basename }}"
         mode: "0755"
 
-    - name: Install nodejs yum repo
+    - name: Install NodeJS yum repo
       ansible.builtin.command: "{{ workingdir.path }}/{{ platform_nodejs_url | basename }}"
       changed_when: true
 
