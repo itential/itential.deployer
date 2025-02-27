@@ -114,5 +114,4 @@
           - "Python packages: {{ platform_python_packages }}"
           - "Python base dependencies: {{ platform_python_base_dependencies }}"
           - "Python Platform dependencies: {{ platform_python_app_dependencies }}"
-          - "Platform NodeJS URL: {{ platform_nodejs_url }}"
       when: not offline_install_enabled
