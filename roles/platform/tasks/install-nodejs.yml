@@ -23,35 +23,19 @@
       with_items: "{{ platform_nodejs_package }}"
       when: "'/' not in platform_nodejs_package"
 
-- name: Install NodeJS AL23 on Amazon Linux
+- name: Install NodeJS on Amazon Linux
   when:
     - ansible_distribution == "Amazon"
     - not offline_install_enabled
   block:
-    - name: Create temp working dir
-      ansible.builtin.tempfile:
-        state: directory
-      register: workingdir
-
-    - name: Download NodeJS repo install script
-      ansible.builtin.get_url:
-        url: "{{ platform_nodejs_url }}"
-        dest: "{{ workingdir.path }}/{{ platform_nodejs_url | basename }}"
-        mode: "0755"
-
-    - name: Install nodejs yum repo
-      ansible.builtin.command: "{{ workingdir.path }}/{{ platform_nodejs_url | basename }}"
-      changed_when: true
+    - name: Install NodeJS repo
+      ansible.builtin.import_tasks:
+        file: install-nodejs-repo.yml
 
     - name: Install NodeJS
       ansible.builtin.dnf:
         name: "{{ platform_nodejs_package }}"
         state: present
-
-    - name: Remove workingdir
-      ansible.builtin.file:
-        path: "{{ workingdir.path }}"
-        state: absent
 
 - name: Install NodeJS (offline)
   ansible.builtin.include_role:
