@@ -11,11 +11,8 @@ profile_id = {{ platform_profile_id }}
 {% endif %}
 
 # The file path to the directory containing additional services (applications and adapters).
-{% if platform_service_directory %}
-service_directory = {{ platform_service_directory }}
-{% else %}
+{# The service_directory cannot be configured #}
 # service_directory =
-{% endif %}
 
 # An identifier for the server instance. This is used to uniquely identify the server in a
 # multi-server environment. If not provided, the server will generate one on startup.
