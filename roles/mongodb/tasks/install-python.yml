@@ -4,13 +4,13 @@
 - name: Install Python and its dependencies
   tags: install_python
   block:
-    # TODO: Do we need to install python if we're using the system python?
-    # - name: Install Python
-    #   ansible.builtin.include_role:
-    #     name: python
-    #   vars:
-    #     python_executable: "{{ mongodb_python_executable }}"
-    #     python_packages: "{{ mongodb_python_packages }}"
+
+    - name: Install Python
+      ansible.builtin.include_role:
+        name: python
+      vars:
+        python_executable: "{{ mongodb_python_executable }}"
+        python_packages: "{{ mongodb_python_packages }}"
 
     - name: Setup python virtual environment
       ansible.builtin.command:
