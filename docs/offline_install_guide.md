@@ -28,7 +28,7 @@ For example, for a Redhat 9 installation, the control node root download directo
 
 Under the root download directory, there will be subdirectories for each component and package type on both the control node and target nodes.  Not all components have every package type.
 
-For example, here is the directory structure on a target node for an All-in-one deployment (Redis, RabbitMQ, MongoDB, Vault and Itential Platform) on a RedHat 9 server:
+For example, here is the directory structure on a target node for an All-in-one deployment (Redis, MongoDB, Vault and Itential Platform) on a RedHat 9 server:
 
 _Example: Directory Structure on Target Node - AIO_
 
@@ -46,8 +46,6 @@ itential_packages/
         │   ├── rpms
         │   └── wheels
         ├── os
-        │   └── rpms
-        ├── rabbitmq
         │   └── rpms
         ├── redis
         │   └── rpms
@@ -96,8 +94,6 @@ files/itential_packages
         │   └── wheels
         ├── os
         │   └── rpms
-        ├── rabbitmq
-        │   └── rpms
         ├── redis
         │   └── rpms
         └── vault
@@ -134,7 +130,7 @@ The download playbooks override the offline_install_enabled variable to false si
 
 ## Running the Install Playbooks in Offline Mode
 
-After all applicable download playbooks are executed, the normal install playbooks can be executed in offline mode.  
+After all applicable download playbooks are executed, the normal install playbooks can be executed in offline mode.
 
 Once the offline_install_enabled variable is set to true, run the install playbooks as you normally would.  For example:
 
@@ -198,12 +194,6 @@ In offline mode, the install playbooks will use the packages downloaded to the c
 | Variable           | Group | Type   | Description       | Default |
 | :----------------- | :---- | :----- | :---------------- | :------ |
 | `os_packages_path` | `all` | String | OS packages path. | `{{ itential_packages_path }}/{{ platform_release }}/os` |
-
-### RabbitMQ
-
-| Variable                 | Group | Type   | Description             | Default |
-| :----------------------- | :---- | :----- | :---------------------- | :------ |
-| `rabbitmq_packages_path` | `all` | String | RabbitMQ packages path. | `{{ itential_packages_path }}/{{ platform_release }}/rabbitmq` |
 
 ### Redis
 
