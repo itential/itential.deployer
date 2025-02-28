@@ -2,9 +2,9 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
 platform_nodejs_package_default:
-  "8": "@nodejs:20"
-  "9": "@nodejs:20"
-  "2023": "@nodejs:20"
+  "8": "@nodejs:22"
+  "9": "@nodejs:22"
+  "2023": "@nodejs:22"
 
 platform_python_version_default:
   "8": 3.11
@@ -39,5 +39,5 @@ platform_python_app_dependencies_default:
     - pymongo
     - textfsm==1.1.3
 
-platform_nodejs_url_default: 
-    - "2023": "https://rpm.nodesource.com/setup_20.x"
+platform_nodejs_url_default:
+    - "2023": "https://rpm.nodesource.com/setup_22.x"
