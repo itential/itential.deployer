@@ -102,7 +102,9 @@
         - name: Set platform_nodejs_url to the default value when not defined in inventory
           ansible.builtin.set_fact:
             platform_nodejs_url: "{{ platform_nodejs_url_default[ansible_distribution_major_version] }}"
-          when: platform_nodejs_url is not defined
+          when:
+            - platform_nodejs_url is not defined
+            - ansible_distribution | lower == "amazon"
 
     - name: Print Itential Platform installation details
       ansible.builtin.debug:
