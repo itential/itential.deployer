@@ -1,6 +1,9 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
+
+# TODO: Do we still need to support the primary/secondary concept?
+
 - name: Create the platform.properties file
   ansible.builtin.template:
     src: "{{ platform_release }}-properties.j2"
@@ -12,12 +15,10 @@
     backup: true
   vars:
     profile_name: Local_AAA
-  when:
-    - groups["platform_secondary"] is not defined or groups["platform_secondary"] | length < 1
+  when: groups["platform_secondary"] is not defined or groups["platform_secondary"] | length < 1
 
 - name: Create the Itential properties.json files for advanced prod builds
-  when:
-    - groups["platform_secondary"] is defined and groups["platform_secondary"] | length > 0
+  when: groups["platform_secondary"] is defined and groups["platform_secondary"] | length > 0
   block:
     - name: Create the platform.properties file for the primary
       ansible.builtin.template:

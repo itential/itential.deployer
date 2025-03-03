@@ -1,7 +1,7 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Download MongoDB rpms
+- name: Download MongoDB RPMs
   when: platform_bootstrap_configs | bool
   block:
     - name: Install MongoDB repo
@@ -14,11 +14,19 @@
         gpgkey: "{{ mongodb_gpgkey_url }}"
       when: install_yum_repos | bool
 
-    - name: Download MongoDB rpms
+    - name: Download MongoDB RPMs
       ansible.builtin.import_role:
         name: offline
         tasks_from: download-rpms
       vars:
-        download_method: yum_module
-        download_packages: "{{ platform_mongodb_tools_packages }}"
-        download_dir: "{{ rpms_download_dir_target_node }}"
+        offline_download_method: yum_module
+        offline_download_packages: "{{ platform_mongodb_tools_packages }}"
+        offline_download_dir: "{{ offline_rpms_download_dir_target_node }}"
+
+    - name: Copy RPMs to control node
+      ansible.builtin.import_role:
+        name: offline
+        tasks_from: fetch-packages
+      vars:
+        offline_src_dir: "{{ offline_rpms_download_dir_target_node }}"
+        offline_dest_dir: "{{ offline_rpms_download_dir_control_node }}"

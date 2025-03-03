@@ -1,6 +1,10 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
+redis_package_dependencies:
+  - selinux-policy
+  - selinux-policy-targeted
+
 # Redis install from source - boolean
 # When set to 'true' Redis will be installed from source.  Otherwise Redis will be installed from YUM.
 redis_install_from_source: true
@@ -18,7 +22,3 @@ redis_build_packages:
 #  - redis_packages contains 'remi'
 redis_remi_repo_url: "http://rpms.remirepo.net/enterprise/remi-release-{{ ansible_distribution_major_version }}.rpm"
 redis_epel_repo_url: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_distribution_major_version }}.noarch.rpm"
-
-# Offline install settings
-# Refer to the offline variables in common_vars for additional settings
-packages_path: "{{ itential_packages_path }}/{{ platform_release }}/redis"  # noqa: var-naming[no-role-prefix]

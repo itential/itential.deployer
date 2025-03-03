@@ -1,6 +1,23 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
+platform_package_dependencies:
+  - glibc-common
+  - openldap
+  - openldap-clients
+  - openssl
+  - git
+
+platform_python_base_dependencies:
+  - pip
+  - setuptools
+  - wheel
+
+# The python and pip executable locations.
+# These will be symlinks to the appropriate executables in /usr/bin.
+platform_python_executable: "/usr/bin/python{{ platform_python_version }}"
+platform_pip_executable: "/usr/bin/pip{{ platform_python_version }}"
+
 # Should the platform configure and add any IAG adapters that it
 # discovers? Based on the presence of devices in the gateway group
 # this will build adapter configs for each that it finds and insert
@@ -28,7 +45,3 @@ platform_disable_git_safe_repo_checks: true
 
 # Flag to prevent the NPM scripts from running when running the NPM install
 platform_npm_ignore_scripts: true
-
-# Offline install settings
-# Refer to the offline variables in common_vars for additional settings
-packages_path: "{{ itential_platform_packages_path }}/{{ platform_release }}/platform"  # noqa: var-naming[no-role-prefix]

@@ -6,16 +6,12 @@
     file: validate-vars.yml
   tags: always
 
-- name: Install base OS packages
-  ansible.builtin.include_role:
-    name: os
-  tags: install_base_os_packages
-
 # Installs all the necessary components and dependencies for MongoDB.
 # This will start the server with the simplest config.
 - name: Install MongoDB and all necessary components
   ansible.builtin.import_tasks:
     file: install-mongodb.yml
+  notify: Update Itential release file
   tags: install_mongodb
 
 # This will configure MongoDB according to the variables defined in the
@@ -25,25 +21,4 @@
   ansible.builtin.import_tasks:
     file: configure-mongodb.yml
   tags: configure_mongodb
-  when: mongodb_auth | bool or mongodb_tls | bool or mongodb_replication | bool
-
-- name: Determine MongoDB version
-  ansible.builtin.shell:
-    cmd: set -o pipefail && mongod --version | grep "db version" | cut -d" " -f3
-  register: result
-  check_mode: false
-  changed_when: false
-  failed_when: result.rc != 0 and result.rc != 127
-
-- name: Set mongo version variable
-  ansible.builtin.set_fact:
-    mongodb_release: "{{ result.stdout }}"
-  when: result.stdout | int < 5
-
-- name: Write mongodb release information
-  ansible.builtin.lineinfile:
-    path: "{{ itential_release_file }}"
-    regexp: '^MONGODB='
-    line: "MONGODB={{ mongodb_release }}"
-    create: true
-    mode: "0644"
+  when: mongodb_auth_enabled | bool or mongodb_tls_enabled | bool or mongodb_replication_enabled | bool

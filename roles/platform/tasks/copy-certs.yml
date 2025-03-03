@@ -1,6 +1,10 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
+
+# TODO:  Do we want to continue to support copying the cert?
+#        Should the cert/key be copied to /etc/ssl?
+
 - name: Put the HTTPS key file in the correct location
   ansible.builtin.copy:
     remote_src: true
@@ -27,5 +31,5 @@
     group: "{{ platform_group }}"
     owner: "{{ platform_user }}"
   when:
-    - mongodb_tls | bool
+    - mongodb_tls_enabled | bool
     - platform_mongodb_root_ca_file_source is defined

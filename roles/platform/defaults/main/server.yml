@@ -5,9 +5,6 @@
 # Not required for installations that are using environment variables or a properties file.
 platform_profile_id:
 
-# The file path to the directory containing additional services (applications and adapters).
-platform_service_directory: /opt/itential/platform/services
-
 # An identifier for the server instance. This is used to uniquely identify the server in a multi-server environment.
 # If not provided, the server will generate one on startup.
 platform_server_id: "{{ inventory_hostname }}"
@@ -15,20 +12,6 @@ platform_server_id: "{{ inventory_hostname }}"
 # A whitelist of services (applications/adapters) to initialize on startup of the platform.
 # If no value is given, all services will be initialized.
 platform_services:
-  - AGManager
-  - FormBuilder
-  - WorkFlowEngine
-  - MOP,OperationsManager
-  - LifecycleManager
-  - ConfigurationManager
-  - Search
-  - Jst
-  - Tags
-  - TemplateBuilder
-  - JsonForms
-  - WorkflowBuilder
-  - AutomationStudio
-  - Local AAA
 
 # The service type that will be denied CRUD operation access.
 platform_service_blacklist:

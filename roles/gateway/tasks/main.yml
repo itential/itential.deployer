@@ -16,23 +16,18 @@
         msg: "Deployer does not support installing Gateway version {{ iag_release }} on {{ ansible_distribution }}-{{ ansible_distribution_major_version }}"
       when: invalid_iag_release is defined
 
-- name: Install base OS packages
-  ansible.builtin.include_role:
-    name: os
-  tags: install_base_os_packages
-
 - name: Create temporary working directory
   ansible.builtin.tempfile:
     state: directory
   register: workingdir
 
-- name: Install Gateway packages (online)
+- name: Install Gateway packages
   ansible.builtin.dnf:
     name: "{{ item }}"
     state: present
   with_items: "{{ gateway_packages }}"
   when:
-    - not offline_install
+    - not offline_install_enabled
     - gateway_packages is defined
     - gateway_packages is iterable
     - gateway_packages | length > 0
@@ -42,7 +37,9 @@
   ansible.builtin.import_role:
     name: offline
     tasks_from: install-rpms
-  when: offline_install
+  vars:
+    offline_rpms_path: "{{ gateway_offline_control_node_rpms_dir }}"
+  when: offline_install_enabled
   tags: install_gateway_packages
 
 - name: Create itential group
@@ -113,7 +110,7 @@
   when: iag_enable_ansible | bool
   block:
     - name: Install Ansible and Ansible collections
-      when: not offline_install
+      when: not offline_install_enabled
       block:
         - name: Install Ansible into the python virtual environment
           ansible.builtin.pip:
@@ -122,7 +119,8 @@
 
         - name: Install collections
           ansible.builtin.command:
-            cmd: "ansible-galaxy collection install -p {{ iag_ansible_collections_path }} {{  iag_ansible_collections | join(' ') }}"
+            cmd: "ansible-galaxy collection install -p {{ iag_ansible_collections_path }}
+                 {{  iag_ansible_collections | join(' ') }}"
           register: install_result
           changed_when: '"Nothing to do" not in install_result.stdout'
           failed_when: install_result.failed
@@ -134,7 +132,7 @@
     - name: Install Ansible collections (offline)
       ansible.builtin.include_tasks:
         file: install-ansible-collections-offline.yml
-      when: offline_install
+      when: offline_install_enabled
 
     - name: Create Ansible config file
       ansible.builtin.template:
@@ -186,8 +184,10 @@
         dest: "{{ workingdir.path }}/"
         mode: '0644'
         # Sets the appropriate header based on the repository type:
-        # - For JFrog: Uses the "X-JFrog-Art-Api" header with the API key if "repository_api_key" is defined and "jfrog" is part of the download URL.
-        # - For Nexus: Uses a default header ("Accept: application/octet-stream") since Nexus doesn't support API key authentication.
+        # - For JFrog: Uses the "X-JFrog-Art-Api" header with the API key if "repository_api_key"
+        #   is defined and "jfrog" is part of the download URL.
+        # - For Nexus: Uses a default header ("Accept: application/octet-stream") since Nexus
+        #   doesn't support API key authentication.
         headers: >-
           {%- if repository_api_key is defined and iag_archive_download_url is search("jfrog") -%}
             {"X-JFrog-Art-Api": "{{ repository_api_key }}", "Accept": "application/octet-stream"}
@@ -325,3 +325,4 @@
     - gateway_build_packages is defined
     - gateway_build_packages is iterable
     - gateway_build_packages | length > 0
+    - not offline_install_enabled

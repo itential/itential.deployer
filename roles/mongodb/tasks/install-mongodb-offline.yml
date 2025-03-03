@@ -7,7 +7,9 @@
     line: exclude=mongodb-org*
     state: absent
 
-- name: Install MongoDB rpms (offline)
+- name: Install MongoDB RPMs (offline)
   ansible.builtin.import_role:
     name: offline
     tasks_from: install-rpms
+  vars:
+    offline_rpms_path: "{{ mongodb_offline_control_node_rpms_dir }}"

@@ -1,3 +1,4 @@
+{# TODO: Can this file be removed? #}
 {# Sensible default SSL props #}
 {% set acceptInvalidCerts = True %}
 {% set checkServerIdentity = False %}
@@ -14,7 +15,7 @@ defined in the host file.
   {% set url = platform_mongobdb_svc_url_localaaa %}
 {% else %}
   {% set mongodb_hosts = [] %}
-  {% if mongodb_replication | bool %}
+  {% if mongodb_replication_enabled | bool %}
     {% for h in groups['mongodb'] %}
       {{ mongodb_hosts.append( h + ":" + mongodb_port|string) }}
     {% endfor %}
@@ -28,7 +29,7 @@ defined in the host file.
   {% endif %}
 {% endif %}
 {# Override TLS defaults if it is enabled #}
-{% if mongodb_tls | bool %}
+{% if mongodb_tls_enabled | bool %}
   {% set sslEnabled = True %}
   {% set acceptInvalidCerts = False %}
   {% set checkServerIdentity = True %}
@@ -75,7 +76,7 @@ defined in the host file.
     "properties": {
       "database": {
         "credentials": {
-          "dbAuth": {{ mongodb_auth | bool | to_json }},
+          "dbAuth": {{ mongodb_auth_enabled | bool | to_json }},
           "passwd": "{{ mongodb_user_localaaa_password }}",
           "user": "localaaa"
         },

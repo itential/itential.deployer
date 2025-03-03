@@ -6,11 +6,6 @@
     file: validate-vars.yml
   tags: always
 
-- name: Install base OS packages
-  ansible.builtin.include_role:
-    name: os
-  tags: install_base_os_packages
-
 - name: Install and configure Redis
   notify:
     - Enable and Start Redis
@@ -18,13 +13,14 @@
   block:
     - name: Install Redis
       tags: install_redis
+      notify: Update Itential release file
       block:
         - name: Include common installation tasks
           ansible.builtin.include_tasks:
             file: install-common.yml
 
         - name: Include tasks to perform online installation
-          when: not offline_install
+          when: not offline_install_enabled
           block:
             - name: Include tasks to install Redis using source
               ansible.builtin.include_tasks:
@@ -39,7 +35,12 @@
         - name: Include tasks to perform offline installation
           ansible.builtin.include_tasks:
             file: install-offline.yml
-          when: offline_install
+          when: offline_install_enabled
+
+        - name: Include tasks to configure SELinux
+          ansible.builtin.include_tasks:
+            file: configure-selinux.yml
+          when: ansible_selinux.status == "enabled"
 
     - name: Configure Redis/Sentinel
       tags: configure_redis
@@ -51,24 +52,4 @@
         - name: Include tasks to configure Sentinel
           ansible.builtin.include_tasks:
             file: configure-sentinel.yml
-          when: redis_replication | bool
-
-- name: Update Itential release file
-  tags: update_release_file
-  block:
-    - name: Determine redis version
-      ansible.builtin.shell:
-        cmd: 'set -o pipefail && redis-server --version | cut -d" " -f3 | cut -d"=" -f2'
-      register: result
-      check_mode: false
-      changed_when: false
-      failed_when: result.rc != 0
-      environment:
-        PATH: "{{ ansible_env.PATH }}:{{ redis_bin_dir }}"
-
-    - name: Write redis release information
-      ansible.builtin.lineinfile:
-        path: "{{ itential_release_file }}"
-        line: "REDIS={{ result.stdout }}"
-        create: true
-        mode: "0644"
+          when: redis_replication_enabled | bool

@@ -7,7 +7,7 @@
 # with a keyFile or x509 certificate. The following block will create this key file,
 # distribute it to each node, and set the appropriate ownership and permissions.
 - name: Create replica set keyfile
-  when: mongodb_replication | bool
+  when: mongodb_replication_enabled | bool
   block:
 
     - name: Ensure that the directory exists for the certificates and key files

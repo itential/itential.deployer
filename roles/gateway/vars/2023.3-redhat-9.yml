@@ -4,6 +4,8 @@
 gateway_packages:
   - gcc-c++
   - make
+  - selinux-policy
+  - selinux-policy-targeted
 
 gateway_build_packages:
   - gcc-c++

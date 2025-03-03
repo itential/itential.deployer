@@ -1,0 +1,20 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Determine redis version
+  ansible.builtin.shell:
+    cmd: 'set -o pipefail && redis-server --version | cut -d" " -f3 | cut -d"=" -f2'
+  register: result
+  check_mode: false
+  changed_when: false
+  failed_when: result.rc != 0
+  environment:
+    PATH: "{{ ansible_env.PATH }}:{{ redis_bin_dir }}"
+
+- name: Write redis release information
+  ansible.builtin.lineinfile:
+    path: "{{ itential_release_file }}"
+    regexp: "^REDIS="
+    line: "REDIS={{ result.stdout }}"
+    create: true
+    mode: "0644"

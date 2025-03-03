@@ -1,8 +1,10 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Install nodejs if RHEL 8 or 9 (online)
-  when: not offline_install
+- name: Install NodeJS on RedHat (online)
+  when:
+    - ansible_distribution == "RedHat"
+    - not offline_install_enabled
   block:
     # Enable and install the module if the profile is defined
     # https://dnf.readthedocs.io/en/latest/command_ref.html#module-switch-to-command-label
@@ -13,10 +15,32 @@
       when: "'/' in platform_nodejs_package"
 
     # Install the module if the profile is not defined
-    - name: DNF install nodejs
+    - name: DNF install NodeJS
       ansible.builtin.dnf:
         name: "{{ item }}"
         state: present
       register: nodejs_install_result
       with_items: "{{ platform_nodejs_package }}"
       when: "'/' not in platform_nodejs_package"
+
+- name: Install NodeJS on Amazon Linux
+  when:
+    - ansible_distribution == "Amazon"
+    - not offline_install_enabled
+  block:
+    - name: Install NodeJS repo
+      ansible.builtin.import_tasks:
+        file: install-nodejs-repo.yml
+
+    - name: Install NodeJS
+      ansible.builtin.dnf:
+        name: "{{ platform_nodejs_package }}"
+        state: present
+
+- name: Install NodeJS (offline)
+  ansible.builtin.include_role:
+    name: offline
+    tasks_from: install-rpms
+  vars:
+    offline_rpms_path: "{{ platform_offline_control_node_rpms_dir }}/nodejs"
+  when: offline_install_enabled

@@ -1,6 +1,12 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
+mongodb_package_dependencies:
+  - selinux-policy
+  - selinux-policy-targeted
+  - tuned
+  - audit
+
 mongodb_release_url: "https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/{{ mongodb_version }}/$basearch/"
 mongodb_gpgkey_url: "https://www.mongodb.org/static/pgp/server-{{ mongodb_version }}.asc"
 
@@ -16,7 +22,3 @@ mongodb_python_app_dependencies:
 mongodb_python_venv_root: /var/tmp
 mongodb_python_venv_name: mongodb_venv
 mongodb_python_venv: "{{ mongodb_python_venv_root }}/{{ mongodb_python_venv_name }}"
-
-# Offline install settings
-# Refer to the offline variables in common_vars for additional settings
-packages_path: "{{ itential_packages_path }}/{{ platform_release }}/mongodb"  # noqa: var-naming[no-role-prefix]

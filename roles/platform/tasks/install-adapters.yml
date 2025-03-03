@@ -9,7 +9,7 @@
   when: platform_disable_git_safe_repo_checks
 
 - name: Install any configured adapters
-  notify: Restart Itential Platform
+  notify: Enable and Start Platform
   when:
     - platform_adapters is defined
     - platform_adapters is iterable
@@ -17,7 +17,7 @@
   block:
     - name: Ensure adapters directory exists
       ansible.builtin.file:
-        path: "{{ platform_service_directory }}"
+        path: "{{ platform_service_dir }}"
         owner: "{{ platform_user }}"
         group: "{{ platform_group }}"
         mode: '0775'
@@ -25,7 +25,7 @@
 
     - name: Find all adapters already installed
       ansible.builtin.find:
-        paths: "{{ platform_service_directory }}"
+        paths: "{{ platform_service_dir }}"
         recurse: false
         file_type: directory
       register: installed_adapters_result
@@ -39,6 +39,10 @@
       ansible.builtin.set_fact:
         platform_adapters: "{{ platform_adapters | reject('search', item) }}"
       loop: "{{ installed_adapters }}"
+      when:
+        - installed_adapters is defined
+        - installed_adapters is iterable
+        - installed_adapters | length > 0
 
     # From the list of repos provided, extract the name of the adapter. This name
     # will be used in a later step to perform the npm install.
@@ -50,12 +54,12 @@
         adapter_names: []
 
     - name: Install adapters
-      when: not offline_install
+      when: not offline_install_enabled
       block:
         - name: Git clone adapter # noqa: latest (always clone the latest)
           ansible.builtin.git:
             repo: "{{ item }}"
-            dest: "{{ platform_service_directory }}/{{ adapter_names[i] }}"
+            dest: "{{ platform_service_dir }}/{{ adapter_names[i] }}"
             force: true
           loop: "{{ platform_adapters | default([], true) }}"
           loop_control:
@@ -65,7 +69,7 @@
         - name: Unzip adapter archive
           ansible.builtin.unarchive:
             src: "{{ item }}"
-            dest: "{{ platform_service_directory }}"
+            dest: "{{ platform_service_dir }}"
           loop: "{{ platform_adapters | default([], true) }}"
           loop_control:
             index_var: i
@@ -73,14 +77,14 @@
 
         - name: Delete package-lock.json file
           ansible.builtin.file:
-            path: "{{ platform_service_directory }}/{{ item }}/package-lock.json"
+            path: "{{ platform_service_dir }}/{{ item }}/package-lock.json"
             state: absent
           loop: "{{ adapter_names }}"
           when: platform_delete_package_lock_file
 
         - name: Run npm install
           community.general.npm:
-            path: "{{ platform_service_directory }}/{{ item }}"
+            path: "{{ platform_service_dir }}/{{ item }}"
             ignore_scripts: "{{ platform_npm_ignore_scripts }}"
           loop: "{{ adapter_names }}"
 
@@ -89,25 +93,26 @@
         name: offline
         tasks_from: install-adapter
       vars:
-        src_adapters_path: "{{ adapters_download_dir_control_node }}"
-        dest_adapters_path: "{{ platform_service_directory }}"
+        offline_src_adapters_path: "{{ platform_offline_control_node_adapters_dir }}"
+        offline_dest_adapters_path: "{{ platform_service_dir }}"
       loop: "{{ adapter_names }}"
       loop_control:
         loop_var: adapter_name
-      when: offline_install
+      when: offline_install_enabled
 
     # Using chown and chmod is a faster way to enforce the file ownership and
     # permissions. The file module in ansible checks each and every file/dir
     # in the tree, 'chown -R ' does not, it just sets it.
     - name: Set appropriate ownership on all itential files
       ansible.builtin.command:
-        cmd: "chown -R {{ platform_user }}:{{ platform_group }} {{ platform_service_directory }}/{{ item }}"
+        cmd: "chown -R {{ platform_user }}:{{ platform_group }}
+             {{ platform_service_dir }}/{{ item }}"
       loop: "{{ adapter_names }}"
       changed_when: true
 
     - name: Set appropriate permissions on all itential files
       ansible.builtin.command:
-        cmd: "chmod -R 775 {{ platform_service_directory }}/{{ item }}"
+        cmd: "chmod -R 775 {{ platform_service_dir }}/{{ item }}"
       loop: "{{ adapter_names }}"
       changed_when: true
 

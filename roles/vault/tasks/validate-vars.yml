@@ -4,15 +4,13 @@
 - name: Validate and set installation variables
   tags: always
   block:
-    - name: Validate installation variables
+    - name: Validate an installation variable is set
       ansible.builtin.assert:
         that: platform_release is defined or vault_packages is defined
-        msg: "Either platform_release or vault_packages must be defined"
+        fail_msg: "platform_release OR vault_packages must be defined"
 
     - name: Set installation variables when using Itential Platform release defaults
-      when:
-        - platform_release is defined
-        - vault_packages is not defined
+      when: platform_release is defined
       block:
         - name: Load release default variables
           ansible.builtin.include_vars:
@@ -24,13 +22,16 @@
         - name: Check for valid Vault release
           ansible.builtin.assert:
             that: vault_invalid_platform_release is not defined
-            msg: "Deployer does not support installing Vault for Itential Platform version {{ platform_release }}"
+            fail_msg: >-
+              Deployer does not support installing Vault
+              for Itential Platform release {{ platform_release }}
 
         - name: Set vault_packages to the default value when not defined in inventory
           ansible.builtin.set_fact:
             vault_packages: "{{ vault_packages_default[ansible_distribution_major_version] }}"
+          when: vault_packages is not defined
 
     - name: Print Vault installation details
       ansible.builtin.debug:
         msg: "Vault packages: {{ vault_packages }}"
-      when: not offline_install
+      when: not offline_install_enabled

@@ -24,12 +24,12 @@
         - name: Include online installation tasks
           ansible.builtin.include_tasks:
             file: install-online.yml
-          when: not offline_install
+          when: not offline_install_enabled
 
         - name: Include offline installation tasks
           ansible.builtin.include_tasks:
             file: install-offline.yml
-          when: offline_install
+          when: offline_install_enabled
 
     - name: Configure Vault
       tags: configure_vault

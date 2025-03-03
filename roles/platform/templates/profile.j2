@@ -1,3 +1,4 @@
+{# TODO: Can this file be removed? #}
 {# Set the correct express settings for HTTP or HTTPS #}
 {% set http_enable = true %}
 {% set https_enable = false %}
@@ -42,13 +43,13 @@
 {% else %}
   {% set redis_host = "" %}
   {% set redis_host = hostvars[ groups[vars.redis_group_name][0] ].inventory_hostname %}
-  {% if redis_auth | bool -%}
+  {% if redis_auth_enabled | bool -%}
     {% set redis_user = "itential" %}
     {% set redis_password = redis_user_itential_password %}
     {% set sentinel_user = "sentineluser" %}
     {% set sentinel_password = redis_user_sentineluser_password %}
   {% endif %}
-  {% if redis_replication | bool %}
+  {% if redis_replication_enabled | bool %}
     {% set redis_host = None %}
     {% set sentinels = [] %}
     {% for sentinel in groups[vars.redis_group_name] %}
@@ -221,12 +222,12 @@
     "name" : "mymaster",
     "password" : {{ redis_password | to_json }},
     "port" : {{ redis_port }},
-{% if redis_replication | bool %}
+{% if redis_replication_enabled | bool %}
     "sentinels" : {{ sentinels | to_json }},
     "sentinelPassword" : {{ sentinel_password | to_json }},
     "sentinelUsername" : {{ sentinel_user | to_json }},
 {% endif %}
-{% if redis_tls | bool %}
+{% if redis_tls_enabled | bool %}
     "tls": {},
 {% endif %}
     "username" : {{ redis_user | to_json }}

@@ -1,30 +1,117 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Validate Itential Platform artifacts array is populated
-  ansible.builtin.assert:
-    that:
-      - platform_packages is defined
-      - platform_packages is iterable
-      - platform_packages | length > 0
-    msg: platform_packages must be defined and contain as least one artifact
 
-- name: Validate Itential Platform artifacts array contains only RPMs
-  ansible.builtin.assert:
-    that: "{{ item.endswith('.rpm') }}"
-  loop: "{{ platform_packages }}"
+# TODO: Replace the asserts with a plugin/module
 
-- name: Check if both user/password and API key are provided
-  ansible.builtin.fail:
-    msg: Only one authentication method should be defined either user/password or API token, not both.
-  when:
-    - repository_username is defined or repository_password is defined
-    - download_api_key is defined
+- name: Validate and set installation variables
+  tags: always
+  block:
+    - name: Validate Itential Platform packages array is populated
+      ansible.builtin.assert:
+        that:
+          - platform_packages is defined
+          - platform_packages is iterable
+          - platform_packages | length > 0
+        fail_msg: platform_packages must be defined and contain as least one artifact
 
-- name: Check if either both username and password are defined or neither
-  ansible.builtin.fail:
-    msg: Both repository_username and repository_password must be defined together.
-  when:
-    - download_url is defined
-    - (repository_username is defined and repository_password is not defined)
-      or (repository_username is not defined and repository_password is defined)
+    - name: Validate Itential Platform packages array contains only RPMs
+      ansible.builtin.assert:
+        that: "{{ item.endswith('.rpm') }}"
+        fail_msg: platform_packages can only contain RPM packages ending in .rpm"
+      loop: "{{ platform_packages }}"
+
+    - name: Validate download auth method is defined when downloading Itential Platform packages
+      ansible.builtin.assert:
+        that: (repository_username is defined and repository_password is defined) or
+              repository_api_key is defined
+        fail_msg: >-
+          repository_api_key or repository_username/repository_password
+          must be defined when downloading platform_packages
+      when: platform_packages is search('http')
+
+    - name: Validate installation variables are defined
+      ansible.builtin.assert:
+        that: |
+          (platform_release is defined) or
+          (platform_nodejs_package is defined and
+           platform_python_version is defined and
+           platform_python_packages is defined and
+           platform_python_app_dependencies is defined)
+        fail_msg: >-
+          platform_release OR
+          platform_nodejs_package, platform_python_version, platform_python_packages, and
+          platform_python_app_dependencies must be defined
+
+    - name: Validate installation variables when not using platform_release
+      ansible.builtin.assert:
+        that:
+          - platform_nodejs_package is defined
+          - platform_python_version is defined
+          - platform_python_packages is defined
+          - platform_python_app_dependencies is defined
+        fail_msg: >-
+          platform_nodejs_package, platform_python_version, platform_python_packages, and
+          platform_python_app_dependencies must be defined when platform_release is not defined
+      when: platform_release is not defined
+
+    - name: Set installation variables when using Itential Platform release defaults
+      when: platform_release is defined
+      block:
+        - name: Load Itential Platform release default variables
+          ansible.builtin.include_vars:
+            file: "{{ item }}"
+          with_first_found:
+            - "platform-release-{{ platform_release }}.yml"
+            - "platform-release-undefined.yml"
+
+        - name: Check for valid Itential Platform release
+          ansible.builtin.assert:
+            that: platform_invalid_release is not defined
+            fail_msg: >-
+              Deployer does not support installing Itential Platform release {{ platform_release }}"
+
+        - name: Set platform_nodejs_package to the default value
+                when not defined in inventory
+          ansible.builtin.set_fact:
+            platform_nodejs_package:
+              "{{ platform_nodejs_package_default[ansible_distribution_major_version] }}"
+          when: platform_nodejs_package is not defined
+
+        - name: Set platform_python_version to the default value
+                when not defined in inventory
+          ansible.builtin.set_fact:
+            platform_python_version:
+              "{{ platform_python_version_default[ansible_distribution_major_version] }}"
+          when: platform_python_version is not defined
+
+        - name: Set platform_python_packages to the default value
+                when not defined in inventory
+          ansible.builtin.set_fact:
+            platform_python_packages:
+              "{{ platform_python_packages_default[ansible_distribution_major_version] }}"
+          when: platform_python_packages is not defined
+
+        - name: Set platform_python_app_dependencies to the default value
+                when not defined in inventory
+          ansible.builtin.set_fact:
+            platform_python_app_dependencies:
+              "{{ platform_python_app_dependencies_default[ansible_distribution_major_version] }}"
+          when: platform_python_app_dependencies is not defined
+
+        - name: Set platform_nodejs_url to the default value when not defined in inventory
+          ansible.builtin.set_fact:
+            platform_nodejs_url: "{{ platform_nodejs_url_default[ansible_distribution_major_version] }}"
+          when: platform_nodejs_url is not defined
+
+    - name: Print Itential Platform installation details
+      ansible.builtin.debug:
+        msg:
+          - "Platform packages: {{ platform_packages }}"
+          - "Platform dependency packages: {{ platform_package_dependencies }}"
+          - "NodeJS package: {{ platform_nodejs_package }}"
+          - "Python version: {{ platform_python_version }}"
+          - "Python packages: {{ platform_python_packages }}"
+          - "Python base dependencies: {{ platform_python_base_dependencies }}"
+          - "Python Platform dependencies: {{ platform_python_app_dependencies }}"
+      when: not offline_install_enabled

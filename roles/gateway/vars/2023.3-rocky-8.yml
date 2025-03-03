@@ -44,3 +44,7 @@ app_python_dependencies:
   - pygnmi==0.8.9
 
 iag_ansible_version: ansible==8.7.0
+
+gateway_application_dependencies:
+  - selinux-policy
+  - selinux-policy-targeted

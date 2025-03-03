@@ -28,7 +28,7 @@ For example, for a Redhat 9 installation, the control node root download directo
 
 Under the root download directory, there will be subdirectories for each component and package type on both the control node and target nodes.  Not all components have every package type.
 
-For example, here is the directory structure on a target node for an All-in-one deployment (Redis, RabbitMQ, MongoDB, Vault and Itential Platform) on a RedHat 9 server:
+For example, here is the directory structure on a target node for an All-in-one deployment (Redis, MongoDB, Vault and Itential Platform) on a RedHat 9 server:
 
 _Example: Directory Structure on Target Node - AIO_
 
@@ -46,8 +46,6 @@ itential_packages/
         │   ├── rpms
         │   └── wheels
         ├── os
-        │   └── rpms
-        ├── rabbitmq
         │   └── rpms
         ├── redis
         │   └── rpms
@@ -96,8 +94,6 @@ files/itential_packages
         │   └── wheels
         ├── os
         │   └── rpms
-        ├── rabbitmq
-        │   └── rpms
         ├── redis
         │   └── rpms
         └── vault
@@ -106,12 +102,12 @@ files/itential_packages
 
 ### Offline Mode Variable
 
-The `offline_install` variable must be defined in the inventory and set to true to run in offline mode, or passed on the command line using the `--extra-vars` option.
+The `offline_install_enabled` variable must be defined in the inventory and set to true to run in offline mode, or passed on the command line using the `--extra-vars` option.
 
 ```yaml
 all:
     vars:
-        offline_install: true
+        offline_install_enabled: true
 ```
 
 ## Running the Download Playbooks
@@ -120,7 +116,7 @@ The download playbooks must be executed on non air-gapped servers.  It is critic
 
 When the download playbooks are executed, the relevant packages will first be downloaded to the target node and then copied to the control node.
 
-Like the installation playbooks, there are download playbooks for each component.  The playbook are named `download-packages-<component>.yml`, for example, `download-packages-gateway.yml`.
+Like the installation playbooks, there are download playbooks for each component.  The playbook are named `download_packages_<component>.yml`, for example, `download_packages_gateway.yml`.
 
 For a basic execution, use the following command:
 
@@ -130,22 +126,22 @@ ansible-playbook itential.deployer.download_packages_<component> -i <inventory>
 
 Note - Your installation might require additional options.
 
-The download playbooks override the offline_install variable to false since they require YUM repos and certain packages to be installed.  This will allow users to define the offline_install variable in the inventory and set it to true and not have to remember to change the offline install setting between runs of the download playbooks and the installation playbooks.
+The download playbooks override the offline_install_enabled variable to false since they require YUM repos and certain packages to be installed.  This will allow users to define the offline_install_enabled variable in the inventory and set it to true and not have to remember to change the offline install setting between runs of the download playbooks and the installation playbooks.
 
 ## Running the Install Playbooks in Offline Mode
 
-After all applicable download playbooks are executed, the normal install playbooks can be executed in offline mode.  
+After all applicable download playbooks are executed, the normal install playbooks can be executed in offline mode.
 
-Once the offline_install variable is set to true, run the install playbooks as you normally would.  For example:
+Once the offline_install_enabled variable is set to true, run the install playbooks as you normally would.  For example:
 
-If `offline_install: true` is defined in the inventory.
+If `offline_install_enabled: true` is defined in the inventory.
 
 ```bash
 ansible-playbook itential.deployer.<component> -i <inventory>
 ```
 OR
 ```bash
-ansible-playbook itential.deployer.<component> -i <inventory> --extra-vars "offline_install=true"
+ansible-playbook itential.deployer.<component> -i <inventory> --extra-vars "offline_install_enabled=true"
 ```
 
 In offline mode, the install playbooks will use the packages downloaded to the control node instead of installing from the YUM/DNF, Python or NodeJS repositories, or from Git in the case of Itential Platform adapters.  The packages are copied to the target nodes and placed in an Ansible temporary directory and installed locally.  The temporary directories are deleted automatically.
@@ -156,10 +152,10 @@ In offline mode, the install playbooks will use the packages downloaded to the c
 
 | Variable                              | Group | Type    | Description                                      | Default |
 | :------------------------------------ | :---- | :------ | :----------------------------------------------- | :------ |
-| `offline_install`                     | `all` | Boolean | Flag to enable offline install mode.             | N/A |
+| `offline_install_enabled`                     | `all` | Boolean | Flag to enable offline install mode.             | N/A |
 | `itential_packages_path`              | `all` | String  | Path appended to the root directory.             | `itential_packages/{{ ansible_distribution }}_{{ ansible_distribution_major_version }}` |
-| `rpms_path`                           | `all` | String  | RPMs path.                                       | `{{ packages_path }}/rpms` |
-| `wheels_path`                         | `all` | String  | Wheels path.                                     | `{{ packages_path }}/wheels` |
+| `offline_rpms_path`                           | `all` | String  | RPMs path.                                       | `{{ packages_path }}/rpms` |
+| `offline_wheels_path`                         | `all` | String  | Wheels path.                                     | `{{ packages_path }}/wheels` |
 | `archives_path`                       | `all` | String  | Archives path.                                   | `{{ packages_path }}/archives` |
 | `adapters_path`                       | `all` | String  | Adapters path.                                   | `{{ packages_path }}/adapters` |
 | `packages_download_root_control_node` | `all` | String  | Root download directory on the control node.     | `{{ playbook_dir }}/files` |
@@ -198,12 +194,6 @@ In offline mode, the install playbooks will use the packages downloaded to the c
 | Variable           | Group | Type   | Description       | Default |
 | :----------------- | :---- | :----- | :---------------- | :------ |
 | `os_packages_path` | `all` | String | OS packages path. | `{{ itential_packages_path }}/{{ platform_release }}/os` |
-
-### RabbitMQ
-
-| Variable                 | Group | Type   | Description             | Default |
-| :----------------------- | :---- | :----- | :---------------------- | :------ |
-| `rabbitmq_packages_path` | `all` | String | RabbitMQ packages path. | `{{ itential_packages_path }}/{{ platform_release }}/rabbitmq` |
 
 ### Redis
 

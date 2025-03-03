@@ -56,7 +56,7 @@ The `itential.deployer` uses the following exporter roles:
 - [`prometheus.prometheus.redis_exporter`](https://prometheus-community.github.io/ansible/branch/main/redis_exporter_role.html#ansible-collections-prometheus-prometheus-redis-exporter-role)
 - [`prometheus.prometheus.mongodb_exporter`](https://prometheus-community.github.io/ansible/branch/main/mongodb_exporter_role.html#ansible-collections-prometheus-prometheus-mongodb-exporter-role)
 - [`prometheus.prometheus.node_exporter`](https://prometheus-community.github.io/ansible/branch/main/node_exporter_role.html#ansible-collections-prometheus-prometheus-node-exporter-role)
-- [`prometheus.prometheus.process_exporter`](https://prometheus-community.github.io/ansible/branch/main/process_exporter_role.html#ansible-collections-prometheus-prometheus-process-exporter-role) 
+- [`prometheus.prometheus.process_exporter`](https://prometheus-community.github.io/ansible/branch/main/process_exporter_role.html#ansible-collections-prometheus-prometheus-process-exporter-role)
 
 Each exporter is a lightweight Go application that exposes the metrics on a standard HTTP endpoint. Each exporter requires a port to be opened so that Prometheus can access the metrics that are being exposed by the exporter. The following ports will be utilised by these roles:
 
@@ -66,8 +66,6 @@ Each exporter is a lightweight Go application that exposes the metrics on a stan
 | [process exporter](https://github.com/ncabatoff/process-exporter) | 9256 | The process exporter is installed on `platform` and `gateway` hosts and will expose individual processes from Itential Platform and IAG. |
 | [mongodb exporter](https://github.com/percona/mongodb_exporter) | 9216 | The mongo exporter is installed on `mongodb` hosts and will expose information about the MongoDB installation and any replica sets. |
 | [redis exporter](https://github.com/oliver006/redis_exporter) | 9121 | The redis exporter is installed on `redis` hosts and will expose information about the Redis installation and any replica sets. |
-| rabbitmq exporter | 15692 | RabbitMQ ships with its own exporter. It will be enabled on `rabbitmq` hosts. |
-| Itential Platform exporter | 3000 | Itential Platform ships with its own exporter already enabled. Itential Platform metrics are exposed at `/prometheus_metrics`. |
 
 #### Process Exporter Notes
 
@@ -94,7 +92,7 @@ We recommend setting the `mongodb_exporter_global_conn_pool` variable to `true` 
 ```
 all:
     vars:
-        mongodb_replication: true
+        mongodb_replication_enabled: true
 
     children:
         mongodb:
@@ -197,5 +195,4 @@ You can also selectively execute portions of the role by using the following tag
 | `process_exporter_install` | This will execute the tasks to install the process exporter. The process exporter is installed on `platform` and `gateway` hosts. |
 | `mongodb_exporter_install` | This will execute the tasks to install the mongo exporter. The mongo exporter is installed on `mongodb` hosts. |
 | `redis_exporter_install` | This will execute the tasks to install the redis exporter. The redis exporter is installed on `redis` hosts. |
-| `rabbitmq_prometheus_plugin_enable` | This will execute the tasks to install the rabbitmq exporter. The rabbitmq exporter is installed on `rabbitmq` hosts. |
 | `grafana_install` | This will execute the tasks to install Grafana. |

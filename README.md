@@ -382,9 +382,9 @@ Although the Itential Deployer can be used to configure nodes that use any suppo
 
 ### Determine the Working and Deployer Directories
 
-The Itential Deployer will be installed into the user's collection directory.  Because the Deployer collection will be overwritten when it is upgraded, users should not store any inventory files, binaries or artifacts in the Deployer collection directory.  Instead, users should create a working directory to store those files.  
+The Itential Deployer will be installed into the user's collection directory.  Because the Deployer collection will be overwritten when it is upgraded, users should not store any inventory files, binaries or artifacts in the Deployer collection directory.  Instead, users should create a working directory to store those files.
 
-The working directory can be any directory on the control node and will be referred to as the `WORKING-DIR` in this guide.  
+The working directory can be any directory on the control node and will be referred to as the `WORKING-DIR` in this guide.
 
 Determine what directory the Itential Deployer is installed to by using the `ansible-galaxy collection list` command. In the following example, the Deployer directory is `/Users/<USER>/.ansible/collections/ansible_collections/itential/deployer`.
 
@@ -518,36 +518,36 @@ all:
 
   children:
     redis:
-        hosts:
-            example1.host.com:
+      hosts:
+        example1.host.com:
 
     rabbitmq:
-        hosts:
-            example1.host.com:
+      hosts:
+        example1.host.com:
 
     mongodb:
-        hosts:
-            example1.host.com:
+      hosts:
+        example1.host.com:
 
     platform:
-        hosts:
-            example1.host.com:
-        vars:
-            platform_archive_download_url: https://registry.aws.itential.com/repository/itential-premium/2023.2/2023.2.8/itential-premium_2023.2.8.linux.x86_64.tar.gzx
-            repository_username: user.name
-            repository_password: !vault |
-                  $ANSIBLE_VAULT;1.1;AES123
-                  12341234123412341234123412341234123412341234123412341234123412341234123412341234
-                  12341234123412341234123412341234123412341234123412341234123412341234123412341234
-                  12341234123412341234123412341241234123412341234123412341234123412341234123412341
-                  1234123412341324
+      hosts:
+        example1.host.com:
+      vars:
+        platform_archive_download_url: https://registry.aws.itential.com/repository/itential-premium/2023.2/2023.2.8/itential-premium_2023.2.8.linux.x86_64.tar.gzx
+        repository_username: user.name
+        repository_password: !vault |
+          $ANSIBLE_VAULT;1.1;AES123
+          12341234123412341234123412341234123412341234123412341234123412341234123412341234
+          12341234123412341234123412341234123412341234123412341234123412341234123412341234
+          12341234123412341234123412341241234123412341234123412341234123412341234123412341
+          1234123412341324
 
     gateway:
-        hosts:
-            example2.host.com:
-        vars:
-            iag_release: 2023.1
-            iag_whl_file: automation_gateway-3.227.0+2023.1.9-py3-none-any.whl
+      hosts:
+        example2.host.com:
+      vars:
+        iag_release: 2023.1
+        iag_whl_file: automation_gateway-3.227.0+2023.1.9-py3-none-any.whl
 ```
 
 ### Run the Itential Deployer
@@ -707,33 +707,29 @@ There will not be a `rabbitmq` group or variables when installing Itential Platf
 ```yaml
 all:
   vars:
-    platform_release: 2023.1
+    platform_release: 6.0
 
   children:
     redis:
-        hosts:
-            example1.host.com:
-
-    rabbitmq:
-        hosts:
-            example1.host.com:
+      hosts:
+        example1.host.com:
 
     mongodb:
-        hosts:
-            example1.host.com:
+      hosts:
+        example1.host.com:
 
     platform:
-        hosts:
-            example1.host.com:
-        vars:
-            platform_bin_file: itential-premium_2023.1.1.linux.x86_64.bin
+      hosts:
+        example1.host.com:
+      vars:
+        platform_bin_file: itential-premium_2023.1.1.linux.x86_64.bin
 
     gateway:
-        hosts:
-            example2.host.com:
-        vars:
-            iag_release: 2023.1
-            iag_whl_file: automation_gateway-3.227.0+2023.1.9-py3-none-any.whl
+      hosts:
+        example2.host.com:
+      vars:
+        iag_release: 2023.1
+        iag_whl_file: automation_gateway-3.227.0+2023.1.9-py3-none-any.whl
 ```
 
 ### Minimal Architecture Inventory
@@ -748,33 +744,29 @@ There will not be a `rabbitmq` group or variables when installing Itential Platf
 ```yaml
 all:
   vars:
-    platform_release: 2023.1
+    platform_release: 6.0
 
   children:
     redis:
-        hosts:
-            redis.host.com:
-
-    rabbitmq:
-        hosts:
-            rabbitmq.host.com:
+      hosts:
+        redis.host.com:
 
     mongodb:
-        hosts:
-            mongodb.host.com:
+      hosts:
+        mongodb.host.com:
 
     platform:
-        hosts:
-            itential-platform.host.com:
-        vars:
-            platform_bin_file: itential-premium_2023.1.1.linux.x86_64.bin
+      hosts:
+        itential-platform.host.com:
+      vars:
+        platform_bin_file: itential-premium_2023.1.1.linux.x86_64.bin
 
     gateway:
-        hosts:
-            automation-gateway.host.com:
-        vars:
-            iag_release: 2023.1
-            iag_whl_file: automation_gateway-3.227.0+2023.1.9-py3-none-any.whl
+      hosts:
+        automation-gateway.host.com:
+      vars:
+        iag_release: 2023.1
+        iag_whl_file: automation_gateway-3.227.0+2023.1.9-py3-none-any.whl
 ```
 
 ### Highly Available Architecture Inventory
@@ -789,44 +781,38 @@ There will not be a `rabbitmq` group or variables when installing Itential Platf
 ```yaml
 all:
   vars:
-    platform_release: 2023.1
-    # Instructs deployer to build a cluster of each
-    redis_replication: true
-    rabbitmq_cluster: true
-    mongodb_replication: true
+    platform_release: 6.0
 
   children:
     redis:
-        hosts:
-            redis1.host.com:
-            redis2.host.com:
-            redis3.host.com:
-
-    rabbitmq:
-        hosts:
-            rabbitmq1.host.com:
-            rabbitmq2.host.com:
-            rabbitmq3.host.com:
+      hosts:
+        redis1.host.com:
+        redis2.host.com:
+        redis3.host.com:
+      vars:
+        redis_replication_enabled: true
 
     mongodb:
-        hosts:
-            mongodb1.host.com:
-            mongodb2.host.com:
-            mongodb3.host.com:
+      hosts:
+        mongodb1.host.com:
+        mongodb2.host.com:
+        mongodb3.host.com:
+      vars:
+        mongodb_replication_enabled: true
 
     platform:
-        hosts:
-            itential-platform1.host.com:
-            itential-platform2.host.com:
-        vars:
-            platform_bin_file: itential-premium_2023.1.1.linux.x86_64.bin
+      hosts:
+        itential-platform1.host.com:
+        itential-platform2.host.com:
+      vars:
+        platform_bin_file: itential-premium_2023.1.1.linux.x86_64.bin
 
     gateway:
-        hosts:
-            automation-gateway1.host.com:
-        vars:
-            iag_release: 2023.1
-            iag_whl_file: automation_gateway-3.227.0+2023.1.9-py3-none-any.whl
+      hosts:
+        automation-gateway1.host.com:
+      vars:
+        iag_release: 2023.1
+        iag_whl_file: automation_gateway-3.227.0+2023.1.9-py3-none-any.whl
 ```
 
 ### Highly Available Architecture Inventory leveraging external dependencies
@@ -841,26 +827,21 @@ There will not be a `rabbitmq` group or variables when installing Itential Platf
 ```yaml
 all:
   vars:
-    platform_release: 2023.1
+    platform_release: 6.0
     # Instructs deployer to use external dependencies.
     # The replication for each of these should be set to false but the auth and
     # tls properties may be utilised to suit your needs.
-    redis_replication: false
-    redis_auth: true
-    redis_tls: true
+    redis_replication_enabled: false
+    redis_auth_enabled: true
+    redis_tls_enabled: true
     redis_user: itential
     redis_password: <The-Redis-password>
-    rabbitmq_cluster: false
-    rabbitmq_ssl: false
-    rabbit_user: itential
-    rabbit_password: <The-RabbitMQ-password>
-    mongodb_replication: false
-    mongodb_auth: false
-    mongodb_tls: false
+    mongodb_replication_enabled: false
+    mongodb_auth_enabled: false
+    mongodb_tls_enabled: false
 
   children:
     redis:
-    rabbitmq:
     mongodb:
     platform:
       hosts:
@@ -890,64 +871,62 @@ There will not be a `rabbitmq` group or variables when installing Itential Platf
 ```yaml
 all:
   vars:
-    platform_release: 2023.1
+    platform_release: 6.0
 
   children:
     redis:
-        hosts:
-            datacenter1.redis1.host.com:
-            datacenter1.redis2.host.com:
-            datacenter1.redis3.host.com:
+      hosts:
+        datacenter1.redis1.host.com:
+        datacenter1.redis2.host.com:
+        datacenter1.redis3.host.com:
+      vars:
+        redis_replication_enabled: true
 
     redis_secondary:
-        hosts:
-            datacenter2.redis1.host.com:
-            datacenter2.redis2.host.com:
-            datacenter2.redis3.host.com:
-
-    rabbitmq:
-        hosts:
-            datacenter1.rabbitmq1.host.com:
-            datacenter1.rabbitmq2.host.com:
-            datacenter1.rabbitmq3.host.com:
-
-    rabbitmq_secondary:
-        hosts:
-            datacenter2.rabbitmq4.host.com:
-            datacenter2.rabbitmq5.host.com:
-            datacenter2.rabbitmq6.host.com:
+      hosts:
+        datacenter2.redis1.host.com:
+        datacenter2.redis2.host.com:
+        datacenter2.redis3.host.com:
+      vars:
+        redis_replication_enabled: true
 
     mongodb:
-        hosts:
-            datacenter1.mongodb1.host.com:
-            datacenter1.mongodb2.host.com:
-            datacenter2.mongodb3.host.com:
-            datacenter2.mongodb4.host.com:
+      hosts:
+        datacenter1.mongodb1.host.com:
+        datacenter1.mongodb2.host.com:
+        datacenter2.mongodb3.host.com:
+        datacenter2.mongodb4.host.com:
+      vars:
+        mongodb_replication_enabled: true
 
     mongodb_arbiter:
-        hosts:
-            datacenter3.mongodb-arbiter.host.com:
+      hosts:
+        datacenter3.mongodb-arbiter.host.com:
 
     platform:
-        hosts:
-            datacenter1.itential-platform1.host.com:
-            datacenter1.itential-platform2.host.com:
-        vars:
-            platform_bin_file: itential-premium_2023.1.1.linux.x86_64.bin
+      hosts:
+        datacenter1.itential-platform1.host.com:
+        datacenter1.itential-platform2.host.com:
+      vars:
+        platform_bin_file: itential-premium_2023.1.1.linux.x86_64.bin
+        platform_job_worker_enabled: false
+        platform_task_worker_enabled: false
 
     platform_secondary:
-        hosts:
-            datacenter2.itential-platform3.host.com:
-            datacenter2.itential-platform4.host.com:
-        vars:
-            platform_bin_file: itential-premium_2023.1.1.linux.x86_64.bin
+      hosts:
+        datacenter2.itential-platform3.host.com:
+        datacenter2.itential-platform4.host.com:
+      vars:
+        platform_bin_file: itential-premium_2023.1.1.linux.x86_64.bin
+        platform_job_worker_enabled: false
+        platform_task_worker_enabled: false
 
     gateway:
-        hosts:
-            datacenter2.automation-gateway1.host.com:
-        vars:
-            iag_release: 2023.1
-            iag_whl_file: automation_gateway-3.227.0+2023.1.9-py3-none-any.whl
+      hosts:
+        datacenter2.automation-gateway1.host.com:
+      vars:
+        iag_release: 2023.1
+        iag_whl_file: automation_gateway-3.227.0+2023.1.9-py3-none-any.whl
 ```
 
 <!-- ### Blue/Green Architecture
@@ -1040,8 +1019,8 @@ To use internal repositories, set `install_yum_repos` to `false` in the `all` va
 
 ```yaml
 all:
-    vars:
-        install_yum_repos: false
+  vars:
+    install_yum_repos: false
 ```
 
 ## Running the Deployer in Offline Mode
