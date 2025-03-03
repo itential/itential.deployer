@@ -104,7 +104,7 @@
             platform_nodejs_repo_url: "{{ platform_nodejs_repo_url_default[ansible_distribution_major_version] }}"
           when:
             - platform_nodejs_repo_url is not defined
-            - ansible_distribution | lower == "amazon"
+            - platform_nodejs_repo_url_default[ansible_distribution_major_version] is defined
 
     - name: Print Itential Platform installation details
       ansible.builtin.debug:
