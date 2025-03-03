@@ -190,7 +190,7 @@ all:
         <host1>:
           ansible_host: <addr1>
       vars:
-        mongodb_version: 8.0
+        mongodb_version: 7.0
         mongodb_packages:
           - mongodb-org
         mongodb_python_packages
