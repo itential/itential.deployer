@@ -1,14 +1,8 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Check whether SELinux is enabled
-  ansible.builtin.command: /usr/sbin/selinuxenabled
-  changed_when: false
-  register: selinux_status
-  failed_when: selinux_status.rc > 1
-
 - name: Update SELinux
-  when: selinux_status.rc == 0
+  when: ansible_selinux.status == "enabled"
   tags: configure_selinux
   block:
     - name: Create temporary working directory
@@ -32,7 +26,13 @@
 
     - name: SELinux - Compile the modules
       ansible.builtin.command:
-        cmd: "checkmodule -M -m -o {{ workingdir.path }}/{{ item.path | basename | splitext | first }}.mod {{ item.path }}"
+        argv:
+          - checkmodule
+          - -M
+          - -m
+          - -o
+          - "{{ workingdir.path }}/{{ item.path | basename | splitext | first }}.mod"
+          - "{{ item.path }}"
       with_items:
         - "{{ selinux_policies.files }}"
       register: result
@@ -47,7 +47,12 @@
 
     - name: SELinux - Package the modules
       ansible.builtin.command:
-        cmd: "semodule_package -o {{ workingdir.path }}/{{ item.path | basename | splitext | first }}.pp -m {{ item.path }}"
+        argv:
+          - semodule_package
+          - -o
+          - "{{ workingdir.path }}/{{ item.path | basename | splitext | first }}.pp"
+          - -m
+          - "{{ item.path }}"
       with_items:
         - "{{ compiled_modules.files }}"
       register: result
