@@ -8,12 +8,12 @@
 
 - name: Download NodeJS repo install script
   ansible.builtin.get_url:
-    url: "{{ platform_nodejs_url }}"
-    dest: "{{ workingdir.path }}/{{ platform_nodejs_url | basename }}"
+    url: "{{ platform_nodejs_repo_url }}"
+    dest: "{{ workingdir.path }}/{{ platform_nodejs_repo_url | basename }}"
     mode: "0755"
 
 - name: Install NodeJS yum repo
-  ansible.builtin.command: "{{ workingdir.path }}/{{ platform_nodejs_url | basename }}"
+  ansible.builtin.command: "{{ workingdir.path }}/{{ platform_nodejs_repo_url | basename }}"
   changed_when: true
 
 - name: Remove workingdir

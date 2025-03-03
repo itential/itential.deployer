@@ -99,11 +99,11 @@
               "{{ platform_python_app_dependencies_default[ansible_distribution_major_version] }}"
           when: platform_python_app_dependencies is not defined
 
-        - name: Set platform_nodejs_url to the default value when not defined in inventory
+        - name: Set platform_nodejs_repo_url to the default value when not defined in inventory
           ansible.builtin.set_fact:
-            platform_nodejs_url: "{{ platform_nodejs_url_default[ansible_distribution_major_version] }}"
+            platform_nodejs_repo_url: "{{ platform_nodejs_repo_url_default[ansible_distribution_major_version] }}"
           when:
-            - platform_nodejs_url is not defined
+            - platform_nodejs_repo_url is not defined
             - ansible_distribution | lower == "amazon"
 
     - name: Print Itential Platform installation details
