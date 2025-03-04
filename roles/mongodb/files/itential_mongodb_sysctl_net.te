@@ -1,4 +1,4 @@
-module mongodb_sysctl_net 1.0;
+module itential_mongodb_sysctl_net 1.0;
 
 require {
     type sysctl_net_t;
