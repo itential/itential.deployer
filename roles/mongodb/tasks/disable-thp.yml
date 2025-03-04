@@ -14,9 +14,6 @@
 # To ensure that THP is disabled before mongod starts, you should create a service file for
 # your platform's initialization system that disables THP at boot. Instructions are provided
 # below for both the systemd and the System V init initialization systems.
-#
-# Additionally, for RHEL / CentOS systems that make use of ktune and tuned performance
-# profiles, you must create a custom tuned profile as well.
 
 # Check if its already disabled
 - name: Ensure THP is enabled never
@@ -59,31 +56,3 @@
         state: started
         enabled: true
         daemon_reload: true
-
-    # Configure tuned
-    - name: Create custom tuned profile directory
-      ansible.builtin.file:
-        state: directory
-        path: "/etc/tuned/virtual-guest-no-thp"
-        owner: root
-        group: root
-        mode: "0755"
-
-    - name: Ensure tuned does not re-enable THP
-      ansible.builtin.template:
-        src: tuned.conf.j2
-        dest: "/etc/tuned/virtual-guest-no-thp/tuned.conf"
-        owner: root
-        group: root
-        mode: "0644"
-      vars:
-        tuned_action: never
-
-    - name: Enable tuned profile
-      ansible.builtin.command:
-        cmd: tuned-adm profile virtual-guest-no-thp
-      vars:
-        ansible_python_interpreter: "{{ mongodb_python_venv }}/bin/python3"
-      register: result
-      changed_when: result.rc == 0
-      failed_when: result.rc > 0

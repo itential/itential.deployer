@@ -18,10 +18,10 @@
         file: install-mongodb-offline.yml
       when: offline_install_enabled
 
-# Update yum config to prevent mongodb from getting updated by yum updates
-- name: Prevent yum from updating mongo
+# Update dnf config to prevent mongodb from getting updated by dnf updates
+- name: Prevent dnf from updating mongo
   ansible.builtin.lineinfile:
-    path: /etc/yum.conf
+    path: /etc/dnf/dnf.conf
     line: exclude=mongodb-org*
 
 - name: Create MongoDB log, data, pid directories
