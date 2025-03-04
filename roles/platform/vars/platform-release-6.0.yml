@@ -26,17 +26,14 @@ platform_python_app_dependencies_default:
   "8":
     - jinja2==3.1.2
     - markupsafe==2.1.4
-    - pymongo
     - textfsm==1.1.3
   "9":
     - jinja2==3.1.2
     - markupsafe==2.1.4
-    - pymongo
     - textfsm==1.1.3
   "2023":
     - jinja2==3.1.2
     - markupsafe==2.1.4
-    - pymongo
     - textfsm==1.1.3
 
 platform_nodejs_repo_url_default:
