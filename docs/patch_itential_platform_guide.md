@@ -22,9 +22,11 @@ directory.
 ## Update Inventory Variables
 
 Next, update the inventory variables.  It is recommended that the inventory used during the original
- Itential Platform install is used as the baseline.  Update the `platform_bin_file` or
- `platform_tar_file` to the new version.  It is highly recommended to take a backup of MongoDB
- before patching. For more information: https://www.mongodb.com/docs/database-tools/mongodump/
+Itential Platform install is used as the baseline.  Update the `platform_release` to the desired
+version and update the `platform_packages` appropriately. It is highly recommended to take a backup
+of MongoDB before patching. For more information:
+
+https://www.mongodb.com/docs/database-tools/mongodump/
 
 _Example: Original Inventory_
 
@@ -39,7 +41,10 @@ all:
         cluster6-aio01:
           ansible_host: 172.16.37.185
       vars:
-        platform_bin_file: itential-premium_2023.1.1.linux.x86_64.bin
+        platform_redis_host: redis1.example.com
+        platform_mongo_url: mongodb://itential:password@mongo1.example.com:27017/itential
+        platform_packages:
+          - itential-platform-2025.14.9-rc.noarch.rpm
 ```
 
 _Example: Patch Upgrade Inventory_
@@ -47,7 +52,7 @@ _Example: Patch Upgrade Inventory_
 ```yaml
 all:
   vars:
-    platform_release: 2023.1
+    platform_release: 6.1
 
   children:
     platform:
@@ -55,7 +60,10 @@ all:
         cluster6-aio01:
           ansible_host: 172.16.37.185
       vars:
-        platform_bin_file: itential-premium_2023.1.5.linux.x86_64.bin
+        platform_redis_host: redis1.example.com
+        platform_mongo_url: mongodb://itential:password@mongo1.example.com:27017/itential
+        platform_packages:
+          - itential-platform-2025.14.10-rc.noarch.rpm
 ```
 
 ## Run Patch Itential Platform Playbook
