@@ -86,7 +86,6 @@ The following table lists the default variables located in `roles/platform/defau
 | `platform_process_tasks_on_start` | `platform` | Boolean | Flag to enable processing tasks on startup. | `true`
 | `platform_process_jobs_on_start` | `platform` | Boolean | Flag to enable processing jobs on startup. | `true`
 | `platform_upload_using_rsync` | `platform` | Boolean | Flag to enable using rsync to upload artifacts.  <br>When set to `true`, rsync will be used.  <br>When set to `false`, secure copy will be used. | `false`
-| `platform_backup_mongo` | `platform` | Boolean | Flag to enable performing a MongoDB backup when upgrading Itential Platform. | `true`
 | `platform_redis_db_number` | `platform` | Integer | Default redis db number. | `0`
 
 ## Platform Adapters Role Variables
