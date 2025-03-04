@@ -12,7 +12,7 @@
         (mongodb_data_dir != "/var/lib/mongo") or
         (mongodb_log_dir != "/var/log/mongodb")
 
-    - name: SELinux - SELinux - Configure port when using non-standard MongoDB port
+    - name: SELinux - Configure port when using non-standard MongoDB port
       community.general.seport:
         ports: "{{ mongodb_port }}"
         proto: tcp
