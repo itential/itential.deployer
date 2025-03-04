@@ -37,6 +37,9 @@
             file: install-offline.yml
           when: offline_install_enabled
 
+    - name: Configure SELinux
+      tags: configure_selinux
+      block:
         - name: Include tasks to configure SELinux
           ansible.builtin.include_tasks:
             file: configure-selinux.yml

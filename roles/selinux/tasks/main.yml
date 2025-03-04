@@ -1,69 +1,116 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Check whether SELinux is enabled
-  ansible.builtin.command: /usr/sbin/selinuxenabled
-  changed_when: false
-  register: selinux_status
-  failed_when: selinux_status.rc > 1
-
 - name: Update SELinux
-  when: selinux_status.rc == 0
+  when: ansible_selinux.status == "enabled"
   tags: configure_selinux
   block:
-    - name: Create temporary working directory
-      ansible.builtin.tempfile:
-        state: directory
-      register: workingdir
-
-    - name: SELinux - Copy the custom policy files
-      ansible.builtin.copy:
-        src: "{{ item }}"
-        dest: "{{ workingdir.path }}/{{ item | basename }}"
-        mode: "0644"
-      with_fileglob:
-        - "{{ ansible_parent_role_paths | first }}/files/*.te"
-
-    - name: SELinux - Find the custom policy files
+    - name: SELinux - Find the policy files for role on the control node
       ansible.builtin.find:
-        paths: "{{ workingdir.path }}"
+        paths: "{{ ansible_parent_role_paths | first }}/files/"
         patterns: "*.te"
-      register: selinux_policies
+        recurse: false
+        file_type: file
+      register: search_results
+      delegate_to: localhost
+      become: false
 
-    - name: SELinux - Compile the modules
-      ansible.builtin.command:
-        cmd: "checkmodule -M -m -o {{ workingdir.path }}/{{ item.path | basename | splitext | first }}.mod {{ item.path }}"
-      with_items:
-        - "{{ selinux_policies.files }}"
-      register: result
-      changed_when: result.rc == 0
-      failed_when: result.rc > 0
+    - name: SELinux - Create the list of policy files
+      ansible.builtin.set_fact:
+        policy_files: "{{ search_results.files | map(attribute='path') }}"
 
-    - name: SELinux - Find the compiled modules
-      ansible.builtin.find:
-        paths: "{{ workingdir.path }}"
-        patterns: "*.mod"
-      register: compiled_modules
+    - name: SELinux - Check to see if the policy has already been installed
+      ansible.builtin.shell:
+        cmd: "set -o pipefail && semodule -l | grep {{ item | basename | splitext | first }}"
+      with_items: "{{ policy_files }}"
+      register: installed_result
+      changed_when: false
+      failed_when: false
 
-    - name: SELinux - Package the modules
-      ansible.builtin.command:
-        cmd: "semodule_package -o {{ workingdir.path }}/{{ item.path | basename | splitext | first }}.pp -m {{ item.path }}"
-      with_items:
-        - "{{ compiled_modules.files }}"
-      register: result
-      changed_when: result.rc == 0
-      failed_when: result.rc > 0
+    - name: SELinux - Create a list of policies that have already been installed
+      ansible.builtin.set_fact:
+        installed_policy_files: "{{ installed_policy_files | default([]) + [(item.item)] }}"
+      with_items: "{{ installed_result.results }}"
+      when: item.rc == 0
 
-    - name: SELinux - Install the modules
-      ansible.builtin.shell: semodule -i *.pp
-      args:
-        executable: /bin/bash
-        chdir: "{{ workingdir.path }}"
-      register: result
-      changed_when: result.rc == 0
-      failed_when: result.rc > 0
+    - name: SELinux - Remove the policies already installed from the policy list
+      ansible.builtin.set_fact:
+        policy_files: "{{ policy_files | reject('search', item) }}"
+      loop: "{{ installed_policy_files }}"
+      when:
+        - installed_policy_files is defined
+        - installed_policy_files is iterable
+        - installed_policy_files | length > 0
 
-    - name: Remove temporary working directory
-      ansible.builtin.file:
-        path: "{{ workingdir.path }}"
-        state: absent
+    - name: SELinux - Install the policy files
+      when:
+        - policy_files is defined
+        - policy_files is iterable
+        - policy_files | length > 0
+      block:
+        - name: SELinux - Create a temporary working directory
+          ansible.builtin.tempfile:
+            state: directory
+          register: workingdir
+
+        - name: SELinux - Copy the custom policy files from the control node
+          ansible.builtin.copy:
+            src: "{{ item }}"
+            dest: "{{ workingdir.path }}/{{ item | basename }}"
+            mode: "0644"
+          loop: "{{ policy_files }}"
+
+        - name: SELinux - Find the custom policy files on the target node
+          ansible.builtin.find:
+            paths: "{{ workingdir.path }}"
+            patterns: "*.te"
+          register: selinux_policies
+
+        - name: SELinux - Compile the modules
+          ansible.builtin.command:
+            argv:
+              - checkmodule
+              - -M
+              - -m
+              - -o
+              - "{{ workingdir.path }}/{{ item.path | basename | splitext | first }}.mod"
+              - "{{ item.path }}"
+          with_items:
+            - "{{ selinux_policies.files }}"
+          register: result
+          changed_when: result.rc == 0
+          failed_when: result.rc > 0
+
+        - name: SELinux - Find the compiled modules on the target node
+          ansible.builtin.find:
+            paths: "{{ workingdir.path }}"
+            patterns: "*.mod"
+          register: compiled_modules
+
+        - name: SELinux - Package the modules
+          ansible.builtin.command:
+            argv:
+              - semodule_package
+              - -o
+              - "{{ workingdir.path }}/{{ item.path | basename | splitext | first }}.pp"
+              - -m
+              - "{{ item.path }}"
+          with_items:
+            - "{{ compiled_modules.files }}"
+          register: result
+          changed_when: result.rc == 0
+          failed_when: result.rc > 0
+
+        - name: SELinux - Install the modules
+          ansible.builtin.shell: semodule -i *.pp
+          args:
+            executable: /bin/bash
+            chdir: "{{ workingdir.path }}"
+          register: result
+          changed_when: result.rc == 0
+          failed_when: result.rc > 0
+
+        - name: SELinux - Remove the temporary working directory
+          ansible.builtin.file:
+            path: "{{ workingdir.path }}"
+            state: absent
