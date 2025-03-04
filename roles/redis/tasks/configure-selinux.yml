@@ -4,7 +4,7 @@
 - name: Configure SELinux
   when: ansible_selinux.status == "enabled"
   block:
-    - name: Install custom SELinux profiles
+    - name: SELinux - Install custom profiles
       ansible.builtin.include_role:
         name: selinux
       when: >
@@ -14,7 +14,7 @@
         (redis_conf_dir != redis_conf_dir_default) or
         (redis_pid_dir != redis_pid_dir_default)
 
-    - name: Configure SELinux port when using non-standard Redis port
+    - name: SELinux - Configure port when using non-standard Redis port
       community.general.seport:
         ports: "{{ redis_port }}"
         proto: tcp
@@ -22,7 +22,7 @@
         state: present
       when: redis_port != redis_port_default
 
-    - name: Configure SELinux port when using non-standard Sentinel port
+    - name: SELinux - Configure port when using non-standard Sentinel port
       community.general.seport:
         ports: "{{ redis_sentinel_port }}"
         proto: tcp
@@ -32,7 +32,7 @@
         - redis_replication_enabled | bool
         - redis_sentinel_port != redis_sentinel_port_default
 
-    - name: Configure SELinux file context when using non-standard bin directory
+    - name: SELinux - Configure file context when using non-standard bin directory
       ansible.builtin.include_role:
         name: selinux
         tasks_from: configure-context
@@ -40,40 +40,45 @@
         selinux_target: "{{ redis_bin_dir }}/redis-server"
         selinux_setype: redis_exec_t
         selinux_ftype: f
+        selinux_path: "{{ redis_bin_dir }}"
       when: redis_bin_dir != redis_bin_dir_default
 
-    - name: Configure SELinux file context when using non-standard log directory
+    - name: SELinux - Configure file context when using non-standard log directory
       ansible.builtin.include_role:
         name: selinux
         tasks_from: configure-context
       vars:
         selinux_target: "{{ redis_log_dir }}(/.*)?"
         selinux_setype: redis_log_t
+        selinux_path: "{{ redis_log_dir }}"
       when: redis_log_dir != redis_log_dir_default
 
-    - name: Configure SELinux file context when using non-standard data directory
+    - name: SELinux - Configure file context when using non-standard data directory
       ansible.builtin.include_role:
         name: selinux
         tasks_from: configure-context
       vars:
         selinux_target: "{{ redis_data_dir }}(/.*)?"
         selinux_setype: redis_var_lib_t
+        selinux_path: "{{ redis_data_dir }}"
       when: redis_data_dir != redis_data_dir_default
 
-    - name: Configure SELinux file context when using non-standard configuration directory
+    - name: SELinux - Configure file context when using non-standard configuration directory
       ansible.builtin.include_role:
         name: selinux
         tasks_from: configure-context
       vars:
         selinux_target: "{{ redis_conf_dir }}(/.*)?"
         selinux_setype: redis_conf_t
+        selinux_path: "{{ redis_conf_dir }}"
       when: redis_conf_dir != redis_conf_dir_default
 
-    - name: Configure SELinux file context when using non-standard pid directory
+    - name: SELinux - Configure file context when using non-standard pid directory
       ansible.builtin.include_role:
         name: selinux
         tasks_from: configure-context
       vars:
         selinux_target: "{{ redis_pid_dir }}(/.*)?"
         selinux_setype: redis_var_run_t
+        selinux_path: "{{ redis_pid_dir }}"
       when: redis_pid_dir != redis_pid_dir_default
