@@ -26,7 +26,7 @@ platform_encryption_key: f256be40b84f053c26a0fc2101dc4bdd039f62522702e28bd4f611c
 platform_shutdown_timeout: 3
 
 # The application/adapter launch delay, in seconds.
-platform_service_launch_delay: 0
+platform_service_launch_delay: 1
 
 # The application/adapter launch timeout, in seconds.
 platform_service_launch_timeout: 600
