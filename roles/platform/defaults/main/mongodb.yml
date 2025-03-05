@@ -34,15 +34,6 @@ platform_mongo_tls_allow_invalid_certificates: false
 # Specify the file name of the .pem file using absolute paths.
 platform_mongo_tls_ca_file:
 
-# Deprecated in favor of the `mongo_tls_enabled` property.
-platform_mongo_ssl_enabled:
-
-# Deprecated in favor of the `mongo_tls_allow_invalid_certificates` property.
-platform_mongo_ssl_accept_invalid_certs:
-
-# Deprecated in favor of the `mongo_tls_ca_file` property.
-platform_mongo_ssl_ca_file:
-
 # The maximum number of connections in a connection pool.
 # Each application/adapter has its own connection pool.
 platform_mongo_max_pool_size:

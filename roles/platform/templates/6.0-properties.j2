@@ -226,29 +226,6 @@ mongo_tls_ca_file = {{ platform_mongo_tls_ca_file }}
 # mongo_tls_ca_file =
 {% endif %}
 
-# Deprecated in favor of the `mongo_tls_enabled` property.
-{% if ( (platform_mongo_ssl_enabled is defined) and
-        (platform_mongo_ssl_enabled is boolean) ) %}
-mongo_ssl_enabled = {{ platform_mongo_ssl_enabled | to_nice_json }}
-{% else %}
-# mongo_ssl_enabled =
-{% endif %}
-
-# Deprecated in favor of the `mongo_tls_allow_invalid_certificates` property.
-{% if ( (platform_mongo_ssl_accept_invalid_certs is defined ) and
-        (platform_mongo_ssl_accept_invalid_certs is boolean) ) %}
-mongo_ssl_accept_invalid_certs = {{ platform_mongo_ssl_accept_invalid_certs | to_nice_json }}
-{% else %}
-# mongo_ssl_accept_invalid_certs =
-{% endif %}
-
-# Deprecated in favor of the `mongo_tls_ca_file` property.
-{% if platform_mongo_ssl_ca_file %}
-mongo_ssl_ca_file = {{ platform_mongo_ssl_ca_file }}
-{% else %}
-# mongo_ssl_ca_file =
-{% endif %}
-
 # The maximum number of connections in a connection pool.
 # Each application/adapter has its own connection pool.
 {% if platform_mongo_max_pool_size %}
