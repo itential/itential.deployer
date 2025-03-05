@@ -58,6 +58,16 @@
             mongodb_python_packages: "{{ mongodb_python_packages_default[ansible_distribution_major_version] }}"
           when: mongodb_python_packages is not defined
 
+        - name: Set mongodb_gpgkey_url to the default value when not defined in inventory
+          ansible.builtin.set_fact:
+            mongodb_gpgkey_url: "{{ mongodb_gpgkey_url_default[ansible_distribution_major_version] }}"
+          when: mongodb_gpgkey_url is not defined
+
+        - name: Set mongodb_release_url to the default value when not defined in inventory
+          ansible.builtin.set_fact:
+            mongodb_release_url: "{{ mongodb_release_url_default }}"
+          when: mongodb_release_url is not defined
+
     - name: Print MongoDB installation details
       ansible.builtin.debug:
         msg:
