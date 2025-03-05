@@ -67,6 +67,3 @@ mongodb_user_itential_password: itential
 
 # The name of the mongo replica set
 mongodb_replset_name: "{{ mongodb_replset_name_default }}"
-
-mongodb_release_url: "https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/{{ mongodb_version }}/$basearch/"
-mongodb_gpgkey_url: "https://www.mongodb.org/static/pgp/server-{{ mongodb_version }}.asc"
