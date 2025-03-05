@@ -2,7 +2,7 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
 - name: Install Vault repo
-  when: install_yum_repos | bool
+  when: common_install_yum_repos | bool
   block:
     - name: Install yum-utils RPM to get yum-config-manager
       ansible.builtin.dnf:

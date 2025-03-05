@@ -7,7 +7,7 @@
   become: true
   roles:
     # Pull in the common vars
-    - role: itential.deployer.common_vars
+    - role: itential.deployer.common
       tags: always
 
     # Install and initialize Vault

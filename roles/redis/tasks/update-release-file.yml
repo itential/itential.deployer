@@ -13,7 +13,7 @@
 
 - name: Write redis release information
   ansible.builtin.lineinfile:
-    path: "{{ itential_release_file }}"
+    path: "{{ common_itential_release_file }}"
     regexp: "^REDIS="
     line: "REDIS={{ result.stdout }}"
     create: true

@@ -3,7 +3,7 @@
 ---
 - name: Install Remi-related repos
   when:
-    - install_yum_repos | bool
+    - common_install_yum_repos | bool
     - redis_packages is defined
     - redis_packages is search('remi')
   block:

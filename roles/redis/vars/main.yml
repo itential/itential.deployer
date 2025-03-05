@@ -7,3 +7,7 @@ redis_conf_dir_default: /etc/redis
 redis_log_dir_default: /var/log/redis
 redis_data_dir_default: /var/lib/redis
 redis_pid_dir_default: /var/run
+
+# Default ports
+redis_port_default: 6379
+redis_sentinel_port_default: 26379

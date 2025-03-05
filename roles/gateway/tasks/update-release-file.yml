@@ -3,7 +3,7 @@
 ---
 - name: Update release file with IAG version
   ansible.builtin.lineinfile:
-    path: "{{ itential_release_file }}"
+    path: "{{ common_itential_release_file }}"
     line: "GATEWAY={{ iag_release }}"
     mode: "0666"
     create: true
@@ -17,7 +17,7 @@
 
 - name: Update release file with Python version
   ansible.builtin.lineinfile:
-    path: "{{ itential_release_file }}"
+    path: "{{ common_itential_release_file }}"
     line: "PYTHON={{ python_installed_version.stdout }}"
     mode: "0666"
     create: true
@@ -31,7 +31,7 @@
 
 - name: Update release file with Pip version
   ansible.builtin.lineinfile:
-    path: "{{ itential_release_file }}"
+    path: "{{ common_itential_release_file }}"
     line: "PIP={{ pip_installed_version.stdout }}"
     mode: "0666"
     create: true
@@ -39,7 +39,7 @@
 
 - name: Update release file with Ansible version
   ansible.builtin.lineinfile:
-    path: "{{ itential_release_file }}"
+    path: "{{ common_itential_release_file }}"
     line: "ANSIBLE={{ iag_ansible_version }}"
     mode: "0666"
     create: true
@@ -48,7 +48,7 @@
 
 - name: Update release file with Nornir version
   ansible.builtin.lineinfile:
-    path: "{{ itential_release_file }}"
+    path: "{{ common_itential_release_file }}"
     line: "NORNIR=true"
     mode: "0666"
     create: true

@@ -1,6 +1,10 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
+mongodb_release_url:
+  "https://repo.mongodb.org/yum/{{ ansible_distribution_file_variety
+  | lower }}/{{ ansible_distribution_major_version }}/mongodb-org/{{ mongodb_version }}/x86_64/"
+
 mongodb_package_dependencies:
   - selinux-policy
   - selinux-policy-targeted
@@ -18,5 +22,3 @@ mongodb_python_app_dependencies:
 mongodb_python_venv_root: /var/tmp
 mongodb_python_venv_name: mongodb_venv
 mongodb_python_venv: "{{ mongodb_python_venv_root }}/{{ mongodb_python_venv_name }}"
-
-mongodb_release_url: "https://repo.mongodb.org/yum/{{ ansible_distribution_file_variety | lower }}/{{ ansible_distribution_major_version }}/mongodb-org/{{ mongodb_version }}/x86_64/"

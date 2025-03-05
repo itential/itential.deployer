@@ -53,7 +53,7 @@
     repo_gpgcheck: false
     sslverify: true
     sslcacert: /etc/pki/tls/certs/ca-bundle.crt
-  when: install_yum_repos | bool
+  when: common_install_yum_repos | bool
 
 - name: Install RabbitMQ repo
   ansible.builtin.yum_repository:
@@ -70,7 +70,7 @@
     sslverify: true
     sslcacert: /etc/pki/tls/certs/ca-bundle.crt
     metadata_expire: 300
-  when: install_yum_repos | bool
+  when: common_install_yum_repos | bool
 
 - name: Download Rabbitmq rpms
   ansible.builtin.import_role:

@@ -1015,12 +1015,12 @@ By default the Deployer will install YUM repositories which point to external UR
 **&#9432; Note:**
 The customer will be reposible for configuring the repo files in `/etc/yum.repos.d`.
 
-To use internal repositories, set `install_yum_repos` to `false` in the `all` vars section.  For example:
+To use internal repositories, set `common_install_yum_repos` to `false` in the `all` vars section.  For example:
 
 ```yaml
 all:
   vars:
-    install_yum_repos: false
+    common_install_yum_repos: false
 ```
 
 ## Running the Deployer in Offline Mode

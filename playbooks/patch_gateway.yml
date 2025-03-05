@@ -6,7 +6,7 @@
   hosts: gateway
   become: true
   roles:
-    - role: itential.deployer.common_vars
+    - role: itential.deployer.common
   tasks:
     - name: Patch IAG
       ansible.builtin.import_role:
