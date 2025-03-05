@@ -20,7 +20,7 @@ The variables located in the `vars` directory of each role are "static" and not 
 
 The variables in this section may be overridden in the inventory in the `all` group vars.
 
-The following table lists the default variables that are shared between the Vault-related roles, located in `roles/common_vars/defaults/main/vault.yml`.
+The following table lists the default variables that are shared between the Vault-related roles, located in `roles/common/defaults/main/vault.yml`.
 
 | Variable | Group | Type | Description | Default Value
 | :------- | :---- | :--- | :---------- | :------------

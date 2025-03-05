@@ -52,7 +52,7 @@ The `platform_release` must be defined in the inventory.  This variable, along w
 
 The variables in this section may be overridden in the inventory in the `all` group vars.
 
-The following table lists the default variables that are shared between the Redis-related roles, located in `roles/common_vars/defaults/main/redis.yml`.
+The following table lists the default variables that are shared between the Redis-related roles, located in `roles/common/defaults/main/redis.yml`.
 
 | Variable | Group | Type | Description | Default Value
 | :------- | :---- | :--- | :---------- | :------------

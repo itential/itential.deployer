@@ -6,7 +6,7 @@
   hosts: platform
   become: true
   roles:
-    - role: itential.deployer.common_vars
+    - role: itential.deployer.common
   tasks:
     - name: Patch Itential Platform
       ansible.builtin.import_role:

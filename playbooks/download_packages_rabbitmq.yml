@@ -7,7 +7,7 @@
   vars:
     offline_install_enabled: false
   roles:
-    - role: itential.deployer.common_vars
+    - role: itential.deployer.common
   tasks:
     - name: Download RabbitMQ packages  # noqa run-once
       ansible.builtin.import_role:

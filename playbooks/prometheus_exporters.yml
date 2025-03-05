@@ -6,7 +6,7 @@
   become: true
   roles:
     # Pull in the common vars
-    - role: itential.deployer.common_vars
+    - role: itential.deployer.common
       tags: always
   tasks:
     # RabbitMQ has builtin Prometheus support, just enable the plugin.
@@ -41,7 +41,7 @@
   become: true
   roles:
     # Pull in the common vars
-    - role: itential.deployer.common_vars
+    - role: itential.deployer.common
       tags: always
 
     - role: prometheus.prometheus.redis_exporter
@@ -83,7 +83,7 @@
   become: true
   roles:
     # Pull in the common vars
-    - role: itential.deployer.common_vars
+    - role: itential.deployer.common
       tags: always
 
     - role: prometheus.prometheus.mongodb_exporter
@@ -141,7 +141,7 @@
   become: true
   roles:
     # Pull in the common vars
-    - role: itential.deployer.common_vars
+    - role: itential.deployer.common
       tags: always
 
     - role: prometheus.prometheus.node_exporter
@@ -181,7 +181,7 @@
   become: true
   roles:
     # Pull in the common vars
-    - role: itential.deployer.common_vars
+    - role: itential.deployer.common
       tags: always
 
     - role: prometheus.prometheus.process_exporter
