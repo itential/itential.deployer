@@ -14,6 +14,9 @@
 # To ensure that THP is disabled before mongod starts, you should create a service file for
 # your platform's initialization system that disables THP at boot. Instructions are provided
 # below for both the systemd and the System V init initialization systems.
+#
+# Additionally, for RHEL / CentOS systems that make use of ktune and tuned performance
+# profiles, you must create a custom tuned profile as well.
 
 # Check if its already disabled
 - name: Ensure THP is enabled never

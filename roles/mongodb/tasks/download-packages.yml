@@ -16,7 +16,7 @@
         baseurl: "{{ mongodb_release_url }}"
         enabled: true
         gpgcheck: true
-        gpgkey: "{{ mongodb_gpgkey_url[ansible_distribution_major_version] }}"
+        gpgkey: "{{ mongodb_gpgkey_url }}"
       when: install_yum_repos | bool
 
     - name: Download MongoDB RPMs
