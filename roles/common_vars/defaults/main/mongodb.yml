@@ -30,5 +30,3 @@ mongodb_user_localaaa_password: localaaa
 
 # The name of the mongo replica set
 mongodb_replset_name: "{{ mongodb_replset_name_default }}"
-
-mongodb_release_url: "https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/{{ mongodb_version }}/$basearch/"

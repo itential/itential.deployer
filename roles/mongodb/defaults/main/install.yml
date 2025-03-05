@@ -6,7 +6,7 @@ mongodb_package_dependencies:
   - selinux-policy-targeted
   - audit
 
-mongodb_release_url: "https://repo.mongodb.org/yum/{{ ansible_distribution | lower }}/{{ ansible_distribution_major_version }}/mongodb-org/{{ mongodb_version }}/x86_64/"
+mongodb_release_url: "https://repo.mongodb.org/yum/{{ ansible_distribution_file_variety | lower }}/{{ ansible_distribution_major_version }}/mongodb-org/{{ mongodb_version }}/x86_64/"
 mongodb_gpgkey_url: "https://www.mongodb.org/static/pgp/server-{{ mongodb_version }}.asc"
 
 # The mongodb role uses the system python3 executables.

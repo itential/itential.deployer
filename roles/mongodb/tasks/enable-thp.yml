@@ -31,7 +31,6 @@
 - name: Enable Transparent Huge Pages (THP)
   when: thp_enable_conf.changed or thp_defrag_conf.changed
   block:
-
     - name: Create systemd unit file
       ansible.builtin.template:
         src: thp.service.j2
@@ -49,3 +48,40 @@
         state: started
         enabled: true
         daemon_reload: true
+
+    - name: Install and configure tuned
+      when: ansible_distribution_file_variety == "RedHat"
+      block:
+
+        - name: Install tuned
+          ansible.builtin.dnf:
+            name: tuned
+            state: present
+            update_cache: true
+
+        - name: Create custom tuned profile directory
+          ansible.builtin.file:
+            state: directory
+            path: "/etc/tuned/virtual-guest-no-thp"
+            owner: root
+            group: root
+            mode: "0755"
+
+        - name: Ensure tuned does not re-enable THP
+          ansible.builtin.template:
+            src: tuned.conf.j2
+            dest: "/etc/tuned/virtual-guest-no-thp/tuned.conf"
+            owner: root
+            group: root
+            mode: "0644"
+          vars:
+            tuned_action: always
+
+        - name: Enable tuned profile
+          ansible.builtin.command:
+            cmd: tuned-adm profile virtual-guest-no-thp
+          vars:
+            ansible_python_interpreter: "{{ mongodb_python_venv }}/bin/python3"
+          register: result
+          changed_when: result.rc == 0
+          failed_when: result.rc > 0
