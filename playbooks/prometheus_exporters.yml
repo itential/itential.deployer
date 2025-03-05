@@ -1,41 +1,6 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Install RabbitMQ exporter
-  hosts: rabbitmq, rabbitmq_secondary
-  become: true
-  roles:
-    # Pull in the common vars
-    - role: itential.deployer.common
-      tags: always
-  tasks:
-    # RabbitMQ has builtin Prometheus support, just enable the plugin.
-    # https://www.rabbitmq.com/docs/prometheus#rabbitmq-configuration
-    - name: Enable the RabbitMQ Prometheus plugin
-      ansible.builtin.command:
-        cmd: rabbitmq-plugins enable rabbitmq_prometheus
-      register: cmdoutput
-      changed_when: cmdoutput.rc != 0
-      tags: rabbitmq_exporter_install
-
-    - name: Make custom configuration changes
-      tags: rabbitmq_exporter_custom_config
-      block:
-        - name: Gather service facts
-          ansible.builtin.service_facts:
-
-        - name: Open Port on FirewallD Public Zone
-          ansible.posix.firewalld:
-            port: "{{ prometheus_rabbitmq_exporter_web_listen_port }}/tcp"
-            permanent: true
-            state: enabled
-            zone: public
-            immediate: true
-          when:
-            - ansible_facts.services["firewalld.service"] is defined
-            - ansible_facts.services["firewalld.service"].state == "running"
-            - ansible_facts.services["firewalld.service"].status == "enabled"
-
 - name: Install Redis exporter
   hosts: redis, redis_secondary
   become: true
