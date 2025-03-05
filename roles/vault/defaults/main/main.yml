@@ -1,14 +1,24 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
+# The default port of the vault server
+vault_port: 8200
+
 # The default port used by vault clusters to communicate with each other
 vault_cluster_port: 8201
+
+# Default directory to store the unseal keys
+vault_unseal_keys_dir: "{{ vault_dir }}/keys/unseal_keys"
+
+# Flag to manage how secret data is written to Vault with
+# Itential Platform version 2021.2 and later.
+vault_read_only: true
+
+# default vault name
+vault_name: itential
 
 # The default user that runs vault
 vault_user: vault
 
 # The default group that runs vault
 vault_group: vault
-
-# Default directory to store the unseal keys
-vault_unseal_keys_dir: "{{ vault_dir }}/keys/unseal_keys"
