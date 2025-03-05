@@ -3,7 +3,7 @@
 ---
 
 # The file containing the installed components and versions
-itential_release_file: /etc/iag-release
+common_itential_release_file: /etc/iag-release
 
 # Default feature flags
 # Enable everything by default, override in the hosts file if required
