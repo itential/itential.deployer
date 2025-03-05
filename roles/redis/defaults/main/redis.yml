@@ -26,6 +26,12 @@ redis_pid_dir: "{{ redis_pid_dir_default }}"
 redis_owner: redis
 redis_group: redis
 
+# Default redis port
+redis_port: "{{ redis_port_default }}"
+
+# The default redis sentinel listen port
+redis_sentinel_port: "{{ redis_sentinel_port_default }}"
+
 # Flag to enable IPv6
 redis_bind_ipv6: true
 
@@ -42,3 +48,19 @@ redis_bind_addr_source: inventory_hostname
 # The inventory_hostname or default_ipv4_address will be automatically added
 # to the redis_bind_addrs depending on the redis_bind_addr_source.
 redis_bind_addrs: 127.0.0.1
+
+# Feature flags that can be overriden in the hosts file
+# Essentially, a default installation will not have auth, replication or tls
+redis_auth_enabled: false
+redis_replication_enabled: false
+redis_tls_enabled: false
+
+# Default redis user passwords
+# These are meant to be changed by the customer. By default they are meant to
+# be predictable and simple.
+redis_user_admin_password: admin
+redis_user_itential_password: itential
+redis_user_repluser_password: repluser
+redis_user_sentineladmin_password: admin
+redis_user_sentineluser_password: sentineluser
+redis_user_prometheus_password: prometheus
