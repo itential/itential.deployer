@@ -8,7 +8,7 @@ The playbook and role in this section install and configure Redis for the Itenti
 
 ## Base Install
 
-The `redis` role performs a base install of Redis including any OS packages required.  It will compile and install any custom SELinux profiles. It creates the appropriate Linux users, directories, log files, and systemd services.  It uses a template to generate a configuration file with some potential features available in other roles commented out. It will start the Redis service when complete.
+The `redis` role performs a base install of Redis including any OS packages required.  It will compile and install any custom SELinux profiles.  It creates the appropriate Linux users, directories, log files, and systemd services.  It uses a template to generate a configuration file based on the variables defined in the redis group vars.  It will start the Redis service when complete.
 
 ## Authentication
 
@@ -28,7 +28,7 @@ More info on Redis authorization: https://redis.io/docs/manual/security/
 
 ## Replication
 
-Optionally, the `redis` role performs the steps required to create a Redis replica set.  It uses a template to generate a Redis Sentinel config file.  It modifies the Redis config file to turn off protected-mode.  It assumes that the first host defined in the inventory file is the initial primary.  It will update the config file for the non-primary Redis servers to replicate from the primary using hostname.  It will start Redis Sentinel when complete.
+Optionally, the `redis` role performs the steps required to create a Redis replica set.  It uses a template to generate a Redis Sentinel config file.  It modifies the Redis config file to turn off protected-mode.  It assumes that the first host defined in the inventory file is the initial primary.  It will update the config file for the non-primary Redis servers to replicate from the primary using hostname.  It will start the Redis Sentinel service when complete.
 
 For more information on Redis replication: https://redis.io/docs/manual/replication/
 
