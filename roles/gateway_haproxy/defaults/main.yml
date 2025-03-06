@@ -3,13 +3,13 @@
 ---
 
 # By default to not install/configure HAProxy
-iag_haproxy: false
+gateway_haproxy_enabled: false
 
 # Location of the HAProxy config file
-haproxy_conf_file: /etc/haproxy/haproxy.cfg
+gateway_haproxy_conf_file: /etc/haproxy/haproxy.cfg
 
 # The SSL cert file name
-haproxy_ssl_cert_src: server.pem
+gateway_haproxy_ssl_cert_src: server.pem
 
 # The SSL cert destination
-haproxy_ssl_cert_dest: "/etc/ssl/certs/{{ haproxy_ssl_cert_src }}"
+gateway_haproxy_ssl_cert_dest: "/etc/ssl/certs/{{ gateway_haproxy_ssl_cert_src }}"

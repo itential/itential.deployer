@@ -10,9 +10,9 @@
 - name: Download Ansible collections
   ansible.builtin.command:
     chdir: "{{ gateway_target_node_root }}"
-    cmd: "{{ iag_pkgs_temp_dir.path }}/offline_install/bin/ansible-galaxy
+    cmd: "{{ gateway_pkgs_temp_dir.path }}/offline_install/bin/ansible-galaxy
          collection download {{ item }}"
-  with_items: "{{ iag_ansible_collections }}"
+  with_items: "{{ gateway_ansible_collections }}"
   changed_when: true
 
 - name: Copy Ansible collections to control node
