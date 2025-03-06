@@ -1,8 +1,8 @@
 # Overview
 
 The Itential Deployer supports patch upgrades for Itential Platform.  These are also referred to as
-monthly releases.  For example, if Itential Platform version 2025.1.1 is currently installed, it
-could be upgraded to any 2025.1.X version.  The patch upgrade playbook **DOES NOT** support major
+monthly releases.  For example, if Itential Platform version 6.0.0 is currently installed, it
+could be upgraded to any 6.0.X version.  The patch upgrade playbook **DOES NOT** support major
 upgrades.  For major upgrades, please work with your Itential Professional Services representative.
 
 # Requirements
