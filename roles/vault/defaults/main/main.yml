@@ -10,10 +10,6 @@ vault_cluster_port: 8201
 # Default directory to store the unseal keys
 vault_unseal_keys_dir: "{{ vault_dir }}/keys/unseal_keys"
 
-# Flag to manage how secret data is written to Vault with
-# Itential Platform version 2021.2 and later.
-vault_read_only: true
-
 # default vault name
 vault_name: itential
 
