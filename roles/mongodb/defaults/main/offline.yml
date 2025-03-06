@@ -3,8 +3,10 @@
 ---
 # Base directories
 mongodb_offline_packages_root: "{{ offline_itential_packages_path }}/{{ platform_release }}/mongodb"
-mongodb_offline_target_node_root: "/var/tmp/{{ mongodb_offline_packages_root }}"
-mongodb_offline_control_node_root: "{{ playbook_dir }}/files/{{ mongodb_offline_packages_root }}"
+mongodb_offline_target_node_root:
+  "{{ offline_target_node_root }}/{{ mongodb_offline_packages_root }}"
+mongodb_offline_control_node_root:
+  "{{ offline_control_node_root }}/{{ mongodb_offline_packages_root }}"
 
 # Target node download directories
 mongodb_offline_target_node_rpms_dir: "{{ mongodb_offline_target_node_root }}/rpms"
