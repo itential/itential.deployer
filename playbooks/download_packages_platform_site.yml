@@ -4,9 +4,6 @@
 - name: Download Redis packages
   import_playbook: itential.deployer.download_packages_redis
 
-- name: Download RabbitMQ packages
-  import_playbook: itential.deployer.download_packages_rabbitmq
-
 - name: Download MongoDB packages
   import_playbook: itential.deployer.download_packages_mongodb
 
