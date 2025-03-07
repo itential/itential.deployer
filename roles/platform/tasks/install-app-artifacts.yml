@@ -21,10 +21,6 @@
         owner: "{{ platform_group }}"
         extra_opts: --strip-components=1
 
-    # - name: Run npm install
-    #   community.general.npm:
-    #     path: "{{ platform_service_dir }}/app-artifacts"
-
     # Using chown and chmod is a faster way to enforce the file ownership and
     # permissions. The file module in ansible checks each and every file/dir
     # in the tree, 'chown -R ' does not, it just sets it.
@@ -45,12 +41,3 @@
       register: result
       changed_when: result.rc == 0
       failed_when: result.rc > 0
-
-    # - name: Add symlink in install directory
-    #   ansible.builtin.file:
-    #     src: "{{ platform_install_dir }}/current/custom/@itential/app-artifacts"
-    #     dest: "{{ platform_install_dir }}/current/node_modules/@itential/app-artifacts"
-    #     group: "{{ platform_user }}"
-    #     owner: "{{ platform_group }}"
-    #     state: link
-    #     follow: false
