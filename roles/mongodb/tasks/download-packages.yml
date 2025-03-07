@@ -28,16 +28,6 @@
         offline_download_packages: "{{ mongodb_packages + mongodb_package_dependencies }}"
         offline_download_dir: "{{ mongodb_offline_target_node_rpms_dir }}"
 
-    - name: Download MongoDB RPMs for Redhat
-      ansible.builtin.import_role:
-        name: offline
-        tasks_from: download-rpms
-      vars:
-        offline_download_method: yum_module
-        offline_download_packages: "{{ mongodb_redhat_package_dependencies }}"
-        offline_download_dir: "{{ mongodb_offline_target_node_rpms_dir }}"
-      when: ansible_distribution_file_variety == "RedHat"
-
     - name: Copy RPMs to control node
       ansible.builtin.import_role:
         name: offline
