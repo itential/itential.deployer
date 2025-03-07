@@ -161,8 +161,8 @@ The following variables are global for all roles.
 
 | Variable | Type | Description | Default |
 | :------- | :--- | :---------- | :------ |
-| `offline_target_node_root` | String | Target node root directory | `/var/tmp` |
-| `offline_control_node_root` | String | Control node root directory | `{{ playbook_dir }}/files` |
+| `offline_target_node_root` | String | Root directory on the target node where required packages are downloaded to by the download playbooks. | `/var/tmp` |
+| `offline_control_node_root` | String | Root directory on the control node where required packages are downloaded to by the download playbooks and where the packages are uploaded from when installing in offline mode. | `{{ playbook_dir }}/files` |
 | `offline_itential_packages_path` | String | Path appended to the root directory | `itential_packages/{{ ansible_distribution }}_{{ ansible_distribution_major_version }}` |
 
 ### Itential Platform
