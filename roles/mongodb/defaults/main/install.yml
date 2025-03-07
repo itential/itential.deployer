@@ -10,6 +10,9 @@ mongodb_package_dependencies:
   - selinux-policy-targeted
   - audit
 
+mongodb_redhat_package_dependencies:
+  - tuned
+
 # The mongodb role uses the system python3 executables.
 mongodb_python_executable: /usr/bin/python3
 mongodb_pip_executable: /usr/bin/pip3

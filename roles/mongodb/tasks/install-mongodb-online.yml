@@ -7,6 +7,13 @@
     state: present
     update_cache: true
 
+- name: Install Mongo dependency packages for Redhat
+  ansible.builtin.dnf:
+    name: "{{ mongodb_redhat_package_dependencies }}"
+    state: present
+    update_cache: true
+  when: ansible_distribution_file_variety == "RedHat"
+
 # Install the mongodb repo if mongodb is not already installed
 - name: Install MongoDB repo
   ansible.builtin.yum_repository:
