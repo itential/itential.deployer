@@ -18,7 +18,7 @@
         - gateway_install
 
     - role: itential.deployer.gateway_haproxy
-      when: iag_haproxy | bool
+      when: gateway_haproxy_enabled | bool
       tags:
         - gateway
         - gateway_haproxy

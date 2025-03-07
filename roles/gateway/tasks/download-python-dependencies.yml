@@ -15,12 +15,12 @@
     name: offline
     tasks_from: download-wheels
   vars:
-    offline_wheel_files: "{{ base_python_dependencies }}"
+    offline_wheel_files: "{{ gateway_python_base_dependencies }}"
     offline_download_dir: "{{ gateway_offline_target_node_wheels_dir }}/base"
-    offline_pip_executable: "{{ pip_executable }}"
+    offline_pip_executable: "{{ gateway_pip_executable }}"
   when:
-    - base_python_dependencies is defined
-    - base_python_dependencies | length > 0
+    - gateway_python_base_dependencies is defined
+    - gateway_python_base_dependencies | length > 0
 
 - name: Copy base Python dependencies to control node
   ansible.builtin.import_role:
@@ -33,41 +33,41 @@
 - name: Create temporary working directory
   ansible.builtin.tempfile:
     state: directory
-  register: iag_pkgs_temp_dir
+  register: gateway_pkgs_temp_dir
 
 - name: Setup Python virtual environment
   ansible.builtin.command:
-    chdir: "{{ iag_pkgs_temp_dir.path }}"
-    cmd: "{{ python_executable }} -m venv offline_install"
+    chdir: "{{ gateway_pkgs_temp_dir.path }}"
+    cmd: "{{ gateway_python_executable }} -m venv offline_install"
   changed_when: true
 
 - name: Install base Python Dependencies
   ansible.builtin.pip:
-    name: "{{ base_python_dependencies }}"
+    name: "{{ gateway_python_base_dependencies }}"
     state: present
-    virtualenv: "{{ iag_pkgs_temp_dir.path }}/offline_install"
+    virtualenv: "{{ gateway_pkgs_temp_dir.path }}/offline_install"
     extra_args: --log /var/log/pip.log
   when:
-    - base_python_dependencies is defined
-    - base_python_dependencies | length > 0
+    - gateway_python_base_dependencies is defined
+    - gateway_python_base_dependencies | length > 0
 
 - name: Install IAG Python Dependencies
   ansible.builtin.pip:
-    name: "{{ app_python_dependencies }}"
+    name: "{{ gateway_python_app_dependencies }}"
     state: present
-    virtualenv: "{{ iag_pkgs_temp_dir.path }}/offline_install"
+    virtualenv: "{{ gateway_pkgs_temp_dir.path }}/offline_install"
     extra_args: --log /var/log/pip.log
   when:
-    - app_python_dependencies is defined
-    - app_python_dependencies | length > 0
+    - gateway_python_app_dependencies is defined
+    - gateway_python_app_dependencies | length > 0
 
 - name: Install Ansible
   ansible.builtin.pip:
-    name: "{{ iag_ansible_version }}"
+    name: "{{ gateway_ansible_version }}"
     state: present
-    virtualenv: "{{ iag_pkgs_temp_dir.path }}/offline_install"
+    virtualenv: "{{ gateway_pkgs_temp_dir.path }}/offline_install"
     extra_args: --log /var/log/pip.log
-  when: iag_enable_ansible | bool
+  when: gateway_enable_ansible | bool
 
 - name: Download Ansible collections
   tags: download_ansible_collections
@@ -76,32 +76,32 @@
       ansible.builtin.include_tasks:
         file: download-ansible-collections.yml
       when:
-        - iag_ansible_collections is defined
-        - iag_ansible_collections is iterable
-        - iag_ansible_collections | length > 0
+        - gateway_ansible_collections is defined
+        - gateway_ansible_collections is iterable
+        - gateway_ansible_collections | length > 0
 
 - name: Copy IAG wheel file to target node
   ansible.builtin.copy:
-    src: "{{ iag_whl_file }}"
-    dest: "{{ iag_pkgs_temp_dir.path }}"
+    src: "{{ gateway_whl_file }}"
+    dest: "{{ gateway_pkgs_temp_dir.path }}"
     mode: '0644'
 
 - name: Install IAG
   ansible.builtin.pip:
-    name: "{{ iag_pkgs_temp_dir.path }}/{{ iag_whl_file }}"
-    virtualenv: "{{ iag_pkgs_temp_dir.path }}/offline_install"
+    name: "{{ gateway_pkgs_temp_dir.path }}/{{ gateway_whl_file }}"
+    virtualenv: "{{ gateway_pkgs_temp_dir.path }}/offline_install"
     extra_args: --log /var/log/pip.log
 
 - name: Uninstall IAG
   ansible.builtin.pip:
-    name: "{{ iag_pkgs_temp_dir.path }}/{{ iag_whl_file }}"
+    name: "{{ gateway_pkgs_temp_dir.path }}/{{ gateway_whl_file }}"
     state: absent
-    virtualenv: "{{ iag_pkgs_temp_dir.path }}/offline_install"
+    virtualenv: "{{ gateway_pkgs_temp_dir.path }}/offline_install"
     extra_args: --log /var/log/pip.log
 
 - name: Create requirements file
   ansible.builtin.shell:
-    chdir: "{{ iag_pkgs_temp_dir.path }}"
+    chdir: "{{ gateway_pkgs_temp_dir.path }}"
     cmd: offline_install/bin/pip3 freeze > requirements.txt
   changed_when: true
 
@@ -110,7 +110,7 @@
     cmd: "offline_install/bin/pip3 download -r requirements.txt
          -d {{ gateway_offline_target_node_wheels_dir }}/app"
   args:
-    chdir: "{{ iag_pkgs_temp_dir.path }}"
+    chdir: "{{ gateway_pkgs_temp_dir.path }}"
   changed_when: true
 
 - name: Copy IAG Python dependencies to control node
@@ -123,5 +123,5 @@
 
 - name: Remove temporary working directory
   ansible.builtin.file:
-    path: "{{ iag_pkgs_temp_dir.path }}"
+    path: "{{ gateway_pkgs_temp_dir.path }}"
     state: absent
