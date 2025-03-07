@@ -15,14 +15,15 @@
       ansible.builtin.include_vars:
         file: "{{ item }}"
       with_first_found:
-        - "{{ iag_release }}-{{ ansible_distribution | lower }}-{{ ansible_distribution_major_version }}.yml"
+        - "{{ gateway_release }}-{{ ansible_distribution
+          | lower }}-{{ ansible_distribution_major_version }}.yml"
         - "release-undefined.yml"
 
     - name: Check for valid IAG release
       ansible.builtin.fail:
-        msg: "Deployer does not support installing Gateway version {{ iag_release }}
+        msg: "Deployer does not support installing Gateway version {{ gateway_release }}
              on {{ ansible_distribution }}-{{ ansible_distribution_major_version }}"
-      when: invalid_iag_release is defined
+      when: gateway_invalid_release is defined
 
 - name: Download OS packages
   tags: download_os_packages

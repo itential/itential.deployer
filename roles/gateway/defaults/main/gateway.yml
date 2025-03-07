@@ -2,58 +2,55 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
 
-# The file containing the installed components and versions
-common_itential_release_file: /etc/iag-release
-
 # Default feature flags
 # Enable everything by default, override in the hosts file if required
-iag_enable_ansible: true
-iag_enable_nornir: true
-iag_enable_netmiko: true
-iag_enable_scripts: true
-iag_enable_netconf: true
-iag_enable_httpreq: true
-iag_enable_python_venv: true
-iag_enable_grpc: true
-iag_enable_git: true
+gateway_enable_ansible: true
+gateway_enable_nornir: true
+gateway_enable_netmiko: true
+gateway_enable_scripts: true
+gateway_enable_netconf: true
+gateway_enable_httpreq: true
+gateway_enable_python_venv: true
+gateway_enable_grpc: true
+gateway_enable_git: true
 
 # Location of IAG assets
-iag_install_dir: /opt/automation-gateway
+gateway_install_dir: /opt/automation-gateway
 
 # Location of IAG Ansible collections
-iag_ansible_collections_path: "{{ iag_install_dir }}/ansible/collections"
+gateway_ansible_collections_path: "{{ gateway_install_dir }}/ansible/collections"
 
 # Location of IAG data
-iag_data_dir: /var/lib/automation-gateway
+gateway_data_dir: /var/lib/automation-gateway
 
 # Location of IAG logs
-iag_log_dir: /var/log/automation-gateway
+gateway_log_dir: /var/log/automation-gateway
 
 # Default port
-iag_port: 8083
+gateway_port: 8083
 
 # location of IAG config file
-iag_properties_location: /etc/automation-gateway
+gateway_properties_location: /etc/automation-gateway
 
-iag_user: itential
-iag_group: itential
+gateway_user: itential
+gateway_group: itential
 
 # Default HTTPS/SSL settings
-iag_https: false
-iag_https_port: 8443
-iag_ssl_copy_certs: true
-iag_ssl_dir: "{{ iag_install_dir }}/conf/certs"
-iag_ssl_cert_src: server.crt
-iag_ssl_cert_dest: "{{ iag_ssl_dir }}/{{ iag_ssl_cert_src }}"
-iag_ssl_key_src: server.key
-iag_ssl_key_dest: "{{ iag_ssl_dir }}/{{ iag_ssl_key_src }}"
-iag_ssl_rootca_src: rootCA.crt
-iag_ssl_rootca_dest: "{{ iag_ssl_dir }}/{{ iag_ssl_rootca_src }}"
-iag_tlsv1_2: false
+gateway_https: false
+gateway_https_port: 8443
+gateway_ssl_copy_certs: true
+gateway_ssl_dir: "{{ gateway_install_dir }}/conf/certs"
+gateway_ssl_cert_src: server.crt
+gateway_ssl_cert_dest: "{{ gateway_ssl_dir }}/{{ gateway_ssl_cert_src }}"
+gateway_ssl_key_src: server.key
+gateway_ssl_key_dest: "{{ gateway_ssl_dir }}/{{ gateway_ssl_key_src }}"
+gateway_ssl_rootca_src: rootCA.crt
+gateway_ssl_rootca_dest: "{{ gateway_ssl_dir }}/{{ gateway_ssl_rootca_src }}"
+gateway_tlsv1_2: false
 
 # The number of http server threads for handling requests
-iag_http_server_threads: "{{ ansible_processor_cores * 4 }}"
+gateway_http_server_threads: "{{ ansible_processor_cores * 4 }}"
 
 # Python virtual environment settings
-iag_venv_name: venv
-python_venv: "{{ iag_install_dir }}/{{ iag_venv_name }}"
+gateway_venv_name: venv
+gateway_python_venv: "{{ gateway_install_dir }}/{{ gateway_venv_name }}"

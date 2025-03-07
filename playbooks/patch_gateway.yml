@@ -11,4 +11,4 @@
     - name: Patch IAG
       ansible.builtin.import_role:
         name: itential.deployer.gateway
-        tasks_from: upgrade-iag
+        tasks_from: upgrade-gateway
