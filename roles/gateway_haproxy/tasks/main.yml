@@ -5,13 +5,13 @@
   ansible.builtin.include_vars:
     file: "{{ item }}"
   with_first_found:
-    - "release-{{ iag_release }}.yml"
+    - "release-{{ gateway_release }}.yml"
     - "release-undefined.yml"
 
 - name: Check for valid IAG release
   ansible.builtin.fail:
-    msg: "Deployer does not support installing HAProxy on {{ iag_release }}"
-  when: invalid_iag_release is defined
+    msg: "Deployer does not support installing HAProxy on {{ gateway_release }}"
+  when: gateway_haproxy_invalid_release is defined
 
 - name: Install HAProxy
   ansible.builtin.package:
@@ -23,8 +23,8 @@
 # the installer will ensure that they get uploaded to the correct location.
 - name: Copy IAG HTTPS certificates to the appropriate remote location
   ansible.builtin.copy:
-    src: "{{ haproxy_ssl_cert_src }}"
-    dest: "{{ haproxy_ssl_cert_dest }}"
+    src: "{{ gateway_haproxy_ssl_cert_src }}"
+    dest: "{{ gateway_haproxy_ssl_cert_dest }}"
     mode: '0400'
     group: haproxy
     owner: haproxy
@@ -32,7 +32,7 @@
 - name: Generate HAProxy config from template
   ansible.builtin.template:
     src: haproxy.cfg.j2
-    dest: "{{ haproxy_conf_file }}"
+    dest: "{{ gateway_haproxy_conf_file }}"
     group: haproxy
     owner: haproxy
     mode: "0660"

@@ -14,7 +14,7 @@ The IAG artifacts are hosted on the Itential Nexus repository. Please contact yo
 
 ## Update Inventory Variables
 
-Next, update the inventory variables.  It is recommended that the inventory used during the original IAG install is used as the baseline.  Update the `iag_whl_file` to the new version.
+Next, update the inventory variables.  It is recommended that the inventory used during the original IAG install is used as the baseline.  Update the `gateway_whl_file` to the new version.
 
 _Example: Original Inventory_
 
@@ -26,8 +26,8 @@ all:
                 <host1:
                     ansible_host: <host1-ip>
             vars:
-                iag_release: 2023.1
-                iag_whl_file: automation_gateway-3.227.0+2023.1.9-py3-none-any.whl
+                gateway_release: 2023.1
+                gateway_whl_file: automation_gateway-3.227.0+2023.1.9-py3-none-any.whl
 ```
 
 _Example: Patch Upgrade Inventory_
@@ -40,8 +40,8 @@ all:
                 <host1:
                     ansible_host: <host1-ip>
             vars:
-                iag_release: 2023.1
-                iag_whl_file: automation_gateway-3.227.0+2023.1.52-py3-none-any.whl
+                gateway_release: 2023.1
+                gateway_whl_file: automation_gateway-3.227.0+2023.1.52-py3-none-any.whl
 ```
 
 ## Run Patch IAG Playbook

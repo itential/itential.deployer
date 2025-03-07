@@ -62,12 +62,6 @@
     - name: Install and configure tuned
       when: ansible_distribution_file_variety == "RedHat"
       block:
-        - name: Install tuned
-          ansible.builtin.dnf:
-            name: tuned
-            state: present
-            update_cache: true
-
         - name: Create custom tuned profile directory
           ansible.builtin.file:
             state: directory

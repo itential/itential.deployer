@@ -13,85 +13,85 @@
 - name: Create temporary working directory
   ansible.builtin.tempfile:
     state: directory
-  register: iag_pkgs_temp_dir
+  register: gateway_pkgs_temp_dir
 
 - name: Setup Python virtual environment
   ansible.builtin.command:
-    chdir: "{{ iag_pkgs_temp_dir.path }}"
+    chdir: "{{ gateway_pkgs_temp_dir.path }}"
     cmd: /usr/local/bin/python3 -m venv offline_install
   changed_when: true
 
 - name: Install Python Dependencies
   ansible.builtin.pip:
-    name: "{{ iag_python_dependencies }}"
+    name: "{{ gateway_python_app_dependencies }}"
     state: present
-    virtualenv: "{{ iag_pkgs_temp_dir.path }}/offline_install"
+    virtualenv: "{{ gateway_pkgs_temp_dir.path }}/offline_install"
 
 - name: Install Ansible
   ansible.builtin.pip:
-    name: "{{ iag_ansible_version }}"
+    name: "{{ gateway_ansible_version }}"
     state: present
-    virtualenv: "{{ iag_pkgs_temp_dir.path }}/offline_install"
-  when: iag_enable_ansible | bool
+    virtualenv: "{{ gateway_pkgs_temp_dir.path }}/offline_install"
+  when: gateway_enable_ansible | bool
 
 - name: Copy IAG wheel file to target node
   ansible.builtin.copy:
-    src: "{{ iag_whl_file }}"
-    dest: "{{ iag_pkgs_temp_dir.path }}"
+    src: "{{ gateway_whl_file }}"
+    dest: "{{ gateway_pkgs_temp_dir.path }}"
     mode: '0644'
 
 - name: Install IAG
   ansible.builtin.pip:
-    name: "{{ iag_pkgs_temp_dir.path }}/{{ iag_whl_file }}"
-    virtualenv: "{{ iag_pkgs_temp_dir.path }}/offline_install"
+    name: "{{ gateway_pkgs_temp_dir.path }}/{{ gateway_whl_file }}"
+    virtualenv: "{{ gateway_pkgs_temp_dir.path }}/offline_install"
 
 - name: Uninstall IAG
   ansible.builtin.pip:
-    name: "{{ iag_pkgs_temp_dir.path }}/{{ iag_whl_file }}"
+    name: "{{ gateway_pkgs_temp_dir.path }}/{{ gateway_whl_file }}"
     state: absent
-    virtualenv: "{{ iag_pkgs_temp_dir.path }}/offline_install"
+    virtualenv: "{{ gateway_pkgs_temp_dir.path }}/offline_install"
 
 - name: Create requirements file
   ansible.builtin.shell:
-    chdir: "{{ iag_pkgs_temp_dir.path }}"
+    chdir: "{{ gateway_pkgs_temp_dir.path }}"
     cmd: offline_install/bin/pip3 freeze > requirements.txt
   changed_when: true
 
 - name: Create package directory
   ansible.builtin.file:
-    name: "{{ iag_pkgs_temp_dir }}/iag_pkgs"
+    name: "{{ gateway_pkgs_temp_dir }}/gateway_pkgs"
     mode: '0775'
     state: directory
   changed_when: true
 
 - name: Download wheel files
   ansible.builtin.command:
-    cmd: offline_install/bin/pip3 download -r requirements.txt -d iag_pkgs
+    cmd: offline_install/bin/pip3 download -r requirements.txt -d gateway_pkgs
   args:
-    chdir: "{{ iag_pkgs_temp_dir.path }}"
+    chdir: "{{ gateway_pkgs_temp_dir.path }}"
   changed_when: true
 
 - name: Copy requirements file to package directory
   ansible.builtin.copy:
     remote_src: true
-    src: "{{ iag_pkgs_temp_dir.path }}/requirements.txt"
-    dest: "{{ iag_pkgs_temp_dir.path }}/iag_pkgs"
+    src: "{{ gateway_pkgs_temp_dir.path }}/requirements.txt"
+    dest: "{{ gateway_pkgs_temp_dir.path }}/gateway_pkgs"
     mode: '0644'
 
 - name: Create download directory
   ansible.builtin.file:
-    path: "{{ iag_pkgs_download_dir_target_node }}"
+    path: "{{ gateway_pkgs_download_dir_target_node }}"
     state: directory
     mode: '0755'
 
 - name: Create IAG archive
   community.general.archive:  # noqa risky-file-permissions
-    path: "{{ iag_pkgs_temp_dir.path }}/iag_pkgs/*"
-    dest: "{{ iag_pkgs_download_dir_target_node }}/iag_pkgs.tar.gz"
+    path: "{{ gateway_pkgs_temp_dir.path }}/gateway_pkgs/*"
+    dest: "{{ gateway_pkgs_download_dir_target_node }}/gateway_pkgs.tar.gz"
     format: gz
     force_archive: true
 
 - name: Remove temporary working directory
   ansible.builtin.file:
-    path: "{{ iag_pkgs_temp_dir.path }}"
+    path: "{{ gateway_pkgs_temp_dir.path }}"
     state: absent

@@ -8,28 +8,28 @@
 
 - name: Copy IAG archive from local
   ansible.builtin.copy:
-    src: "{{ iag_whl_file }}"
-    dest: "{{ workingdir.path }}/{{ iag_whl_file | basename }}"
+    src: "{{ gateway_whl_file }}"
+    dest: "{{ workingdir.path }}/{{ gateway_whl_file | basename }}"
     mode: '0644'
   when:
-    - iag_whl_file is defined
-    - iag_archive_download_url is not defined
+    - gateway_whl_file is defined
+    - gateway_archive_download_url is not defined
 
 - name: Download IAG archive from repository
   when:
-    - iag_archive_download_url is defined
-    - iag_whl_file is not defined
+    - gateway_archive_download_url is defined
+    - gateway_whl_file is not defined
   block:
     - name: Download IAG archive from repository
       ansible.builtin.get_url:
-        url: "{{ iag_archive_download_url }}"
+        url: "{{ gateway_archive_download_url }}"
         dest: "{{ workingdir.path }}/"
         mode: '0644'
         # Sets the appropriate header based on the repository type:
         # - For JFrog: Uses the "X-JFrog-Art-Api" header with the API key if "repository_api_key" is defined and "jfrog" is part of the download URL.
         # - For Nexus: Uses a default header ("Accept: application/octet-stream") since Nexus doesn't support API key authentication.
         headers: >-
-          {%- if repository_api_key is defined and iag_archive_download_url is search("jfrog") -%}
+          {%- if repository_api_key is defined and gateway_archive_download_url is search("jfrog") -%}
             {"X-JFrog-Art-Api": "{{ repository_api_key }}", "Accept": "application/octet-stream"}
           {%- else -%}
             {"Accept": "application/octet-stream"}
@@ -39,28 +39,28 @@
         validate_certs: true
       register: download_result
 
-    - name: Set iag_whl_file destination from download
+    - name: Set gateway_whl_file destination from download
       ansible.builtin.set_fact:
-        iag_whl_file: "{{ download_result.dest }}"
+        gateway_whl_file: "{{ download_result.dest }}"
 
 - name: Upgrade IAG
   ansible.builtin.pip:
-    name: "{{ workingdir.path }}/{{ iag_whl_file | basename }}"
-    virtualenv: "{{ iag_install_dir }}/venv"
+    name: "{{ workingdir.path }}/{{ gateway_whl_file | basename }}"
+    virtualenv: "{{ gateway_install_dir }}/venv"
 
 # Using chown and chmod is a faster way to enforce the file ownership and
 # permissions. The file module in ansible checks each and every file/dir
 # in the tree, 'chown -R ' does not, it just sets it.
 - name: Set appropriate ownership on all gateway files
   ansible.builtin.command:
-    cmd: "chown -R {{ iag_user }}:{{ iag_group }} {{ iag_install_dir }}/venv"
+    cmd: "chown -R {{ gateway_user }}:{{ gateway_group }} {{ gateway_install_dir }}/venv"
   register: chown_output
   changed_when: chown_output.rc == 0
   failed_when: chown_output.rc != 0
 
 - name: Set appropriate permissions on all gateway files
   ansible.builtin.command:
-    cmd: "chmod -R 775 {{ iag_install_dir }}/venv"
+    cmd: "chmod -R 775 {{ gateway_install_dir }}/venv"
   register: chmod_output
   changed_when: chmod_output.rc == 0
   failed_when: chmod_output.rc != 0

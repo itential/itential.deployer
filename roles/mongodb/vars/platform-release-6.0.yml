@@ -15,6 +15,22 @@ mongodb_packages_default:
     - mongodb-org
     - mongodb-mongosh-shared-openssl3
 
+mongodb_package_dependencies_default:
+  "8":
+    - selinux-policy
+    - selinux-policy-targeted
+    - audit
+    - tuned
+  "9":
+    - selinux-policy
+    - selinux-policy-targeted
+    - audit
+    - tuned
+  "2023":
+    - selinux-policy
+    - selinux-policy-targeted
+    - audit
+
 # MongoDB doesn't require python, pip, or pymongo but the community.mongodb collection does.
 mongodb_python_packages_default:
   "8":
