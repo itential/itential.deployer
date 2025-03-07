@@ -108,8 +108,8 @@ The following table lists the default variables located in `roles/platform_app_a
 
 | Variable | Group | Type | Description | Default Value
 | :------- | :---- | :--- | :---------- | :------------
-| `platform_app_artifact` | `platform` | Boolean | Flag for enabling the installation of App Artifact. | `false`
-| `platform_app_artifact_source_file` | `platform` | String | The name of the App-Artifact archive.  The archive must be placed in the `files` directory. | N/A
+| `platform_app_artifacts_enabled` | `platform` | Boolean | Flag for enabling the installation of App Artifact. | `false`
+| `platform_app_artifacts_source_file` | `platform` | String | The name of the App-Artifact archive.  The archive must be placed in the `files` directory. | N/A
 
 # Building the Inventory
 
@@ -164,7 +164,7 @@ all:
                     - <zip_archiveN>
                 platform_custom_location: <location>
 
-To install App-Artifacts, add the `platform_app_artifact` flag to the `platform` group and set it to `true` and configure the `platform_app_artifact_source_file`.
+To install App-Artifacts, add the `platform_app_artifacts_enabled` flag to the `platform` group and set it to `true` and configure the `platform_app_artifacts_source_file`.
 
 ## Example Inventory - Install App-Artifact
 
@@ -180,8 +180,8 @@ all:
                     ansible_host: <addr1>
             vars:
                 platform_bin_file: <bin-file>
-                platform_app_artifact: true
-                platform_app_artifact_source_file: <archive1>
+                platform_app_artifacts_enabled: true
+                platform_app_artifacts_source_file: <archive1>
 ```
 
 ## Example Inventory - Use Hashicorp Vault

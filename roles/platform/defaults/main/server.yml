@@ -1,11 +1,13 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-# The name of the profile document to load from the MongoDB where legacy configuration properties are stored.
+# The name of the profile document to load from the MongoDB where legacy configuration
+# properties are stored.
 # Not required for installations that are using environment variables or a properties file.
 platform_profile_id:
 
-# An identifier for the server instance. This is used to uniquely identify the server in a multi-server environment.
+# An identifier for the server instance. This is used to uniquely identify the server in a
+# multi-server environment.
 # If not provided, the server will generate one on startup.
 platform_server_id: "{{ inventory_hostname }}"
 

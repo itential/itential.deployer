@@ -16,16 +16,19 @@
         - platform
         - platform_install
 
-    # Install app-artifact into Itential Platform
-    # This should only be done in a development environment
-    - role: itential.deployer.platform_app_artifact
-      when: app_artifact | bool
+  tasks:
+    # Install app-artifacts into Itential Platform
+    # This should only be done in development environments
+    - name: Install app-artifacts
+      ansible.builtin.import_role:
+        name: itential.deployer.platform
+        tasks_from: install-app-artifacts
+      when: platform_app_artifacts_enabled | bool
       tags:
         - platform
-        - platform_app_artifact
+        - platform_app_artifacts
 
-  # Install any listed apps and/or adapters
-  tasks:
+    # Install any listed apps and/or adapters
     - name: Install adapters
       ansible.builtin.import_role:
         name: itential.deployer.platform

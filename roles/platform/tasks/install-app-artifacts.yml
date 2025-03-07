@@ -1,0 +1,56 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Install App Artifacts
+  notify: Enable and Start Platform
+  block:
+    - name: Make directory for app-artifacts
+      ansible.builtin.file:
+        path: "{{ platform_service_dir }}/app-artifacts"
+        owner: "{{ platform_user }}"
+        group: "{{ platform_group }}"
+        mode: '0775'
+        state: directory
+
+    - name: Unarchive app-artifacts
+      ansible.builtin.unarchive:
+        src: "{{ platform_app_artifacts_source_file }}"
+        dest: "{{ platform_service_dir }}/app-artifacts"
+        mode: '0644'
+        group: "{{ platform_user }}"
+        owner: "{{ platform_group }}"
+        extra_opts: --strip-components=1
+
+    # - name: Run npm install
+    #   community.general.npm:
+    #     path: "{{ platform_service_dir }}/app-artifacts"
+
+    # Using chown and chmod is a faster way to enforce the file ownership and
+    # permissions. The file module in ansible checks each and every file/dir
+    # in the tree, 'chown -R ' does not, it just sets it.
+    - name: Set ownership on app-artifacts
+      ansible.builtin.command:
+        argv:
+          - chown
+          - -R
+          - "{{ platform_user }}:{{ platform_group }}"
+          - "{{ platform_service_dir }}/app-artifacts"
+      register: result
+      changed_when: result.rc == 0
+      failed_when: result.rc > 0
+
+    - name: Set permissions on app-artifacts
+      ansible.builtin.command:
+        cmd: "chmod -R 775 {{ platform_service_dir }}/app-artifacts"
+      register: result
+      changed_when: result.rc == 0
+      failed_when: result.rc > 0
+
+    # - name: Add symlink in install directory
+    #   ansible.builtin.file:
+    #     src: "{{ platform_install_dir }}/current/custom/@itential/app-artifacts"
+    #     dest: "{{ platform_install_dir }}/current/node_modules/@itential/app-artifacts"
+    #     group: "{{ platform_user }}"
+    #     owner: "{{ platform_group }}"
+    #     state: link
+    #     follow: false
