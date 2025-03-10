@@ -21,7 +21,7 @@ gateway_python_packages:
   - python3-pip
   - python3-devel
 
-base_python_dependencies:
+gateway_python_base_dependencies:
   - pip==24.0
   - setuptools==69.0.3
   - wheel==0.42.0
