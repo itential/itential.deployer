@@ -220,11 +220,6 @@ the required repository or download the packages.
 | MongoDB | repo.mongodb.org | https | |
 | MongoDB | www.mongodb.org | https | |
 | Vault | rpm.releases.hashicorp.com | https | |
-| Itential Platform | rpm.nodesource.com | https | When installing on Redhat/CentOS 7 |
-| Itential Platform | www.python.org | https | When installing on Redhat/CentOS 7 |
-| Itential Platform | www.openssl.org | https | When installing on Redhat/CentOS 7 |
-| IAG | www.python.org | https | When installing on Redhat/CentOS 7 |
-| IAG | www.openssl.org | https | When installing on Redhat/CentOS 7 |
 
 If internal YUM repositories are used, refer to the
 [Using Internal YUM Repositories](#using-internal-yum-repositories) section.
@@ -280,68 +275,22 @@ The deployer will create several user accounts in the dependent systems. It uses
 in all cases and those passwords can be overridden with the defined ansible variables. To override
 these variables just define the variable in the deployer host file.
 
-<table>
-  <tr>
-    <th style="background-color: grey;"d>User Account</th>
-    <th style="background-color: grey;">Default Password</th>
-    <th style="background-color: grey;">Variable Name</th>
-    <th style="background-color: grey;">Description</th>
-  </tr>
-  <tr>
-    <th colspan="4" style="background-color: grey; font-weight: bold">MongoDB</th>
-  </tr>
-  <tr>
-    <td>admin</td>
-    <td>admin</td>
-    <td>mongo_user_admin_password</td>
-    <td>Has full root access to the mongo database.</td>
-  </tr>
-  <tr>
-    <td>itential</td>
-    <td>itential</td>
-    <td>mongo_user_itential_password</td>
-    <td>Has read and write access to the “itential” database only.</td>
-  </tr>
-  <tr>
-    <td>localaaa</td>
-    <td>localaaa</td>
-    <td>mongo_user_localaaa_password</td>
-    <td>Has read and write access to the “LocalAAA” database.  This is used by the Local AAA adapter for local, non-LDAP logins.</td>
-  </tr>
-  <tr>
-    <th colspan="4" style="background-color: grey; font-weight: bold">Redis</th>
-  </tr>
-  <tr>
-    <td>admin</td>
-    <td>admin</td>
-    <td>redis_user_admin_password</td>
-    <td>Has full root access to the Redis database, all channels, all keys, all commands.</td>
-  </tr>
-  <tr>
-    <td>itential</td>
-    <td>itential</td>
-    <td>redis_user_itential_password</td>
-    <td>Has full access to the Redis database, all channels, all keys, EXCEPT the following commands: asking, cluster, readonly, readwrite, bgrewriteaof, bgsave, failover, flushall, flushdb, psync, replconf, replicaof, save, shutdown, sync.</td>
-  </tr>
-  <tr>
-    <td>repluser</td>
-    <td>repluser</td>
-    <td>redis_user_repluser_password</td>
-    <td>Has access to the minimum set of commands to perform replication: psync, replconf, ping.</td>
-  </tr>
-  <tr>
-    <td>admin</td>
-    <td>sentineladmin</td>
-    <td>redis_user_sentineladmin_password</td>
-    <td>Full root access to Redis Sentinel.</td>
-  </tr>
-  <tr>
-    <td>sentineluser</td>
-    <td>sentineluser</td>
-    <td>redis_user_sentineluser_password</td>
-    <td>Has access to the minimum set of commands to perform sentinel monitoring: multi, slaveof, ping, exec, subscribe, config|rewrite, role, publish, info, client|setname, client|kill, script|kill.</td>
-  </tr>
-</table>
+#### MongoDB Accounts
+
+| User Account | Default Password | Variable Name | Description |
+| :----------- | :--------------- | :------------ | :---------- |
+| admin | admin | mongo_user_admin_password | Has full root access to the mongo database. |
+| itential | itential | mongo_user_itential_password | Has read and write access to the “itential” database only. |
+
+#### Redis Accounts
+
+| User Account | Default Password | Variable Name | Description |
+| :----------- | :--------------- | :------------ | :---------- |
+| admin | admin | redis_user_admin_password | Has full root access to the Redis database, all channels, all keys, all commands. |
+| itential | itential | redis_user_itential_password | Has full access to the Redis database, all channels, all keys, EXCEPT the following commands: asking, cluster, readonly, readwrite, bgrewriteaof, bgsave, failover, flushall, flushdb, psync, replconf, replicaof, save, shutdown, sync. |
+| repluser | repluser | redis_user_repluser_password | Has access to the minimum set of commands to perform replication: psync, replconf, ping. |
+| admin | sentineladmin | redis_user_sentineladmin_password | Full root access to Redis Sentinel. |
+| sentineluser | sentineluser | redis_user_sentineluser_password | Has access to the minimum set of commands to perform sentinel monitoring: multi, slaveof, ping, exec, subscribe, config.rewrite, role, publish, info, client.setname, client.kill, script.kill. |
 
 ### Obtaining the Itential Binaries
 
@@ -853,18 +802,6 @@ Fault tolerant architecture using external dependencies.
 all:
   vars:
     platform_release: 6.0
-    # Instructs deployer to use external dependencies.
-    # The replication for each of these should be set to false but the auth and
-    # tls properties may be utilised to suit your needs.
-    redis_replication_enabled: false
-    redis_auth_enabled: true
-    redis_tls_enabled: true
-    redis_user: itential
-    redis_password: <The-Redis-password>
-    mongodb_replication_enabled: false
-    mongodb_auth_enabled: false
-    mongodb_tls_enabled: false
-
   children:
     redis:
     mongodb:
@@ -875,8 +812,13 @@ all:
       vars:
         platform_packages:
           - itential-platform-6.0.0-1.noarch.rpm
-        platform_redis_svc_url: <The-FQDN-to-the-Redis-service>
-        platform_mongodb_svc_url_itential: <The-connection-string-for-the-itential-database>
+        platform_redis_host: <The-FQDN-to-the-Redis-service>
+        platform_redis_port: 6379
+        platform_redis_auth_enabled: true
+        platform_redis_username: itential
+        platform_redis_password: super-secret-password
+        platform_mongo_auth_enabled: true
+        platform_mongo_url: <a-valid-mongo-connection-string>
     gateway:
       hosts:
         automation-gateway1.host.com:
