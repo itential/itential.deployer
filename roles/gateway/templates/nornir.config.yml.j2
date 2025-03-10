@@ -5,9 +5,9 @@ logging:
 inventory:
     plugin: SimpleInventory
     options:
-        host_file: "{{ iag_install_dir }}/nornir/inventory/hosts.yml"
-        group_file: "{{ iag_install_dir }}/nornir/inventory/groups.yml"
-        defaults_file: "{{ iag_install_dir }}/nornir/inventory/defaults.yml"
+        host_file: "{{ gateway_install_dir }}/nornir/inventory/hosts.yml"
+        group_file: "{{ gateway_install_dir }}/nornir/inventory/groups.yml"
+        defaults_file: "{{ gateway_install_dir }}/nornir/inventory/defaults.yml"
 runner:
     plugin: threaded
     options:
