@@ -218,13 +218,13 @@ the required repository or download the packages.
 | Redis | dl.fedoraproject.org | https | When installing Redis from the Remi repository |
 | Redis | github.com | https | When installing Redis from source |
 | MongoDB | repo.mongodb.org | https | |
-| MongoDB | <www.mongodb.org> | https | |
+| MongoDB | www.mongodb.org | https | |
 | Vault | rpm.releases.hashicorp.com | https | |
 | Itential Platform | rpm.nodesource.com | https | When installing on Redhat/CentOS 7 |
-| Itential Platform | <www.python.org> | https | When installing on Redhat/CentOS 7 |
-| Itential Platform | <www.openssl.org> | https | When installing on Redhat/CentOS 7 |
-| IAG | <www.python.org> | https | When installing on Redhat/CentOS 7 |
-| IAG | <www.openssl.org> | https | When installing on Redhat/CentOS 7 |
+| Itential Platform | www.python.org | https | When installing on Redhat/CentOS 7 |
+| Itential Platform | www.openssl.org | https | When installing on Redhat/CentOS 7 |
+| IAG | www.python.org | https | When installing on Redhat/CentOS 7 |
+| IAG | www.openssl.org | https | When installing on Redhat/CentOS 7 |
 
 If internal YUM repositories are used, refer to the
 [Using Internal YUM Repositories](#using-internal-yum-repositories) section.
@@ -585,7 +585,8 @@ all:
       hosts:
         example1.host.com:
       vars:
-        platform_archive_download_url: https://registry.aws.itential.com/repository/PLATFORM/Platform%206.0.0/itential-platform-6.0.0-1.noarch.rpm
+        platform_packages:
+          - https://registry.aws.itential.com/repository/PLATFORM/Platform%206.0.0/itential-platform-6.0.0-1.noarch.rpm
         repository_username: user.name
         repository_password: !vault |
           $ANSIBLE_VAULT;1.1;AES123
