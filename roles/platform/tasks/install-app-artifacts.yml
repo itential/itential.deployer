@@ -20,7 +20,6 @@
           ansible.builtin.unarchive:
             src: "{{ platform_app_artifacts_source_file }}"
             dest: "{{ platform_service_dir }}/app-artifacts"
-            mode: '0644'
             group: "{{ platform_user }}"
             owner: "{{ platform_group }}"
             extra_opts: --strip-components=1
@@ -41,7 +40,11 @@
 
         - name: Set permissions on App Artifacts
           ansible.builtin.command:
-            cmd: "chmod -R 775 {{ platform_service_dir }}/app-artifacts"
+            argv:
+              - chmod
+              - -R
+              - u=rwX,g=rX,o=rX
+              - "{{ platform_service_dir }}/app-artifacts"
           register: result
           changed_when: result.rc == 0
           failed_when: result.rc > 0
