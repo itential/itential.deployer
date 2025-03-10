@@ -6,7 +6,7 @@
     file: validate-vars.yml
   tags: always
 
-- name: Install and configure Redis
+- name: Install and configure Itential Platform
   notify: Enable and Start Platform
   block:
     - name: Configure OS
@@ -41,29 +41,45 @@
           ansible.builtin.include_tasks:
             file: configure-firewalld.yml
 
-    - name: Install Dependencies
-      tags: install_dependencies
+    - name: Install Dependencies, Platform, Adapters and App Artifacts
       notify: Update Itential release file
       block:
-        - name: Install Platform package dependencies
-          ansible.builtin.include_tasks:
-            file: install-platform-packages.yml
+        - name: Install Dependencies
+          tags: install_dependencies
+          block:
+            - name: Install Platform package dependencies
+              ansible.builtin.include_tasks:
+                file: install-platform-packages.yml
 
-        - name: Install NodeJS
-          ansible.builtin.include_tasks:
-            file: install-nodejs.yml
+            - name: Install NodeJS
+              ansible.builtin.include_tasks:
+                file: install-nodejs.yml
 
-        - name: Install Python
-          ansible.builtin.include_tasks:
-            file: install-python.yml
+            - name: Install Python
+              ansible.builtin.include_tasks:
+                file: install-python.yml
 
-    - name: Install Platform
-      tags: install_platform
-      notify: Update Itential release file
-      block:
         - name: Install Platform
-          ansible.builtin.include_tasks:
-            file: install-platform.yml
+          tags: install_platform
+          block:
+            - name: Install Platform
+              ansible.builtin.include_tasks:
+                file: install-platform.yml
+
+        - name: Install Adapters
+          tags: install_adapters
+          block:
+            - name: Install Adapters
+              ansible.builtin.include_tasks:
+                file: install-adapters.yml
+
+        - name: Install App Artifacts
+          tags: install_app_artifacts
+          when: platform_app_artifacts_enabled | bool
+          block:
+            - name: Install App Artifacts
+              ansible.builtin.include_tasks:
+                file: install-app-artifacts.yml
 
     - name: Configure SELinux
       tags: configure_selinux

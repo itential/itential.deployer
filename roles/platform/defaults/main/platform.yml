@@ -57,3 +57,6 @@ platform_disable_git_safe_repo_checks: true
 
 # Flag to prevent the NPM scripts from running when running the NPM install
 platform_npm_ignore_scripts: true
+
+# Flag to install app-artifacts
+platform_app_artifacts_enabled: false

@@ -3,8 +3,9 @@
 ---
 # Base directories
 os_offline_packages_root: "{{ offline_itential_packages_path }}/{{ platform_release }}/os"
-os_offline_target_node_root: "/var/tmp/{{ os_offline_packages_root }}"
-os_offline_control_node_root: "{{ playbook_dir }}/files/{{ os_offline_packages_root }}"
+os_offline_target_node_root: "{{ offline_target_node_root }}/{{ os_offline_packages_root }}"
+os_offline_control_node_root:
+  "{{ playbooffline_control_node_rootok_dir }}/{{ os_offline_packages_root }}"
 
 # Target node download directories
 os_offline_target_node_rpms_dir: "{{ os_offline_target_node_root }}/rpms"
