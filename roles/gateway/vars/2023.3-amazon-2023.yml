@@ -26,7 +26,7 @@ gateway_python_base_dependencies:
   - setuptools==69.0.3
   - wheel==0.42.0
 
-app_python_dependencies:
+gateway_python_app_dependencies:
   - ansible-pylibssh==1.1.0
   - flask-ldap3-login==0.9.18
   - grpcio==1.53.0
