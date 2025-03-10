@@ -12,21 +12,21 @@ gateway_build_packages:
   - make
   - python3-devel
 
-python_version: 3.9
-python_executable: "/usr/bin/python{{ python_version }}"
-pip_executable: "/usr/bin/pip{{ python_version }}"
+gateway_python_version: 3.9
+gateway_python_executable: "/usr/bin/python{{ gateway_python_version }}"
+gateway_pip_executable: "/usr/bin/pip{{ gateway_python_version }}"
 
-python_packages:
+gateway_python_packages:
   - python3
   - python3-pip
   - python3-devel
 
-base_python_dependencies:
+gateway_python_base_dependencies:
   - pip==24.0
   - setuptools==69.0.3
   - wheel==0.42.0
 
-app_python_dependencies:
+gateway_python_app_dependencies:
   - ansible-pylibssh==1.1.0
   - flask-ldap3-login==0.9.18
   - grpcio==1.53.0
@@ -39,4 +39,4 @@ app_python_dependencies:
   - nornir-utils==0.2.0
   - pygnmi==0.8.9
 
-iag_ansible_version: ansible==8.7.0
+gateway_ansible_version: ansible==8.7.0

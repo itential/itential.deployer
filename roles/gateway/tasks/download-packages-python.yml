@@ -8,7 +8,7 @@
     tasks_from: download-rpms
   vars:
     offline_download_method: yum_module
-    offline_download_packages: "{{ python_packages }}"
+    offline_download_packages: "{{ gateway_python_packages }}"
     offline_download_dir: "{{ gateway_offline_target_node_rpms_dir }}"
   tags: download_gateway_python_packages
 
@@ -24,6 +24,8 @@
   ansible.builtin.include_role:
     name: python
   tags: install_python
+  vars:
+    python_packages: "{{ gateway_python_packages }}"
 
 - name: Include tasks to download IAG dependencies
   ansible.builtin.include_tasks:

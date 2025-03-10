@@ -11,7 +11,7 @@
 
 - name: Write MongoDB release information
   ansible.builtin.lineinfile:
-    path: "{{ itential_release_file }}"
+    path: "{{ common_itential_release_file }}"
     regexp: '^MONGODB='
     line: "MONGODB={{ result.stdout }}"
     create: true

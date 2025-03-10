@@ -17,7 +17,7 @@
     gpgcheck: true
     gpgkey: "{{ mongodb_gpgkey_url }}"
   when:
-    - install_yum_repos | bool
+    - common_install_yum_repos | bool
     - "'mongodb-org' not in ansible_facts.packages"
 
 # Install mongodb if mongodb is not already installed

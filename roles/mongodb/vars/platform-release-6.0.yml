@@ -13,6 +13,23 @@ mongodb_packages_default:
     - mongodb-org
   "2023":
     - mongodb-org
+    - mongodb-mongosh-shared-openssl3
+
+mongodb_package_dependencies_default:
+  "8":
+    - selinux-policy
+    - selinux-policy-targeted
+    - audit
+    - tuned
+  "9":
+    - selinux-policy
+    - selinux-policy-targeted
+    - audit
+    - tuned
+  "2023":
+    - selinux-policy
+    - selinux-policy-targeted
+    - audit
 
 # MongoDB doesn't require python, pip, or pymongo but the community.mongodb collection does.
 mongodb_python_packages_default:
@@ -25,3 +42,11 @@ mongodb_python_packages_default:
   "2023":
     - python3
     - python3-pip
+
+mongodb_gpgkey_url_default:
+  "8":
+    - https://www.mongodb.org/static/pgp/server-{{ mongodb_version }}.asc
+  "9":
+    - https://www.mongodb.org/static/pgp/server-{{ mongodb_version }}.asc
+  "2023":
+    - https://pgp.mongodb.com/server-{{ mongodb_version }}.asc

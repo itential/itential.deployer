@@ -181,7 +181,7 @@ In offline mode, the install playbooks will use the packages downloaded to the c
 
 | Variable            | Group     | Type   | Description        | Default |
 | :------------------ | :-------- | :------| :----------------- | :------ |
-| `iag_packages_path` | `gateway` | String | IAG packages path. | `{{ itential_packages_path }}/{{ iag_release }}/iag` |
+| `iag_packages_path` | `gateway` | String | IAG packages path. | `{{ itential_packages_path }}/{{ gateway_release }}/iag` |
 
 ### MongoDB
 

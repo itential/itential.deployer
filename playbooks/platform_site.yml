@@ -4,10 +4,6 @@
 - name: Install and configure Redis
   import_playbook: itential.deployer.redis
 
-- name: Install and configure RabbitMQ
-  import_playbook: itential.deployer.rabbitmq
-  when: "'rabbitmq' in groups"
-
 - name: Install and configure MongoDB
   import_playbook: itential.deployer.mongodb
 

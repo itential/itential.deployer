@@ -1,6 +1,6 @@
 # Overview
 
-The playbook and role in this section install and configure Hashicorp Vault for the Itential Automation Platform.  There is currently one Vault-related role:
+The playbook and role in this section install and configure Hashicorp Vault for the Itential Platform. There is currently one Vault-related role:
 
 * `vault` – Installs Hashicorp Vault, performs a base configuration, and unseals the Vault.
 
@@ -20,25 +20,12 @@ The variables located in the `vars` directory of each role are "static" and not 
 
 The variables in this section may be overridden in the inventory in the `all` group vars.
 
-The following table lists the default variables that are shared between the Vault-related roles, located in `roles/common_vars/defaults/main/vault.yml`.
+The following table lists the default variables that are shared between the Vault-related roles, located in `roles/common/defaults/main/vault.yml`.
 
-| Variable | Group | Type | Description | Default Value
-| :------- | :---- | :--- | :---------- | :------------
-| `vault_port` | `all` | Integer | The Vault listen port. | `8200`
-| `vault_root_key_dir` | `all` | String | The Vault root key directory. | `/opt/vault/keys/root_key`
-| `vault_name` | `all` | String | The name of the secret engine used to configure vault and Itential Platform | `itential`
-| `vault_read_only` | `all` | Boolean | Flag to manage how secret data is written to Vault with Itential Platform version 2021.2 and later. | `true`
-
-Beginning with the 2021.2 release, a `readOnly` property was added to vaultProps in the properties.json file. This property allows developers to denote fields that contain sensitive data and manage how secret data is written to Vault. This configurable property defaults to false.
-
-When set as readOnly: true, the following will occur:
-
- - Masking in the UI will be disabled (turned off).
- - Clear text will be shown.
- - All custom user decorations will be ignored.
- - Itential Platform will not write data to Vault.
-
-⚠ WARNING: If there are passwords stored within Vault and the readOnly property is initially set to false, and then later changed to true, all passwords will be lost and have to be set manually.
+| Variable | Type | Description | Default Value
+| :------- | :--- | :---------- | :------------
+| `vault_dir` | String | The Vault data directory. | `/opt/vault`
+| `vault_root_key_dir` | String | The Vault root key directory. | `/opt/vault/keys/root_key`
 
 ## Vault Role Variables
 
@@ -46,13 +33,14 @@ The variables in this section may be overridden in the inventory in the `vault` 
 
 The following table lists the default variables located in `roles/vault/defaults/main.yml`.
 
-| Variable | Group | Type | Description | Default Value
-| :------- | :---- | :--- | :---------- | :------------
-| `vault_dir` | `vault` | String | The Vault data directory. | `/opt/vault`
-| `vault_cluster_port` | `vault` | Integer | The Vault cluster communication port. | `8201`
-| `vault_user` | `vault` | String |The Vault Linux user. | `vault`
-| `vault_group` | `vault` | String | The Vault Linux group. | `vault`
-| `vault_unseal_keys_dir` | `vault` | String | The Vault unseal keys directory. | `/opt/vault/keys/unseal_keys`
+| Variable | Type | Description | Default Value
+| :------- | :--- | :---------- | :------------
+| `vault_port` | Integer | The Vault listen port. | `8200`
+| `vault_cluster_port` | Integer | The Vault cluster communication port. | `8201`
+| `vault_unseal_keys_dir` | String | The Vault unseal keys directory. | `/opt/vault/keys/unseal_keys`
+| `vault_name` | String | The name of the secret engine used to configure vault and Itential Platform | `itential`
+| `vault_user` | String |The Vault Linux user. | `vault`
+| `vault_group` |  String | The Vault Linux group. | `vault`
 
 # Building Your Inventory
 
@@ -62,11 +50,11 @@ To install and unseal Vault, add a `vault` group and host to your inventory.  Th
 
 ```
 all:
-    children:
-        vault:
-            hosts:
-                <host1>:
-                    ansible_host: <addr1>
+  children:
+    vault:
+      hosts:
+        <host1>:
+          ansible_host: <addr1>
 ```
 
 **&#9432; Note:**

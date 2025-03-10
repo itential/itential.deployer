@@ -4,159 +4,67 @@
 - name: Configure SELinux
   when: ansible_selinux.status == "enabled"
   block:
-    - name: Install custom SELinux profiles
+    - name: SELinux - Install custom profiles
       ansible.builtin.include_role:
         name: selinux
-      when: >
-        (redis_log_dir != redis_log_dir_default) or
-        (redis_data_dir != redis_data_dir_default) or
-        (redis_conf_dir != redis_conf_dir_default) or
-        (redis_pid_dir != redis_pid_dir_default)
 
-    - name: Configure SELinux port when using non-standard Redis port
+    - name: SELinux - Configure port when using non-standard Redis port
       community.general.seport:
         ports: "{{ redis_port }}"
         proto: tcp
         setype: redis_port_t
         state: present
-      when: redis_port != redis_port_default
 
-    - name: Configure SELinux port when using non-standard Sentinel port
+    - name: SELinux - Configure port when using non-standard Sentinel port
       community.general.seport:
         ports: "{{ redis_sentinel_port }}"
         proto: tcp
         setype: redis_port_t
         state: present
-      when:
-        - redis_replication_enabled | bool
-        - redis_sentinel_port != redis_sentinel_port_default
+      when: redis_replication_enabled | bool
 
-    - name: Configure SELinux file context when using non-standard bin directory
-      when: redis_bin_dir != redis_bin_dir_default
-      block:
-        - name: Set SELinux fcontext on Redis binaries
-          community.general.sefcontext:
-            target: "{{ redis_bin_dir }}(/.*)?"
-            setype: redis_exec_t
+    - name: SELinux - Configure file context when using non-standard bin directory
+      ansible.builtin.include_role:
+        name: selinux
+        tasks_from: configure-context
+      vars:
+        selinux_target: "{{ redis_bin_dir }}/redis-server"
+        selinux_setype: redis_exec_t
+        selinux_ftype: f
+        selinux_path: "{{ redis_bin_dir }}"
 
-        # To ensure idempotency, a restorecon with the passive check option (-n) is run first
-        - name: Check to see if a SELinux restore security contexts on Redis bin directory is required
-          ansible.builtin.command: restorecon -irvFn "{{ redis_bin_dir }}"
-          register: restorecon_check_result
-          changed_when: false
-          failed_when:
-            - restorecon_check_result.rc is defined
-            - restorecon_check_result.rc > 0
+    - name: SELinux - Configure file context when using non-standard log directory
+      ansible.builtin.include_role:
+        name: selinux
+        tasks_from: configure-context
+      vars:
+        selinux_target: "{{ redis_log_dir }}(/.*)?"
+        selinux_setype: redis_log_t
+        selinux_path: "{{ redis_log_dir }}"
 
-        - name: Apply new SELinux file context to Redis bin directory
-          ansible.builtin.command: restorecon -irvF "{{ redis_bin_dir }}"
-          register: restorecon_result
-          changed_when: restorecon_result.rc == 0
-          failed_when:
-            - restorecon_result.rc is defined
-            - restorecon_result.rc > 0
-          when: restorecon_check_result.stdout_lines | length > 0
+    - name: SELinux - Configure file context when using non-standard data directory
+      ansible.builtin.include_role:
+        name: selinux
+        tasks_from: configure-context
+      vars:
+        selinux_target: "{{ redis_data_dir }}(/.*)?"
+        selinux_setype: redis_var_lib_t
+        selinux_path: "{{ redis_data_dir }}"
 
-    - name: Configure SELinux file context when using non-standard log directory
-      when: redis_log_dir != redis_log_dir_default
-      block:
-        - name: Set SELinux fcontext on Redis log file
-          community.general.sefcontext:
-            target: "{{ redis_log_dir }}(/.*)?"
-            setype: redis_log_t
+    - name: SELinux - Configure file context when using non-standard configuration directory
+      ansible.builtin.include_role:
+        name: selinux
+        tasks_from: configure-context
+      vars:
+        selinux_target: "{{ redis_conf_dir }}(/.*)?"
+        selinux_setype: redis_conf_t
+        selinux_path: "{{ redis_conf_dir }}"
 
-        # To ensure idempotency, a restorecon with the passive check option (-n) is run first
-        - name: Check to see if a SELinux restore security contexts on Redis log directory is required
-          ansible.builtin.command: restorecon -irvn "{{ redis_log_dir }}"
-          register: restorecon_check_result
-          changed_when: false
-          failed_when:
-            - restorecon_check_result.rc is defined
-            - restorecon_check_result.rc > 0
-
-        - name: Apply new SELinux file context to Redis log directory
-          ansible.builtin.command: restorecon -irv "{{ redis_log_dir }}"
-          register: restorecon_result
-          changed_when: restorecon_result.rc == 0
-          failed_when:
-            - restorecon_result.rc is defined
-            - restorecon_result.rc > 0
-          when: restorecon_check_result.stdout_lines | length > 0
-
-    - name: Configure SELinux file context when using non-standard data directory
-      when: redis_data_dir != redis_data_dir_default
-      block:
-        - name: Set SELinux fcontext on Redis data directory
-          community.general.sefcontext:
-            target: "{{ redis_data_dir }}(/.*)?"
-            setype: redis_var_lib_t
-
-        # To ensure idempotency, a restorecon with the passive check option (-n) is run first
-        - name: Check to see if a SELinux restore security contexts on Redis data directory is required
-          ansible.builtin.command: restorecon -irvn "{{ redis_data_dir }}"
-          register: restorecon_check_result
-          changed_when: false
-          failed_when:
-            - restorecon_check_result.rc is defined
-            - restorecon_check_result.rc > 0
-
-        - name: Apply new SELinux file context to Redis data directory
-          ansible.builtin.command: restorecon -irv "{{ redis_data_dir }}"
-          register: restorecon_result
-          changed_when: restorecon_result.rc == 0
-          failed_when:
-            - restorecon_result.rc is defined
-            - restorecon_result.rc > 0
-          when: restorecon_check_result.stdout_lines | length > 0
-
-    - name: Configure SELinux file context when using non-standard configuration directory
-      when: redis_conf_dir != redis_conf_dir_default
-      block:
-        - name: Set SELinux fcontext on Redis configuration file
-          community.general.sefcontext:
-            target: "{{ redis_conf_dir }}(/.*)?"
-            setype: redis_conf_t
-
-        # To ensure idempotency, a restorecon with the passive check option (-n) is run first
-        - name: Check to see if a SELinux restore security contexts on Redis configuration directory is required
-          ansible.builtin.command: restorecon -irvn "{{ redis_conf_dir }}"
-          register: restorecon_check_result
-          changed_when: false
-          failed_when:
-            - restorecon_check_result.rc is defined
-            - restorecon_check_result.rc > 0
-
-        - name: Apply new SELinux file context to Redis configuration directory
-          ansible.builtin.command: restorecon -irv "{{ redis_conf_dir }}"
-          register: restorecon_result
-          changed_when: restorecon_result.rc == 0
-          failed_when:
-            - restorecon_result.rc is defined
-            - restorecon_result.rc > 0
-          when: restorecon_check_result.stdout_lines | length > 0
-
-    - name: Configure SELinux file context when using non-standard pid directory
-      when: redis_pid_dir != redis_pid_dir_default
-      block:
-        - name: Set SELinux fcontext on Redis pid directory
-          community.general.sefcontext:
-            target: "{{ redis_pid_dir }}(/.*)?"
-            setype: redis_var_run_t
-
-        # To ensure idempotency, a restorecon with the passive check option (-n) is run first
-        - name: Check to see if a SELinux restore security contexts on Redis pid directory is required
-          ansible.builtin.command: restorecon -irvn "{{ redis_pid_dir }}"
-          register: restorecon_check_result
-          changed_when: false
-          failed_when:
-            - restorecon_check_result.rc is defined
-            - restorecon_check_result.rc > 0
-
-        - name: Apply new SELinux file context to Redis pid directory
-          ansible.builtin.command: restorecon -irv "{{ redis_pid_dir }}"
-          register: restorecon_result
-          changed_when: restorecon_result.rc == 0
-          failed_when:
-            - restorecon_result.rc is defined
-            - restorecon_result.rc > 0
-          when: restorecon_check_result.stdout_lines | length > 0
+    - name: SELinux - Configure file context when using non-standard pid directory
+      ansible.builtin.include_role:
+        name: selinux
+        tasks_from: configure-context
+      vars:
+        selinux_target: "{{ redis_pid_dir }}(/.*)?"
+        selinux_setype: redis_var_run_t
+        selinux_path: "{{ redis_pid_dir }}"

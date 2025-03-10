@@ -63,11 +63,11 @@ defaults
 frontend  automation-gateway-frontend
     option forwardfor except 127.0.0.1
     maxconn 100
-    bind *:{{ iag_https_port }} ssl crt {{ haproxy_ssl_cert_dest }} force-tlsv12 ciphers DHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256
+    bind *:{{ gateway_https_port }} ssl crt {{ gateway_haproxy_ssl_cert_dest }} force-tlsv12 ciphers DHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256
     default_backend automation-gateway-backend
 
 #---------------------------------------------------------------------
 # IAG backend
 #---------------------------------------------------------------------
 backend automation-gateway-backend
-    server  app1 {{ inventory_hostname }}:{{ iag_port }}
+    server  app1 {{ inventory_hostname }}:{{ gateway_port }}

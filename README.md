@@ -546,8 +546,8 @@ all:
       hosts:
         example2.host.com:
       vars:
-        iag_release: 2023.1
-        iag_whl_file: automation_gateway-3.227.0+2023.1.9-py3-none-any.whl
+        gateway_release: 2023.1
+        gateway_whl_file: automation_gateway-3.227.0+2023.1.9-py3-none-any.whl
 ```
 
 ### Run the Itential Deployer
@@ -728,8 +728,8 @@ all:
       hosts:
         example2.host.com:
       vars:
-        iag_release: 2023.1
-        iag_whl_file: automation_gateway-3.227.0+2023.1.9-py3-none-any.whl
+        gateway_release: 2023.1
+        gateway_whl_file: automation_gateway-3.227.0+2023.1.9-py3-none-any.whl
 ```
 
 ### Minimal Architecture Inventory
@@ -765,8 +765,8 @@ all:
       hosts:
         automation-gateway.host.com:
       vars:
-        iag_release: 2023.1
-        iag_whl_file: automation_gateway-3.227.0+2023.1.9-py3-none-any.whl
+        gateway_release: 2023.1
+        gateway_whl_file: automation_gateway-3.227.0+2023.1.9-py3-none-any.whl
 ```
 
 ### Highly Available Architecture Inventory
@@ -811,8 +811,8 @@ all:
       hosts:
         automation-gateway1.host.com:
       vars:
-        iag_release: 2023.1
-        iag_whl_file: automation_gateway-3.227.0+2023.1.9-py3-none-any.whl
+        gateway_release: 2023.1
+        gateway_whl_file: automation_gateway-3.227.0+2023.1.9-py3-none-any.whl
 ```
 
 ### Highly Available Architecture Inventory leveraging external dependencies
@@ -857,8 +857,8 @@ all:
       hosts:
         automation-gateway1.host.com:
       vars:
-        iag_release: 2023.1
-        iag_whl_file: automation_gateway-3.227.0+2023.1.9-py3-none-any.whl
+        gateway_release: 2023.1
+        gateway_whl_file: automation_gateway-3.227.0+2023.1.9-py3-none-any.whl
 ```
 
 ### Active/Standby Architecture Inventory
@@ -925,8 +925,8 @@ all:
       hosts:
         datacenter2.automation-gateway1.host.com:
       vars:
-        iag_release: 2023.1
-        iag_whl_file: automation_gateway-3.227.0+2023.1.9-py3-none-any.whl
+        gateway_release: 2023.1
+        gateway_whl_file: automation_gateway-3.227.0+2023.1.9-py3-none-any.whl
 ```
 
 <!-- ### Blue/Green Architecture
@@ -960,8 +960,8 @@ all:
         hosts:
             example2.host.com:
         vars:
-            iag_release: 2023.1
-            iag_whl_file: automation_gateway-3.227.0+2023.1.9-py3-none-any.whl
+            gateway_release: 2023.1
+            gateway_whl_file: automation_gateway-3.227.0+2023.1.9-py3-none-any.whl
 ``` -->
 
 <!-- ### Available tags
@@ -998,15 +998,15 @@ Valid only when installing Itential Platform version 2023.1 and older.
 
 ### IAG
 
-[IAG Guide](docs/iag_guide.md)
+[IAG Guide](docs/itential_gateway_guide.md)
 
 ## Patching Itential Platform and IAG
 
 The Deployer supports patching Itential Platform and IAG.  Refer to the following guide for instructions on running the patch playbooks.
 
-[Patch Itential Platform Guide](docs/patch_platform_guide.md)
+[Patch Itential Platform Guide](docs/patch_itential_platform_guide.md)
 
-[Patch IAG Guide](docs/patch_iag_guide.md)
+[Patch IAG Guide](docs/patch_itential_gateway_guide.md)
 
 ## Using Internal YUM Repositories
 
@@ -1015,12 +1015,12 @@ By default the Deployer will install YUM repositories which point to external UR
 **&#9432; Note:**
 The customer will be reposible for configuring the repo files in `/etc/yum.repos.d`.
 
-To use internal repositories, set `install_yum_repos` to `false` in the `all` vars section.  For example:
+To use internal repositories, set `common_install_yum_repos` to `false` in the `all` vars section.  For example:
 
 ```yaml
 all:
   vars:
-    install_yum_repos: false
+    common_install_yum_repos: false
 ```
 
 ## Running the Deployer in Offline Mode

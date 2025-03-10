@@ -7,7 +7,7 @@
   vars:
     offline_install_enabled: false
   roles:
-    - role: itential.deployer.common_vars
+    - role: itential.deployer.common
     - role: itential.deployer.offline
   tasks:
     - name: Download Vault packages  # noqa run-once

@@ -3,7 +3,7 @@
 ---
 - name: Check release file
   ansible.builtin.stat:
-    path: "{{ itential_release_file }}"
+    path: "{{ common_itential_release_file }}"
   register: release_file
 
 - name: Check for supported os family

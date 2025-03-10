@@ -56,7 +56,7 @@
 
 - name: Update release file with vault version
   ansible.builtin.lineinfile:
-    path: "{{ itential_release_file }}"
+    path: "{{ common_itential_release_file }}"
     line: "VAULT={{ vault_installed_version.stdout }}"
     mode: "0644"
     create: true

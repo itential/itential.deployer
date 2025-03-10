@@ -1,14 +1,9 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-mongodb_package_dependencies:
-  - selinux-policy
-  - selinux-policy-targeted
-  - tuned
-  - audit
-
-mongodb_release_url: "https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/{{ mongodb_version }}/$basearch/"
-mongodb_gpgkey_url: "https://www.mongodb.org/static/pgp/server-{{ mongodb_version }}.asc"
+mongodb_release_url:
+  "https://repo.mongodb.org/yum/{{ ansible_distribution_file_variety
+  | lower }}/{{ ansible_distribution_major_version }}/mongodb-org/{{ mongodb_version }}/x86_64/"
 
 # The mongodb role uses the system python3 executables.
 mongodb_python_executable: /usr/bin/python3

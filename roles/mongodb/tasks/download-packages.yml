@@ -17,7 +17,7 @@
         enabled: true
         gpgcheck: true
         gpgkey: "{{ mongodb_gpgkey_url }}"
-      when: install_yum_repos | bool
+      when: common_install_yum_repos | bool
 
     - name: Download MongoDB RPMs
       ansible.builtin.import_role:
