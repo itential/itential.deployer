@@ -13,8 +13,8 @@ gateway_build_packages:
   - python3-devel
 
 gateway_python_version: 3.9
-gateway_python_executable: "/usr/bin/python{{ python_version }}"
-gateway_pip_executable: "/usr/bin/pip{{ python_version }}"
+gateway_python_executable: "/usr/bin/python{{ gateway_python_version }}"
+gateway_pip_executable: "/usr/bin/pip{{ gateway_python_version }}"
 
 gateway_python_packages:
   - python3
