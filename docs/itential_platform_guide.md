@@ -1,6 +1,6 @@
 # Overview
 
-The playbook and role in this section install and configure Itential Platform.  There are currently one role:
+The playbook and role in this section install and configure Itential Platform.  There is currently one role:
 
 * `platform` – Installs Itential Platform and performs a base configuration.
 
