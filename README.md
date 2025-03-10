@@ -107,7 +107,7 @@ architecture for testing environments and simple production environments. The in
 an environment that is as close to production as possible so that testing automations can provide
 confidence and expose potential problems sooner in the development lifecycle. Security
 considerations should mimic production requirements. In this architecture, each of the required
-Itential components is installed in clusters to provide stability, mimic production, and expose any
+Itential components are installed in clusters to provide stability, mimic production, and expose any
 issues with the clustering of the components. This could also serve as a production architecture.
 
 The ideal HA2 environment will have 9 VMs:
