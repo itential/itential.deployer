@@ -279,8 +279,8 @@ these variables just define the variable in the deployer host file.
 
 | User Account | Default Password | Variable Name | Description |
 | :----------- | :--------------- | :------------ | :---------- |
-| admin | admin | mongo_user_admin_password | Has full root access to the mongo database. |
-| itential | itential | mongo_user_itential_password | Has read and write access to the “itential” database only. |
+| admin | admin | mongodb_user_admin_password | Has full root access to the mongo database. |
+| itential | itential | mongodb_user_itential_password | Has read and write access to the “itential” database only. |
 
 #### Redis Accounts
 
@@ -816,7 +816,7 @@ all:
         platform_redis_port: 6379
         platform_redis_auth_enabled: true
         platform_redis_username: itential
-        platform_redis_password: super-secret-password
+        platform_redis_password: <super-secret-password>
         platform_mongo_auth_enabled: true
         platform_mongo_url: <a-valid-mongo-connection-string>
     gateway:
