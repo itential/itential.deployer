@@ -5,3 +5,4 @@ prometheus_process_exporter_web_listen_port: 9256
 prometheus_node_exporter_web_listen_port: 9100
 prometheus_redis_exporter_web_listen_port: 9121
 prometheus_mongodb_exporter_web_listen_port: 9216
+prometheus_itential_platform_web_listen_port: 3000
