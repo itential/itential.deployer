@@ -104,7 +104,9 @@
   tags: initialize_mongo_config
 
 - name: Add users to database
-  when: groups.mongodb.index(inventory_hostname) == 0
+  when:
+    - inventory_hostname not in groups.mongodb_arbiter
+    - groups.mongodb.index(inventory_hostname) == 0
   tags: create_mongo_users
   block:
     # The tasks in this file should only run on one host if configuring a replica set
