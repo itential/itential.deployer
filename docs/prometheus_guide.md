@@ -91,16 +91,13 @@ We recommend setting the `mongodb_exporter_global_conn_pool` variable to `true` 
 
 ```
 all:
-    vars:
-        mongodb_replication_enabled: true
-
     children:
         mongodb:
             hosts:
-                <MONGODB-HOST1>:
-                <MONGODB-HOST2>:
-                <MONGODB-HOST3>:
+                <MONGODB-HOST-1>:
+                <MONGODB-HOST-N>:
         vars:
+            mongodb_replication_enabled: true
             mongodb_exporter_global_conn_pool: true
 ```
 
@@ -125,12 +122,27 @@ To install and configure Prometheus and Grafana, add `prometheus` and `grafana` 
 ```
 all:
   vars:
-    platform_release: 2023.1
+    platform_release: 6.0
 
   children:
+    redis:
+      hosts:
+        <REDIS-HOST-1>:
+        <REDIS_HOST-N>:
+      vars:
+        redis_exporter_password: <REDIS-PROMETHEUS-PASSWORD>
+
+    mongodb:
+      hosts:
+        <MONGODB-HOST-1>:
+        <MONGODB-HOST-N>:
+      vars:
+        mongodb_exporter_admin_password: <MONGODB-ADMIN-PASSWORD>
+
     platform:
       hosts:
-        <PLATFORM-HOST>:
+        <PLATFORM-HOST-1>:
+        <PLATFORM-HOST-N>:
       vars:
         process_exporter_names: |
           {% raw %}
@@ -142,7 +154,8 @@ all:
 
     gateway:
       hosts:
-        <GATEWAY-HOST>:
+        <GATEWAY-HOST-1>:
+        <GATEWAY-HOST-N>:
       vars:
         process_exporter_names: |
           {% raw %}

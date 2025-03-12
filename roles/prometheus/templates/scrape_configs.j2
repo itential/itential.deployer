@@ -6,15 +6,9 @@
 {%- set mongodb_exporter_targets = [] %}
 {%- set redis_exporter_targets = [] %}
 
-{%- if platform_https -%}
-{%   set iap_port = platform_https_port %}
-{% else %}
-{%   set iap_port = platform_http_port %}
-{% endif %}
-
 {%- if 'platform' in groups -%}
 {%   for host in groups['platform'] %}
-{%     set iap_exporter_web_listen_address = host + ":" + iap_port | string %}
+{%     set iap_exporter_web_listen_address = host + ":" + prometheus_itential_platform_web_listen_port | string %}
 {{-    iap_exporter_targets.append( iap_exporter_web_listen_address ) -}}
 {%     if 'process_exporter_web_listen_address' in hostvars[host] %}
 {%       set process_exporter_web_listen_address = hostvars[host].process_exporter_web_listen_address %}
