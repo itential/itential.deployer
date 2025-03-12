@@ -5,7 +5,7 @@
 platform_ui_layout_file:
 
 # Path to the HTML file that will be displayed as the home page for the UI.
-platform_ui_home_file: node_modules/@itential/iap-ui/build/index.html
+platform_ui_home_file: "node_modules/@itential/iap-ui/build/index.html"
 
 # Path to the HTML file that will be displayed as the login page for the UI.
 platform_ui_login_file: "node_modules/@itential/iap-ui/build/index.html"
@@ -14,7 +14,7 @@ platform_ui_login_file: "node_modules/@itential/iap-ui/build/index.html"
 platform_ui_profile_file: "node_modules/@itential/iap-ui/build/index.html"
 
 # Path to the favicon file that will be displayed in the browser tab.
-platform_ui_favicon_file: ui/img/favicon.ico
+platform_ui_favicon_file: "ui/img/favicon.ico"
 
 # Path to the apple touch icon file that will be displayed on iOS devices.
-platform_ui_apple_touch_icon_file: ui/img/apple-touch-icon.png
+platform_ui_apple_touch_icon_file: "ui/img/apple-touch-icon.png"
