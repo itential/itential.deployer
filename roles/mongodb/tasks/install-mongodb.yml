@@ -105,7 +105,7 @@
 
 - name: Add users to database
   when:
-    - inventory_hostname not in groups.mongodb_arbiter
+    - inventory_hostname in groups.mongodb
     - groups.mongodb.index(inventory_hostname) == 0
   tags: create_mongo_users
   block:
