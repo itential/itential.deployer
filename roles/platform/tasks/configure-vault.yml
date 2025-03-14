@@ -1,12 +1,18 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
+
+# TODO: Figure out how we want to handle the Vault token.
+#       Do we want to continue to copy the the token from the Vault server?
+#       Do we want to create a variable that contains the token?
+#       Do we want to put the Vault token in the files directory and create a file variable?
+
 - name: Make the directory to store vault token.txt
   ansible.builtin.file:
-    path: "{{ iap_vault_token_dir }}"
+    path: "{{ platform_vault_token_dir }}"
     state: directory
-    owner: "{{ iap_user }}"
-    group: "{{ iap_group }}"
+    owner: "{{ platform_user }}"
+    group: "{{ platform_group }}"
     mode: "0770"
 
 - name: Get the root token from Vault server
@@ -17,8 +23,8 @@
 
 - name: Create the token file
   ansible.builtin.copy:
-    dest: "{{ iap_vault_token_dir }}/token.txt"
+    dest: "{{ platform_vault_token_file }}"
     content: "{{ root_key.content | b64decode }}"
-    owner: "{{ iap_user }}"
-    group: "{{ iap_group }}"
+    owner: "{{ platform_user }}"
+    group: "{{ platform_group }}"
     mode: "0400"

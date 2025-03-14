@@ -1,19 +1,57 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Install Python
-  ansible.builtin.include_role:
-    name: python
-  tags: install_python
+- name: Online install
+  when: not offline_install_enabled
+  block:
+    - name: Install Python
+      ansible.builtin.include_role:
+        name: python
+      tags: install_python
+      vars:
+        python_packages: "{{ platform_python_packages }}"
 
-- name: Create python3 symlinks
-  ansible.builtin.include_role:
-    name: python
-    tasks_from: create-symlinks
-  tags: install_python
+    - name: Create python3 symlinks
+      ansible.builtin.include_role:
+        name: python
+        tasks_from: create-symlinks
+      tags: install_python
+      vars:
+        python_executable: "{{ platform_python_executable }}"
+        python_pip_executable: "{{ platform_pip_executable }}"
 
-- name: Install Python dependencies
-  ansible.builtin.include_role:
-    name: python
-    tasks_from: install-dependencies
-  tags: install_python
+    - name: Install Python dependencies
+      ansible.builtin.include_role:
+        name: python
+        tasks_from: install-dependencies
+      tags: install_python
+      vars:
+        python_pip_executable: "{{ platform_pip_executable }}"
+        python_base_dependencies: "{{ platform_python_base_dependencies }}"
+        python_app_dependencies: "{{ platform_python_app_dependencies }}"
+
+- name: Install Python (offline)
+  when: offline_install_enabled
+  block:
+    - name: Install Python RPMs (offline)
+      ansible.builtin.include_role:
+        name: offline
+        tasks_from: install-rpms
+      vars:
+        offline_rpms_path: "{{ platform_offline_control_node_rpms_dir }}/python"
+
+    - name: Install base Python dependencies (offline)
+      ansible.builtin.include_role:
+        name: offline
+        tasks_from: install-wheels
+      vars:
+        offline_pip_executable: "{{ platform_pip_executable }}"
+        offline_wheels_dir: "{{ platform_offline_control_node_wheels_dir }}/base"
+
+    - name: Install application Python dependencies (offline)
+      ansible.builtin.include_role:
+        name: offline
+        tasks_from: install-wheels
+      vars:
+        offline_pip_executable: "{{ platform_pip_executable }}"
+        offline_wheels_dir: "{{ platform_offline_control_node_wheels_dir }}/app"

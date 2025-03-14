@@ -1,0 +1,41 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+# Ensure that the directory exists for the certificates and key files
+- name: Ensure that the directory exists for the certificates and key files
+  ansible.builtin.file:
+    state: directory
+    path: "{{ mongodb_ssl_root_dir }}/mongodb"
+    owner: root
+    group: root
+    mode: "0775"
+
+# Copy the predefined certificate file to the mongodb host. This certificate is
+# the .pem file that contains both the TLS certificate and key.
+- name: Copy certificate to MongoDB host if TLS enabled
+  ansible.builtin.copy:
+    src: "{{ mongodb_cert_keyfile_source }}"
+    dest: "{{ mongodb_cert_keyfile_destination }}"
+    mode: "0400"
+    group: "{{ mongodb_group }}"
+    owner: "{{ mongodb_owner }}"
+
+# # Copy the predefined root CA certificate file to the mongodb host.
+- name: Copy CA certificate to MongoDB host if TLS enabled
+  ansible.builtin.copy:
+    src: "{{ mongodb_root_ca_file_source }}"
+    dest: "{{ mongodb_root_ca_file_destination }}"
+    mode: "0400"
+    group: "{{ mongodb_group }}"
+    owner: "{{ mongodb_owner }}"
+
+# Execute the template to apply changes to the mongo.conf for TLS support
+- name: Create MongoDB config file
+  ansible.builtin.template:
+    src: mongod.conf.j2
+    dest: "{{ mongodb_conf_file }}"
+    owner: "{{ mongodb_owner }}"
+    group: "{{ mongodb_group }}"
+    mode: "0644"
+  vars:
+    stage: "tls"

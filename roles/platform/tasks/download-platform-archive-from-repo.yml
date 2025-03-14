@@ -1,17 +1,23 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Download the IAP file from URL
+- name: Download the Itential Platform artifact from URL
   ansible.builtin.get_url:
-    url: "{{ iap_archive_download_url }}"
-    dest: "{{ iap_install_dir }}/"
+    url: "{{ artifact }}"
+    dest: "{{ downloaddir.path }}/"
     mode: '0755'
     # Sets the appropriate header based on the repository type:
-    # - For JFrog: Uses the "X-JFrog-Art-Api" header with the API key if "repository_api_key" is defined and "jfrog" is part of the download URL.
-    # - For Nexus: Uses a default header ("Accept: application/octet-stream") since Nexus doesn't support API key authentication.
+    # - For JFrog: Uses the "X-JFrog-Art-Api" header with the API key if "repository_api_key"
+    #   is defined and "jfrog" is part of the download URL.
+    # - For Gitlab: Uses the "PRIVATE-TOKEN" header with the API key if "repository_api_key"
+    #   is defined and "gitlab" is part of the download URL.
+    # - For Nexus: Uses a default header ("Accept: application/octet-stream") since Nexus doesn't
+    #   support API key authentication.
     headers: >-
-      {%- if repository_api_key is defined and iap_archive_download_url is search("jfrog") -%}
+      {%- if repository_api_key is defined and artifact is search("jfrog") -%}
         {"X-JFrog-Art-Api": "{{ repository_api_key }}", "Accept": "application/octet-stream"}
+      {%- elif repository_api_key is defined and artifact is search("gitlab") -%}
+        {"PRIVATE-TOKEN": "{{ repository_api_key }}", "Accept": "application/octet-stream"}
       {%- else -%}
         {"Accept": "application/octet-stream"}
       {%- endif -%}
@@ -19,26 +25,4 @@
     url_password: "{{ repository_password | default(omit) }}"
     validate_certs: true
   register: download_result
-
-- name: Extract downloaded filename from result
-  ansible.builtin.set_fact:
-    downloaded_file: "{{ download_result.dest | basename }}"
-
-- name: Set iap_bin_file if the downloaded file is a bin file
-  ansible.builtin.set_fact:
-    iap_bin_file: "{{ downloaded_file }}"
-  when: downloaded_file.endswith('.bin')
-
-- name: Set iap_tar_file if the downloaded file is a tar.gz file
-  ansible.builtin.set_fact:
-    iap_tar_file: "{{ downloaded_file }}"
-  when: downloaded_file.endswith('.tar.gz')
-
-- name: Determine package name from the downloaded file
-  ansible.builtin.set_fact:
-    iap_package_name: >-
-      {%- if downloaded_file.endswith('.bin') -%}
-        {{ downloaded_file.split('.linux.x86_64.bin')[0] }}
-      {%- elif downloaded_file.endswith('.tar.gz') -%}
-        {{ downloaded_file.split('.linux.x86_64.tar.gz')[0] }}
-      {%- endif -%}
+  changed_when: false

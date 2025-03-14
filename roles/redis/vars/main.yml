@@ -1,0 +1,13 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+# Default directories
+redis_bin_dir_default: /usr/bin
+redis_conf_dir_default: /etc/redis
+redis_log_dir_default: /var/log/redis
+redis_data_dir_default: /var/lib/redis
+redis_pid_dir_default: /var/run
+
+# Default ports
+redis_port_default: 6379
+redis_sentinel_port_default: 26379

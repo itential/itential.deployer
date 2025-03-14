@@ -1,10 +1,10 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Validate rpms_path is set
-  ansible.builtin.fail:
-    msg: "rpms_path is not set"
-  when: rpms_path is not defined
+- name: Validate offline_rpms_path is set
+  ansible.builtin.assert:
+    that: offline_rpms_path is defined
+    msg: "offline_rpms_path must be set"
 
 - name: Create temporary working directory
   ansible.builtin.tempfile:
@@ -16,7 +16,7 @@
     src: "{{ item }}"
     dest: "{{ install_packages_temp_dir.path }}/{{ item | basename }}"
     mode: '0644'
-  with_fileglob: "{{ rpms_path }}/*.rpm"
+  with_fileglob: "{{ offline_rpms_path }}/*.rpm"
 
 - name: Find RPMs on target node
   ansible.builtin.find:
@@ -28,12 +28,12 @@
   ansible.builtin.command: rpmdb --rebuilddb
   changed_when: false
 
-- name: Get list of yum repos (to disable temporarily) # noqa command-instead-of-module (yum module does not support repolist)
+- name: Get list of yum repos (to disable temporarily) # noqa command-instead-of-module
   ansible.builtin.command: yum -q repolist
   register: repolist_result
   changed_when: false
 
-- name: Install RPMs
+- name: Install RPMs (ansible dnf module)
   ansible.builtin.dnf:
     name: "{{ rpm_list.files | map(attribute='path') | list | sort }}"
     state: present
@@ -42,6 +42,17 @@
     install_weak_deps: false
     enablerepo: []
     disablerepo: "{{ repolist_result.stdout_lines[1:] | map('split', ' ') | map('first') | list }}"
+  when: offline_use_rpm_cmd is not defined or not offline_use_rpm_cmd | bool
+
+- name: Install RPMs (rpm)  # noqa command-instead-of-module
+  ansible.builtin.command:
+    cmd: "rpm -i {{ offline_rpm_cmd_opts }}
+         {{ rpm_list.files | map(attribute='path') | list | sort | join(' ') }}"
+  register: install_result
+  changed_when: install_result.rc == 0
+  when:
+    - offline_use_rpm_cmd is defined
+    - offline_use_rpm_cmd | bool
 
 - name: Remove temporary working directory
   ansible.builtin.file:

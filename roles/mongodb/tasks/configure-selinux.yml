@@ -3,54 +3,45 @@
 ---
 - name: Configure SELinux
   tags: configure_selinux
+  when: ansible_selinux.status == "enabled"
   block:
-    - name: Install custom SELinux profiles
+    - name: SELinux - Install custom profiles
       ansible.builtin.include_role:
         name: selinux
+      when: >
+        (mongodb_data_dir != "/var/lib/mongo") or
+        (mongodb_log_dir != "/var/log/mongodb")
 
-    - name: Allow mongodb to listen on tcp port when using non-standard mongo port
+    - name: SELinux - Configure port when using non-standard MongoDB port
       community.general.seport:
-        ports: "{{ mongo_port }}"
+        ports: "{{ mongodb_port }}"
         proto: tcp
         setype: mongod_port_t
         state: present
-      when:
-        - ansible_selinux.status == "enabled"
-        - mongo_port != 27017
+      when: mongodb_port != 27017
 
-    # MongoDB is configured to use non-default paths for its data and log
-    # directories. First, we need to update the SELinux policy to allow the
+    # If MongoDB is configured to use non-default paths for its data and log
+    # directories then we need to update the SELinux policy to allow the
     # mongod service to use the new directory, it’s worth to note that we
     # need to make sure to include the .* at the end of the directory. Then,
     # update the SELinux user policy for the new directory. Finally, apply
     # the updated SELinux policies to the directory. Do this for data and logs.
-    - name: Configure SELinux when using custom directories
-      when: selinux_status.rc == 0
-      block:
-        - name: SELinux - Update the policy to allow the mongod service to use the custom data directory
-          ansible.builtin.command: "{{ item }}"
-          with_items:
-            - semanage fcontext -a -t mongod_var_lib_t '{{ mongo_data_dir }}.*'
-            - chcon -Rv -u system_u -t mongod_var_lib_t '{{ mongo_data_dir }}'
-            - restorecon -R -v '{{ mongo_data_dir }}'
-          register: result
-          changed_when: result.rc == 0
-          failed_when:
-            - result.rc is defined
-            - result.rc > 0
-            - "'already defined' not in result.stderr"
-          when: mongo_data_dir != "/var/lib/mongo"
+    - name: SELinux - Configure file context when using non-standard data directory
+      ansible.builtin.include_role:
+        name: selinux
+        tasks_from: configure-context
+      vars:
+        selinux_target: "{{ mongodb_data_dir }}.*"
+        selinux_setype: mongod_var_lib_t
+        selinux_path: "{{ mongodb_data_dir }}"
+      when: mongodb_data_dir != "/var/lib/mongo"
 
-        - name: SELinux - Update the policy to allow the mongod service to use the custom log directory
-          ansible.builtin.command: "{{ item }}"
-          with_items:
-            - semanage fcontext -a -t mongod_log_t '{{ mongo_log_dir }}'
-            - chcon -Rv -u system_u -t mongod_log_t '{{ mongo_log_dir }}'
-            - restorecon -R -v '{{ mongo_log_dir }}'
-          register: result
-          changed_when: result.rc == 0
-          failed_when:
-            - result.rc is defined
-            - result.rc > 0
-            - "'already defined' not in result.stderr"
-          when: mongo_log_dir != "/var/log/mongodb"
+    - name: SELinux - Configure file context when using non-standard log directory
+      ansible.builtin.include_role:
+        name: selinux
+        tasks_from: configure-context
+      vars:
+        selinux_target: "{{ mongodb_log_dir }}.*"
+        selinux_setype: mongod_log_t
+        selinux_path: "{{ mongodb_log_dir }}"
+      when: mongodb_log_dir != "/var/log/mongodb"

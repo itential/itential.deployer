@@ -1,14 +1,16 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Install Platform dependent rpms (online)
+- name: Install Platform dependencies
   ansible.builtin.dnf:
-    name: "{{ platform_packages }}"
+    name: "{{ platform_package_dependencies }}"
     state: present
-  when: not offline_install
+  when: not offline_install_enabled
 
-- name: Install Platform dependent rpms (offline)
+- name: Install Platform dependencies (offline)
   ansible.builtin.include_role:
     name: offline
     tasks_from: install-rpms
-  when: offline_install
+  vars:
+    offline_rpms_path: "{{ platform_offline_control_node_rpms_dir }}/dependencies"
+  when: offline_install_enabled

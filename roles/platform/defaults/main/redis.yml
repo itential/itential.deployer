@@ -1,0 +1,44 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+# The Redis keyspace (database number) to use for the connection.
+platform_redis_db: 0
+
+# Flag to enable Redis authentication.
+platform_redis_auth_enabled: true
+
+# The username to use when connecting to Redis.
+platform_redis_username: itential
+
+# The password to use when connecting to Redis.
+platform_redis_password: itential
+
+# The maximum number of times to retry a request to Redis when the connection is lost.
+platform_redis_max_retries_per_request: 20
+
+# The maximum number of times to retry writing a heartbeat message to Redis from a service.
+platform_redis_max_heartbeat_write_retries: 20
+
+# The hostname of the Redis server. Not used when connecting to Redis Sentinels.
+platform_redis_host: localhost
+
+# The port to use when connecting to this Redis instance.
+platform_redis_port: 6379
+
+# The list of Redis Sentinel servers (hostnames and ports) to use for high availability.
+platform_redis_sentinels:
+
+# The username to use when connecting to Sentinel.
+platform_redis_sentinel_username: sentineluser
+
+# The password to use when connecting to Sentinel.
+platform_redis_sentinel_password: sentineluser
+
+# The Redis primary name. This only has meaning when Redis is running with replication enabled.
+# The sentinels will monitor this node and consider it down only when the sentinels agree.
+# Note: The primary name should not include special characters other than: .-_ and no whitespaces.
+platform_redis_name: itentialmaster
+
+# Redis TLS configuration options for secure connections.
+# Refer to NodeJS TLS library for all supported options.
+platform_redis_tls_enabled:

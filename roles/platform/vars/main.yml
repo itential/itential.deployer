@@ -1,0 +1,8 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+# Itential Platform directories
+platform_root_dir: /opt/itential/platform
+platform_install_dir: "{{ platform_root_dir }}/server"
+platform_service_dir: "{{ platform_root_dir }}/services"
+platform_config_dir: /etc/itential
