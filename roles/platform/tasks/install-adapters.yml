@@ -32,7 +32,7 @@
 
     - name: Create a list of adapters already installed
       ansible.builtin.set_fact:
-        installed_adapters: "{{ installed_adapters | default([]) + [(item.path | basename)] }}"
+        installed_adapters: "{{ installed_adapters | default([]) + [item.path | basename] }}"
       loop: "{{ installed_adapters_result.files }}"
 
     - name: Remove the adapters already installed from the list of adapters
