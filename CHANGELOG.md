@@ -1,9 +1,17 @@
 # Changelog
 
+## v3.0.1 (March 14, 2025)
+
+* 
+
+Full Changelog: https://github.com/itential/itential.deployer/compare/v3.0.0...v3.0.1 
+
+
 ## v3.0.0 (March 14, 2025)
 
 * Preflight Checks  https://github.com/itential/itential.deployer/pull/116
 * Release v3.0.0
+* Update galaxy version and changelog for release 3.0.0 [skip ci]
 
 Full Changelog: https://github.com/itential/itential.deployer/compare/v2.6.0...v3.0.0 
 
