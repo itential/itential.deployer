@@ -2,7 +2,7 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
 # Instructs the MongoDB driver to use the configured username/password when connecting to MongoDB.
-platform_mongo_auth_enabled: false
+platform_mongo_auth_enabled: true
 
 # The username to use when connecting to MongoDB.
 platform_mongo_user: itential

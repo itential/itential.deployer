@@ -5,7 +5,7 @@
 platform_redis_db: 0
 
 # Flag to enable Redis authentication.
-platform_redis_auth_enabled: false
+platform_redis_auth_enabled: true
 
 # The username to use when connecting to Redis.
 platform_redis_username: itential

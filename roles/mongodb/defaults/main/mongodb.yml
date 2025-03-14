@@ -56,7 +56,7 @@ mongodb_itential_db_name: itential
 # Essentially, a default installation will not have replication, authorization,
 # or TLS settings applied.
 mongodb_replication_enabled: false
-mongodb_auth_enabled: false
+mongodb_auth_enabled: true
 mongodb_tls_enabled: false
 
 # Default mongo user passwords
