@@ -87,7 +87,7 @@ The following table contains the most commonly overridden variables.
 | Variable | Type | Description | Default Value |
 | :------- | :--- | :---------- | :------------ |
 | `mongodb_admin_db_name` | String | The name of the admin database. | `admin` |
-| `mongodb_auth_enabled` | Boolean | Flag to enable MongoDB authentication. | `false` |
+| `mongodb_auth_enabled` | Boolean | Flag to enable MongoDB authentication. | `true` |
 | `mongodb_itential_db_name` | String | The name of the itential database. | `itential` |
 | `mongodb_replication_enabled` | Boolean | Flag to enable MongoDB replication | `false` |
 | `mongodb_replset_name` | String | The MongoDB replica set name. | `rs0` |
@@ -191,34 +191,9 @@ all:
         mongodb_version: 7.0
         mongodb_packages:
           - mongodb-org
-        mongodb_python_packages
+        mongodb_python_packages:
           - python3
           - python3-pip
-```
-
-## Example Inventory - Configuring MongoDB Authorization accepting all other defaults
-
-To add authentication, add the `mongodb_auth_enabled` variable to the mongodb group vars and set it
-to `true`. This will instruct the deployer to configure MongoDB to require authentication when
-connecting to it. See the table above for the default values for username and password or overide
-the default passwords by providing the passwords for the appropriate user.
-
-```yaml
-all:
-  vars:
-    repository_api_key: #key
-    platform_release: 6.0
-
-  children:
-    mongodb:
-      hosts:
-        <host1>:
-          ansible_host: <addr1>
-      vars:
-        mongodb_auth_enabled: true
-        # optionally override the default passwords
-        # mongodb_user_admin_password: <super-secret-password1>
-        # mongodb_user_itential_password: <super-secret-password2>
 ```
 
 ## Example Inventory - Configuring MongoDB Replica Set accepting all other defaults
@@ -243,7 +218,6 @@ all:
         <host3>:
           ansible_host: <addr3>
       vars:
-        mongodb_auth_enabled: true
         mongodb_replication_enabled: true
         # Optionally override the replica set name
         # mongodb_replset_name: <a-meaningful-replica-set-name>
@@ -270,7 +244,6 @@ all:
         <host3>:
           ansible_host: <addr3>
     vars:
-      mongodb_auth_enabled: true
       mongodb_replication_enabled: true
       mongodb_tls_enabled: true
       mongo_cert_keyfile_source: mongodb.pem
