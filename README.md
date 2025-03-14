@@ -217,7 +217,7 @@ the required repository or download the packages.
 | Redis | <http://rpms.remirepo.net> | https | When installing Redis from the Remi repository |
 | Redis | <http://dl.fedoraproject.org> | https | When installing Redis from the Remi repository |
 | Redis | <http://github.com> | https | When installing Redis from source |
-| MongoDB | <rhttp://epo.mongodb.org> | https | |
+| MongoDB | <http://repo.mongodb.org> | https | |
 | MongoDB | <http://www.mongodb.org> | https | |
 | Vault | <http://rpm.releases.hashicorp.com> | https | |
 
