@@ -1,0 +1,19 @@
+Name: {{results['name']}}
+Role: MongoDB
+Pass: {{results['pass']}}
+
+
+SELinux     | {{results['SELinux']}}
+avx         | {{results['avx']}}
+http_proxy  | {{ 'Yes' if results['http_proxy'] else 'None'}}
+https_proxy | {{ 'Yes' if results['https_proxy'] else 'None'}}
+IPv6        | {{ 'Enabled' if results['ipv6'] else 'Disabled'}}
+
+CPU         | {{ 'Pass' if results['cpuCores'] >= mongodb_cpu_cores else 'FAIL'}}       | Cores: {{results['cpuCores']}}     Req: {{mongodb_cpu_cores}}
+HDD         | {{ 'Pass' if results['/_sizeAvailable'] >= mongodb_free_disk_space else 'FAIL'}}       | Free: {{results['/_sizeAvailable']}} on {{results['mount']}} Req: {{mongodb_free_disk_space}}
+Memory      | {{ 'Pass' if results['memory'] >= mongodb_ram else 'FAIL'}}       | Free: {{results['memory']}}  Req: {{mongodb_ram}}
+
+URL  | Status
+{% for key, value in results['url_status'].items() %}
+{{key}} | {{value}}
+{% endfor %}
