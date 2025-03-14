@@ -1,68 +1,72 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Validate distribution major version
-  ansible.builtin.fail:
-    msg: Download not supported for version 7
-  when: ansible_distribution_major_version == "7"
+- name: Include tasks to validate variables
+  ansible.builtin.include_tasks:
+    file: validate-vars.yml
+  tags: always
 
-- name: Validate offline_install variable
-  ansible.builtin.fail:
-    msg: offline_install must be set to false for download
-  when:
-    - offline_install is defined
-    - offline_install
-
-- name: Include release vars
-  ansible.builtin.include_vars:
-    file: "{{ item }}"
-  with_first_found:
-    - "release-{{ iap_release }}.yml"
-    - "release-undefined.yml"
-
-- name: Check for valid Redis release
-  ansible.builtin.fail:
-    msg: "Deployer does not support installing Redis on IAP version {{ iap_release }}"
-  when: invalid_redis_release is defined
+- name: Include tasks to validate offline variables
+  ansible.builtin.include_tasks:
+    file: validate-vars-offline.yml
 
 - name: Download package from Remi repo
-  when: redis_install_method == "remi_repo"
+  when: not redis_install_from_source | bool
   block:
-    - name: Install EPEL repo
-      ansible.builtin.dnf:
-        name: "{{ redis_epel_repo_url }}"
-        state: present
-        update_cache: true
-        disable_gpg_check: true
+    - name: Include tasks to install Remi repo
+      ansible.builtin.include_tasks:
+        file: install-remi-repo.yml
+      when:
+        - redis_packages is defined
+        - redis_packages is search('remi')
 
-    - name: Install Remi repo
-      ansible.builtin.dnf:
-        name: "{{ redis_repo_url[ansible_distribution_major_version] }}"
-        state: present
-        disable_gpg_check: true
-
-    - name: Download Redis rpms
+    - name: Download Redis dependency RPMs
       ansible.builtin.import_role:
         name: offline
         tasks_from: download-rpms
       vars:
-        download_method: yum_module
-        download_packages: "{{ redis_packages[ansible_distribution_major_version] }}"
-        download_dir: "{{ rpms_download_dir_target_node }}"
+        offline_download_method: yum_module
+        offline_download_packages: "{{ redis_package_dependencies }} "
+        offline_download_dir: "{{ redis_offline_target_node_rpms_dir }}/dependencies"
+
+    - name: Copy Redis dependency RPMs to control node
+      ansible.builtin.import_role:
+        name: offline
+        tasks_from: fetch-packages
+      vars:
+        offline_src_dir: "{{ redis_offline_target_node_rpms_dir }}/dependencies"
+        offline_dest_dir: "{{ redis_offline_control_node_rpms_dir }}/dependencies"
+
+    - name: Download Redis RPMs
+      ansible.builtin.import_role:
+        name: offline
+        tasks_from: download-rpms
+      vars:
+        offline_download_method: yum_module
+        offline_download_packages: "{{ redis_packages }} "
+        offline_download_dir: "{{ redis_offline_target_node_rpms_dir }}/redis"
+
+    - name: Copy Redis RPMs to control node
+      ansible.builtin.import_role:
+        name: offline
+        tasks_from: fetch-packages
+      vars:
+        offline_src_dir: "{{ redis_offline_target_node_rpms_dir }}/redis"
+        offline_dest_dir: "{{ redis_offline_control_node_rpms_dir }}/redis"
 
 - name: Download source packages
-  when: redis_install_method == "source"
+  when: redis_install_from_source | bool
   block:
     - name: Create archives directory
       ansible.builtin.file:
-        path: "{{ archives_download_dir_target_node }}"
+        path: "{{ redis_offline_target_node_archives_dir }}"
         state: directory
         mode: '0755'
 
     - name: Download Redis archive
       ansible.builtin.get_url:
-        url: "{{ redis_source_url[ansible_distribution_major_version] }}"
-        dest: "{{ archives_download_dir_target_node }}"
+        url: "{{ redis_source_url }}"
+        dest: "{{ redis_offline_target_node_archives_dir }}"
         mode: "0644"
 
     - name: Copy Redis archive to control node
@@ -70,22 +74,22 @@
         name: offline
         tasks_from: fetch-packages
       vars:
-        src_dir: "{{ archives_download_dir_target_node }}"
-        dest_dir: "{{ archives_download_dir_control_node }}"
+        offline_src_dir: "{{ redis_offline_target_node_archives_dir }}"
+        offline_dest_dir: "{{ redis_offline_control_node_archives_dir }}"
 
-    - name: Download Redis build rpms
+    - name: Download Redis build RPMs
       ansible.builtin.import_role:
         name: offline
         tasks_from: download-rpms
       vars:
-        download_method: yum_module
-        download_packages: "{{ redis_build_packages[ansible_distribution_major_version] }}"
-        download_dir: "{{ rpms_download_dir_target_node }}"
+        offline_download_method: yum_module
+        offline_download_packages: "{{ redis_build_packages }}"
+        offline_download_dir: "{{ redis_offline_target_node_rpms_dir }}/build"
 
-- name: Copy rpms to control node
-  ansible.builtin.import_role:
-    name: offline
-    tasks_from: fetch-packages
-  vars:
-    src_dir: "{{ rpms_download_dir_target_node }}"
-    dest_dir: "{{ rpms_download_dir_control_node }}"
+    - name: Copy Redis build RPMs to control node
+      ansible.builtin.import_role:
+        name: offline
+        tasks_from: fetch-packages
+      vars:
+        offline_src_dir: "{{ redis_offline_target_node_rpms_dir }}/build"
+        offline_dest_dir: "{{ redis_offline_control_node_rpms_dir }}/build"

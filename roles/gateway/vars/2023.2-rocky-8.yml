@@ -5,6 +5,8 @@ gateway_packages:
   - gcc-c++
   - make
   - sqlite-devel
+  - selinux-policy
+  - selinux-policy-targeted
 
 gateway_build_packages:
   - gcc-c++
@@ -12,11 +14,11 @@ gateway_build_packages:
   - sqlite-devel
   - python39-devel
 
-python_version: 3.9
-python_executable: "/usr/bin/python{{ python_version }}"
-pip_executable: "/usr/bin/pip{{ python_version }}"
+gateway_python_version: 3.9
+gateway_python_executable: "/usr/bin/python{{ gateway_python_version }}"
+gateway_pip_executable: "/usr/bin/pip{{ gateway_python_version }}"
 
-python_packages:
+gateway_python_packages:
   - python39
   - python39-pip
   - python39-devel
@@ -25,12 +27,12 @@ python_packages:
   - python3-rpm-generators
   - python3-rpm-macros
 
-base_python_dependencies:
+gateway_python_base_dependencies:
   - pip==23.3.2
   - setuptools==69.0.3
   - wheel==0.42.0
 
-app_python_dependencies:
+gateway_python_app_dependencies:
   - ansible-pylibssh==1.1.0
   - flask-ldap3-login==0.9.18
   - grpcio==1.53.0
@@ -43,4 +45,4 @@ app_python_dependencies:
   - nornir-utils==0.2.0
   - pygnmi==0.8.9
 
-iag_ansible_version: ansible==8.7.0
+gateway_ansible_version: ansible==8.7.0

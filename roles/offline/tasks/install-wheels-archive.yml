@@ -1,10 +1,15 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Validate wheels_archive is set
-  ansible.builtin.fail:
-    msg: "wheels_archive is not set"
-  when: not wheels_archive
+- name: Validate offline_wheels_archive is set
+  ansible.builtin.assert:
+    that: offline_wheels_archive is defined
+    msg: "offline_wheels_archive must be set"
+
+- name: Validate offline_virtual_env or offline_python_pip_executable is set
+  ansible.builtin.assert:
+    that: offline_virtual_env is defined or offline_python_pip_executable is defined
+    msg: "offline_virtual_env or offline_python_pip_executable must be set"
 
 - name: Create temporary working directory
   ansible.builtin.tempfile:
@@ -13,13 +18,13 @@
 
 - name: Extract wheel archive
   ansible.builtin.unarchive:
-    src: "{{ wheels_archive.path }}"
+    src: "{{ offline_wheels_archive.path }}"
     dest: "{{ install_wheel_archive_temp_dir.path }}"
     remote_src: true
 
 - name: Install wheels using requirements file
   ansible.builtin.pip:
-    executable: "{{ virtual_env is defined | ternary(omit, pip3) }}"
+    executable: "{{ virtual_env is defined | ternary(omit, python_pip_executable) }}"
     virtualenv: "{{ virtual_env is defined | ternary(virtual_env, omit) }}"
     requirements: "{{ install_wheel_archive_temp_dir.path }}/requirements.txt"
     extra_args: "--no-index --find-links=file:///{{ install_wheel_archive_temp_dir.path }}"

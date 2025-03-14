@@ -1,0 +1,12 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+# A list of adapter types that manages the devices.
+platform_device_broker_default_adapter_priority:
+
+# Runs a command on a device.
+platform_device_broker_run_command_adapter_preference:
+
+# If true, the platform will perform strict JSON Schema validation on messages into the brokers and
+# coming back to the broker layer from adapters.
+platform_broker_validation_enabled: false

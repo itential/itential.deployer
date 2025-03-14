@@ -1,254 +1,293 @@
-# Overview
+# MongoDB Role
 
-The playbook and roles in this section install and configure MongoDB for the Itential Automation Platform.  There are currently four MongoDB-related roles:
+The playbook and role in this section install and configure MongoDB for the Itential Automation
+Platform. There is currently only one role that can install and configure MongoDB for use with the Itential
+Platform.
 
-* `mongodb` – Installs MongoDB and performs a base configuration.
-* `mongodb_auth` – Configures MongoDB authentication.
-* `mongodb_replication` – Configures MongoDB as replica set.
-* `mongodb_tls` - Configures MongoDB SSL.
+## MongoDB Installation
 
-# Roles
+The `mongodb` role is basically divided into two functional segments, one for the base installation
+of the MongoDB software, and the other for the configuration of MongoDB. These segments can be
+triggered individually by using the appropriate tag. See below for details on the available tags.
 
-## MongoDB Role
+The role performs a base install of MongoDB including any OS packages required. It includes a few
+recommended kernel settings and other optimizations recommended by MongoDB. It creates the
+appropriate Linux users, directories, log files, and systemd services. If the host is configured to
+use SELinux the role will set the appropriate labels on files and directories. It will start the
+mongod service when complete.
 
-The `mongodb` role performs a base install of MongoDB including any OS packages required. It includes a few recommended kernel settings and other optimizations recommended by MongoDB. It creates the appropriate Linux users, directories, log files, and systemd services. It will start the mongod service when complete.
-
-## MongoDB Authentication
-
-The `mongodb_auth` role is designed to enable authorization on the MongoDB.  It will modify the MongoDB config file to enable authentication for a single database or a replica set.  When MongoDB is configured as a replica set it requires a key for the members of the replica set to talk to one another.  This key file is uploaded to the appropriate location.  It will restart the mongod service when complete.
-
-More info on the key file: https://www.mongodb.com/docs/manual/tutorial/deploy-replica-set-with-keyfile-access-control/
+Once the base installation is complete, the role will conditionally configure a replica set. After
+potentially configuring a replica set, the role will then conditionally configure authorization.
+After this, it will conditionally configure TLS connections. Triggering these conditional
+configurations is based on the variables that are set in the host file. See below for examples.
 
 ## MongoDB Replication
 
-The `mongodb_replication` role is responsible for configuring MongoDB as a replica set.  It uses the first host defined in the `mongodb` group in the inventory as the initial primary.  It updates the MongoDB configuration file with the replica set name and enables replication.  It initializes the replica set on the initial primary and then joins the remaining MongoDB nodes to the replica set. It will restart the mongod service when complete.
+When configured to do so, the role is responsible for configuring MongoDB as a replica set.  It uses
+the first host defined in the `mongodb` group in the inventory as the initial primary.  It updates
+the MongoDB configuration file with the replica set name and enables replication.  It initializes
+the replica set on the initial primary and then joins the remaining MongoDB nodes to the replica
+set. It will restart the mongod service when complete. The role will detect if replication has
+already been enabled and skip these tasks if it determines that replication is already enabled.
 
-More info on replication: https://www.mongodb.com/docs/manual/replication/
+More info on replication: <https://www.mongodb.com/docs/manual/replication/>
+
+## MongoDB Authentication
+
+When configured to do so, the role is designed to enable authentication on the MongoDB.  It will
+modify the MongoDB config file to enable authentication for a single database or a replica set.
+When MongoDB is configured as a replica set it requires a key for the members of the replica set to
+talk to one another.  This key file is created by the role and uploaded to the appropriate location.
+It uses openssl and generates a random base 64 string of 756 bytes. It will restart the mongod
+service when complete.
+
+More info on authentication: <https://www.mongodb.com/docs/manual/core/authentication/>
+
+More info on the key file: <https://www.mongodb.com/docs/manual/tutorial/deploy-replica-set-with-keyfile-access-control/>
 
 ## MongoDB TLS
 
-The `mongodb_tls` role is responsible for configuring MongoDB to use a TLS connection when connecting to the database.  It is NOT responsible for creating certificates.  Those must be supplied to this role.  It will copy those certificates to the correct location.  It will make all required changes to enable TLS connections in the Mongo configuration file. It will restart the mongod service when complete.
+When configured to do so, the role is responsible for configuring MongoDB to use a TLS connection
+when connecting to the database.  It is NOT responsible for creating certificates.  Those must be
+supplied to this role.  It will copy those certificates to the correct location.  It will make all
+required changes to enable TLS connections in the Mongo configuration file. It will restart the
+mongod service when complete.
 
-# Variables
+More info on TLS: <https://www.mongodb.com/docs/manual/tutorial/configure-ssl/>
 
-## Static Variables
+## Variables
 
-The variables located in the `vars` directory of each role are "static" and not meant to be overridden by the user.  Since these variable files are included at run-time based on the IAP release and OS major version, they have a higher precedence than the variables in the inventory and are not easily overridden.
+### Static Variables
 
-## Global Variables
+The variables located in the `vars` directory of each role are "static" and not meant to be
+overridden by the user.  Since these variable files are included at run-time based on the Itential
+Platform release and OS major version, they have a higher precedence than the variables in the
+inventory and are not easily overridden.
+
+### Global Variables
 
 The variables in this section are configured in the inventory in the `all` group vars.
 
-| Variable | Group | Type | Description | Default Value | Required?
-| :------- | :---- | :--- | :---------- | :------------ | :---------
-| `iap_release` | `all` | Fixed-point | Designates the IAP major version. | N/A | Yes
-| `mongo_root_ca_file_source` | `all` | String | The name of the MongoDB Root CA file.| N/A | No
+| Variable | Group | Type | Description | Default Value |
+| :------- | :---- | :--- | :---------- | :------------ |
+| `platform_release` | `all` | Fixed-point | Designates the IAP major version. If this is not included then the `mongodb` device group must specify the MongoDB packages (the precise Mongo version) to install. | N/A |
 
-The `iap_release` must be defined in the inventory.  This variable, along with the OS major version, is used to determine the static variables.
+When the `platform_release` is defined in the inventory then the playbook will use default values
+for the MongoDB version to install. These defaults are determined by the Itential Platform version
+and represent our validated design. If this is not included then the `mongodb` device group must
+specify the MongoDB packages (the precise Mongo version) to install. See below an example of how to
+override the default MongoDB version.
 
-## Common Variables
-
-The variables in this section may be overridden in the inventory in the `all` group vars.
-
-The following table lists the default variables that are shared between the MongoDB-related roles, located in `roles/common_vars/defaults/main/mongodb.yml`.
-
-| Variable | Group | Type | Description | Default Value
-| :------- | :---- | :--- | :---------- | :------------
-| `mongo_port` | `all` | Integer | The MongoDB listen port. | `27017`
-| `mongo_itential_db_name` | `all` | String | The name of the itential database. | `itential`
-| `mongo_localaaa_db_name` | `all` | String | The name of the local AAA database | `LocalAAA`
-| `mongodb_replication` | `all` | Boolean | Flag to enable MongoDB replication | `false`
-| `mongodb_auth` | `all` | Boolean | Flag to enable MongoDB authentication. | `false`
-| `mongodb_tls` | `all` | Boolean | Flag to enable MongoDB TLS. | `false`
-| `mongo_itential_connection_string` | `all` | String | The default MongoDB connection string to the itential databse. | `mongodb://{{ mongo_host }}:{{ mongo_port }}/{{ mongo_itential_db_name }}`
-| `mongo_admin_connection_string` | `all` | String | The default MongoDB connection string to the admin database. | `mongodb://{{ mongo_host }}:{{ mongo_port }}/{{ mongo_admin_db_name }}`
-| `mongo_localaaa_connection_string` | `all` | String | The default MongoDB connection string to the Local AAA databas.e | `mongodb://{{ mongo_host }}:{{ mongo_port }}/{{ mongo_localaaa_db_name }}`
-| `mongo_user_admin_password` | `all` | String | The MongoDB admin user password. | `admin`
-| `mongo_user_itential_password` | `all` | String | The MongoDB itential user password. | `itential`
-| `mongo_user_localaaa_password` | `all` | String | The MongoDB Local AAA user password. | `localaaa`
-| `mongo_replset_name` | `all` | String | The MongoDB replica set name. | `rs0`
-
-:::(Warning) (⚠ Warning: ) It is assumed that these default passwords will be changed to meet more rigorous standards. These are intended to be defaults strictly used just for ease of the installation.  It is highly recommended that sensitive data be encrypted using Ansible Vault.
-
-## MongoDB Role Variables
+### MongoDB Role Variables
 
 The variables in this section may be overridden in the inventory in the `mongodb` group vars.
 
-The following table lists the default variables located in `roles/mongodb/defaults/main.yml`.
+The following table contains the most commonly overridden variables.
 
-| Variable | Group | Type | Description | Default Value
-| :------- | :---- | :--- | :---------- | :------------
-| `mongo_conf_file` | `mongodb` | String | The location of the MongoDB configuration file. | `/etc/mongodb.conf`
-| `mongo_data_dir` | `mongodb` | String | The MongoDB data file directory. | `/var/lib/mongo`
-| `mongo_log_dir` | `mongodb` | String | The MongoDB log files directory. | `/var/log/mongodb`
-| `mongo_owner` | `mongodb` | String | The MongoDB Linux user. | `mongod`
-| `mongo_group` | `mongodb` | String | The MongoDB Linux group. | `mongod`
-| `mongo_admin_db_name` | `mongodb` | String | The name of the admin database. | `admin`
-| `mongodb_bind_ipv6` | `mongodb` | Boolean | Flag to enable binding to IPv6. | `true`
-| `mongodb_bind_addrs` | `mongodb` | String | The hostnames and/or IP addresses and/or full Unix domain socket paths on which mongos or mongod should listen for client connections. You may attach mongos or mongod to any interface. To bind to multiple addresses, enter a list of comma-separated values.  <br>The inventory_hostname will be automatically added to `mongodb_bind_addrs`.  <br>If `mongodb_bind_ipv6` is set to true, '::1' will be added to `mongodb_bind_addrs`. | `127.0.0.1`
+| Variable | Type | Description | Default Value |
+| :------- | :--- | :---------- | :------------ |
+| `mongodb_admin_db_name` | String | The name of the admin database. | `admin` |
+| `mongodb_auth_enabled` | Boolean | Flag to enable MongoDB authentication. | `true` |
+| `mongodb_itential_db_name` | String | The name of the itential database. | `itential` |
+| `mongodb_replication_enabled` | Boolean | Flag to enable MongoDB replication | `false` |
+| `mongodb_replset_name` | String | The MongoDB replica set name. | `rs0` |
+| `mongodb_ssl_root_dir` | String | The base directory for SSL certs and key files. | `/etc/ssl/certs` |
+| `mongodb_tls_enabled` | Boolean | Flag to enable MongoDB TLS. | `false` |
+| `mongodb_user_admin_password` | String | The MongoDB admin user password. | `admin` |
+| `mongodb_user_itential_password` | String | The MongoDB itential user password. | `itential` |
 
-## MongoDB Auth Role Variables
+> :warning: It is assumed that these default passwords will be changed to meet more rigorous
+security standards. These are intended to be defaults strictly used just for ease of the
+installation and should be overridden in the inventory file. It is highly recommended that sensitive
+data be encrypted using Ansible Vault when they are overridden so that the passwords don't actually
+appear anywhere in source code.
 
-The variables in this section may be overridden in the inventory in the `mongodb` group vars.
+These variables can be used to override the default version of MongoDB that is installed.
 
-The following table lists the default variables located in `roles/mongodb_auth/defaults/main.yml`.
+| Variable | Type | Description | Default Value |
+| :------- | :--- | :---------- | :------------ |
+| `mongodb_packages` | List(String) | The list of MongoDB yum package names to install. | |
+| `mongodb_version` | Float | The MongoDB major version being installed. | Depends on `platform_release` |
 
-| Variable | Group | Type | Description | Default Value
-| :------- | :---- | :--- | :---------- | :------------
-| `mongo_auth_keyfile_source` | `mongodb` | String | The name of the key file. | `mongo-replicaset-key.pem`
-| `mongo_auth_keyfile_destination` | `mongodb` | String | The key file used to authenticate members of a replica set. | `/etc/ssl/{{ mongo_auth_keyfile_source }}`
+These variables effect how and where MongoDB is installed. In most cases, these should not be
+modified.
 
-## MongoDB Replication Role Variables
+| Variable | Type | Description | Default Value |
+| :------- | :--- | :---------- | :------------ |
+| `mongodb_conf_file` | String | The location of the MongoDB configuration file. | `/etc/mongodb.conf` |
+| `mongodb_data_dir` | String | The MongoDB data file directory. | `/var/lib/mongo` |
+| `mongodb_gpgkey_url` | String | The fully qualified URL to the GPG key for the desired RPM file. | Depends on `mongodb_version` |
+| `mongodb_group` | String | The MongoDB Linux group. | `mongod` |
+| `mongodb_log_dir` | String | The MongoDB log files directory. | `/var/log/mongodb` |
+| `mongodb_owner` | String | The MongoDB Linux user. | `mongod` |
+| `mongodb_pid_dir` | String | Directory that stores the mongodb pid file. | `/var/run/mongodb` |
+| `mongodb_port` | Integer | The MongoDB listen port. | `27017` |
+| `mongodb_release_url` | String | The fully qualified URL to the repo where the MongoDB RPM packages exist. | Depends on `mongodb_version` |
 
-There are no default variables for the MongoDB Replication role.
+These variables apply to advanced situations.
 
-## MongoDB TLS Role Variables
+| Variable | Type | Description | Default Value |
+| :------- | :--- | :---------- | :------------ |
+| `mongodb_python_executable` | String | The location of the python executable used by the Community.mongodb ansible tasks. | `/usr/bin/python3` |
+| `mongodb_pip_executable` | String | The location of the pip executable used by the Community.mongodb ansible tasks. | `/usr/bin/pip3` |
+| `mongodb_python_venv_root` | String | The location of the virtual environment used by the Community.mongodb collection. | `/var/tmp` |
+| `mongodb_python_venv_name` | String | The name of the Python virtual environment used by this deployer. | `mongodb_venv` |
+| `mongodb_bind_ipv6` | Boolean | Flag to enable binding to IPv6. | `true` |
+| `mongodb_bind_addrs` | String | The hostnames and/or IP addresses and/or full Unix domain socket paths on which mongos or mongod should listen for client connections. You may attach mongos or mongod to any interface. To bind to multiple addresses, enter a list of comma-separated values. The inventory_hostname will be automatically added to `mongodb_bind_addrs`.  If `mongodb_bind_ipv6` is set to true, '::1' will be added to `mongodb_bind_addrs`. | `127.0.0.1` |
 
-| Variable | Group | Type | Description | Default Value
-| :------- | :---- | :--- | :---------- | :------------
-| `mongo_cert_keyfile_source` | `mongodb` | String | The MongoDB SSL cert key file source. | N/A
-| `mongo_cert_keyfile_destination` | `mongodb` | String | The MongoDB SSL cert key file destination. | `/etc/ssl/mongo-certificate.pem`
-| `mongo_root_ca_file_source` | `mongodb` | String | The MongoDB SSL root CA source. | N/A
-| `mongo_root_ca_file_destination` | `mongodb` | String | The MongoDB SSL root CA file destination. | `/etc/ssl/mongo-rootCA.pem`
+## Configuring TLS
 
-# Configuring TLS
+The `mongodb` role does not generate SSL certificates.  They must be generated by the user and put
+in the top level `files` directory on the Ansible control node. These files are uploaded to the
+location defined in `mongodb_ssl_root_dir`.
 
-The `mongodb_tls` roles does not generate SSL certificates.  They must be generated by the user and put in the top level `files` directory on the Ansible control node.  The following variables must be defined in the `all` group vars.
+## SELinux
 
-| File | Variable | Group | Default
-| :--- | :------- | :---- | :------
-| Key File | `{{ mongo_cert_keyfile_source }}` | `mongodb` | N/A
-| Root CA File | `{{ mongo_root_ca_file_source }}` | `mongodb` | N/A
+The `mongodb` role contains tasks to install custom SELinux profiles (located in
+`roles/mongodb/files` and containing the `te` extension).  If your installation requires additional
+profiles, the files can be placed in the `files` directory and they will be automatically installed
+by the role.
 
-The following table shows the source and destination locations for the files.
+## Building the Inventory
 
-| File | Source Location | Destination Location
-| :--- | :-------------- | :-------------------
-| Server Cert | `{{ mongo_cert_keyfile_sourcele_path }}` | `{{ mongo_cert_keyfile_destination }}`
-| Server Key | `{{ mongo_root_ca_file_source }}` | `{{ mongo_root_ca_file_destination }}`
+To install and configure MongoDB, add a `mongodb` group and host(s) to your inventory file.  The
+following inventory examples demonstrate some common installation patterns.
 
-# SELinux
+## Example Inventory - Single MongoDB Node accepting all defaults for Platform 6.0
 
-The `mongodb` role contains tasks to install custom SELinux profiles (located in `roles/mongodb/files` and containing the `te` extension).  If your use case requires additional profiles, the files can be placed in the `files` directory and they will be automatically installed by the role.
+This example shows a basic MongoDB configuration with a single MongoDB node accepting all default
+values defined with Platform 6.0.
 
-# Building the Inventory
-
-To install and configure MongoDB, add a `mongodb` group and host to your inventory.  The following inventory shows a basic MongoDB configuration with a single MongoDB node with no Authentication/TLS.
-
-## Example Inventory - Single MongoDB Node
-
-```
+```yaml
 all:
-    vars:
-        iap_release: 2023.1
+  vars:
+    repository_api_key: #key
+    platform_release: 6.0
 
-    children:
-        mongodb:
-            hosts:
-                <host1>:
-                    ansible_host: <addr1>
+  children:
+    mongodb:
+      hosts:
+        <host1>:
+          ansible_host: <addr1>
 ```
 
-To add authentication, add the `mongodb_auth` variable and set it to `true`.
+## Example Inventory - Single MongoDB Node overridding the default MongoDB version
 
-## Example Inventory - Configuring MongoDB Authorization
+This example shows how to override the default version of MongoDB that is installed. Note that the
+`platform_release` variable is NOT specified and the packages are explicitly defined in the
+mongodb group vars.
 
-```
+```yaml
 all:
-    vars:
-        iap_release: 2023.1
-        mongodb_auth: true
+  vars:
+    repository_api_key: #key
 
-    children:
-        mongodb:
-            hosts:
-                <host1>:
-                    ansible_host: <addr1>
+  children:
+    mongodb:
+      hosts:
+        <host1>:
+          ansible_host: <addr1>
+      vars:
+        mongodb_version: 7.0
+        mongodb_packages:
+          - mongodb-org
+        mongodb_python_packages:
+          - python3
+          - python3-pip
 ```
 
-To configure replication, add two additional nodes to the `mongodb` group and add the `mongodb_replication` flag to the `all` group vars and set it to `true`.
+## Example Inventory - Configuring MongoDB Replica Set accepting all other defaults
 
-## Example Inventory - Configuring MongoDB Replica Set
+To configure replication, add two additional nodes (at least) to the `mongodb` group, add the
+`mongodb_replication_enabled` flag to the `mongodb` group vars, and set it to `true`. Optionally,
+override the replica set name.
 
-```
+```yaml
 all:
-    vars:
-        iap_release: 2023.1
-        mongodb_auth: true
-        mongodb_replication: true
+  vars:
+    repository_api_key: #key
+    platform_release: 6.0
 
-    children:
-        mongodb:
-            hosts:
-                <host1>:
-                    ansible_host: <addr1>
-                <host2>:
-                    ansible_host: <addr2>
-                <host3>:
-                    ansible_host: <addr3>
+  children:
+    mongodb:
+      hosts:
+        <host1>: # This host will be chosen as the primary initially
+          ansible_host: <addr1>
+        <host2>:
+          ansible_host: <addr2>
+        <host3>:
+          ansible_host: <addr3>
+      vars:
+        mongodb_replication_enabled: true
+        # Optionally override the replica set name
+        # mongodb_replset_name: <a-meaningful-replica-set-name>
 ```
 
-To configure a MongoDB TLS, add the `mongodb_tls` flag to the `all` group vars and set it to `true` and configure the `mongo_cert_keyfile_source` and `mongo_root_ca_file_source`.
+## Example Inventory - Configuring MongoDB TLS accepting all other defaults
 
-## Example Inventory - Configuring MongoDB TLS
+To configure a MongoDB TLS, add the `mongodb_tls` flag to the `all` group vars and set it to `true`
+and configure the `mongo_cert_keyfile_source` and `mongo_root_ca_file_source`.
 
-```
+```yaml
 all:
+  vars:
+    repository_api_key: #key
+    platform_release: 6.0
+
+  children:
+    mongodb:
+      hosts:
+        <host1>:
+          ansible_host: <addr1>
+        <host2>:
+          ansible_host: <addr2>
+        <host3>:
+          ansible_host: <addr3>
     vars:
-        iap_release: 2023.1
-        mongodb_auth: true
-        mongodb_cluster: true
-        mongodb_tls: true
-
-    children:
-        mongodb:
-            hosts:
-                <host1>:
-                    ansible_host: <addr1>
-                <host2>:
-                    ansible_host: <addr2>
-                <host3>:
-                    ansible_host: <addr3>
-            vars:
-                mongo_cert_keyfile_source: mongodb.pem
-                mongo_root_ca_file_source: rootCA.pem
+      mongodb_replication_enabled: true
+      mongodb_tls_enabled: true
+      mongo_cert_keyfile_source: mongodb.pem
+      mongo_root_ca_file_source: rootCA.pem
 ```
 
-# Running the Playbook
+## Running the Playbook
 
-To execute all MongoDB roles, run the `mongodb` playbook:
+To execute the MongoDB role, run the `mongodb` playbook:
 
-```
+```bash
 ansible-playbook itential.deployer.mongodb -i <inventory>
 ```
 
-You can also run select MongodDB roles by using the following tags:
+## Tags
 
-* `mongodb_install`
-* `mongodb_replication`
-* `mongodb_auth`
-* `mongodb_tls`
+You can also run select MongodDB segments by using the following tags:
 
-To execute only the `mongodb` role, run the `itential.deployer.mongodb` playbook with the `mongodb_install` tag:
+* `install_mongodb`
+* `configure_mongodb`
+* `initialize_mongo_config`
 
-```
-ansible-playbook itential.deployer.mongodb -i <inventory> --tags mongodb_install
-```
+The tag `install_mongodb` will run all of the installation tasks which will install MongoDB and
+start it up in its most basic state. This tag will execute the tasks to configure SELinux. This tag
+will also create the required database users even if they are not used because authorization is not
+enabled. Basic installation can be achieved with this command:
 
-To execute only the MongoDB Replication role, run the `itential.deployer.mongodb` playbook with the `mongodb_replication` tag:
-
-```
-ansible-playbook itential.deployer.mongodb -i <inventory> --tags mongodb_replication
+```bash
+ansible-playbook itential.deployer.mongodb -i <inventory> --tags install_mongodb
 ```
 
-To execute only the MongoDB Authentication role, run the `itential.deployer.mongodb` playbook with the `mongodb_auth` tag:
+The tag `configure_mongodb` will run all of the configuration tasks. These tasks are conditional
+depending on the features that are enabled in the global vars of the inventory file. Configuration
+can be achieved with this command:
 
-```
-ansible-playbook itential.deployer.mongodb -i <inventory> --tags mongodb_auth
+```bash
+ansible-playbook itential.deployer.mongodb -i <inventory> --tags configure_mongodb
 ```
 
-To execute only the MongoDB TLS role, run the `itential.deployer.mongodb` playbook with the `mongodb_tls` tag:
+This tag can be run repeatedly if there is a need to enable these features in a consecutive manner
+or to troubleshoot. However, each feature does alter the state of MongoDB and its possible that
+repeated executions can put the configuration in a bad state. To "reset" the configuration to the
+state that the installation tag produced you can run this command:
 
-```
-ansible-playbook itential.deployer.mongodb -i <inventory> --tags mongodb_tls
+```bash
+ansible-playbook itential.deployer.mongodb -i <inventory> --tags initialize_mongo_config
 ```

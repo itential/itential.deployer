@@ -1,14 +1,22 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Download Python rpms
+- name: Download Python RPMs
   ansible.builtin.import_role:
     name: offline
     tasks_from: download-rpms
   vars:
-    download_method: yum_module
-    download_packages: "{{ python_packages }}"
-    download_dir: "{{ rpms_download_dir_target_node }}"
+    offline_download_method: yum_module
+    offline_download_packages: "{{ platform_python_packages }}"
+    offline_download_dir: "{{ platform_offline_target_node_rpms_dir }}/python"
+
+- name: Copy Python RPMs to control node
+  ansible.builtin.import_role:
+    name: offline
+    tasks_from: fetch-packages
+  vars:
+    offline_src_dir: "{{ platform_offline_target_node_rpms_dir }}/python"
+    offline_dest_dir: "{{ platform_offline_control_node_rpms_dir }}/python"
 
 - name: Install Python
   ansible.builtin.include_tasks:
@@ -20,24 +28,46 @@
     name: offline
     tasks_from: download-wheels
   vars:
-    wheel_files: "{{ base_python_dependencies }}"
-    download_dir: "{{ wheels_download_dir_target_node }}/base"
+    offline_wheel_files: "{{ platform_python_base_dependencies }}"
+    offline_download_dir: "{{ platform_offline_target_node_wheels_dir }}/base"
+    offline_pip_executable: "{{ platform_pip_executable }}"
   when:
-    - base_python_dependencies is defined
-    - base_python_dependencies | length > 0
+    - platform_python_base_dependencies is defined
+    - platform_python_base_dependencies | length > 0
 
-- name: Download IAP Python dependencies
+- name: Copy base Python dependencies to control node
+  ansible.builtin.import_role:
+    name: offline
+    tasks_from: fetch-packages
+  vars:
+    offline_src_dir: "{{ platform_offline_target_node_wheels_dir }}/base"
+    offline_dest_dir: "{{ platform_offline_control_node_wheels_dir }}/base"
+
+- name: Download Itential Platform Python dependencies
   ansible.builtin.import_role:
     name: offline
     tasks_from: download-wheels
   vars:
-    with_deps: true
-    wheel_files: "{{ app_python_dependencies }}"
-    download_dir: "{{ wheels_download_dir_target_node }}/app"
+    offline_with_deps: true
+    offline_wheel_files: "{{ platform_python_app_dependencies }}"
+    offline_download_dir: "{{ platform_offline_target_node_wheels_dir }}/app"
+    offline_pip_executable: "{{ platform_pip_executable }}"
+  when:
+    - platform_python_app_dependencies is defined
+    - platform_python_app_dependencies | length > 0
 
-- name: Uninstall Python rpms
+- name: Copy Itential Platform Python dependencies to control node
+  ansible.builtin.import_role:
+    name: offline
+    tasks_from: fetch-packages
+  vars:
+    offline_src_dir: "{{ platform_offline_target_node_wheels_dir }}/app"
+    offline_dest_dir: "{{ platform_offline_control_node_wheels_dir }}/app"
+
+- name: Uninstall Python RPMs
   ansible.builtin.dnf:
     name: "{{ item }}"
     state: absent
     autoremove: true
-  with_items: "{{ python_install_result.results | selectattr('changed', 'equalto', true) | map(attribute='item') }}"
+  with_items: "{{ python_install_result.results | selectattr('changed', 'equalto', true)
+              | map(attribute='item') }}"

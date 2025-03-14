@@ -20,7 +20,7 @@
     enabled: true
     gpgcheck: true
     gpgkey: "{{ grafana_gpg_key }}"
-  when: install_yum_repos | bool
+  when: common_install_yum_repos | bool
 
 # Install grafana with yum
 - name: Install Grafana
@@ -57,16 +57,6 @@
     group: "{{ grafana_group }}"
     owner: "{{ grafana_user }}"
     mode: "0644"
-
-- name: Upload grafana dashboard RabbitMQ definitions
-  ansible.builtin.copy:
-    src: definitions/rabbitmq/
-    dest: "{{ grafana_install_dir }}/provisioning/dashboards/definitions/"
-    directory_mode: "0755"
-    group: "{{ grafana_group }}"
-    owner: "{{ grafana_user }}"
-    mode: "0644"
-  when: "'rabbitmq' in groups"
 
 - name: Gather service facts
   ansible.builtin.service_facts:

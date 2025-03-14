@@ -1,0 +1,20 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Create Redis systemd file
+  ansible.builtin.template:
+    src: redis.service.j2
+    dest: /usr/lib/systemd/system/redis.service
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Use template to generate redis.conf
+  ansible.builtin.template:
+    src: redis.conf.j2
+    dest: "{{ redis_conf_file }}"
+    owner: "{{ redis_owner }}"
+    group: "{{ redis_group }}"
+    mode: "0640"
+    backup: true
+  tags: configure_redis

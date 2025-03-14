@@ -1,0 +1,64 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+# The name of the profile document to load from the MongoDB where legacy configuration
+# properties are stored.
+# Not required for installations that are using environment variables or a properties file.
+platform_profile_id:
+
+# An identifier for the server instance. This is used to uniquely identify the server in a
+# multi-server environment.
+# If not provided, the server will generate one on startup.
+platform_server_id: "{{ inventory_hostname }}"
+
+# A whitelist of services (applications/adapters) to initialize on startup of the platform.
+# If no value is given, all services will be initialized.
+platform_services:
+
+# The service type that will be denied CRUD operation access.
+platform_service_blacklist:
+
+# Indicates whether the platform is using encrypted code files.
+platform_encrypted: true
+
+# 64-length hex string describing a 256 bit encryption key.
+platform_encryption_key: f256be40b84f053c26a0fc2101dc4bdd039f62522702e28bd4f611c2e097803e
+
+# The amount of time a service should wait before shutting down, in seconds.
+platform_shutdown_timeout: 3
+
+# The application/adapter launch delay, in seconds.
+platform_service_launch_delay: 1
+
+# The application/adapter launch timeout, in seconds.
+platform_service_launch_timeout: 600
+
+# How often to update service health, measured in seconds.
+platform_service_health_check_interval: 5
+
+# The number of failed health checks in a row before a service is considered to be “unhealthy”.
+platform_service_health_check_unhealthy_threshold: 3
+
+# If true, the platform will periodically check for dead processes.
+platform_dead_process_check_enabled: false
+
+# How often to check if application/adapter stopped sending healthcheck pings, in seconds.
+platform_dead_process_check_interval: 5
+
+# Maximum time period for application/adapter without sending healthcheck ping, in seconds.
+platform_dead_process_max_period: 15
+
+# Specifies the amount of times services will retry on crash before stopping.
+platform_service_crash_recovery_max_retries: 10
+
+# Specifies the amount of times between each retry before the count will reset in milliseconds.
+platform_service_crash_recovery_reset_retries_after_ms: 60000
+
+# The timeout for external API requests, in seconds.
+platform_external_request_timeout: 5
+
+# The interval for how often IAP polls for the number of devices, in hours.
+platform_device_count_polling_interval: 24
+
+# If true, the platform will track detailed audit events.
+platform_audit_enabled: false

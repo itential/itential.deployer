@@ -5,9 +5,9 @@
 - name: Gather service facts
   ansible.builtin.service_facts:
 
-- name: Open HTTP Port on FirewallD Public Zone
+- name: Open Itential Platform HTTP Port on FirewallD Public Zone
   ansible.posix.firewalld:
-    port: "{{ iap_http_port }}/tcp"
+    port: "{{ platform_http_port }}/tcp"
     permanent: true
     state: enabled
     zone: public
@@ -16,11 +16,11 @@
     - ansible_facts.services["firewalld.service"] is defined
     - ansible_facts.services["firewalld.service"].state == "running"
     - ansible_facts.services["firewalld.service"].status == "enabled"
-    - not iap_https | bool
+    - not platform_https | bool
 
-- name: Open HTTPS Port on FirewallD Public Zone
+- name: Open Itential Platform HTTPS Port on FirewallD Public Zone
   ansible.posix.firewalld:
-    port: "{{ iap_https_port }}/tcp"
+    port: "{{ platform_https_port }}/tcp"
     permanent: true
     state: enabled
     zone: public
@@ -29,4 +29,4 @@
     - ansible_facts.services["firewalld.service"] is defined
     - ansible_facts.services["firewalld.service"].state == "running"
     - ansible_facts.services["firewalld.service"].status == "enabled"
-    - iap_https | bool
+    - platform_https | bool

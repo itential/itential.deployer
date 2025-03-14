@@ -1,7 +1,7 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Install rpms required for download
+- name: Install packages required for download
   ansible.builtin.dnf:
     name: "{{ item }}"
     state: present
@@ -15,76 +15,51 @@
     name: safe.directory
     scope: global
     value: '*'
-  when: disable_git_safe_repo_checks
+  when: platform_disable_git_safe_repo_checks
 
 - name: Install NodeJS
   ansible.builtin.include_tasks:
     file: install-nodejs.yml
 
-- name: Download and fetch opensource adapters
+- name: Download and fetch adapters
   when:
-    - itential_adapters is defined
-    - itential_adapters is iterable
-    - itential_adapters | length > 0
+    - platform_adapters is defined
+    - platform_adapters is iterable
+    - platform_adapters | length > 0
   block:
-    - name: Download opensource adapters
+    - name: Download  adapters
       ansible.builtin.include_role:
         name: offline
         tasks_from: download-adapters
       vars:
-        adapters: "{{ itential_adapters }}"
-        download_dir: "{{ adapters_download_dir_target_node }}/opensource"
+        offline_adapters: "{{ platform_adapters }}"
+        offline_download_dir: "{{ platform_offline_target_node_adapters_dir }}"
 
-    - name: Find all downloaded opensource adapters
+    - name: Find all downloaded adapters
       ansible.builtin.find:
-        paths: "{{ adapters_download_dir_target_node }}/opensource"
+        paths: "{{ platform_offline_target_node_adapters_dir }}"
         patterns: "*.tgz"
-      register: found_opensource_adapters
+      register: found_adapters
 
-    - name: Copy opensource adapters to control node
+    - name: Copy adapters to control node
       ansible.builtin.fetch:
         src: "{{ item.path }}"
-        dest: "{{ adapters_download_dir_control_node }}/opensource/"
+        dest: "{{ platform_offline_control_node_adapters_dir }}/"
         flat: true
-      with_items: "{{ found_opensource_adapters.files }}"
+      with_items: "{{ found_adapters.files }}"
 
-- name: Download and fetch custom adapters
-  when:
-    - custom_adapters is defined
-    - custom_adapters is iterable
-    - custom_adapters | length > 0
-  block:
-    - name: Download custom adapters
-      ansible.builtin.include_role:
-        name: offline
-        tasks_from: download-adapters
-      vars:
-        adapters: "{{ custom_adapters }}"
-        download_dir: "{{ adapters_download_dir_target_node }}/custom"
-
-    - name: Find all downloaded custom adapters
-      ansible.builtin.find:
-        paths: "{{ adapters_download_dir_target_node }}/custom"
-        patterns: "*.tgz"
-      register: found_custom_adapters
-
-    - name: Copy custom adapters to control node
-      ansible.builtin.fetch:
-        src: "{{ item.path }}"
-        dest: "{{ adapters_download_dir_control_node }}/custom/"
-        flat: true
-      with_items: "{{ found_custom_adapters.files }}"
-
-- name: Uninstall rpms required for download
+- name: Uninstall packages required for download
   ansible.builtin.dnf:
     name: "{{ item }}"
     state: absent
     autoremove: true
-  with_items: "{{ install_result.results | selectattr('changed', 'equalto', true) | map(attribute='item') }}"
+  with_items: "{{ install_result.results | selectattr('changed', 'equalto', true)
+              | map(attribute='item') }}"
 
-- name: Uninstall nodejs rpms
+- name: Uninstall nodejs packages
   ansible.builtin.dnf:
     name: "{{ item }}"
     state: absent
     autoremove: true
-  with_items: "{{ nodejs_install_result.results | selectattr('changed', 'equalto', true) | map(attribute='item') }}"
+  with_items: "{{ nodejs_install_result.results | selectattr('changed', 'equalto', true)
+              | map(attribute='item') }}"

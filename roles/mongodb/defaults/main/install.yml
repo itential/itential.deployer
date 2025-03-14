@@ -1,0 +1,19 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+mongodb_release_url:
+  "https://repo.mongodb.org/yum/{{ ansible_distribution_file_variety
+  | lower }}/{{ ansible_distribution_major_version }}/mongodb-org/{{ mongodb_version }}/x86_64/"
+
+# The mongodb role uses the system python3 executables.
+mongodb_python_executable: /usr/bin/python3
+mongodb_pip_executable: /usr/bin/pip3
+mongodb_python_base_dependencies:
+  - pip
+mongodb_python_app_dependencies:
+  - pymongo
+
+# To isolate Python, a virtual environment is used.
+mongodb_python_venv_root: /var/tmp
+mongodb_python_venv_name: mongodb_venv
+mongodb_python_venv: "{{ mongodb_python_venv_root }}/{{ mongodb_python_venv_name }}"

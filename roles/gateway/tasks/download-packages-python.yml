@@ -2,36 +2,39 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
 
-- name: Download Gateway Python rpms
+- name: Download Gateway Python RPMs
   ansible.builtin.import_role:
     name: offline
     tasks_from: download-rpms
   vars:
-    download_method: yum_module
-    download_packages: "{{ python_packages }}"
-    download_dir: "{{ rpms_download_dir_target_node }}"
+    offline_download_method: yum_module
+    offline_download_packages: "{{ gateway_python_packages }}"
+    offline_download_dir: "{{ gateway_offline_target_node_rpms_dir }}"
   tags: download_gateway_python_packages
 
-- name: Copy Gateway Python rpms to control node
+- name: Copy Gateway Python RPMs to control node
   ansible.builtin.import_role:
     name: offline
     tasks_from: fetch-packages
   vars:
-    src_dir: "{{ rpms_download_dir_target_node }}"
-    dest_dir: "{{ rpms_download_dir_control_node }}"
+    offline_src_dir: "{{ gateway_offline_target_node_rpms_dir }}"
+    offline_dest_dir: "{{ gateway_offline_control_node_rpms_dir }}"
 
 - name: Install Python
   ansible.builtin.include_role:
     name: python
   tags: install_python
+  vars:
+    python_packages: "{{ gateway_python_packages }}"
 
 - name: Include tasks to download IAG dependencies
   ansible.builtin.include_tasks:
     file: download-python-dependencies.yml
 
-- name: Uninstall Python rpms
+- name: Uninstall Python RPMs
   ansible.builtin.dnf:
     name: "{{ item }}"
     state: absent
     autoremove: true
-  with_items: "{{ python_install_result.results | selectattr('changed', 'equalto', true) | map(attribute='item') }}"
+  with_items: "{{ python_install_result.results | selectattr('changed', 'equalto', true)
+              | map(attribute='item') }}"

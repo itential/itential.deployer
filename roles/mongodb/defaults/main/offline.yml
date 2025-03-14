@@ -1,0 +1,17 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+# Base directories
+mongodb_offline_packages_root: "{{ offline_itential_packages_path }}/{{ platform_release }}/mongodb"
+mongodb_offline_target_node_root:
+  "{{ offline_target_node_root }}/{{ mongodb_offline_packages_root }}"
+mongodb_offline_control_node_root:
+  "{{ offline_control_node_root }}/{{ mongodb_offline_packages_root }}"
+
+# Target node download directories
+mongodb_offline_target_node_rpms_dir: "{{ mongodb_offline_target_node_root }}/rpms"
+mongodb_offline_target_node_wheels_dir: "{{ mongodb_offline_target_node_root }}/wheels"
+
+# Control node download directories
+mongodb_offline_control_node_rpms_dir: "{{ mongodb_offline_control_node_root }}/rpms"
+mongodb_offline_control_node_wheels_dir: "{{ mongodb_offline_control_node_root }}/wheels"

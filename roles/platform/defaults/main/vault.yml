@@ -1,0 +1,33 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+# Flag to enable/disable configuring Vault in Itential Platform
+platform_configure_vault: false
+
+# The directory to store the vault root key in
+platform_vault_token_dir: "{{ platform_install_dir }}/keys"
+
+# The URL to the Hashicorp Vault server.
+platform_vault_url: http://localhost:8200
+
+# The authorization method to connect to Hashicorp Vault. Either token or approle.
+platform_vault_auth_method: token
+
+# Hashicorp Vault Role ID used for AppRole authentication.
+platform_vault_role_id:
+
+# Hashicorp Vault Secret ID used for AppRole login.
+platform_vault_secret_id:
+
+# The path where the AppRole was enabled.
+platform_vault_approle_path:
+
+# The file path to a token file. The token is used for authentication to access Vault secrets.
+platform_vault_token_file: "{{ platform_vault_token_dir }}/vault.token"
+
+# The endpoint for the Secrets Engine that is used.
+platform_vault_secrets_endpoint: itential/data
+
+# If true, only reads secrets from Hashicorp Vault. Otherwise, the platform can write secrets
+# to Vault for storage.
+platform_vault_read_only: true

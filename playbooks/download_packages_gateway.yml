@@ -1,21 +1,17 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Download OS packages
+- name: Download Gateway packages
   hosts: gateway
   become: true
   vars:
-    offline_install: false
+    offline_install_enabled: false
   roles:
-    - role: itential.deployer.common_vars
+    - role: itential.deployer.common
+    - role: itential.deployer.offline
   tasks:
-    - name: Download OS packages
+    - name: Download Gateway packages  # noqa run-once
       ansible.builtin.import_role:
-        name: itential.deployer.os
+        name: itential.deployer.gateway
         tasks_from: download-packages
       run_once: true
-      tags: download_os_packages
-
-- name: Download IAG packages
-  import_playbook: itential.deployer.download_packages_iag
-  tags: download_iag_packages

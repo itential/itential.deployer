@@ -1,0 +1,59 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+# The maximum number of each log file to keep as rotation occurs.
+platform_log_max_files: 100
+
+# The maximum file size in bytes of each log file before rotation occurs.
+platform_log_max_file_size: 1048576
+
+# The minimum log level to display in the log file.
+platform_log_level: info
+
+# The absolute directory path where log files are written.
+platform_log_dir: /var/log/itential/platform
+
+# The name of the primary platform log file.
+platform_log_filename: platform.log
+
+# The minimum log level to display in the console (stdout).
+platform_log_level_console: warn
+
+# The absolute directory path where webserver log files are written.
+platform_webserver_log_directory: /var/log/itential/platform
+
+# The name of the webserver log file.
+platform_webserver_log_filename: webserver.log
+
+# The minimum log level to send to the syslog server.
+platform_log_level_syslog: warning
+
+# The hostname or IP address of the syslog server.
+platform_syslog_host: localhost
+
+# The port number of the syslog server.
+platform_syslog_port: 514
+
+# The protocol to use when sending logs to the syslog server.
+platform_syslog_protocol: udp4
+
+# The syslog facility to use when sending logs to the syslog server.
+platform_syslog_facility: local0
+
+# The syslog message format to use when sending logs to the syslog server.
+platform_syslog_type: BSD
+
+# The path to the syslog server file.
+platform_syslog_path: /dev/log
+
+# The process property to include as the process id in the syslog message.
+platform_syslog_pid: process.pid
+
+# The hostname to include in the syslog message.
+platform_syslog_localhost: localhost
+
+# The process property to include as the application name in the syslog message.
+platform_syslog_app_name: process.title
+
+# The end of line character to include in the syslog message.
+platform_syslog_eol:
