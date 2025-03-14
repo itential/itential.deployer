@@ -2,21 +2,30 @@
 
 ## Overview
 
-It is not uncommon for customers to have environments that are air-gapped for security reasons.  The Deployer contains playbooks that will download all required packages based on the Ansible inventory and operating system.  Those packages can then be used to install the components with the Deployer configured in offline mode.  A single, non air-gapped server is required to download the dependent packages.
+It is not uncommon for customers to have environments that are air-gapped for security reasons.
+The Deployer contains playbooks that will download all required packages based on the Ansible
+inventory and operating system.  Those packages can then be used to install the components with
+the Deployer configured in offline mode.  A single, non air-gapped server is required to download
+the dependent packages.
 
 | Definitions       | Description |
 | :---------------- | :---------- |
 | Control Node      | The Ansible server.  This is the server where the Deployer is installed and where the inventory files are located. |
 | Target Node       | The server where the Itential components will be installed.  Sometimes also referred to as a managed node. |
-| Package Type      | A generic term for the downloaded artifacts.<br>YUM/DNF – RPMs<br>Python – wheels<br>Zip files – archives<br>IAG archive – pkgs<br>Itential Platform adapters – adapters<br>Ansible Collections - collections |
+| Package Type      | A generic term for the downloaded artifacts. YUM/DNF – RPMs, Python – wheels, Zip files – archives, IAG archive – pkgs, Itential Platform adapters – adapters, Ansible Collections - collections |
 
 ## Running the Download Playbooks
 
-The download playbooks must be executed on a non air-gapped server.  It is critical to use a server that has the same OS image as the Target Servers in the air-gapped environment.  Otherwise, the downloaded packages will not match, and the installation will most likely fail.  It is also highly recommended to use an image that has been updated with the latest RPMs.
+The download playbooks must be executed on a non air-gapped server.  It is critical to use a server
+that has the same OS image as the Target Servers in the air-gapped environment.  Otherwise, the
+downloaded packages will not match, and the installation will most likely fail.  It is also highly
+recommended to use an image that has been updated with the latest RPMs.
 
-When the download playbooks are executed, all relevant packages will first be downloaded to the Target Node and then copied to the Control Node.
+When the download playbooks are executed, all relevant packages will first be downloaded to the
+Target Node and then copied to the Control Node.
 
-Like the installation playbooks, there are download playbooks for each component.  The playbooks are named `download_packages_<component>.yml`, for example, `download_packages_gateway.yml`.
+Like the installation playbooks, there are download playbooks for each component.  The playbooks
+are named `download_packages_<component>.yml`, for example, `download_packages_gateway.yml`.
 
 For a basic execution, use the following command:
 
@@ -27,15 +36,20 @@ ansible-playbook itential.deployer.download_packages_<component> -i <inventory>
 **&#9432; Note:**
 Your installation might require additional options.
 
-The download playbooks override the `offline_install_enabled` variable to `false` since they require YUM repos and certain packages to be installed.  This will allow users to define the `offline_install_enabled` variable in the inventory and set it to `true` and not have to remember to change the offline install setting between runs of the download playbooks and the installation playbooks.
+The download playbooks override the `offline_install_enabled` variable to `false` since they
+require YUM repos and certain packages to be installed.  This will allow users to define the
+`offline_install_enabled` variable in the inventory and set it to `true` and not have to remember
+to change the offline install setting between runs of the download playbooks and the installation
+playbooks.
 
 ### Target Node Download Directory Structure
 
-By default, the download playbooks will put the artifacts in `/var/tmp/itential_packages` on the Target Node.
+By default, the download playbooks will put the artifacts in `/var/tmp/itential_packages` on the
+Target Node.
 
 This is an example directory structure on a Target Node on a RedHat 9 server:
 
-_Example: Directory Structure on Target Node_
+#### Example: Directory Structure on Target Node
 
 ```bash
 /var/tmp/itential_packages
@@ -75,11 +89,12 @@ _Example: Directory Structure on Target Node_
 
 ### Control Node Download Directory Structure
 
-By default, the download playbooks will copy the artifacts to `playbooks/files/itential_packages` on the Control Node.  This directory is relative where the Deployer is installed.
+By default, the download playbooks will copy the artifacts to `playbooks/files/itential_packages`
+on the Control Node.  This directory is relative where the Deployer is installed.
 
 This is an example directory structure on the Control Node:
 
-_Example: Directory Structure on Control Node_
+#### Example: Directory Structure on Control Node
 
 ```bash
 playbooks/files/itential_packages
@@ -121,11 +136,15 @@ playbooks/files/itential_packages
 
 ### Copying Artifacts to Air-gapped Environment
 
-After all applicable download playbooks are executed, the entire `playbooks/files/itential_packages` directory from the non air-gapped Control Node must be archived, copied to the Control Node in the air-gapped environment, and unarchived before running the install playbooks.
+After all applicable download playbooks are executed, the entire
+`playbooks/files/itential_packages` directory from the non air-gapped Control Node must be
+archived, copied to the Control Node in the air-gapped environment, and unarchived before running
+the install playbooks.
 
 ### Defining the Inventory
 
-The `offline_install_enabled` variable must be defined in the inventory and set to `true` to run in offline mode, or passed on the command line using the `--extra-vars` option.
+The `offline_install_enabled` variable must be defined in the inventory and set to `true` to run
+in offline mode, or passed on the command line using the `--extra-vars` option.
 
 ```yaml
 all:
@@ -135,25 +154,35 @@ all:
 
 ### Running the Playbooks
 
-After the artifacts are copied to the Control Node in the air-gapped environment, the install playbooks can be executed in offline mode.
+After the artifacts are copied to the Control Node in the air-gapped environment, the install
+playbooks can be executed in offline mode.
 
-If the `offline_install_enabled` flag is set to `true` in the inventory, run the install playbooks as you normally would.  For example:
+If the `offline_install_enabled` flag is set to `true` in the inventory, run the install playbooks
+as you normally would.  For example:
 
 ```bash
 ansible-playbook itential.deployer.<component> -i <inventory>
 ```
 
-If the `offline_install_enabled` flag is not defined in the inventory, it must be passed as a command line argument.  For example:
+If the `offline_install_enabled` flag is not defined in the inventory, it must be passed as a
+command line argument.  For example:
 
 ```bash
 ansible-playbook itential.deployer.<component> -i <inventory> --extra-vars "offline_install_enabled=true"
 ```
 
-In offline mode, the install playbooks will use the packages on the Control Node in the air-gapped environment instead of installing from the YUM/DNF, Python or NodeJS repositories, from Git (Itential Platform adapters) or from Ansible Galaxy.  The packages are copied to the Target Nodes and placed in a temporary directory and installed locally.  The temporary directories are deleted automatically.
+In offline mode, the install playbooks will use the packages on the Control Node in the air-gapped
+environment instead of installing from the YUM/DNF, Python or NodeJS repositories, from Git
+(Itential Platform adapters) or from Ansible Galaxy.  The packages are copied to the Target Nodes
+and placed in a temporary directory and installed locally.  The temporary directories are deleted
+automatically.
 
 ## Variable Reference
 
-All variables defined in this section work out of the box and won't need to be overridden in the inventory in most cases.  If the user wants to use different download directories, they can be overridden by setting the `offline_target_node_root` or `offline_control_node_root` variables in the inventory.
+All variables defined in this section work out of the box and won't need to be overridden in the
+inventory in most cases.  If the user wants to use different download directories, they can be
+overridden by setting the `offline_target_node_root` or `offline_control_node_root` variables in
+the inventory.
 
 ### Global
 

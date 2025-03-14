@@ -21,7 +21,7 @@
 5. [Running the Deployer](#running-the-deployer)
     1. [Confirm Requirements](#confirm-requirements)
     2. [Determine the Working and Deployer Directories](#determine-the-working-and-deployer-directories)
-    3. [Create the Files and Inventories Directories](#create-the-files-and-inventories-directories)
+    3. [Create the Inventories Directory](#create-the-inventories-directory)
     4. [Download Installation Artifacts](#download-installation-artifacts)
     5. [Copy Installation Artifacts into the Files Directory](#copy-installation-artifacts-into-the-files-directory)
     6. [Create a Symlink to the Files Directory](#create-a-symlink-to-the-files-directory)
@@ -37,9 +37,9 @@
     1. [MongoDB](#mongodb)
     2. [Redis](#redis)
     3. [Hashicorp Vault](#hashicorp-vault)
-    4. [Platform](#platform)
-    5. [IAG](#iag)
-    6. [Prometheus & Grafana](#prometheus)
+    4. [Itential Platform](#itential-platform)
+    5. [Itential Gateway](#itential-gateway)
+    6. [Prometheus and Grafana](#prometheus-and-grafana)
 8. [Patching Itential Platform and IAG](#patching-itential-platform-and-iag)
 9. [Using Internal YUM Repositories](#using-internal-yum-repositories)
 10. [Running the Deployer in Offline Mode](#running-the-deployer-in-offline-mode)
@@ -212,14 +212,14 @@ In general the Deployer will install packages using the standard YUM repositorie
 servers.  When packages are not available for the distribution, the Deployer will either install
 the required repository or download the packages.
 
-| Component | Hostname | Protocol | Notes |
+| Component | Location | Protocol | Notes |
 | :-------- | :------- | :------- | :---- |
-| Redis | rpms.remirepo.net | https | When installing Redis from the Remi repository<br>When installing on Redhat/Rocky 8+ |
-| Redis | dl.fedoraproject.org | https | When installing Redis from the Remi repository |
-| Redis | github.com | https | When installing Redis from source |
-| MongoDB | repo.mongodb.org | https | |
-| MongoDB | www.mongodb.org | https | |
-| Vault | rpm.releases.hashicorp.com | https | |
+| Redis | <http://rpms.remirepo.net> | https | When installing Redis from the Remi repository |
+| Redis | <http://dl.fedoraproject.org> | https | When installing Redis from the Remi repository |
+| Redis | <http://github.com> | https | When installing Redis from source |
+| MongoDB | <http://repo.mongodb.org> | https | |
+| MongoDB | <http://www.mongodb.org> | https | |
+| Vault | <http://rpm.releases.hashicorp.com> | https | |
 
 If internal YUM repositories are used, refer to the
 [Using Internal YUM Repositories](#using-internal-yum-repositories) section.
@@ -242,17 +242,17 @@ network traffic flows need to be allowed.
 | Itential Platform | IAG | 8083 | TCP | Itential Platform connections to IAG over HTTP |
 | Itential Platform | IAG | 8443 | TCP | Itential Platform connections to IAG over HTTPS |
 | Itential Platform | Vault | 8200 | TCP | Itential Platform connections to Hashicorp Vault |
-| Itential Platform | LDAP | 389 | TCP | Itential Platform connections to LDAP<br>When LDAP adapter is used for authentication |
-| Itential Platform | LDAP | 636 | TCP | Itential Platform connections to LDAP with TLS<br>When LDAP adapter is used for authentication |
-| Itential Platform | RADIUS | 1812 | UDP | Itential Platform connections to RADIUS<br>When RADIUS adapter is used for authentication |
+| Itential Platform | LDAP | 389 | TCP | Itential Platform connections to LDAP when LDAP adapter is used for authentication |
+| Itential Platform | LDAP | 636 | TCP | Itential Platform connections to LDAP with TLS when LDAP adapter is used for authentication |
+| Itential Platform | RADIUS | 1812 | UDP | Itential Platform connections to RADIUS when RADIUS adapter is used for authentication |
 | MongoDB | MongoDB | 27017 | TCP | MongoDB replication |
 | Redis | Redis | 6379 | TCP | Redis replication |
 | Redis | Redis | 26379 | TCP | Redis Sentinel for HA |
 
 Notes
 
-* Not all ports will need to be open for every supported architecture
-* Secure ports are only required when explicitly configured in the inventory
+- Not all ports will need to be open for every supported architecture
+- Secure ports are only required when explicitly configured in the inventory
 
 ### Certificates
 
@@ -262,7 +262,7 @@ can upload and configure the platform to use them. The table below describes the
 can be used and what their purpose is.
 
 | Certificate | Description |
-|---|---|
+| :-----------| :-----------|
 | Itential Platform webserver | Enables HTTPS communications with the Itential Platform webserver. |
 | IAG webserver | Enables HTTPS communications with the IAG webserver. |
 | MongoDB | Enables secure communications with the MongoDB server. Also used for intra-node mongo replication. |
@@ -502,7 +502,7 @@ be installed on this node.
 
 **&#9432; Note:**
 Itential recommends that all inventories follow the best practices outlined in the
-[Ansible documentation][Ansible Best Practices].
+[Ansible documentation](https://docs.ansible.com/ansible/latest/getting_started/get_started_inventory.html).
 
 #### Example: Creating the Inventory File
 
@@ -739,6 +739,10 @@ all:
       vars:
         platform_packages:
           - itential-platform-6.0.0-1.noarch.rpm
+        # MongoDB config
+        platform_mongo_url: mongodb://mongodb.host.com:27017/itential
+        # Redis config
+        platform_redis_host: redis.host.com
 
     gateway:
       hosts:
@@ -783,6 +787,18 @@ all:
       vars:
         platform_packages:
           - itential-platform-6.0.0-1.noarch.rpm
+        # MongoDB config
+        platform_mongo_auth_enabled: true
+        platform_mongo_url: mongodb://itential:itential@mongodb1.host.com:27017,mongodb2.host.com:27017,mongodb3.host.com:27017/itential?replicaSet=rs0
+        # Redis config
+        platform_redis_auth_enabled: true
+        platform_redis_sentinels:
+          - host: redis1.host.com
+            port: 26379
+          - host: redis2.host.com
+            port: 26379
+          - host: redis3.host.com
+            port: 26379
 
     gateway:
       hosts:
@@ -803,8 +819,6 @@ all:
   vars:
     platform_release: 6.0
   children:
-    redis:
-    mongodb:
     platform:
       hosts:
         itential-platform1.host.com:
@@ -812,13 +826,23 @@ all:
       vars:
         platform_packages:
           - itential-platform-6.0.0-1.noarch.rpm
-        platform_redis_host: <The-FQDN-to-the-Redis-service>
-        platform_redis_port: 6379
-        platform_redis_auth_enabled: true
-        platform_redis_username: itential
-        platform_redis_password: <super-secret-password>
+        # MongoDB config
         platform_mongo_auth_enabled: true
         platform_mongo_url: <a-valid-mongo-connection-string>
+        # Redis config
+        platform_redis_auth_enabled: true
+        platform_redis_host: <The-FQDN-to-the-Redis-service>
+        platform_redis_port: 6379
+        platform_redis_username: itential
+        platform_redis_password: <super-secret-password>
+        # Or if connecting to Redis Sentinel
+        # platform_redis_sentinels:
+        #   - host: redis1.host.com
+        #     port: 26379
+        #   - host: redis2.host.com
+        #     port: 26379
+        #   - host: redis3.host.com
+        #     port: 26379
     gateway:
       hosts:
         automation-gateway1.host.com:
@@ -875,6 +899,20 @@ all:
           - itential-platform-6.0.0-1.noarch.rpm
         platform_job_worker_enabled: false
         platform_task_worker_enabled: false
+        # MongoDB config
+        platform_mongo_auth_enabled: true
+        platform_mongo_url: mongodb://itential:itential@datacenter1.mongodb1.host.com:27017,datacenter1.mongodb2.host.com:27017,datacenter2.mongodb3.host.com:27017,datacenter2.mongodb4.host.com:27017,datacenter3.mongodb-arbiter.host.com:27017/itential?replicaset=rs0
+        # Redis config
+        platform_redis_auth_enabled: true
+        platform_redis_sentinel_username: itential
+        platform_redis_sentinel_password: <super-secret-password>
+        platform_redis_sentinels:
+          - host: datacenter1.redis1.host.com
+            port: 26379
+          - host: datacenter1.redis2.host.com
+            port: 26379
+          - host: datacenter1.redis3.host.com
+            port: 26379
 
     platform_secondary:
       hosts:
@@ -885,6 +923,20 @@ all:
           - itential-platform-6.0.0-1.noarch.rpm
         platform_job_worker_enabled: false
         platform_task_worker_enabled: false
+        # MongoDB config
+        platform_mongo_auth_enabled: true
+        platform_mongo_url: mongodb://itential:itential@datacenter1.mongodb1.host.com:27017,datacenter1.mongodb2.host.com:27017,datacenter2.mongodb3.host.com:27017,datacenter2.mongodb4.host.com:27017,datacenter3.mongodb-arbiter.host.com:27017/itential?replicaset=rs0
+        # Redis config
+        platform_redis_auth_enabled: true
+        platform_redis_sentinel_username: itential
+        platform_redis_sentinel_password: <super-secret-password>
+        platform_redis_sentinels:
+          - host: datacenter2.redis1.host.com
+            port: 26379
+          - host: datacenter2.redis2.host.com
+            port: 26379
+          - host: datacenter2.redis3.host.com
+            port: 26379
 
     gateway:
       hosts:
@@ -918,9 +970,13 @@ corresponding variables are detailed in the following guides.
 
 [Itential Platform Guide](docs/itential_platform_guide.md)
 
-### IAG
+### Itential Gateway
 
-[IAG Guide](docs/itential_gateway_guide.md)
+[Itential Gatway Guide](docs/itential_gateway_guide.md)
+
+### Prometheus and Grafana
+
+[Prometheus and Grafana Guide](docs/prometheus_guide.md)
 
 ## Patching Itential Platform and IAG
 
