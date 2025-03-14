@@ -1,7 +1,13 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Restart IAP
+- name: Enable and Start Platform
   ansible.builtin.systemd:
-    name: automation-platform
+    name: itential-platform
+    enabled: true
     state: restarted
+    daemon_reload: true
+
+- name: Update Itential release file
+  ansible.builtin.include_tasks:
+    file: update-release-file.yml

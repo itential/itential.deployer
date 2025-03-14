@@ -1,0 +1,18 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Determine MongoDB version
+  ansible.builtin.shell:
+    cmd: set -o pipefail && mongod --version | grep "db version" | cut -d" " -f3
+  register: result
+  check_mode: false
+  changed_when: false
+  failed_when: result.rc != 0 and result.rc != 127
+
+- name: Write MongoDB release information
+  ansible.builtin.lineinfile:
+    path: "{{ common_itential_release_file }}"
+    regexp: '^MONGODB='
+    line: "MONGODB={{ result.stdout }}"
+    create: true
+    mode: "0644"

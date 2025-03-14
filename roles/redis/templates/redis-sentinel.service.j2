@@ -5,7 +5,7 @@ After=network-online.target
 Wants=network-online.target
 
 [Service]
-ExecStart=/usr/local/bin/redis-sentinel {{ redis_sentinel_conf_file }} --daemonize no --supervised systemd
+ExecStart={{ redis_bin_dir }}/redis-sentinel {{ redis_sentinel_conf_file }} --daemonize no --supervised systemd
 Type=notify
 User={{ redis_owner }}
 Group={{ redis_group }}

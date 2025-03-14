@@ -1,0 +1,62 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+# Run Itential Platform server as HTTPS
+platform_https: false
+
+# The Itential Platform listen ports
+platform_http_port: 3000
+platform_https_port: 3443
+
+# Destination as referenced by itential user when connecting from itential host.
+# This is ultimately stored in the mongo database to be read by Itential Platform, therefore
+# this is the location as seen from the Itential Platform host.
+platform_mongodb_root_ca_file_destination: /opt/itential/keys/mongo-rootCA.pem
+
+platform_package_dependencies:
+  - glibc-common
+  - openldap
+  - openldap-clients
+  - openssl
+  - git
+
+platform_python_base_dependencies:
+  - pip
+  - setuptools
+  - wheel
+
+# The python and pip executable locations.
+# These will be symlinks to the appropriate executables in /usr/bin.
+platform_python_executable: "/usr/bin/python{{ platform_python_version }}"
+platform_pip_executable: "/usr/bin/pip{{ platform_python_version }}"
+
+# Should the platform configure and add any IAG adapters that it
+# discovers? Based on the presence of devices in the gateway group
+# this will build adapter configs for each that it finds and insert
+# them into the mongo database.
+platform_configure_iag_adapters: true
+
+# If the IAG adapters are configured, set the token timeout. The
+# default value is 3600000 milliseconds (60 minutes).
+platform_iag_adapter_token_timeout: 3600000
+
+# The default user that runs the server process
+platform_user: itential
+
+# The default group that runs the server process
+platform_group: itential
+
+# Flag to determine whether to use rsync when uploading artifacts
+platform_upload_using_rsync: false
+
+# Flag to remove the package-lock.json file before running the NPM install
+platform_delete_package_lock_file: true
+
+# Flag to disable Git safe repo check
+platform_disable_git_safe_repo_checks: true
+
+# Flag to prevent the NPM scripts from running when running the NPM install
+platform_npm_ignore_scripts: true
+
+# Flag to install app-artifacts
+platform_app_artifacts_enabled: false

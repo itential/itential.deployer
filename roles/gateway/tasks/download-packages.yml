@@ -4,49 +4,49 @@
 - name: Validation steps
   tags: always
   block:
-    - name: Validate distribution major version
+    - name: Validate offline_install_enabled variable
       ansible.builtin.fail:
-        msg: Download not supported for version 7
-      when: ansible_distribution_major_version == "7"
-
-    - name: Validate offline_install variable
-      ansible.builtin.fail:
-        msg: offline_install must be set to false for download
+        msg: offline_install_enabled must be set to false for download
       when:
-        - offline_install is defined
-        - offline_install
+        - offline_install_enabled is defined
+        - offline_install_enabled
 
     - name: Include release vars
       ansible.builtin.include_vars:
         file: "{{ item }}"
       with_first_found:
-        - "{{ iag_release }}-{{ ansible_distribution | lower }}-{{ ansible_distribution_major_version }}.yml"
+        - "{{ gateway_release }}-{{ ansible_distribution
+          | lower }}-{{ ansible_distribution_major_version }}.yml"
         - "release-undefined.yml"
 
     - name: Check for valid IAG release
       ansible.builtin.fail:
-        msg: "Deployer does not support installing Gateway version {{ iag_release }} on {{ ansible_distribution }}-{{ ansible_distribution_major_version }}"
-      when: invalid_iag_release is defined
+        msg: "Deployer does not support installing Gateway version {{ gateway_release }}
+             on {{ ansible_distribution }}-{{ ansible_distribution_major_version }}"
+      when: gateway_invalid_release is defined
 
-- name: Download Gateway OS rpms
-  ansible.builtin.import_role:
-    name: offline
-    tasks_from: download-rpms
-  vars:
-    download_method: yum_module
-    download_packages: "{{ gateway_packages }}"
-    download_dir: "{{ rpms_download_dir_target_node }}"
-  tags: download_gateway_packages
+- name: Download OS packages
+  tags: download_os_packages
+  block:
+    - name: Download Gateway OS RPMs
+      ansible.builtin.import_role:
+        name: offline
+        tasks_from: download-rpms
+      vars:
+        offline_download_method: yum_module
+        offline_download_packages: "{{ gateway_packages }}"
+        offline_download_dir: "{{ gateway_offline_target_node_rpms_dir }}"
+      tags: download_gateway_packages
 
-- name: Copy rpms to control node
-  ansible.builtin.import_role:
-    name: offline
-    tasks_from: fetch-packages
-  vars:
-    src_dir: "{{ rpms_download_dir_target_node }}"
-    dest_dir: "{{ rpms_download_dir_control_node }}"
+    - name: Copy RPMs to control node
+      ansible.builtin.import_role:
+        name: offline
+        tasks_from: fetch-packages
+      vars:
+        offline_src_dir: "{{ gateway_offline_target_node_rpms_dir }}"
+        offline_dest_dir: "{{ gateway_offline_control_node_rpms_dir }}"
 
-- name: Install Gateway rpms
+- name: Install Gateway packages
   ansible.builtin.dnf:
     name: "{{ item }}"
     state: present
@@ -59,26 +59,30 @@
   tags: install_gateway_packages
 
 - name: Download Python packages
-  ansible.builtin.include_tasks:
-    file: download-packages-python.yml
+  tags: download_python_packages
+  block:
+    - name: Download Python packages
+      ansible.builtin.include_tasks:
+        file: download-packages-python.yml
 
-- name: Create archives directory
-  ansible.builtin.file:
-    path: "{{ archives_download_dir_target_node }}"
-    state: directory
-    mode: '0755'
+    - name: Create archives directory
+      ansible.builtin.file:
+        path: "{{ gateway_offline_target_node_archives_dir }}"
+        state: directory
+        mode: '0755'
 
-- name: Copy archives to control node
-  ansible.builtin.import_role:
-    name: offline
-    tasks_from: fetch-packages
-  vars:
-    src_dir: "{{ archives_download_dir_target_node }}"
-    dest_dir: "{{ archives_download_dir_control_node }}"
+    - name: Copy archives to control node
+      ansible.builtin.import_role:
+        name: offline
+        tasks_from: fetch-packages
+      vars:
+        offline_src_dir: "{{ gateway_offline_target_node_archives_dir }}"
+        offline_dest_dir: "{{ gateway_offline_control_node_archives_dir }}"
 
 - name: Uninstall Gateway packages
   ansible.builtin.dnf:
     name: "{{ item }}"
     state: absent
     autoremove: true
-  with_items: "{{ gateway_packages_installed.results | selectattr('changed', 'equalto', true) | map(attribute='item') }}"
+  with_items: "{{ gateway_packages_installed.results | selectattr('changed', 'equalto', true)
+              | map(attribute='item') }}"

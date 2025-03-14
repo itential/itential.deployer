@@ -1,57 +1,72 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Download archive files local
-  ansible.builtin.include_tasks:
-    file: upload-platform-archive-from-local.yml
-  when: iap_bin_file is defined or iap_tar_file is defined
-
-- name: Download archive files repository
-  ansible.builtin.include_tasks:
-    file: download-platform-archive-from-repo.yml
-  when: iap_archive_download_url is defined
-
-# Extract bin file contents
-# -e Extract tar archive and exit
-# -y Assume defaults for all prompts & run non-interactively
-# -d Installation directory, where to extract the files
-# We are no longer going to depend on the shell code that is contained within
-# the bin file. Just extract the tar from the bin and perform the rest of the
-# upgrade with this role for transparency. If the extracted directory already
-# exists then do nothing (creates).
-- name: Extract the bin file contents
-  ansible.builtin.command:
-    cmd: "{{ iap_install_dir }}/{{ iap_bin_file }} -ey -d {{ iap_install_dir }}"
-    chdir: "{{ iap_install_dir }}"
-    creates: "{{ iap_install_dir }}/{{ iap_package_name }}"
-  when: iap_bin_file is defined
-
-- name: Extract the tar file contents
-  ansible.builtin.unarchive:
-    src: "{{ iap_install_dir }}/{{ iap_tar_file }}"
-    dest: "{{ iap_install_dir }}"
-    remote_src: true
-  when: iap_tar_file is defined
-
-- name: Create the "current" symlink
-  ansible.builtin.file:
-    path: "{{ iap_install_dir }}/current"
-    src: "{{ iap_install_dir }}/{{ iap_package_name }}"
-    owner: "{{ iap_user }}"
-    group: "{{ iap_group }}"
-    state: link
-
-- name: Remove the source file
-  when: remove_iap_source_file | bool
+- name: Online install
+  when: not offline_install_enabled
   block:
-    - name: Remove the bin file
-      ansible.builtin.file:
-        path: "{{ iap_install_dir }}/{{ iap_bin_file }}"
-        state: absent
-      when: iap_bin_file is defined
+    - name: Create temporary download directory
+      ansible.builtin.tempfile:
+        state: directory
+      register: downloaddir
+      changed_when: false
 
-    - name: Remove the tar file
+    - name: Upload packages from control node
+      ansible.builtin.include_tasks:
+        file: upload-platform-archive-from-local.yml
+      loop: "{{ platform_packages }}"
+      loop_control:
+        loop_var: artifact
+      when:
+        - "'http' not in artifact"
+        - artifact.endswith('.rpm')
+
+    - name: Download packages from repository
+      ansible.builtin.include_tasks:
+        file: download-platform-archive-from-repo.yml
+      loop: "{{ platform_packages }}"
+      loop_control:
+        loop_var: artifact
+      when:
+        - "'http' in artifact"
+        - artifact.endswith('.rpm')
+
+    - name: Find downloaded packages
+      ansible.builtin.find:
+        paths: "{{ downloaddir.path }}"
+        patterns: "*.rpm"
+      register: downloaded_platform_packages
+      changed_when: false
+
+    - name: Install the Itential Platform packages (local)
+      ansible.builtin.dnf:
+        name: "{{ downloaded_platform_packages.files | map(attribute='path') | join(',') }}"
+        disable_gpg_check: true
+        state: present
+      when: downloaded_platform_packages | length > 0
+
+    # TODO: Implement installing from a yum repo
+    # - name: Install the Itential Platform packages (YUM repository)
+    #   ansible.builtin.dnf:
+    #     name: "{{ item.path }}"
+    #     disable_gpg_check: true
+    #     state: present
+    #   loop: "{{ platform_packages }}"
+    #   loop_control:
+    #     loop_var: artifact
+    #   when:
+    #     - "'http' not in artifact"
+    #     - not artifact.endswith('.rpm')
+
+    - name: Remove temporary download directory
       ansible.builtin.file:
-        path: "{{ iap_install_dir }}/{{ iap_tar_file }}"
+        path: "{{ downloaddir.path }}"
         state: absent
-      when: iap_tar_file is defined
+      changed_when: false
+
+- name: Install Platform (offline)
+  ansible.builtin.include_role:
+    name: offline
+    tasks_from: install-rpms
+  vars:
+    offline_rpms_path: "{{ platform_offline_control_node_rpms_dir }}/platform"
+  when: offline_install_enabled

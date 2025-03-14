@@ -8,38 +8,28 @@
       ansible.builtin.include_vars:
         file: "{{ item }}"
       with_first_found:
-        - "{{ iag_release }}-{{ ansible_distribution | lower }}-{{ ansible_distribution_major_version }}.yml"
+        - "{{ gateway_release }}-{{ ansible_distribution
+          | lower }}-{{ ansible_distribution_major_version }}.yml"
         - "release-undefined.yml"
 
     - name: Check for valid IAG release
       ansible.builtin.fail:
-        msg: "Deployer does not support installing Gateway version {{ iag_release }} on {{ ansible_distribution }}-{{ ansible_distribution_major_version }}"
-      when: invalid_iag_release is defined
-
-- name: Run preflight checks
-  ansible.builtin.include_tasks:
-    file: preflight.yml
-  when:
-    - preflight_run_checks is defined
-    - preflight_run_checks | bool
-
-- name: Install base OS packages
-  ansible.builtin.include_role:
-    name: os
-  tags: install_base_os_packages
+        msg: "Deployer does not support installing Gateway version {{ gateway_release }}
+             on {{ ansible_distribution }}-{{ ansible_distribution_major_version }}"
+      when: gateway_invalid_release is defined
 
 - name: Create temporary working directory
   ansible.builtin.tempfile:
     state: directory
   register: workingdir
 
-- name: Install Gateway packages (online)
+- name: Install Gateway packages
   ansible.builtin.dnf:
     name: "{{ item }}"
     state: present
   with_items: "{{ gateway_packages }}"
   when:
-    - not offline_install
+    - not offline_install_enabled
     - gateway_packages is defined
     - gateway_packages is iterable
     - gateway_packages | length > 0
@@ -49,17 +39,19 @@
   ansible.builtin.import_role:
     name: offline
     tasks_from: install-rpms
-  when: offline_install
+  vars:
+    offline_rpms_path: "{{ gateway_offline_control_node_rpms_dir }}"
+  when: offline_install_enabled
   tags: install_gateway_packages
 
 - name: Create itential group
   ansible.builtin.group:
-    name: "{{ iag_group }}"
+    name: "{{ gateway_group }}"
 
 - name: Create itential user
   ansible.builtin.user:
-    name: "{{ iag_user }}"
-    group: "{{ iag_group }}"
+    name: "{{ gateway_user }}"
+    group: "{{ gateway_group }}"
     groups: wheel
     generate_ssh_key: true
     state: present
@@ -67,45 +59,45 @@
 - name: Create working directories
   ansible.builtin.file:
     name: "{{ item }}"
-    owner: "{{ iag_user }}"
-    group: "{{ iag_group }}"
+    owner: "{{ gateway_user }}"
+    group: "{{ gateway_group }}"
     mode: "0775"
     state: directory
   with_items:
     - /etc/ansible
-    - "{{ iag_log_dir }}"
-    - "{{ iag_properties_location }}"
-    - "{{ iag_data_dir }}"
-    - "{{ iag_install_dir }}"
-    - "{{ iag_ansible_collections_path }}"
-    - "{{ iag_install_dir }}/ansible/inventory"
-    - "{{ iag_install_dir }}/ansible/modules"
-    - "{{ iag_install_dir }}/ansible/roles"
-    - "{{ iag_install_dir }}/ansible/playbooks"
-    - "{{ iag_install_dir }}/ansible/plugins/modules"
-    - "{{ iag_install_dir }}/ansible/scripts"
-    - "{{ iag_install_dir }}/conf"
-    - "{{ iag_install_dir }}/conf/certs"
-    - "{{ iag_install_dir }}/nornir/conf"
-    - "{{ iag_install_dir }}/nornir/inventory"
-    - "{{ iag_install_dir }}/nornir/modules"
-    - "{{ iag_install_dir }}/repos"
-    - "{{ iag_install_dir }}/scripts"
-    - "{{ iag_install_dir }}/ssh"
+    - "{{ gateway_log_dir }}"
+    - "{{ gateway_properties_location }}"
+    - "{{ gateway_data_dir }}"
+    - "{{ gateway_install_dir }}"
+    - "{{ gateway_ansible_collections_path }}"
+    - "{{ gateway_install_dir }}/ansible/inventory"
+    - "{{ gateway_install_dir }}/ansible/modules"
+    - "{{ gateway_install_dir }}/ansible/roles"
+    - "{{ gateway_install_dir }}/ansible/playbooks"
+    - "{{ gateway_install_dir }}/ansible/plugins/modules"
+    - "{{ gateway_install_dir }}/ansible/scripts"
+    - "{{ gateway_install_dir }}/conf"
+    - "{{ gateway_install_dir }}/conf/certs"
+    - "{{ gateway_install_dir }}/nornir/conf"
+    - "{{ gateway_install_dir }}/nornir/inventory"
+    - "{{ gateway_install_dir }}/nornir/modules"
+    - "{{ gateway_install_dir }}/repos"
+    - "{{ gateway_install_dir }}/scripts"
+    - "{{ gateway_install_dir }}/ssh"
 
 - name: Create Python venv directory
   ansible.builtin.file:
-    name: "{{ iag_install_dir }}/python-venvs"
-    owner: "{{ iag_user }}"
-    group: "{{ iag_group }}"
+    name: "{{ gateway_install_dir }}/python-venvs"
+    owner: "{{ gateway_user }}"
+    group: "{{ gateway_group }}"
     mode: "0775"
     state: directory
-  when: iag_enable_python_venv | bool
+  when: gateway_enable_python_venv | bool
 
 - name: Copy certs
   ansible.builtin.include_tasks:
     file: copy-certs.yml
-  when: iag_https and iag_ssl_copy_certs
+  when: gateway_https and gateway_ssl_copy_certs
 
 - name: Install Python
   tags: install_python
@@ -117,31 +109,32 @@
 # Need to install ansible within the virtual environment
 - name: Install Ansible
   tags: install_ansible
-  when: iag_enable_ansible | bool
+  when: gateway_enable_ansible | bool
   block:
     - name: Install Ansible and Ansible collections
-      when: not offline_install
+      when: not offline_install_enabled
       block:
         - name: Install Ansible into the python virtual environment
           ansible.builtin.pip:
-            name: "{{ iag_ansible_version }}"
-            virtualenv: "{{ iag_install_dir }}/venv"
+            name: "{{ gateway_ansible_version }}"
+            virtualenv: "{{ gateway_install_dir }}/venv"
 
         - name: Install collections
           ansible.builtin.command:
-            cmd: "ansible-galaxy collection install -p {{ iag_ansible_collections_path }} {{  iag_ansible_collections | join(' ') }}"
+            cmd: "ansible-galaxy collection install -p {{ gateway_ansible_collections_path }}
+                 {{  gateway_ansible_collections | join(' ') }}"
           register: install_result
           changed_when: '"Nothing to do" not in install_result.stdout'
           failed_when: install_result.failed
           when:
-            - iag_ansible_collections is defined
-            - iag_ansible_collections is iterable
-            - iag_ansible_collections | length > 0
+            - gateway_ansible_collections is defined
+            - gateway_ansible_collections is iterable
+            - gateway_ansible_collections | length > 0
 
     - name: Install Ansible collections (offline)
       ansible.builtin.include_tasks:
         file: install-ansible-collections-offline.yml
-      when: offline_install
+      when: offline_install_enabled
 
     - name: Create Ansible config file
       ansible.builtin.template:
@@ -152,51 +145,53 @@
 
     - name: Create empty ansible inventory files
       ansible.builtin.file:
-        name: "{{ iag_install_dir }}/ansible/inventory/hosts"
-        owner: "{{ iag_user }}"
-        group: "{{ iag_group }}"
+        name: "{{ gateway_install_dir }}/ansible/inventory/hosts"
+        owner: "{{ gateway_user }}"
+        group: "{{ gateway_group }}"
         mode: "0660"
         state: touch
 
     - name: Create empty ansible vault file
       ansible.builtin.file:
-        name: "{{ iag_install_dir }}/conf/.vault_password_file"
-        owner: "{{ iag_user }}"
-        group: "{{ iag_group }}"
+        name: "{{ gateway_install_dir }}/conf/.vault_password_file"
+        owner: "{{ gateway_user }}"
+        group: "{{ gateway_group }}"
         mode: "0400"
         state: touch
 
 - name: Check if Automation Gateway is already installed
   ansible.builtin.stat:
-    path: "{{ iag_install_dir }}/venv/automation-gateway"
-  register: iag_installed
+    path: "{{ gateway_install_dir }}/venv/automation-gateway"
+  register: gateway_installed
 
 - name: Copy IAG archive from local
   ansible.builtin.copy:
-    src: "{{ iag_whl_file }}"
-    dest: "{{ workingdir.path }}/{{ iag_whl_file | basename }}"
+    src: "{{ gateway_whl_file }}"
+    dest: "{{ workingdir.path }}/{{ gateway_whl_file | basename }}"
     mode: '0644'
   when:
-    - not iag_installed.stat.exists
-    - iag_whl_file is defined
-    - iag_archive_download_url is not defined
+    - not gateway_installed.stat.exists
+    - gateway_whl_file is defined
+    - gateway_archive_download_url is not defined
 
 - name: Download IAG archive from repository
   when:
-    - not iag_installed.stat.exists
-    - iag_archive_download_url is defined
-    - iag_whl_file is not defined
+    - not gateway_installed.stat.exists
+    - gateway_archive_download_url is defined
+    - gateway_whl_file is not defined
   block:
     - name: Download IAG archive from repository
       ansible.builtin.get_url:
-        url: "{{ iag_archive_download_url }}"
+        url: "{{ gateway_archive_download_url }}"
         dest: "{{ workingdir.path }}/"
         mode: '0644'
         # Sets the appropriate header based on the repository type:
-        # - For JFrog: Uses the "X-JFrog-Art-Api" header with the API key if "repository_api_key" is defined and "jfrog" is part of the download URL.
-        # - For Nexus: Uses a default header ("Accept: application/octet-stream") since Nexus doesn't support API key authentication.
+        # - For JFrog: Uses the "X-JFrog-Art-Api" header with the API key if "repository_api_key"
+        #   is defined and "jfrog" is part of the download URL.
+        # - For Nexus: Uses a default header ("Accept: application/octet-stream") since Nexus
+        #   doesn't support API key authentication.
         headers: >-
-          {%- if repository_api_key is defined and iag_archive_download_url is search("jfrog") -%}
+          {%- if repository_api_key is defined and gateway_archive_download_url is search("jfrog") -%}
             {"X-JFrog-Art-Api": "{{ repository_api_key }}", "Accept": "application/octet-stream"}
           {%- else -%}
             {"Accept": "application/octet-stream"}
@@ -206,60 +201,60 @@
         validate_certs: true
       register: download_result
 
-    - name: Set iag_whl_file destination from download
+    - name: Set gateway_whl_file destination from download
       ansible.builtin.set_fact:
-        iag_whl_file: "{{ download_result.dest }}"
+        gateway_whl_file: "{{ download_result.dest }}"
 
 - name: Install IAG
   ansible.builtin.pip:
-    name: "{{ workingdir.path }}/{{ iag_whl_file | basename }}"
-    virtualenv: "{{ iag_install_dir }}/venv"
+    name: "{{ workingdir.path }}/{{ gateway_whl_file | basename }}"
+    virtualenv: "{{ gateway_install_dir }}/venv"
 
 - name: Set ownership/permissions and create properties.yml
-  when: not iag_installed.stat.exists
+  when: not gateway_installed.stat.exists
   block:
     # Using chown and chmod is a faster way to enforce the file ownership and
     # permissions. The file module in ansible checks each and every file/dir
     # in the tree, 'chown -R ' does not, it just sets it.
     - name: Set appropriate ownership on all gateway files
       ansible.builtin.command:
-        cmd: "chown -R {{ iag_user }}:{{ iag_group }} {{ iag_install_dir }}/venv"
+        cmd: "chown -R {{ gateway_user }}:{{ gateway_group }} {{ gateway_install_dir }}/venv"
       changed_when: true
 
     - name: Set appropriate permissions on all gateway files
       ansible.builtin.command:
-        cmd: "chmod -R 775 {{ iag_install_dir }}/venv"
+        cmd: "chmod -R 775 {{ gateway_install_dir }}/venv"
       changed_when: true
 
     - name: Create properties.yml using template based on the version
       ansible.builtin.template:
-        src: "properties.{{ iag_release }}.yml.j2"
-        dest: "{{ iag_properties_location }}/properties.yml"
-        owner: "{{ iag_user }}"
-        group: "{{ iag_group }}"
+        src: "properties.{{ gateway_release }}.yml.j2"
+        dest: "{{ gateway_properties_location }}/properties.yml"
+        owner: "{{ gateway_user }}"
+        group: "{{ gateway_group }}"
         mode: "0600"
 
 - name: Create Nornir files
-  when: iag_enable_nornir | bool
+  when: gateway_enable_nornir | bool
   block:
     - name: Create Nornir inventory files (empty)
       ansible.builtin.file:
         name: "{{ item }}"
-        owner: "{{ iag_user }}"
-        group: "{{ iag_group }}"
+        owner: "{{ gateway_user }}"
+        group: "{{ gateway_group }}"
         mode: "0660"
         state: touch
       with_items:
-        - "{{ iag_install_dir }}/nornir/inventory/defaults.yml"
-        - "{{ iag_install_dir }}/nornir/inventory/groups.yml"
-        - "{{ iag_install_dir }}/nornir/inventory/hosts.yml"
+        - "{{ gateway_install_dir }}/nornir/inventory/defaults.yml"
+        - "{{ gateway_install_dir }}/nornir/inventory/groups.yml"
+        - "{{ gateway_install_dir }}/nornir/inventory/hosts.yml"
 
     - name: Create Nornir config file
       ansible.builtin.template:
         src: nornir.config.yml.j2
-        dest: "{{ iag_install_dir }}/nornir/config.yml"
-        owner: "{{ iag_user }}"
-        group: "{{ iag_group }}"
+        dest: "{{ gateway_install_dir }}/nornir/config.yml"
+        owner: "{{ gateway_user }}"
+        group: "{{ gateway_group }}"
         mode: "0660"
 
 - name: Write automation-gateway.service to host
@@ -275,9 +270,9 @@
 
 - name: Configure HTTP Port on FirewallD Public Zone
   ansible.posix.firewalld:
-    port: "{{ iag_port }}/tcp"
+    port: "{{ gateway_port }}/tcp"
     permanent: true
-    state: "{{ iag_https or iag_haproxy | ternary('disabled', 'enabled') }}"
+    state: "{{ gateway_https or gateway_haproxy_enabled | ternary('disabled', 'enabled') }}"
     zone: public
     immediate: true
   when:
@@ -287,9 +282,9 @@
 
 - name: Configure HTTPS Port on FirewallD Public Zone
   ansible.posix.firewalld:
-    port: "{{ iag_https_port }}/tcp"
+    port: "{{ gateway_https_port }}/tcp"
     permanent: true
-    state: "{{ iag_https or iag_haproxy | ternary('enabled', 'disabled') }}"
+    state: "{{ gateway_https or gateway_haproxy_enabled | ternary('enabled', 'disabled') }}"
     zone: public
     immediate: true
   when:
@@ -297,9 +292,9 @@
     - ansible_facts.services["firewalld.service"].state == "running"
     - ansible_facts.services["firewalld.service"].status == "enabled"
 
-- name: Allow IAG to listen on tcp port {{ iag_port }}
+- name: Allow IAG to listen on tcp port {{ gateway_port }}
   community.general.seport:
-    ports: "{{ iag_port }}"
+    ports: "{{ gateway_port }}"
     proto: tcp
     setype: http_port_t
     state: present
@@ -332,3 +327,4 @@
     - gateway_build_packages is defined
     - gateway_build_packages is iterable
     - gateway_build_packages | length > 0
+    - not offline_install_enabled

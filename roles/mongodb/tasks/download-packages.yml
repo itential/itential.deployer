@@ -1,73 +1,68 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Validate distribution major version
-  ansible.builtin.fail:
-    msg: Download not supported for version 7
-  when: ansible_distribution_major_version == "7"
+- name: Include tasks to validate variables
+  ansible.builtin.include_tasks:
+    file: validate-vars.yml
+  tags: always
 
-- name: Validate offline_install variable
-  ansible.builtin.fail:
-    msg: offline_install must be set to false for download
-  when:
-    - offline_install is defined
-    - offline_install
+- name: Download MongoDB RPMs
+  tags: download_mongodb_packages
+  block:
+    - name: Install MongoDB repo
+      ansible.builtin.yum_repository:
+        name: mongodb
+        description: MongoDB Repository
+        baseurl: "{{ mongodb_release_url }}"
+        enabled: true
+        gpgcheck: true
+        gpgkey: "{{ mongodb_gpgkey_url }}"
+      when: common_install_yum_repos | bool
 
-- name: Include release vars
-  ansible.builtin.include_vars:
-    file: "{{ item }}"
-  with_first_found:
-    - "{{ iap_release }}-{{ ansible_distribution | lower }}-{{ ansible_distribution_major_version }}.yml"
-    - "release-undefined.yml"
+    - name: Download MongoDB RPMs
+      ansible.builtin.import_role:
+        name: offline
+        tasks_from: download-rpms
+      vars:
+        offline_download_method: yum_module
+        offline_download_packages: "{{ mongodb_packages + mongodb_package_dependencies }}"
+        offline_download_dir: "{{ mongodb_offline_target_node_rpms_dir }}"
 
-- name: Check for valid MongoDB release
-  ansible.builtin.fail:
-    msg: "Deployer does not support installing MongoDB for IAP version {{ iap_release }} on {{ ansible_distribution | lower }}-{{ ansible_distribution_major_version }}"
-  when: invalid_mongodb_release is defined
-
-- name: Install MongoDB repo
-  ansible.builtin.yum_repository:
-    name: mongodb
-    description: MongoDB Repository
-    baseurl: "{{ mongodb_release_url }}"
-    enabled: true
-    gpgcheck: true
-    gpgkey: "{{ mongodb_gpgkey_url }}"
-  when: install_yum_repos | bool
-
-- name: Download MongoDB rpms
-  ansible.builtin.import_role:
-    name: offline
-    tasks_from: download-rpms
-  vars:
-    download_method: yum_module
-    download_packages: "{{ mongodb_packages }}"
-    download_dir: "{{ rpms_download_dir_target_node }}"
+    - name: Copy RPMs to control node
+      ansible.builtin.import_role:
+        name: offline
+        tasks_from: fetch-packages
+      vars:
+        offline_src_dir: "{{ mongodb_offline_target_node_rpms_dir }}"
+        offline_dest_dir: "{{ mongodb_offline_control_node_rpms_dir }}"
 
 - name: Download Python packages
-  ansible.builtin.include_tasks:
-    file: download-packages-python.yml
+  tags: download_python_packages
+  block:
+    - name: Download Python packages
+      ansible.builtin.include_tasks:
+        file: download-packages-python.yml
 
-- name: Copy rpms to control node
-  ansible.builtin.import_role:
-    name: offline
-    tasks_from: fetch-packages
-  vars:
-    src_dir: "{{ rpms_download_dir_target_node }}"
-    dest_dir: "{{ rpms_download_dir_control_node }}"
+    - name: Copy RPMs to control node
+      ansible.builtin.import_role:
+        name: offline
+        tasks_from: fetch-packages
+      vars:
+        offline_src_dir: "{{ mongodb_offline_target_node_rpms_dir }}"
+        offline_dest_dir: "{{ mongodb_offline_control_node_rpms_dir }}"
 
-- name: Copy base Python dependencies to control node
-  ansible.builtin.import_role:
-    name: offline
-    tasks_from: fetch-packages
-  vars:
-    src_dir: "{{ wheels_download_dir_target_node }}/base"
-    dest_dir: "{{ wheels_download_dir_control_node }}/base"
+    - name: Copy base Python dependencies to control node
+      ansible.builtin.import_role:
+        name: offline
+        tasks_from: fetch-packages
+      vars:
+        offline_src_dir: "{{ mongodb_offline_target_node_wheels_dir }}/base"
+        offline_dest_dir: "{{ mongodb_offline_control_node_wheels_dir }}/base"
 
-- name: Copy MongoDB Python dependencies to control node
-  ansible.builtin.import_role:
-    name: offline
-    tasks_from: fetch-packages
-  vars:
-    src_dir: "{{ wheels_download_dir_target_node }}/app"
-    dest_dir: "{{ wheels_download_dir_control_node }}/app"
+    - name: Copy MongoDB Python dependencies to control node
+      ansible.builtin.import_role:
+        name: offline
+        tasks_from: fetch-packages
+      vars:
+        offline_src_dir: "{{ mongodb_offline_target_node_wheels_dir }}/app"
+        offline_dest_dir: "{{ mongodb_offline_control_node_wheels_dir }}/app"

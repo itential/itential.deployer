@@ -1,0 +1,106 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+# Kernel Adjust
+# Memory overcommit must be enabled! Without it, a background save or replication may fail under low memory condition.
+# Being disabled, it can can also cause failures without low memory condition, see https://github.com/jemalloc/jemalloc/issues/1328
+- name: Adjust Memory Overcommit
+  ansible.posix.sysctl:
+    name: vm.overcommit_memory
+    value: 1
+
+# Check if firewalld is running, if it is then open the appropriate ports
+- name: Gather service facts
+  ansible.builtin.service_facts:
+
+- name: Open Redis port on FirewallD Public Zone
+  ansible.posix.firewalld:
+    port: "{{ redis_port }}/tcp"
+    permanent: true
+    state: enabled
+    zone: public
+    immediate: true
+  when:
+    - ansible_facts.services["firewalld.service"] is defined
+    - ansible_facts.services["firewalld.service"].state == "running"
+    - ansible_facts.services["firewalld.service"].status == "enabled"
+
+- name: Open Sentinel port on FirewallD Public Zone
+  ansible.posix.firewalld:
+    port: "{{ redis_sentinel_port }}/tcp"
+    permanent: true
+    state: enabled
+    zone: public
+    immediate: true
+  when:
+    - ansible_facts.services["firewalld.service"] is defined
+    - ansible_facts.services["firewalld.service"].state == "running"
+    - ansible_facts.services["firewalld.service"].status == "enabled"
+    - redis_replication_enabled | bool
+
+- name: Create Redis group
+  ansible.builtin.group:
+    name: "{{ redis_group }}"
+
+- name: Create Redis user
+  ansible.builtin.user:
+    name: "{{ redis_owner }}"
+    group: "{{ redis_group }}"
+    state: present
+
+- name: Create Redis bin directory
+  ansible.builtin.file:
+    state: directory
+    path: "{{ redis_bin_dir }}"
+    owner: "{{ redis_owner }}"
+    group: "{{ redis_group }}"
+    mode: "0755"
+  when: redis_bin_dir != redis_bin_dir_default or redis_install_from_source | bool
+
+- name: Create Redis data directory
+  ansible.builtin.file:
+    state: directory
+    path: "{{ redis_data_dir }}"
+    owner: "{{ redis_owner }}"
+    group: "{{ redis_group }}"
+    mode: "0755"
+    seuser: system_u
+    serole: object_r
+    setype: redis_var_lib_t
+  when: redis_data_dir != redis_data_dir_default or redis_install_from_source | bool
+
+- name: Create Redis log directory
+  ansible.builtin.file:
+    state: directory
+    path: "{{ redis_log_dir }}"
+    owner: "{{ redis_owner }}"
+    group: "{{ redis_group }}"
+    mode: "0755"
+    seuser: system_u
+    serole: object_r
+    setype: redis_log_t
+  when: redis_log_dir != redis_log_dir_default or redis_install_from_source | bool
+
+- name: Create Redis pid directory
+  ansible.builtin.file:
+    state: directory
+    path: "{{ redis_pid_dir }}"
+    owner: "{{ redis_owner }}"
+    group: "{{ redis_group }}"
+    mode: "0755"
+    seuser: system_u
+    serole: object_r
+    setype: redis_var_run_t
+  when: redis_pid_dir != redis_pid_dir_default or redis_install_from_source | bool
+
+- name: Create Redis configuration directory
+  ansible.builtin.file:
+    path: "{{ redis_conf_dir }}"
+    state: directory
+    owner: "{{ redis_owner }}"
+    group: "{{ redis_group }}"
+    mode: "0750"
+    seuser: system_u
+    serole: object_r
+    setype: redis_conf_t
+  when: redis_conf_dir != redis_conf_dir_default or redis_install_from_source | bool

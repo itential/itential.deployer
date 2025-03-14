@@ -489,7 +489,7 @@ dir {{ redis_data_dir }}
 #    and resynchronize with them.
 #
 # replicaof <masterip> <masterport>
-{% if redis_replication %}
+{% if redis_replication_enabled %}
 {%   if groups['redis'] is defined and inventory_hostname in groups['redis'] and inventory_hostname not in groups['redis'][0] %}
 replicaof {{ hostvars[groups['redis'][0]].inventory_hostname }} {{ redis_port }}
 {%   elif groups['redis_secondary'] is defined and inventory_hostname in groups['redis_secondary'] and inventory_hostname not in groups['redis_secondary'][0] %}
@@ -514,7 +514,7 @@ replicaof {{ hostvars[groups['redis_secondary'][0]].inventory_hostname }} {{ red
 #
 # When masteruser is specified, the replica will authenticate against its
 # master using the new AUTH form: AUTH <username> <password>.
-{% if redis_auth and redis_replication %}
+{% if redis_auth_enabled and redis_replication_enabled %}
 masterauth {{ redis_user_repluser_password }}
 masteruser repluser
 {% endif %}
@@ -725,7 +725,7 @@ replica-priority 100
 #
 # By default min-replicas-to-write is set to 0 (feature disabled) and
 # min-replicas-max-lag is set to 10.
-{% if redis_replication | bool %}
+{% if redis_replication_enabled | bool %}
 min-replicas-to-write 1
 {% endif %}
 
@@ -755,7 +755,7 @@ min-replicas-to-write 1
 # There is no need to use both the options if you need to override just
 # the port or the IP address.
 #
-{% if redis_replication | bool %}
+{% if redis_replication_enabled | bool %}
 replica-announce-ip {{ inventory_hostname }}
 replica-announce-port {{ redis_port }}
 {% endif %}
@@ -900,12 +900,12 @@ replica-announce-port {{ redis_port }}
 #
 # For more information about ACL configuration please refer to
 # the Redis web site at https://redis.io/topics/acl
-{% if redis_auth %}
+{% if redis_auth_enabled %}
 user default off
 user admin on allkeys allchannels allcommands >{{ redis_user_admin_password }}
 user itential on allkeys allchannels allcommands -asking -cluster -readonly -readwrite -bgrewriteaof -bgsave -failover -flushall -flushdb -psync -replconf -replicaof -save -shutdown -sync >{{ redis_user_itential_password }}
-user prometheus on -@all +@connection +memory -readonly +strlen +config|get +xinfo +pfcount -quit +zcard +type +xlen -readwrite -command +client -wait +scard +llen +hlen +get +eval +slowlog +cluster|info -hello -echo +info +latency +scan -reset -auth -asking >{{ redis_user_prometheus_password }}
-{%  if redis_replication %}
+user prometheus on -@all +@connection +memory -readonly +strlen +config|get +xinfo +pfcount +zcard +type +xlen -readwrite -command +client -wait +scard +llen +hlen +get +eval +slowlog +cluster|info -hello -echo +info +latency +scan -reset -auth -asking >{{ redis_user_prometheus_password }}
+{%  if redis_replication_enabled %}
 user repluser on allchannels +psync +replconf +ping >{{ redis_user_repluser_password }}
 user sentineluser on allchannels +multi +slaveof +ping +exec +subscribe +config|rewrite +role +publish +info +client|setname +client|kill +script|kill >{{ redis_user_sentineluser_password }}
 {%  endif %}

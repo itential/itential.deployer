@@ -1,0 +1,20 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+# Base directories
+platform_offline_packages_root:
+  "{{ offline_itential_packages_path }}/{{ platform_release }}/platform"
+platform_offline_target_node_root:
+  "{{ offline_target_node_root }}/{{ platform_offline_packages_root }}"
+platform_offline_control_node_root:
+  "{{ offline_control_node_root }}/{{ platform_offline_packages_root }}"
+
+# Target node download directories
+platform_offline_target_node_rpms_dir: "{{ platform_offline_target_node_root }}/rpms"
+platform_offline_target_node_wheels_dir: "{{ platform_offline_target_node_root }}/wheels"
+platform_offline_target_node_adapters_dir: "{{ platform_offline_target_node_root }}/adapters"
+
+# Control node download directories
+platform_offline_control_node_rpms_dir: "{{ platform_offline_control_node_root }}/rpms"
+platform_offline_control_node_wheels_dir: "{{ platform_offline_control_node_root }}/wheels"
+platform_offline_control_node_adapters_dir: "{{ platform_offline_control_node_root }}/adapters"

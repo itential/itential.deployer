@@ -1,0 +1,159 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+
+# Check the state of the MongoDB servers. This might or might not be a replicaset.
+# This might or might not have authorization enabled. This module returns an
+# object that looks like this:
+# {
+#   "auth_enabled": true,
+#   "changed": false,
+#   "failed": false,
+#   "members": [
+#     "example1.host.com:27017",
+#     "example2.host.com:27017",
+#     "example3.host.com:27017"
+#   ],
+#   "primary": "ip-10-0-0-28.ec2.internal:27017",
+#   "replication_enabled": true
+# }
+- name: Discover MongoDB configuration state
+  itential.deployer.mongodb_config_state:
+    login_database: admin
+    login_host: "{{ inventory_hostname }}"
+    login_port: "{{ mongodb_port }}"
+  register: mongodb_state
+  vars:
+    ansible_python_interpreter: "{{ mongodb_python_venv }}/bin/python3"
+
+- name: Print MongoDB configuration state
+  ansible.builtin.debug:
+    msg: "{{ mongodb_state }}"
+
+# Execute the template to apply changes to the mongo.conf for replication
+- name: Create MongoDB config file
+  ansible.builtin.template:
+    src: mongod.conf.j2
+    dest: "{{ mongodb_conf_file }}"
+    owner: "{{ mongodb_owner }}"
+    group: "{{ mongodb_group }}"
+    mode: "0644"
+  when: not mongodb_state.replication_enabled
+  vars:
+    stage: "replication"
+
+- name: Start mongo
+  ansible.builtin.systemd:
+    name: mongod
+    state: restarted
+    enabled: true
+  when: not mongodb_state.replication_enabled
+
+- name: Set empty array of mongo servers
+  ansible.builtin.set_fact:
+    mongodb_servers: []
+  when: not mongodb_state.replication_enabled
+
+# This task should always run, arbiter or not
+- name: Create the replicaset members list (no arbiter)
+  ansible.builtin.set_fact:
+    mongodb_servers: "{{ mongodb_servers + [item + ':' + mongodb_port | string] }}"
+  with_items: "{{ groups.mongodb }}"
+  when:
+    - not mongodb_state.replication_enabled
+    - inventory_hostname in groups.mongodb
+    - groups.mongodb.index(inventory_hostname) == 0
+
+# This task will only run when there is an arbiter defined in the hosts file
+- name: Add the arbiter to the list of servers when there is one
+  ansible.builtin.set_fact:
+    mongodb_servers: "{{ mongodb_servers + [item + ':' + mongodb_port | string] }}"
+  with_items: "{{ groups.mongodb_arbiter }}"
+  when:
+    - not mongodb_state.replication_enabled
+    - inventory_hostname in groups.mongodb
+    - groups.mongodb.index(inventory_hostname) == 0
+    - groups.mongodb_arbiter is defined
+
+- name: Create the replicaset
+  community.mongodb.mongodb_replicaset:
+    arbiter_at_index: "{{ (groups.mongodb_arbiter | default([]) | length > 0) | ternary(mongodb_servers | length - 1, omit) }}"
+    auth_mechanism: "SCRAM-SHA-256"
+    login_user: "{{ (mongodb_state.auth_enabled | bool) | ternary('admin', omit) }}"
+    login_password: "{{ (mongodb_state.auth_enabled | bool) | ternary(mongodb_user_admin_password, omit) }}"
+    login_port: "{{ mongodb_port }}"
+    login_database: admin
+    login_host: "{{ inventory_hostname }}"
+    members: "{{ mongodb_servers }}"
+    replica_set: "{{ mongodb_replset_name }}"
+    validate: true
+  when:
+    - not mongodb_state.replication_enabled
+    - inventory_hostname in groups.mongodb
+    - groups.mongodb.index(inventory_hostname) == 0
+  vars:
+    ansible_python_interpreter: "{{ mongodb_python_venv }}/bin/python3"
+
+- name: Ensure replicaset is stable before continuing
+  community.mongodb.mongodb_status:
+    login_user: "{{ mongodb_state.auth_enabled | ternary('admin', omit) }}"
+    login_password: "{{ mongodb_state.auth_enabled | ternary(mongodb_user_admin_password, omit) }}"
+    login_port: "{{ mongodb_port }}"
+    login_database: admin
+    login_host: "{{ inventory_hostname }}"
+    replica_set: "{{ mongodb_replset_name }}"
+    poll: 3
+    interval: 10
+    validate: minimal
+  register: rs
+  failed_when:
+    - "'Unable to determine if auth is enabled' not in rs.msg"
+    - "'replicaset is in a converged state' not in rs.msg"
+  when:
+    - not mongodb_state.replication_enabled
+    - inventory_hostname in groups.mongodb
+  vars:
+    ansible_python_interpreter: "{{ mongodb_python_venv }}/bin/python3"
+
+# Starting in MongoDB 5.0, the implicit default write concern is w: majority.
+# However, special considerations are made for deployments containing arbiters:
+# The voting majority of a replica set is 1 plus half the number of voting
+# members, rounded down. If the number of data-bearing voting members is not
+# greater than the voting majority, the default write concern is { w: 1 }.
+# In all other scenarios, the default write concern is { w: "majority" }.
+# Specifically, MongoDB uses the following formula to determine the default
+# write concern:
+#
+#   if [ (#arbiters > 0) AND (#non-arbiters <= majority(#voting-nodes)) ]
+#     defaultWriteConcern = { w: 1 }
+#   else
+#     defaultWriteConcern = { w: "majority" }
+#
+# When there are 2 non-arbiters and 1 arbiter for a total of 3 voting nodes,
+# the majority of voting nodes (1 plus half of 3, rounded down) is 2. Therefore
+# The number of non-arbiters (2) is equal to the majority of voting nodes (2),
+# resulting in an implicit write concern of { w: 1 }. When there are 4
+# non-arbiters and 1 arbiter for a total of 5 voting nodes, the majority of
+# voting nodes (1 plus half of 5, rounded down) is 3. The number of non-arbiters
+# (4) is greater than the majority of voting nodes (3), resulting in an implicit
+# write concern of { w: "majority" }.
+#
+# Thus, conditionally run the following command to force the appropriate
+# writeConcern when there is 1 arbiter and 2 non-arbiters.
+- name: Adjust the default writeConcern if there are arbiters
+  community.mongodb.mongodb_shell:
+    mongo_cmd: auto
+    login_user: "{{ mongodb_state.auth_enabled | ternary('admin', omit) }}"
+    login_password: "{{ mongodb_state.auth_enabled | ternary(mongodb_user_admin_password, omit) }}"
+    login_port: "{{ mongodb_port }}"
+    login_database: admin
+    login_host: "{{ inventory_hostname }}"
+    eval: db.adminCommand({"setDefaultRWConcern":1,"defaultWriteConcern":{"w":1}})
+  when:
+    - not mongodb_state.replication_enabled
+    - inventory_hostname in groups.mongodb
+    - inventory_hostname == mongodb_state.primary
+    - groups.mongodb | length < 3
+    - groups.mongodb_arbiter | default([]) | length > 0
+  vars:
+    ansible_python_interpreter: "{{ mongodb_python_venv }}/bin/python3"

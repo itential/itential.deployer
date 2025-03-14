@@ -4,24 +4,24 @@
 
 - name: Copy the cert file
   ansible.builtin.copy:
-    src: "{{ iag_ssl_cert_src }}"
-    dest: "{{ iag_ssl_cert_dest }}"
+    src: "{{ gateway_ssl_cert_src }}"
+    dest: "{{ gateway_ssl_cert_dest }}"
     mode: "0400"
-    owner: "{{ iag_user }}"
-    group: "{{ iag_group }}"
+    owner: "{{ gateway_user }}"
+    group: "{{ gateway_group }}"
 
 - name: Copy the key file
   ansible.builtin.copy:
-    src: "{{ iag_ssl_key_src }}"
-    dest: "{{ iag_ssl_key_dest }}"
+    src: "{{ gateway_ssl_key_src }}"
+    dest: "{{ gateway_ssl_key_dest }}"
     mode: "0400"
-    owner: "{{ iag_user }}"
-    group: "{{ iag_group }}"
+    owner: "{{ gateway_user }}"
+    group: "{{ gateway_group }}"
 
 - name: Copy the root CA file
   ansible.builtin.copy:
-    src: "{{ iag_ssl_rootca_src }}"
-    dest: "{{ iag_ssl_rootca_dest }}"
+    src: "{{ gateway_ssl_rootca_src }}"
+    dest: "{{ gateway_ssl_rootca_dest }}"
     mode: "0400"
-    group: "{{ iag_group }}"
-    owner: "{{ iag_user }}"
+    group: "{{ gateway_group }}"
+    owner: "{{ gateway_user }}"

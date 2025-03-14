@@ -1,47 +1,12 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Install RabbitMQ exporter
-  hosts: rabbitmq, rabbitmq_secondary
-  become: true
-  roles:
-    # Pull in the common vars
-    - role: itential.deployer.common_vars
-      tags: always
-  tasks:
-    # RabbitMQ has builtin Prometheus support, just enable the plugin.
-    # https://www.rabbitmq.com/docs/prometheus#rabbitmq-configuration
-    - name: Enable the RabbitMQ Prometheus plugin
-      ansible.builtin.command:
-        cmd: rabbitmq-plugins enable rabbitmq_prometheus
-      register: cmdoutput
-      changed_when: cmdoutput.rc != 0
-      tags: rabbitmq_exporter_install
-
-    - name: Make custom configuration changes
-      tags: rabbitmq_exporter_custom_config
-      block:
-        - name: Gather service facts
-          ansible.builtin.service_facts:
-
-        - name: Open Port on FirewallD Public Zone
-          ansible.posix.firewalld:
-            port: "{{ prometheus_rabbitmq_exporter_web_listen_port }}/tcp"
-            permanent: true
-            state: enabled
-            zone: public
-            immediate: true
-          when:
-            - ansible_facts.services["firewalld.service"] is defined
-            - ansible_facts.services["firewalld.service"].state == "running"
-            - ansible_facts.services["firewalld.service"].status == "enabled"
-
 - name: Install Redis exporter
-  hosts: redis, redis_secondary
+  hosts: redis*
   become: true
   roles:
     # Pull in the common vars
-    - role: itential.deployer.common_vars
+    - role: itential.deployer.common
       tags: always
 
     - role: prometheus.prometheus.redis_exporter
@@ -55,18 +20,9 @@
         - name: Gather service facts
           ansible.builtin.service_facts:
 
-        - name: Default the Redis exporter listen port
-          ansible.builtin.set_fact:
-            redis_exporter_listen_port: "{{ prometheus_redis_exporter_web_listen_port }}"
-
-        - name: Set the Redis exporter listen port from inventory
-          ansible.builtin.set_fact:
-            redis_exporter_listen_port: "{{ hostvars[inventory_hostname].redis_exporter_web_listen_address.split(':') | last }}"
-          when: "'redis_exporter_web_listen_address' in hostvars[inventory_hostname]"
-
         - name: Open Port on FirewallD Public Zone
           ansible.posix.firewalld:
-            port: "{{ redis_exporter_listen_port }}/tcp"
+            port: "{{ redis_exporter_web_listen_address.split(':') | last }}/tcp"
             permanent: true
             state: enabled
             zone: public
@@ -77,11 +33,11 @@
             - ansible_facts.services["firewalld.service"].status == "enabled"
 
 - name: Install MongoDB exporter
-  hosts: mongodb, mongodb_arbiter, mongodb_secondary
+  hosts: mongodb*
   become: true
   roles:
     # Pull in the common vars
-    - role: itential.deployer.common_vars
+    - role: itential.deployer.common
       tags: always
 
     - role: prometheus.prometheus.mongodb_exporter
@@ -97,32 +53,23 @@
             path: /etc/systemd/system/mongodb_exporter.service
             insertafter: '^\[Service\]'
             line: 'Environment="MONGODB_USER=admin"'
-          when: mongodb_auth | bool
+          when: mongodb_auth_enabled | bool
           notify: Restart mongodb_exporter
 
         - name: Add the MongoDB password to the systemd service file
           ansible.builtin.lineinfile:
             path: /etc/systemd/system/mongodb_exporter.service
             insertafter: 'Environment="MONGODB_USER=admin"'
-            line: 'Environment="MONGODB_PASSWORD={{ mongo_user_admin_password }}"'
-          when: mongodb_auth | bool
+            line: 'Environment="MONGODB_PASSWORD={{ mongodb_exporter_admin_password }}"'
+          when: mongodb_auth_enabled | bool
           notify: Restart mongodb_exporter
 
         - name: Gather service facts
           ansible.builtin.service_facts:
 
-        - name: Default the MongoDB exporter listen port
-          ansible.builtin.set_fact:
-            mongodb_exporter_listen_port: "{{ prometheus_mongodb_exporter_web_listen_port }}"
-
-        - name: Set the MongoDB exporter listen port from inventory
-          ansible.builtin.set_fact:
-            mongodb_exporter_listen_port: "{{ hostvars[inventory_hostname].mongodb_exporter_web_listen_address.split(':') | last }}"
-          when: "'mongodb_exporter_web_listen_address' in hostvars[inventory_hostname]"
-
         - name: Open Port on FirewallD Public Zone
           ansible.posix.firewalld:
-            port: "{{ mongodb_exporter_listen_port }}/tcp"
+            port: "{{ mongodb_exporter_web_listen_address.split(':') | last }}/tcp"
             permanent: true
             state: enabled
             zone: public
@@ -133,11 +80,11 @@
             - ansible_facts.services["firewalld.service"].status == "enabled"
 
 - name: Install node exporter
-  hosts: all,!prometheus,!grafana
+  hosts: redis*, mongodb*, platform, gateway
   become: true
   roles:
     # Pull in the common vars
-    - role: itential.deployer.common_vars
+    - role: itential.deployer.common
       tags: always
 
     - role: prometheus.prometheus.node_exporter
@@ -149,18 +96,9 @@
         - name: Gather service facts
           ansible.builtin.service_facts:
 
-        - name: Default the node exporter listen port
-          ansible.builtin.set_fact:
-            node_exporter_listen_port: "{{ prometheus_node_exporter_web_listen_port }}"
-
-        - name: Set the node exporter listen port from inventory
-          ansible.builtin.set_fact:
-            node_exporter_listen_port: "{{ hostvars[inventory_hostname].node_exporter_web_listen_address.split(':') | last }}"
-          when: "'node_exporter_web_listen_address' in hostvars[inventory_hostname]"
-
         - name: Open Port on FirewallD Public Zone
           ansible.posix.firewalld:
-            port: "{{ node_exporter_listen_port }}/tcp"
+            port: "{{ node_exporter_web_listen_address.split(':') | last }}/tcp"
             permanent: true
             state: enabled
             zone: public
@@ -175,7 +113,7 @@
   become: true
   roles:
     # Pull in the common vars
-    - role: itential.deployer.common_vars
+    - role: itential.deployer.common
       tags: always
 
     - role: prometheus.prometheus.process_exporter
@@ -187,18 +125,9 @@
         - name: Gather service facts
           ansible.builtin.service_facts:
 
-        - name: Default the process exporter listen port
-          ansible.builtin.set_fact:
-            process_exporter_listen_port: "{{ prometheus_process_exporter_web_listen_port }}"
-
-        - name: Set the process exporter listen port from inventory
-          ansible.builtin.set_fact:
-            process_exporter_listen_port: "{{ hostvars[inventory_hostname].process_exporter_web_listen_address.split(':') | last }}"
-          when: "'process_exporter_web_listen_address' in hostvars[inventory_hostname]"
-
         - name: Open Port on FirewallD Public Zone
           ansible.posix.firewalld:
-            port: "{{ process_exporter_listen_port }}/tcp"
+            port: "{{ process_exporter_web_listen_address.split(':') | last }}/tcp"
             permanent: true
             state: enabled
             zone: public

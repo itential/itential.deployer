@@ -1,0 +1,52 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+mongodb_version_default:
+  "8": 8.0
+  "9": 8.0
+  "2023": 8.0
+
+mongodb_packages_default:
+  "8":
+    - mongodb-org
+  "9":
+    - mongodb-org
+  "2023":
+    - mongodb-org
+    - mongodb-mongosh-shared-openssl3
+
+mongodb_package_dependencies_default:
+  "8":
+    - selinux-policy
+    - selinux-policy-targeted
+    - audit
+    - tuned
+  "9":
+    - selinux-policy
+    - selinux-policy-targeted
+    - audit
+    - tuned
+  "2023":
+    - selinux-policy
+    - selinux-policy-targeted
+    - audit
+
+# MongoDB doesn't require python, pip, or pymongo but the community.mongodb collection does.
+mongodb_python_packages_default:
+  "8":
+    - python39
+    - python39-pip
+  "9":
+    - python3
+    - python3-pip
+  "2023":
+    - python3
+    - python3-pip
+
+mongodb_gpgkey_url_default:
+  "8":
+    - https://www.mongodb.org/static/pgp/server-{{ mongodb_version }}.asc
+  "9":
+    - https://www.mongodb.org/static/pgp/server-{{ mongodb_version }}.asc
+  "2023":
+    - https://pgp.mongodb.com/server-{{ mongodb_version }}.asc

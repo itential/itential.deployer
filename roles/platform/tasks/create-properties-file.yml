@@ -1,43 +1,47 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Create the default Itential properties.json file
+
+# TODO: Do we still need to support the primary/secondary concept?
+
+- name: Create the platform.properties file
   ansible.builtin.template:
-    src: "{{ iap_release }}-properties.j2"
-    dest: "{{ iap_install_dir }}/current/properties.json"
+    src: "{{ platform_release }}-properties.j2"
+    dest: "{{ platform_config_dir }}/platform.properties"
     mode: "0600"
-    owner: "{{ iap_user }}"
-    group: "{{ iap_group }}"
+    owner: "{{ platform_user }}"
+    group: "{{ platform_group }}"
     lstrip_blocks: true
+    backup: true
   vars:
     profile_name: Local_AAA
-  when:
-    - groups["platform_secondary"] is not defined or groups["platform_secondary"] | length < 1
+  when: groups["platform_secondary"] is not defined or groups["platform_secondary"] | length < 1
 
 - name: Create the Itential properties.json files for advanced prod builds
-  when:
-    - groups["platform_secondary"] is defined and groups["platform_secondary"] | length > 0
+  when: groups["platform_secondary"] is defined and groups["platform_secondary"] | length > 0
   block:
-    - name: Create the default Itential properties.json file for the primary
+    - name: Create the platform.properties file for the primary
       ansible.builtin.template:
-        src: "{{ iap_release }}-properties.j2"
-        dest: "{{ iap_install_dir }}/current/properties.json"
+        src: "{{ platform_release }}-properties.j2"
+        dest: "{{ platform_config_dir }}/platform.properties"
         mode: "0600"
-        owner: "{{ iap_user }}"
-        group: "{{ iap_group }}"
+        owner: "{{ platform_user }}"
+        group: "{{ platform_group }}"
         lstrip_blocks: true
+        backup: true
       vars:
         profile_name: Primary_Local_AAA
       when: inventory_hostname in groups['platform']
 
-    - name: Create the Itential properties.json file for the secondary
+    - name: Create the platform.properties file for the secondary
       ansible.builtin.template:
-        src: "{{ iap_release }}-properties.j2"
-        dest: "{{ iap_install_dir }}/current/properties.json"
+        src: "{{ platform_release }}-properties.j2"
+        dest: "{{ platform_config_dir }}/platform.properties"
         mode: "0600"
-        owner: "{{ iap_user }}"
-        group: "{{ iap_group }}"
+        owner: "{{ platform_user }}"
+        group: "{{ platform_group }}"
         lstrip_blocks: true
+        backup: true
       vars:
         profile_name: Secondary_Local_AAA
       when: inventory_hostname in groups['platform_secondary']

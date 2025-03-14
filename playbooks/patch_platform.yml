@@ -1,0 +1,14 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+### Itential Platform
+- name: Patch Itential Platform
+  hosts: platform
+  become: true
+  roles:
+    - role: itential.deployer.common
+  tasks:
+    - name: Patch Itential Platform
+      ansible.builtin.import_role:
+        name: itential.deployer.platform
+        tasks_from: upgrade-platform

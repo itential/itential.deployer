@@ -1,15 +1,20 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Validate src_adapters_path is set
-  ansible.builtin.fail:
-    msg: "src_adapters_path is not set"
-  when: src_adapters_path is not defined
+- name: Validate offline_src_adapters_path is set
+  ansible.builtin.assert:
+    that: offline_src_adapters_path is defined
+    msg: "offline_src_adapters_path must be set"
 
-- name: Validate dest_adapters_path is set
-  ansible.builtin.fail:
-    msg: "dest_adapters_path is not set"
-  when: dest_adapters_path is not defined
+- name: Validate offline_dest_adapters_path is set
+  ansible.builtin.assert:
+    that: offline_dest_adapters_path is defined
+    msg: "offline_dest_adapters_path must be set"
+
+- name: Validate adapter_name is set
+  ansible.builtin.assert:
+    that: adapter_name is defined
+    msg: "adapter_name must be set"
 
 - name: Create temporary working directory
   ansible.builtin.tempfile:
@@ -21,7 +26,7 @@
     src: "{{ item }}"
     dest: "{{ install_adapters_temp_dir.path }}"
     mode: '0644'
-  with_fileglob: "{{ src_adapters_path }}/*{{ adapter_name }}*.tgz"
+  with_fileglob: "{{ offline_src_adapters_path }}/*{{ adapter_name }}*.tgz"
 
 - name: Find adapter on target node
   ansible.builtin.find:
@@ -31,14 +36,14 @@
 
 - name: Validate adapter exists
   ansible.builtin.fail:
-    msg: "{{ adapter_name }} does not exist in {{ src_adapters_path }}, re-run download"
+    msg: "{{ adapter_name }} does not exist in {{ offline_src_adapters_path }}, re-run download"
   when: adapter_list.files | length == 0
 
 - name: Create adapter destination
   ansible.builtin.file:
-    name: "{{ dest_adapters_path }}/{{ adapter_name }}"
-    owner: "{{ iap_user }}"
-    group: "{{ iap_group }}"
+    name: "{{ offline_dest_adapters_path }}/{{ adapter_name }}"
+    owner: "{{ platform_user }}"
+    group: "{{ platform_group }}"
     mode: '0775'
     state: directory
 
@@ -48,7 +53,7 @@
 - name: Extract adapter
   ansible.builtin.unarchive:
     src: "{{ adapter_list.files[0].path }}"
-    dest: "{{ dest_adapters_path }}/"
+    dest: "{{ offline_dest_adapters_path }}/"
     remote_src: true
     extra_opts:
       - --transform

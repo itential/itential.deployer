@@ -13,14 +13,14 @@
     msg: "Deployer does not support installing on OS version {{ ansible_distribution_major_version }}!"
   when: invalid_os_release is defined
 
-- name: Include OS specific tasks (online)
+- name: Include OS specific tasks
   ansible.builtin.include_tasks: "{{ ansible_os_family.lower() }}-online.yml"
   when:
     - not release_file.stat.exists
-    - not offline_install
+    - not offline_install_enabled
 
 - name: Include OS specific tasks (offline)
   ansible.builtin.include_tasks: "{{ ansible_os_family.lower() }}-offline.yml"
   when:
     - not release_file.stat.exists
-    - offline_install
+    - offline_install_enabled

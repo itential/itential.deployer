@@ -12,20 +12,21 @@
     dest: "{{ install_collections_temp_dir.path }}/{{ item | basename }}"
     mode: '0644'
   with_fileglob:
-    - "{{ ansible_collections_download_dir_control_node }}/*.tar.gz"
-    - "{{ ansible_collections_download_dir_control_node }}/requirements.yml"
+    - "{{ gateway_offline_control_node_collections_dir }}/*.tar.gz"
+    - "{{ gateway_offline_control_node_collections_dir }}/requirements.yml"
+  register: copy_result
 
 - name: Install collections
   ansible.builtin.command:
-    cmd: "ansible-galaxy collection install -p {{ iag_ansible_collections_path }} -r requirements.yml"
+    cmd: "ansible-galaxy collection install -p {{ gateway_ansible_collections_path }}
+         -r requirements.yml"
     chdir: "{{ install_collections_temp_dir.path }}"
   register: install_result
   changed_when: '"Nothing to do" not in install_result.stdout'
   failed_when: install_result.failed
   when:
-    - iag_ansible_collections is defined
-    - iag_ansible_collections is iterable
-    - iag_ansible_collections | length > 0
+    - copy_result.changed
+    - not copy_result.skipped
 
 - name: Remove temporary working directory
   ansible.builtin.file:

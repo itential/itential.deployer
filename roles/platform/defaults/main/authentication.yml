@@ -1,0 +1,27 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+# If true, logs out existing sessions for a user when they log in with a new session.
+platform_auth_unique_sessions_enabled: false
+
+# Members of these groups will be implicitly assigned with admin permissions.
+platform_auth_admin_groups:
+  # - { "provenance": "Local AAA", "group": "pronghorn_admin" }
+
+# Enables a AAA adapter to custom build the principal object for a user with a "buildPrincipal" method.
+platform_auth_broker_principal_enabled: false
+
+# The name of the cookie used for a user session.
+platform_auth_session_cookie_name: token
+
+# The time in minutes before a user session expires.
+platform_auth_session_ttl: 60
+
+# Enables a default user to be used for login when SSO is not configured and no AAA Adapter exists.
+platform_default_user_enabled: true
+
+# The username of the default user.
+platform_default_user_username: "admin"
+
+# The password of the default user.
+platform_default_user_password: "admin"

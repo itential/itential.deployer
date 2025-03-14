@@ -1,13 +1,16 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
+
+# TODO: Remove this file once the RPM is creating the directories correctly
+
 - name: Create itential group
   ansible.builtin.group:
-    name: "{{ iap_group }}"
+    name: "{{ platform_group }}"
     state: present
 
 - name: Create itential user
   ansible.builtin.user:
-    name: "{{ iap_user }}"
-    group: "{{ iap_group }}"
+    name: "{{ platform_user }}"
+    group: "{{ platform_group }}"
     state: present

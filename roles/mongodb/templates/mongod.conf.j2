@@ -1,92 +1,105 @@
+{%- set authMode = "disabled" %}
+{%- set tlsMode = "disabled" %}
+{%- if (stage != "initialize" and stage != "replication") and mongodb_auth_enabled | bool %}
+  {%- set authMode = "enabled" %}
+{%- endif %}
+{%- if stage == "tls" and mongodb_tls_enabled | bool %}
+  {%- set tlsMode = "requireTLS" %}
+{%- endif %}
 # mongod.conf
 
-# for documentation of all options, see:
+# For documentation of all options, see:
 # http://docs.mongodb.org/manual/reference/configuration-options/
-# where to write logging data.
+
+# Where to write logging data.
 systemLog:
   destination: file
   logAppend: true
-  path: {{ mongo_log_dir }}/mongod.log
+  path: {{ mongodb_log_dir }}/mongod.log
 
 # Where and how to store data.
 storage:
   # The directory where the mongod instance stores its data.
-  dbPath: {{ mongo_data_dir }}
-
-{% if (mongodb_version is not defined) or (mongodb_version | float < 7.0) %}
+  dbPath: {{ mongodb_data_dir }}
+{% if (mongodb_version is not defined) or (mongodb_version | float < 7.0) -%}
   # Enable or disable the durability journal to ensure data files remain
   # valid and recoverable.
   journal:
     enabled: true
-{% endif %}
+{%- endif %}
   # The storage engine for the mongod database.
   engine: wiredTiger
 
-{% if (mongodb_version is not defined) or (mongodb_version | float < 5.0) %}
+{% if (mongodb_version is not defined) or (mongodb_version | float < 5.0) -%}
 # How the process runs
 processManagement:
   fork: true
   pidFilePath: /var/run/mongodb/mongod.pid
-{% endif %}
+{%- endif -%}
 
 # Security
 security:
-  authorization: disabled
-  
+  authorization: {{ authMode }}
+{% if (stage != "initialize" and stage != "replication") and mongodb_auth_enabled | bool and mongodb_replication_enabled | bool %}
   # The path to a key file that stores the shared secret that MongoDB
   # instances use to authenticate to each other in a sharded cluster
   # or replica set. Not required for standalone instance.
-  #keyFile: /etc/ssl/
+  keyFile: {{ mongodb_auth_keyfile_destination }}
+{% endif %}
 
 # Network Interfaces & TLS Settings
 net:
   # The TCP port on which the MongoDB instance listens for client connections.
-  port: {{ mongo_port }}
+  port: {{ mongodb_port }}
   ipv6: {{ mongodb_bind_ipv6 | to_nice_json }}
-  
+
   # The hostnames and/or IP addresses and/or full Unix domain socket paths on
   # which mongos or mongod should listen for client connections. You may attach
   # mongos or mongod to any interface. To bind to multiple addresses, enter a
   # list of comma-separated values.
   bindIp: {{ mongodb_bind_ipv6 | ternary('::1, ', None) }}{{ mongodb_bind_addrs }}, {{ inventory_hostname }}
-  
-  tls:
-    mode: disabled
-  
-    # The .pem file that contains both the TLS certificate and key.
-    #certificateKeyFile: /etc/ssl/mongo-certificate.pem
-  
-    # The .pem file that contains the root certificate chain from the
-    # Certificate Authority. Specify the file name of the .pem file
-    # using relative or absolute paths.
-    #CAFile: /etc/ssl/mongo-rootCA.pem
-  
-    # For clients that do not present certificates, mongod bypasses
-    # TLS/SSL certificate validation when establishing the connection.
-    #allowConnectionsWithoutCertificates: true
-  
-    # Enable or disable the validation checks for TLS certificates on
-    # other servers in the cluster and allows the use of invalid
-    # certificates to connect.
-    #allowInvalidCertificates: true
-  
-    # When net.tls.allowInvalidHostnames is true, MongoDB disables the
-    # validation of the hostnames in TLS certificates, allowing mongod
-    # to connect to MongoDB instances if the hostname their certificates
-    # do not match the specified hostname.
-    #allowInvalidHostnames: true
-  
-  # Specifies the default compressor(s) to use for communication between this 
-  # mongod or mongos instance and: other members of the deployment if the 
-  # instance is part of a replica set or a sharded cluster, mongosh, drivers 
-  # that support the OP_COMPRESSED message format. MongoDB supports the following 
-  # compressors: snappy, zlib, zstd. To disable network compression, set the 
+
+  # Specifies the default compressor(s) to use for communication between this
+  # mongod or mongos instance and other members of the deployment if the
+  # instance is part of a replica set or a sharded cluster, mongosh, drivers
+  # that support the OP_COMPRESSED message format. MongoDB supports the following
+  # compressors: snappy, zlib, zstd. To disable network compression, set the
   # value to disabled.
   compression:
     compressors: disabled
 
+  tls:
+    mode: {{ tlsMode }}
+
+{% if stage == "tls" and mongodb_tls_enabled | bool %}
+    # The .pem file that contains both the TLS certificate and key.
+    certificateKeyFile: {{ mongodb_cert_keyfile_destination }}
+
+    # The .pem file that contains the root certificate chain from the
+    # Certificate Authority. Specify the file name of the .pem file
+    # using relative or absolute paths.
+    CAFile: {{ mongodb_root_ca_file_destination }}
+
+    # For clients that do not present certificates, mongod bypasses
+    # TLS/SSL certificate validation when establishing the connection.
+    allowConnectionsWithoutCertificates: true
+
+    # Enable or disable the validation checks for TLS certificates on
+    # other servers in the cluster and allows the use of invalid
+    # certificates to connect.
+    allowInvalidCertificates: true
+
+    # When net.tls.allowInvalidHostnames is true, MongoDB disables the
+    # validation of the hostnames in TLS certificates, allowing mongod
+    # to connect to MongoDB instances if the hostname their certificates
+    # do not match the specified hostname.
+    allowInvalidHostnames: true
+{% endif %}
+
+{% if stage != "initialize" and mongodb_replication_enabled | bool %}
 # Replication Settings
-#replication:
+replication:
   # The name of the replica set that the mongod is part of. All hosts
   # in the replica set must have the same set name.
-  #replSetName: rs0
+  replSetName: {{ mongodb_replset_name }}
+{% endif %}

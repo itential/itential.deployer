@@ -1,0 +1,56 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+
+# Default feature flags
+# Enable everything by default, override in the hosts file if required
+gateway_enable_ansible: true
+gateway_enable_nornir: true
+gateway_enable_netmiko: true
+gateway_enable_scripts: true
+gateway_enable_netconf: true
+gateway_enable_httpreq: true
+gateway_enable_python_venv: true
+gateway_enable_grpc: true
+gateway_enable_git: true
+
+# Location of IAG assets
+gateway_install_dir: /opt/automation-gateway
+
+# Location of IAG Ansible collections
+gateway_ansible_collections_path: "{{ gateway_install_dir }}/ansible/collections"
+
+# Location of IAG data
+gateway_data_dir: /var/lib/automation-gateway
+
+# Location of IAG logs
+gateway_log_dir: /var/log/automation-gateway
+
+# Default port
+gateway_port: 8083
+
+# location of IAG config file
+gateway_properties_location: /etc/automation-gateway
+
+gateway_user: itential
+gateway_group: itential
+
+# Default HTTPS/SSL settings
+gateway_https: false
+gateway_https_port: 8443
+gateway_ssl_copy_certs: true
+gateway_ssl_dir: "{{ gateway_install_dir }}/conf/certs"
+gateway_ssl_cert_src: server.crt
+gateway_ssl_cert_dest: "{{ gateway_ssl_dir }}/{{ gateway_ssl_cert_src }}"
+gateway_ssl_key_src: server.key
+gateway_ssl_key_dest: "{{ gateway_ssl_dir }}/{{ gateway_ssl_key_src }}"
+gateway_ssl_rootca_src: rootCA.crt
+gateway_ssl_rootca_dest: "{{ gateway_ssl_dir }}/{{ gateway_ssl_rootca_src }}"
+gateway_tlsv1_2: false
+
+# The number of http server threads for handling requests
+gateway_http_server_threads: "{{ ansible_processor_cores * 4 }}"
+
+# Python virtual environment settings
+gateway_venv_name: venv
+gateway_python_venv: "{{ gateway_install_dir }}/{{ gateway_venv_name }}"

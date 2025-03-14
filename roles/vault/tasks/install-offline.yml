@@ -1,0 +1,9 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Install vault rpms
+  ansible.builtin.import_role:
+    name: offline
+    tasks_from: install-rpms
+  vars:
+    offline_rpms_path: "{{ vault_offline_control_node_rpms_dir }}"

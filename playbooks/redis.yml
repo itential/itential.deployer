@@ -7,7 +7,7 @@
   become: true
   roles:
     # Pull in the common vars
-    - role: itential.deployer.common_vars
+    - role: itential.deployer.common
 
     # Perform a base installation of Redis and optionally configure authorization and replication
     - role: itential.deployer.redis
