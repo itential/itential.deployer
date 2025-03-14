@@ -214,7 +214,7 @@ the required repository or download the packages.
 
 | Component | Location | Protocol | Notes |
 | :-------- | :------- | :------- | :---- |
-| Redis | <http://rpms.remirepo.net> | https | When installing Redis from the Remi repository or when installing on Redhat/Rocky 8+ |
+| Redis | <http://rpms.remirepo.net> | https | When installing Redis from the Remi repository |
 | Redis | <http://dl.fedoraproject.org> | https | When installing Redis from the Remi repository |
 | Redis | <http://github.com> | https | When installing Redis from source |
 | MongoDB | <rhttp://epo.mongodb.org> | https | |
