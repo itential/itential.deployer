@@ -450,8 +450,8 @@ Next, copy the files downloaded in the previous step to the `files` subdirectory
 
 ```bash
 cd <WORKING-DIR>/files
-cp ~/Downloads/itential-premium_2023.1.1.linux.x86_64.bin .
-cp ~/Downloads/automation_gateway-3.198.19+2023.1.0-py3-none-any.whl .
+cp ~/Downloads/itential*.rpm .
+cp ~/Downloads/automation_gateway*.whl .
 ```
 
 #### Create a Symlink to the Files Directory
@@ -788,10 +788,8 @@ all:
         platform_packages:
           - itential-platform-6.0.0-1.noarch.rpm
         # MongoDB config
-        platform_mongo_auth_enabled: true
         platform_mongo_url: mongodb://itential:itential@mongodb1.host.com:27017,mongodb2.host.com:27017,mongodb3.host.com:27017/itential?replicaSet=rs0
         # Redis config
-        platform_redis_auth_enabled: true
         platform_redis_sentinels:
           - host: redis1.host.com
             port: 26379
@@ -830,7 +828,6 @@ all:
         platform_mongo_auth_enabled: true
         platform_mongo_url: <a-valid-mongo-connection-string>
         # Redis config
-        platform_redis_auth_enabled: true
         platform_redis_host: <The-FQDN-to-the-Redis-service>
         platform_redis_port: 6379
         platform_redis_username: itential
@@ -903,7 +900,6 @@ all:
         platform_mongo_auth_enabled: true
         platform_mongo_url: mongodb://itential:itential@datacenter1.mongodb1.host.com:27017,datacenter1.mongodb2.host.com:27017,datacenter2.mongodb3.host.com:27017,datacenter2.mongodb4.host.com:27017,datacenter3.mongodb-arbiter.host.com:27017/itential?replicaset=rs0
         # Redis config
-        platform_redis_auth_enabled: true
         platform_redis_sentinel_username: itential
         platform_redis_sentinel_password: <super-secret-password>
         platform_redis_sentinels:
@@ -927,7 +923,6 @@ all:
         platform_mongo_auth_enabled: true
         platform_mongo_url: mongodb://itential:itential@datacenter1.mongodb1.host.com:27017,datacenter1.mongodb2.host.com:27017,datacenter2.mongodb3.host.com:27017,datacenter2.mongodb4.host.com:27017,datacenter3.mongodb-arbiter.host.com:27017/itential?replicaset=rs0
         # Redis config
-        platform_redis_auth_enabled: true
         platform_redis_sentinel_username: itential
         platform_redis_sentinel_password: <super-secret-password>
         platform_redis_sentinels:
