@@ -29,7 +29,7 @@
 
     - name: SELinux - Create a list of policies that have already been installed
       ansible.builtin.set_fact:
-        installed_policy_files: "{{ installed_policy_files | default([]) + [(item.item)] }}"
+        installed_policy_files: "{{ installed_policy_files | default([]) + [item.item] }}"
       with_items: "{{ installed_result.results }}"
       when: item.rc == 0
 
