@@ -121,8 +121,13 @@
 
         - name: Install collections
           ansible.builtin.command:
-            cmd: "ansible-galaxy collection install -p {{ gateway_ansible_collections_path }}
-                 {{  gateway_ansible_collections | join(' ') }}"
+            argv:
+              - "{{ gateway_install_dir }}/venv/bin/ansible-galaxy"
+              - collection
+              - install
+              - -p
+              - "{{ gateway_ansible_collections_path }}"
+              - "{{ gateway_ansible_collections | join(' ') }}"
           register: install_result
           changed_when: '"Nothing to do" not in install_result.stdout'
           failed_when: install_result.failed
