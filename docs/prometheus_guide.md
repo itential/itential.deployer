@@ -15,7 +15,7 @@ These are optional playbooks and roles and are not required for operation of the
 
 In order to run the Prometheus playbooks and roles, the `prometheus.prometheus` collection must be
 installed manually. It does not get installed automatically when the `itential.deployer` collection
-is installed.
+is installed. Also, this playbook requires prometheus version >= 0.22.0.
 
 ```bash
 ansible-galaxy collection install prometheus.prometheus
