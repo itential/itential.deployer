@@ -444,3 +444,9 @@ with the `platform_app_artifact` tag:
 ```bash
 ansible-playbook itential.deployer.platform -i <inventory> --tags platform_app_artifact
 ```
+
+To regenerate the platform.properties file run the platform role with the `configure_platform` tag:
+
+```bash
+ansible-playbook itential.deployer.platform -i <inventory> --tags configure_platform
+```

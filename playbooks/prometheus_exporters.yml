@@ -48,21 +48,23 @@
     - name: Make custom configuration changes
       tags: mongodb_exporter_custom_config
       block:
-        - name: Add the MongoDB user to the systemd service file
-          ansible.builtin.lineinfile:
-            path: /etc/systemd/system/mongodb_exporter.service
-            insertafter: '^\[Service\]'
-            line: 'Environment="MONGODB_USER=admin"'
-          when: mongodb_auth_enabled | bool
-          notify: Restart mongodb_exporter
 
-        - name: Add the MongoDB password to the systemd service file
-          ansible.builtin.lineinfile:
-            path: /etc/systemd/system/mongodb_exporter.service
-            insertafter: 'Environment="MONGODB_USER=admin"'
-            line: 'Environment="MONGODB_PASSWORD={{ mongodb_exporter_admin_password }}"'
-          when: mongodb_auth_enabled | bool
+        - name: Add MongoDB authentication properties to MongoDB exporter
+          when: mongodb_exporter_admin_password is defined
           notify: Restart mongodb_exporter
+          block:
+
+            - name: Add the MongoDB user to the systemd service file
+              ansible.builtin.lineinfile:
+                path: /etc/systemd/system/mongodb_exporter.service
+                insertafter: '^\[Service\]'
+                line: 'Environment="MONGODB_USER=admin"'
+
+            - name: Add the MongoDB password to the systemd service file
+              ansible.builtin.lineinfile:
+                path: /etc/systemd/system/mongodb_exporter.service
+                insertafter: 'Environment="MONGODB_USER=admin"'
+                line: 'Environment="MONGODB_PASSWORD={{ mongodb_exporter_admin_password }}"'
 
         - name: Gather service facts
           ansible.builtin.service_facts:
