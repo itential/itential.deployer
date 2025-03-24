@@ -284,7 +284,7 @@ role_path:
 # Path(s) to customized roles that extend device support of the Itential roles found in the release,
 # i.e., itential_cli, itential_get_config.
 extended_device_role_path:
-  # This is a sample path to roles that extend device support
+  # This path will enable connecting to devices that use Netmiko
   - "{{ gateway_install_dir }}/venv/lib/python{{ gateway_python_version }}/site-packages/automation_gateway/integrations/extensible_device_roles/ansible_netmiko"
 
 # Discovery behavior for Ansible playbooks. Determines whether or not to
