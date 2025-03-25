@@ -7,7 +7,7 @@
 
 - name: Open Itential Platform HTTP Port on FirewallD Public Zone
   ansible.posix.firewalld:
-    port: "{{ platform_http_port }}/tcp"
+    port: "{{ platform_webserver_http_port }}/tcp"
     permanent: true
     state: enabled
     zone: public
@@ -16,11 +16,11 @@
     - ansible_facts.services["firewalld.service"] is defined
     - ansible_facts.services["firewalld.service"].state == "running"
     - ansible_facts.services["firewalld.service"].status == "enabled"
-    - not platform_https | bool
+    - platform_webserver_http_enabled | bool
 
 - name: Open Itential Platform HTTPS Port on FirewallD Public Zone
   ansible.posix.firewalld:
-    port: "{{ platform_https_port }}/tcp"
+    port: "{{ platform_webserver_https_port }}/tcp"
     permanent: true
     state: enabled
     zone: public
@@ -29,4 +29,4 @@
     - ansible_facts.services["firewalld.service"] is defined
     - ansible_facts.services["firewalld.service"].state == "running"
     - ansible_facts.services["firewalld.service"].status == "enabled"
-    - platform_https | bool
+    - platform_webserver_https_enabled | bool
