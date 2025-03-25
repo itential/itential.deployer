@@ -9,10 +9,9 @@
 
 - name: Install NodeJS
   ansible.builtin.dnf:
-    name: "{{ item }}"
+    name: "{{ platform_nodejs_package }}"
     state: present
   register: nodejs_install_result
-  with_items: "{{ platform_nodejs_package }}"
   when: not offline_install_enabled
 
 - name: Install NodeJS (offline)
