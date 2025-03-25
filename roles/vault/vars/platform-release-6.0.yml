@@ -7,3 +7,10 @@ vault_packages_default:
     - vault-1.15.4
   "9":
     - vault-1.15.4
+  "2023":
+    - vault-1.15.4
+
+vault_repo_baseurl:
+  "8": "https://rpm.releases.hashicorp.com/RHEL/$releasever/$basearch/stable"
+  "9": "https://rpm.releases.hashicorp.com/RHEL/$releasever/$basearch/stable"
+  "2023": "https://rpm.releases.hashicorp.com/AmazonLinux/latest/$basearch/stable"
