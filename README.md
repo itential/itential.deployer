@@ -199,6 +199,7 @@ To see which Ansible version is currently installed, execute the `ansible --vers
 
 - **Ansible Modules**: The following ansible modules are required on the control node for the
 deployer to run.
+  - 'ansible': '>=9.x.x'
   - 'ansible.posix': '>=0.0.1'
   - 'community.mongodb': '>=0.0.1'
 
@@ -316,7 +317,8 @@ On your control node, execute the following command to install the Itential Depl
 ansible-galaxy collection install itential.deployer
 ```
 
-When a new version of the Deployer is available, you can upgrade using the following command:
+This should also install the required ansible dependencies. When a new version of the Deployer is
+available, you can upgrade using the following command:
 
 ```bash
 ansible-galaxy collection install itential.deployer --upgrade
