@@ -43,6 +43,7 @@
       ansible.builtin.pip:
         name: "{{ python_app_dependencies }}"
         executable: "{{ python_pip_executable }}"
+        umask: "0022"
       when:
         - python_app_dependencies is defined
         - python_app_dependencies | length > 0
