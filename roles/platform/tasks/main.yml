@@ -52,12 +52,18 @@
                 file: install-platform-packages.yml
 
             - name: Install NodeJS
-              ansible.builtin.include_tasks:
-                file: install-nodejs.yml
+              tags: install_nodejs
+              block:
+                - name: Install NodeJS
+                  ansible.builtin.include_tasks:
+                    file: install-nodejs.yml
 
             - name: Install Python
-              ansible.builtin.include_tasks:
-                file: install-python.yml
+              tags: install_python
+              block:
+                - name: Install Python
+                  ansible.builtin.include_tasks:
+                    file: install-python.yml
 
         - name: Install Platform
           tags: install_platform
