@@ -8,24 +8,12 @@
   when: platform_nodejs_repo_url is defined
 
 - name: Install NodeJS
+  ansible.builtin.dnf:
+    name: "{{ item }}"
+    state: present
+  register: nodejs_install_result
+  with_items: "{{ platform_nodejs_package }}"
   when: not offline_install_enabled
-  block:
-    # Enable and install the module if the profile is defined
-    # https://dnf.readthedocs.io/en/latest/command_ref.html#module-switch-to-command-label
-    - name: DNF switch to the nodejs module (if profile is defined)
-      ansible.builtin.command: dnf module switch-to -y "{{ platform_nodejs_package }}"
-      register: result
-      changed_when: '"Enabling module streams" in result.stdout'
-      when: "'/' in platform_nodejs_package"
-
-    # Install the module if the profile is not defined
-    - name: DNF install NodeJS
-      ansible.builtin.dnf:
-        name: "{{ item }}"
-        state: present
-      register: nodejs_install_result
-      with_items: "{{ platform_nodejs_package }}"
-      when: "'/' not in platform_nodejs_package"
 
 - name: Install NodeJS (offline)
   ansible.builtin.include_role:
