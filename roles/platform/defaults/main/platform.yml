@@ -1,12 +1,6 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-# Run Itential Platform server as HTTPS
-platform_https: false
-
-# The Itential Platform listen ports
-platform_http_port: 3000
-platform_https_port: 3443
 
 # Destination as referenced by itential user when connecting from itential host.
 # This is ultimately stored in the mongo database to be read by Itential Platform, therefore

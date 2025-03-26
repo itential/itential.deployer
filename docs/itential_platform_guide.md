@@ -266,9 +266,6 @@ located in `roles/platform/defaults/main/platform.yml`.
 
 | Variable | Type | Description | Default Value |
 | :------- | :--- | :---------- | :------------ |
-| platform_https | Boolean | Run Itential Platform server as HTTPS | `false` |
-| platform_http_port | Integer | The Itential Platform HTTP listen ports | 3000 |
-| platform_https_port | Integer | The Itential Platform HTTPS listen ports | 3443 |
 | platform_mongodb_root_ca_file_destination | String | Destination as referenced by itential user when connecting from itential host. This is ultimately stored in the mongo database to be read by Itential Platform, therefore this is the location as seen from the Itential Platform host. | `/opt/itential/keys/mongo-rootCA.pem` |
 | platform_package_dependencies | List(String) | Required OS packages for install. | `glibc-common, openldap, openldap-clients, openssl, git` |
 | platform_python_base_dependencies | List(String) | Required python packages for install. | `pip, setuptools, wheel` |

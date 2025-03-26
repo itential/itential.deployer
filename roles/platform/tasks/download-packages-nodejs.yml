@@ -2,9 +2,9 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
 - name: Install NodeJS repo
-  when: ansible_distribution == "Amazon"
   ansible.builtin.import_tasks:
     file: install-nodejs-repo.yml
+  when: ansible_distribution == "Amazon"
 
 - name: Download NodeJS RPMs
   ansible.builtin.import_role:
