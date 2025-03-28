@@ -179,6 +179,7 @@ The **Ansible Control Node** must have the following installed:
 
 - **Ansible**
   - ansible-core >= 2.11, < 2.17
+  - ansible: >=9.x.x
 
 To see which Ansible version is currently installed, execute the `ansible --version` command as shown below.
 
@@ -316,7 +317,8 @@ On your control node, execute the following command to install the Itential Depl
 ansible-galaxy collection install itential.deployer
 ```
 
-When a new version of the Deployer is available, you can upgrade using the following command:
+This should also install the required ansible dependencies. When a new version of the Deployer is
+available, you can upgrade using the following command:
 
 ```bash
 ansible-galaxy collection install itential.deployer --upgrade
