@@ -16,7 +16,7 @@ gateway_python_version: 3.9
 gateway_python_executable: "/usr/bin/python{{ gateway_python_version }}"
 gateway_pip_executable: "/usr/bin/pip{{ gateway_python_version }}"
 
-gateway_python_packages:
+gateway_python_packages_map:
   "8":
     - python39
     - python39-pip
@@ -29,6 +29,9 @@ gateway_python_packages:
     - python3
     - python3-pip
     - python3-devel
+
+# Backwards compatible variable name references the appropriate list from the map
+gateway_python_packages: "{{ gateway_python_packages_map[ansible_distribution_major_version] }}"
 
 gateway_python_base_dependencies:
   - pip==24.0

@@ -6,7 +6,7 @@
     name: python
   tags: install_python
   vars:
-    python_packages: "{{ gateway_python_packages[ansible_distribution_major_version] }}"
+    python_packages: "{{ gateway_python_packages }}"
 
 - name: Setup python virtual environment
   ansible.builtin.command:

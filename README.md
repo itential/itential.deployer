@@ -179,6 +179,7 @@ The **Ansible Control Node** must have the following installed:
 
 - **Ansible**
   - ansible-core >= 2.11, < 2.17
+  - ansible: >=9.x.x
 
 To see which Ansible version is currently installed, execute the `ansible --version` command as shown below.
 
@@ -199,7 +200,6 @@ To see which Ansible version is currently installed, execute the `ansible --vers
 
 - **Ansible Modules**: The following ansible modules are required on the control node for the
 deployer to run.
-  - 'ansible': '>=9.x.x'
   - 'ansible.posix': '>=0.0.1'
   - 'community.mongodb': '>=0.0.1'
 
