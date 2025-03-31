@@ -2,8 +2,6 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
 gateway_packages:
-  - gcc-c++
-  - make
   - selinux-policy
   - selinux-policy-targeted
 
@@ -19,7 +17,6 @@ gateway_pip_executable: "/usr/bin/pip{{ gateway_python_version }}"
 gateway_python_packages:
   - python3
   - python3-pip
-  - python3-devel
 
 gateway_python_base_dependencies:
   - pip==24.0

@@ -2,15 +2,25 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
 gateway_packages:
-  - gcc-c++
-  - make
   - selinux-policy
   - selinux-policy-targeted
 
-gateway_build_packages:
-  - gcc-c++
-  - make
-  - python3-devel
+gateway_build_packages_map:
+  "8":
+    - gcc-c++
+    - make
+    - python39-devel
+  "9":
+    - gcc-c++
+    - make
+    - python3-devel
+  "2023":
+    - gcc-c++
+    - make
+    - python3-devel
+
+# Backwards compatible variable name references the appropriate list from the map
+gateway_build_packages: "{{ gateway_build_packages_map[ansible_distribution_major_version] }}"
 
 gateway_python_version: 3.9
 gateway_python_executable: "/usr/bin/python{{ gateway_python_version }}"

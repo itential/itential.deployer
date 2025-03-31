@@ -2,9 +2,6 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
 gateway_packages:
-  - gcc-c++
-  - make
-  - sqlite-devel
 
 gateway_build_packages:
   - gcc-c++
@@ -19,7 +16,6 @@ gateway_pip_executable: "/usr/bin/pip{{ gateway_python_version }}"
 gateway_python_packages:
   - python39
   - python39-pip
-  - python39-devel
   - python-rpm-macros
   - python3-pyparsing
   - python3-rpm-generators
