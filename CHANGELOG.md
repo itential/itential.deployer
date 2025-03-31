@@ -1,8 +1,24 @@
 # Changelog
 
+## v3.1.0 (March 28, 2025)
+
+* Add umask to python app dependencies pip install  https://github.com/itential/itential.deployer/pull/189
+* Added support for IAG 4.3  https://github.com/itential/itential.deployer/pull/190
+* Ansible netmiko  https://github.com/itential/itential.deployer/pull/187
+* Duplicate vars  https://github.com/itential/itential.deployer/pull/185
+* Os clean up  https://github.com/itential/itential.deployer/pull/182
+* Pinning the ansible-lint version  https://github.com/itential/itential.deployer/pull/186
+* Prometheus al23  https://github.com/itential/itential.deployer/pull/181
+* Remove dnf switch-to when installing nodejs  https://github.com/itential/itential.deployer/pull/188
+* Use full path to ansible-galaxy when installing collections  https://github.com/itential/itential.deployer/pull/183
+* Vault al23  https://github.com/itential/itential.deployer/pull/184
+
+Full Changelog: https://github.com/itential/itential.deployer/compare/v3.0.1...v3.1.0 
+
+
 ## v3.0.1 (March 14, 2025)
 
-* 
+* Update galaxy version and changelog for release 3.0.1 [skip ci]
 
 Full Changelog: https://github.com/itential/itential.deployer/compare/v3.0.0...v3.0.1 
 
