@@ -44,6 +44,7 @@
   ansible.builtin.pip:
     name: "{{ wheel_list.files | map(attribute='path') | list | sort }}"
     executable: "{{ offline_pip_executable }}"
+    umask: "0022"
     extra_args: --no-index
   when: offline_python_venv is not defined
 
