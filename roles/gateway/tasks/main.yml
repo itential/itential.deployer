@@ -24,7 +24,7 @@
     state: directory
   register: workingdir
 
-- name: Install Gateway packages
+- name: Install Gateway dependency packages
   ansible.builtin.dnf:
     name: "{{ item }}"
     state: present
@@ -36,12 +36,12 @@
     - gateway_packages | length > 0
   tags: install_gateway_packages
 
-- name: Install Gateway packages (offline)
+- name: Install Gateway dependency packages (offline)
   ansible.builtin.import_role:
     name: offline
     tasks_from: install-rpms
   vars:
-    offline_rpms_path: "{{ gateway_offline_control_node_rpms_dir }}"
+    offline_rpms_path: "{{ gateway_offline_control_node_rpms_dir }}/dependencies"
   when: offline_install_enabled
   tags: install_gateway_packages
 
@@ -108,17 +108,59 @@
         file: install-python.yml
 
 - name: Install Gateway build packages
-  ansible.builtin.dnf:
-    name: "{{ item }}"
-    state: present
-  register: gateway_build_packages_result
-  with_items: "{{ gateway_build_packages }}"
-  when:
-    - not offline_install_enabled
-    - gateway_build_packages is defined
-    - gateway_build_packages is iterable
-    - gateway_build_packages | length > 0
   tags: install_gateway_build_packages
+  block:
+    - name: Install Gateway build packages
+      ansible.builtin.dnf:
+        name: "{{ item }}"
+        state: present
+      register: gateway_build_packages_result
+      with_items: "{{ gateway_build_packages }}"
+      when:
+        - not offline_install_enabled
+        - gateway_build_packages is defined
+        - gateway_build_packages is iterable
+        - gateway_build_packages | length > 0
+
+    - name: Install Gateway build packages (offline)
+      when: offline_install_enabled | bool
+      block:
+        - name: Install Gateway build packages (offline)
+          ansible.builtin.import_role:
+            name: offline
+            tasks_from: install-rpms
+          vars:
+            offline_rpms_path: "{{ gateway_offline_control_node_rpms_dir }}/build"
+
+        # Build a list of installed build packages. The rpm_list variable is registered in the
+        # offline install-rpms.
+        - name: Set Gateway build package list
+          ansible.builtin.set_fact:
+            installed_gateway_build_package_list:
+              "{{ installed_gateway_build_package_list | default([]) +
+              [item | basename | split('.el') | first] }}"
+          with_items: "{{ rpm_list.files | map(attribute='path') | list | sort }}"
+          when:
+            - rpm_list is defined
+            - rpm_list is iterable
+            - rpm_list | length > 0
+
+        # Build a list of build packages that need to be removed later. We don't want to remove
+        # all of the installed build packages, only the ones that are in the gateway_build_packages
+        # and installed_gateway_build_package_list.
+        - name: Set Gateway build package remove list
+          ansible.builtin.set_fact:
+            gateway_build_package_remove_list:
+              "{{ gateway_build_package_remove_list | default([]) + [item] }}"
+          with_items: "{{ gateway_build_packages }}"
+          when: installed_gateway_build_package_list | select('search', item) | list | length > 0
+
+- name: Install Python dependencies
+  tags: install_python_dependencies
+  block:
+    - name: Install Python dependencies
+      ansible.builtin.include_tasks:
+        file: install-python-dependencies.yml
 
 # Need to install ansible within the virtual environment
 - name: Install Ansible
@@ -336,15 +378,34 @@
     state: absent
 
 - name: Uninstall Gateway build packages
-  ansible.builtin.dnf:
-    name: "{{ item }}"
-    allowerasing: true
-    autoremove: true
-    state: absent
-  with_items: "{{ gateway_build_packages_result.results | selectattr('changed', 'equalto', true)
-              | map(attribute='item') }}"
-  when:
-    - not offline_install_enabled
-    - gateway_build_packages_result.results is defined
-    - gateway_build_packages_result.results is iterable
-    - gateway_build_packages_result.results | length > 0
+  tags: uninstall_gateway_build_packages
+  block:
+    - name: Uninstall Gateway build packages
+      ansible.builtin.dnf:
+        name: "{{ item }}"
+        allowerasing: true
+        autoremove: true
+        state: absent
+      with_items: "{{ gateway_build_packages_result.results | selectattr('changed', 'equalto', true)
+                  | map(attribute='item') }}"
+      when:
+        - not offline_install_enabled
+        - gateway_build_packages_result.results is defined
+        - gateway_build_packages_result.results is iterable
+        - gateway_build_packages_result.results | length > 0
+
+    - name: Uninstall Gateway build packages (offline)
+      when: offline_install_enabled | bool
+      block:
+        - name: Get list of yum repos (to disable temporarily) # noqa command-instead-of-module
+          ansible.builtin.command: yum -q repolist
+          register: repolist_result
+          changed_when: false
+
+        - name: Uninstall Gateway build packages (offline)
+          ansible.builtin.dnf:
+            name: "{{ gateway_build_package_remove_list }}"
+            state: absent
+            enablerepo: []
+            disablerepo: "{{ repolist_result.stdout_lines[1:] | map('split', ' ')
+                         | map('first') | list }}"

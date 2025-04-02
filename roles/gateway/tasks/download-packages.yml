@@ -25,32 +25,48 @@
              on {{ ansible_distribution }}-{{ ansible_distribution_major_version }}"
       when: gateway_invalid_release is defined
 
-- name: Download OS packages
-  tags: download_os_packages
+- name: Download Gateway packages
+  tags: download_gateway_packages
   block:
-    - name: Download Gateway OS RPMs
+    - name: Download Gateway dependency RPMs
       ansible.builtin.import_role:
         name: offline
         tasks_from: download-rpms
       vars:
         offline_download_method: yum_module
         offline_download_packages: "{{ gateway_packages }}"
-        offline_download_dir: "{{ gateway_offline_target_node_rpms_dir }}"
-      tags: download_gateway_packages
+        offline_download_dir: "{{ gateway_offline_target_node_rpms_dir }}/dependencies"
 
-    - name: Copy RPMs to control node
+    - name: Copy Gateway dependency RPMs to control node
       ansible.builtin.import_role:
         name: offline
         tasks_from: fetch-packages
       vars:
-        offline_src_dir: "{{ gateway_offline_target_node_rpms_dir }}"
-        offline_dest_dir: "{{ gateway_offline_control_node_rpms_dir }}"
+        offline_src_dir: "{{ gateway_offline_target_node_rpms_dir }}/dependencies"
+        offline_dest_dir: "{{ gateway_offline_control_node_rpms_dir }}/dependencies"
 
-- name: Install Gateway packages
+    - name: Download Gateway build RPMs
+      ansible.builtin.import_role:
+        name: offline
+        tasks_from: download-rpms
+      vars:
+        offline_download_method: yum_module
+        offline_download_packages: "{{ gateway_build_packages }}"
+        offline_download_dir: "{{ gateway_offline_target_node_rpms_dir }}/build"
+
+    - name: Copy Gateway build RPMs to control node
+      ansible.builtin.import_role:
+        name: offline
+        tasks_from: fetch-packages
+      vars:
+        offline_src_dir: "{{ gateway_offline_target_node_rpms_dir }}/build"
+        offline_dest_dir: "{{ gateway_offline_control_node_rpms_dir }}/build"
+
+- name: Install Gateway dependency and build packages
   ansible.builtin.dnf:
     name: "{{ item }}"
     state: present
-  with_items: "{{ gateway_packages }}"
+  with_items: "{{ gateway_packages + gateway_build_packages }}"
   register: gateway_packages_installed
   when:
     - gateway_packages is defined
@@ -79,7 +95,7 @@
         offline_src_dir: "{{ gateway_offline_target_node_archives_dir }}"
         offline_dest_dir: "{{ gateway_offline_control_node_archives_dir }}"
 
-- name: Uninstall Gateway packages
+- name: Uninstall Gateway dependency and build packages
   ansible.builtin.dnf:
     name: "{{ item }}"
     state: absent
