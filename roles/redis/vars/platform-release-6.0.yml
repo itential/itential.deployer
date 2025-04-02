@@ -3,7 +3,7 @@
 ---
 # The keys represent the EL major version (ansible_distribution_major_version)
 
-# The redis_packages_default is used when the redis_install_from_source is set to 'true'
+# The redis_packages_default is used when the redis_install_from_source is set to 'false'
 redis_packages_default:
   "8":
     - "@redis:remi-7.2"
@@ -12,7 +12,7 @@ redis_packages_default:
   "2023":
     - "@redis:remi-7.2"
 
-# The redis_source_url_default is used when the redis_install_from_source is set to 'false'
+# The redis_source_url_default is used when the redis_install_from_source is set to 'true'
 redis_source_url_default:
   "8": "https://github.com/redis/redis/archive/7.4.2.tar.gz"
   "9": "https://github.com/redis/redis/archive/7.4.2.tar.gz"

@@ -35,11 +35,16 @@
     - name: Online install
       when: not offline_install_enabled
       block:
-        - name: Install packages required to build Redis
-          ansible.builtin.package:
-            name: "{{ redis_build_packages }}"
+        - name: Install Redis build packages
+          ansible.builtin.dnf:
+            name: "{{ item }}"
             state: present
           register: redis_install_result
+          with_items: "{{ redis_build_packages }}"
+          when:
+            - redis_build_packages is defined
+            - redis_build_packages is iterable
+            - redis_build_packages | length > 0
 
         - name: Download Redis source archive
           ansible.builtin.get_url:
@@ -99,3 +104,17 @@
       ansible.builtin.file:
         path: "{{ redis_build_temp_dir.path }}"
         state: absent
+
+    - name: Uninstall Redis build packages
+      ansible.builtin.dnf:
+        name: "{{ item }}"
+        allowerasing: true
+        autoremove: true
+        state: absent
+      with_items: "{{ redis_install_result.results | selectattr('changed', 'equalto', true)
+                  | map(attribute='item') }}"
+      when:
+        - not offline_install_enabled
+        - redis_install_result.results is defined
+        - redis_install_result.results is iterable
+        - redis_install_result.results | length > 0

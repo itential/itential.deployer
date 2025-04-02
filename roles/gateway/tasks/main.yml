@@ -107,6 +107,19 @@
       ansible.builtin.include_tasks:
         file: install-python.yml
 
+- name: Install Gateway build packages
+  ansible.builtin.dnf:
+    name: "{{ item }}"
+    state: present
+  register: gateway_build_packages_result
+  with_items: "{{ gateway_build_packages }}"
+  when:
+    - not offline_install_enabled
+    - gateway_build_packages is defined
+    - gateway_build_packages is iterable
+    - gateway_build_packages | length > 0
+  tags: install_gateway_build_packages
+
 # Need to install ansible within the virtual environment
 - name: Install Ansible
   tags: install_ansible
@@ -322,15 +335,16 @@
     path: "{{ workingdir.path }}"
     state: absent
 
-- name: Uninstall gateway build packages
+- name: Uninstall Gateway build packages
   ansible.builtin.dnf:
     name: "{{ item }}"
     allowerasing: true
     autoremove: true
     state: absent
-  with_items: "{{ gateway_build_packages }}"
+  with_items: "{{ gateway_build_packages_result.results | selectattr('changed', 'equalto', true)
+              | map(attribute='item') }}"
   when:
-    - gateway_build_packages is defined
-    - gateway_build_packages is iterable
-    - gateway_build_packages | length > 0
     - not offline_install_enabled
+    - gateway_build_packages_result.results is defined
+    - gateway_build_packages_result.results is iterable
+    - gateway_build_packages_result.results | length > 0
