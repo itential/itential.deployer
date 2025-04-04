@@ -63,8 +63,6 @@
     - name: Validate that the platform_encryption_key variable is correctly formatted
       ansible.builtin.assert:
         that:
-          # - "{{ platform_encryption_key is match('^[0-9a-fA-F]+$') }}"
-          # - "{{ platform_encryption_key | length == 64 }}"
           - platform_encryption_key is match('^[0-9a-fA-F]+$')
           - platform_encryption_key | length == 64
         fail_msg: platform_encryption_key must be a 64 character hexidecimal string
