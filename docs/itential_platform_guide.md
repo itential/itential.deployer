@@ -58,6 +58,21 @@ install.
 The variables in this section may be overridden in the inventory in the `platform` group vars. In
 most cases accepting the defaults is what you want except for in some more advanced installations.
 
+The variable `platform_encryption_key` is required for this role to run. This value must be a 64
+character hexidecimal string.
+
+The following approaches may be followed for generating an encryption key:
+
+- Generating a randomized key value: `openssl rand -hex 32`
+- Generating a key value using an existing password value as a base: `printf '%s' “$PASSWORD” | sha256sum | head -c 64`
+
+Whichever approach you use to generate the key, ensure the result is persisted in a secrets
+repository for safe keeping before applying it to your Itential Platform installation. Losing
+access to this key means losing access to secret values stored inside of Itential Platform.
+
+More info on the encryption key:
+<https://docs.itential.com/docs/platform-6-installation#create-the-encryption-key>
+
 #### Installation Variables
 
 These variables will effect how the installation occurs.
@@ -293,7 +308,7 @@ located in `roles/platform/defaults/main/server.yml`.
 | platform_services | List | A whitelist of services (applications/adapters) to initialize on startup of the platform. If no value is given, all services will be initialized. |  |
 | platform_service_blacklist | List | The service type that will be denied CRUD operation access. |  |
 | platform_encrypted | Boolean | Indicates whether the platform is using encrypted code files. | `true` |
-| platform_encryption_key | String | 64-length hex string describing a 256 bit encryption key. | `f256be40b84f053c26a0fc2101dc4bdd039f62522702e28bd4f611c2e097803e` |
+| platform_encryption_key | String | 64-length hex string describing a 256 bit encryption key. This MUST be provided to deployer! |  |
 | platform_shutdown_timeout | Integer | The amount of time a service should wait before shutting down, in seconds. | 3 |
 | platform_service_launch_delay | Integer | The application/adapter launch delay, in seconds. | 1 |
 | platform_service_launch_timeout | Integer | The application/adapter launch timeout, in seconds. | 600 |
