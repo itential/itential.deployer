@@ -26,12 +26,12 @@
     src: "{{ item }}"
     dest: "{{ install_adapters_temp_dir.path }}"
     mode: '0644'
-  with_fileglob: "{{ offline_src_adapters_path }}/*{{ adapter_name }}*.tgz"
+  with_fileglob: "{{ offline_src_adapters_path }}/*{{ adapter_name }}-*.tgz"
 
 - name: Find adapter on target node
   ansible.builtin.find:
     paths: "{{ install_adapters_temp_dir.path }}"
-    patterns: "*{{ adapter_name }}*.tgz"
+    patterns: "*{{ adapter_name }}-*.tgz"
   register: adapter_list
 
 - name: Validate adapter exists
