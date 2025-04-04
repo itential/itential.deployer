@@ -66,7 +66,7 @@
           - "{{ platform_encryption_key is match('^[0-9a-fA-F]+$') }}"
           - "{{ platform_encryption_key | length == 64 }}"
         fail_msg: >-
-          platform_encryption_key MUST be defined and MUST be a 64 character hexidecimal string
+          platform_encryption_key MUST be a 64 character hexidecimal string
 
     - name: Set installation variables when using Itential Platform release defaults
       when: platform_release is defined
