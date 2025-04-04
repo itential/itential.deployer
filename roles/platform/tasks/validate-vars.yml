@@ -55,6 +55,19 @@
           platform_python_app_dependencies must be defined when platform_release is not defined
       when: platform_release is not defined
 
+    - name: Validate that the platform_encryption_key variable exists
+      ansible.builtin.fail:
+        msg: platform_encryption_key variable must be defined
+      when: platform_encryption_key is not defined
+
+    - name: Validate that the platform_encryption_key variable is correctly formatted
+      ansible.builtin.assert:
+        that:
+          - "{{ platform_encryption_key is match('^[0-9a-fA-F]+$') }}"
+          - "{{ platform_encryption_key | length == 64 }}"
+        fail_msg: >-
+          platform_encryption_key MUST be defined and MUST be a 64 character hexidecimal string
+
     - name: Set installation variables when using Itential Platform release defaults
       when: platform_release is defined
       block:
