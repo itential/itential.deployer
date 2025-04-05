@@ -21,9 +21,6 @@ platform_service_blacklist:
 # Indicates whether the platform is using encrypted code files.
 platform_encrypted: true
 
-# 64-length hex string describing a 256 bit encryption key.
-platform_encryption_key: f256be40b84f053c26a0fc2101dc4bdd039f62522702e28bd4f611c2e097803e
-
 # The amount of time a service should wait before shutting down, in seconds.
 platform_shutdown_timeout: 3
 
