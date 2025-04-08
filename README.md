@@ -477,7 +477,7 @@ the steps below based on the repository type:
 Copy the link provided in the **Path** field to obtain the download URL.
 - **For JFrog**: Locate the file in the JFrog repository and copy the File URL.
 
-This download method supports both the Itential Platform (bin/tar) files and the IAG (whl) files.
+This download method supports both the Itential Platform (bin/tar/rpm) files and the IAG (whl) files.
 
 #### Configure Repository Credentials
 
