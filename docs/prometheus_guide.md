@@ -75,7 +75,7 @@ The `itential.deployer` uses the following exporter roles:
 - [`prometheus.prometheus.node_exporter`](https://prometheus-community.github.io/ansible/branch/main/node_exporter_role.html#ansible-collections-prometheus-prometheus-node-exporter-role)
 - [`prometheus.prometheus.process_exporter`](https://prometheus-community.github.io/ansible/branch/main/process_exporter_role.html#ansible-collections-prometheus-prometheus-process-exporter-role)
 
-Each exporter is a lightweight Go application that exposes the metrics on a standard HTTP endpoint. Each exporter requires a port to be opened so that Prometheus can access the metrics that are being exposed by the exporter. The following ports will be utilised by these roles:
+Each exporter is a lightweight Go application that exposes the metrics on a standard HTTP endpoint. Each exporter requires a port to be opened so that Prometheus can access the metrics that are being exposed by the exporter. The following ports will be utilized by these roles:
 
 | Exporter | Default Port | Description |
 | -------- | ------------ | ----------- |
