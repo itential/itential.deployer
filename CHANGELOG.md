@@ -1,6 +1,17 @@
 # Changelog
 
-## v3.1.0 (March 28, 2025)
+## v3.1.1 (April 07, 2025)
+
+* Add umask to offline pip installs  https://github.com/itential/itential.deployer/pull/192
+* Fix gateway offline install  https://github.com/itential/itential.deployer/pull/193
+* Offline install adapter overwrite fix  https://github.com/itential/itential.deployer/pull/194
+* Remove build packages only when installed with deployer  https://github.com/itential/itential.deployer/pull/191
+* Remove default encryption key, require this key for execution  https://github.com/itential/itential.deployer/pull/195
+
+Full Changelog: https://github.com/itential/itential.deployer/compare/v3.1.0...v3.1.1 
+
+
+## v3.1.0 (March 31, 2025)
 
 * Add umask to python app dependencies pip install  https://github.com/itential/itential.deployer/pull/189
 * Added support for IAG 4.3  https://github.com/itential/itential.deployer/pull/190
@@ -10,6 +21,7 @@
 * Pinning the ansible-lint version  https://github.com/itential/itential.deployer/pull/186
 * Prometheus al23  https://github.com/itential/itential.deployer/pull/181
 * Remove dnf switch-to when installing nodejs  https://github.com/itential/itential.deployer/pull/188
+* Update galaxy version and changelog for release 3.1.0 [skip ci]
 * Use full path to ansible-galaxy when installing collections  https://github.com/itential/itential.deployer/pull/183
 * Vault al23  https://github.com/itential/itential.deployer/pull/184
 
