@@ -202,6 +202,7 @@ To see which Ansible version is currently installed, execute the `ansible --vers
 deployer to run.
   - 'ansible.posix': '>=0.0.1'
   - 'community.mongodb': '>=0.0.1'
+  - 'community.crypto': '>=2.0.0'
 
 **&#9432; Note:**
 The Itential Deployer is an Ansible collection. As such, a familiarity with basic Ansible concepts

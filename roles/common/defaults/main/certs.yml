@@ -1,0 +1,16 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+self_signed_cert_dir: "/etc/ssl/cert"
+
+self_signed_cert_key: "selfsigned.key"
+
+self_signed_cert_crt: "itential.crt"
+
+self_signed_cert_common_name: "itential"
+
+self_signed_cert_days_valid: 365
+
+self_signed_cert_key_size: 2048
+
+self_signed_cert_csr: "itential.csr"
