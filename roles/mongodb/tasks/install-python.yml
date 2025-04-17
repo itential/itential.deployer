@@ -17,11 +17,6 @@
         path: "{{ mongodb_python_venv }}"
       register: mongodb_python_venv_check
 
-    # - name: Remove python virtual environment
-    #   ansible.builtin.file:
-    #     path: "{{ mongodb_python_venv }}"
-    #     state: absent
-
     - name: Setup python virtual environment
       ansible.builtin.command:
         chdir: "{{ mongodb_python_venv_root }}"
