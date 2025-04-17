@@ -12,11 +12,23 @@
         python_executable: "{{ mongodb_python_executable }}"
         python_packages: "{{ mongodb_python_packages }}"
 
+    - name: Check if python virtual environment already exists
+      ansible.builtin.stat:
+        path: "{{ mongodb_python_venv }}"
+      register: mongodb_python_venv_check
+
+    # - name: Remove python virtual environment
+    #   ansible.builtin.file:
+    #     path: "{{ mongodb_python_venv }}"
+    #     state: absent
+
     - name: Setup python virtual environment
       ansible.builtin.command:
         chdir: "{{ mongodb_python_venv_root }}"
         cmd: "{{ mongodb_python_executable }} -m venv {{ mongodb_python_venv_name }}"
-      changed_when: true
+      register: mongodb_python_venv_result
+      changed_when: mongodb_python_venv_result.changed
+      when: not mongodb_python_venv_check.stat.exists
 
     - name: Install Python dependencies
       ansible.builtin.include_role:
