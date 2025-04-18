@@ -2,7 +2,7 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
 
-# The owner and group are intentially unset throughout in order to use the current user.
+# The owner and group are intentionally unset throughout in order to use the current user.
 #
 # From the Ansible documentation:
 # group - When left unspecified, it uses the current group of the current user unless you are root,
