@@ -1,0 +1,14 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+### Load Balancer
+- name: Install Load Balancer
+  hosts: load_balancer
+  become: true
+  roles:
+    # Pull in the common vars
+    - role: itential.deployer.common
+      tags: always
+
+    # Install and initialize load balancer
+    - role: itential.deployer.load_balancer

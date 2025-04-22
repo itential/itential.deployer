@@ -1,0 +1,20 @@
+[Unit]
+Description=vault service
+Requires=network-online.target
+After=network-online.target
+ConditionFileNotEmpty={{ vault_dir }}/config.hcl
+
+[Service]
+User=vault
+Group=vault
+ExecStart=/usr/bin/vault server -config={{ vault_dir }}/config.hcl
+ExecReload=/usr/bin/kill --signal HUP $MAINPID 
+KillSignal=SIGINT 
+CapabilityBoundingSet=CAP_SYSLOG CAP_IPC_LOCK
+AmbientCapabilities=CAP_IPC_LOCK
+SecureBits=keep-caps
+NoNewPrivileges=yes
+KillSignal=SIGINT
+
+[Install]
+WantedBy=multi-user.target
