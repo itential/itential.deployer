@@ -209,18 +209,27 @@ is suggested before proceeding.
 
 ### Required Public Repositories
 
-In general the Deployer will install packages using the standard YUM repositories on the target
-servers.  When packages are not available for the distribution, the Deployer will either install
-the required repository or download the packages.
+On the Ansible control node, the Ansible Python module and the Itential Deployer Ansible collection
+will need to be installed.
+
+On the target servers, the Deployer will install RPM packages using the standard YUM repositories
+and Python modules using the PyPI repository. When packages are not available for the distribution,
+the Deployer will either install the required repository or download the packages.
 
 | Component | Location | Protocol | Notes |
 | :-------- | :------- | :------- | :---- |
-| Redis | <http://rpms.remirepo.net> | https | When installing Redis from the Remi repository |
-| Redis | <http://dl.fedoraproject.org> | https | When installing Redis from the Remi repository |
-| Redis | <http://github.com> | https | When installing Redis from source |
-| MongoDB | <http://repo.mongodb.org> | https | |
-| MongoDB | <http://www.mongodb.org> | https | |
-| Vault | <http://rpm.releases.hashicorp.com> | https | |
+| Ansible Control Node | <https://pypi.org> | TCP | |
+| Ansible Control Node | <https://galaxy.ansible.com> | TCP | |
+| Itential Gateway | <https://pypi.org> | TCP | |
+| Itential Gateway | <https://galaxy.ansible.com> | TCP | |
+| Itential Gateway | <https://registry.aws.itential.com> | TCP | |
+| Itential Platform | <https://registry.aws.itential.com> | TCP | |
+| MongoDB | <https://repo.mongodb.org> | TCP | |
+| MongoDB | <https://www.mongodb.org> | TCP | |
+| Redis | <http://rpms.remirepo.net> | TCP | When installing Redis from the Remi repository |
+| Redis | <https://dl.fedoraproject.org> | TCP | When installing Redis from the Remi repository |
+| Redis | <https://github.com> | TCP | When installing Redis from source |
+| Vault | <https://rpm.releases.hashicorp.com> | TCP | |
 
 If internal YUM repositories are used, refer to the
 [Using Internal YUM Repositories](#using-internal-yum-repositories) section.
