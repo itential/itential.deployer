@@ -20,5 +20,5 @@ redis_build_packages:
 #  - redis_install_from_source is set to 'false'
 #  - common_install_yum_repos is set to 'true'
 #  - redis_packages contains 'remi'
-redis_remi_repo_url: "http://rpms.remirepo.net/enterprise/remi-release-{{ ansible_distribution_major_version }}.rpm"
+redis_remi_repo_url: "http://rpms.remirepo.net/enterprise/remi-release-{{ ansible_distribution_version }}.rpm"
 redis_epel_repo_url: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_distribution_major_version }}.noarch.rpm"
