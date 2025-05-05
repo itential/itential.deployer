@@ -3,7 +3,7 @@
 ---
 
 # Initialize the replicaset. This requires MongoDB to be in a running state.
-# Initating a replicaset can only happen when authentication is NOT running.
+# Initiating a replicaset can only happen when authentication is NOT running.
 # This step must happen first.
 - name: Configure MongoDB replica set
   ansible.builtin.include_tasks:
