@@ -64,11 +64,11 @@ The Prometheus and Exporter roles in this section are part of the
 
 ### Prometheus Role
 
-The `itential.deployer` uses the [`prometheus.prometheus.prometheus`](https://prometheus-community.github.io/ansible/branch/main/prometheus_role.html#ansible-collections-prometheus-prometheus-prometheus-role) role.
+The `itential.deployer` uses the community Prometheus role. Refer to the [`prometheus.prometheus.prometheus`](https://prometheus-community.github.io/ansible/branch/main/prometheus_role.html#ansible-collections-prometheus-prometheus-prometheus-role) documentation for all available configuration parameters.
 
 ### Exporter Roles
 
-The `itential.deployer` uses the following exporter roles:
+The `itential.deployer` uses the following community Prometheus exporter roles (refer to the linked documentation for all available configuration parameters):
 
 - [`prometheus.prometheus.redis_exporter`](https://prometheus-community.github.io/ansible/branch/main/redis_exporter_role.html#ansible-collections-prometheus-prometheus-redis-exporter-role)
 - [`prometheus.prometheus.mongodb_exporter`](https://prometheus-community.github.io/ansible/branch/main/mongodb_exporter_role.html#ansible-collections-prometheus-prometheus-mongodb-exporter-role)
