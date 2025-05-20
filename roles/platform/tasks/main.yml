@@ -113,14 +113,6 @@
     - name: Configure Platform
       tags: configure_platform
       block:
-        - name: Create systemd file
-          ansible.builtin.template:
-            src: itential-platform.service.j2
-            dest: /usr/lib/systemd/system/itential-platform.service
-            owner: root
-            group: root
-            mode: "0644"
-
-        - name: Create properties.json file
+        - name: Configure Platform
           ansible.builtin.include_tasks:
-            file: create-properties-file.yml
+            file: configure-platform.yml

@@ -42,6 +42,7 @@
         name: "{{ downloaded_platform_packages.files | map(attribute='path') | join(',') }}"
         disable_gpg_check: true
         state: present
+        allow_downgrade: true
       when: downloaded_platform_packages | length > 0
 
     # TODO: Implement installing from a yum repo
