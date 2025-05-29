@@ -52,7 +52,7 @@ mongodb_port: "{{ mongodb_port_default }}"
 # Default Itential database name in MongoDB
 mongodb_itential_db_name: itential
 
-# Feature flags that can be overriden in the hosts file
+# Feature flags that can be overridden in the hosts file
 # Essentially, a default installation will not have replication, authorization,
 # or TLS settings applied.
 mongodb_replication_enabled: false

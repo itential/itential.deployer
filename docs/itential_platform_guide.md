@@ -59,7 +59,7 @@ The variables in this section may be overridden in the inventory in the `platfor
 most cases accepting the defaults is what you want except for in some more advanced installations.
 
 The variable `platform_encryption_key` is required for this role to run. This value must be a 64
-character hexidecimal string.
+character hexadecimal string.
 
 The following approaches may be followed for generating an encryption key:
 
@@ -154,7 +154,7 @@ default variables located in `roles/platform/defaults/main/logging.yml`.
 #### Platform UI Variables
 
 These variables control UI behaviors. The following table lists the default variables located in
-`roles/platform/defaults/main/platorm_ui.yml`.
+`roles/platform/defaults/main/platform_ui.yml`.
 
 | Variable | Type | Description | Default Value |
 | :------- | :--- | :---------- | :------------ |

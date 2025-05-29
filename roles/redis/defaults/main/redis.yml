@@ -49,7 +49,7 @@ redis_bind_addr_source: inventory_hostname
 # to the redis_bind_addrs depending on the redis_bind_addr_source.
 redis_bind_addrs: 127.0.0.1
 
-# Feature flags that can be overriden in the hosts file
+# Feature flags that can be overridden in the hosts file
 # Essentially, a default installation will have auth, but not replication or tls
 redis_auth_enabled: true
 redis_replication_enabled: false

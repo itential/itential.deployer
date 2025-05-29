@@ -200,7 +200,7 @@ The following variables are defined in the `platform` role.
 
 | Variable | Type   | Description | Default |
 | :------- | :----- | :---------- | :------ |
-| `platform_offline_packages_root` | String | Platform packages root dirctory | `{{ offline_itential_packages_path }}/{{ platform_release }}/platform` |
+| `platform_offline_packages_root` | String | Platform packages root directory | `{{ offline_itential_packages_path }}/{{ platform_release }}/platform` |
 | `platform_offline_target_node_root` | String | Platform target node root directory | `{{ offline_target_node_root }}/{{ platform_offline_packages_root }}` |
 | `platform_offline_control_node_root` | String | Platform control node root directory | `{{ offline_control_node_root }}/{{ platform_offline_packages_root }}` |
 | `platform_offline_target_node_rpms_dir` | String | Platform target node RPMs directory | `{{ platform_offline_target_node_root }}/rpms` |
@@ -216,9 +216,9 @@ The following variables are defined in the `gateway` role.
 
 | Variable | Type | Description | Default |
 | :------- | :--- | :---------- | :------ |
-| `gateway_offline_packages_root` | String | Gateway packages root dirctory | `{{ offline_itential_packages_path }}/{{ iag_release }}/gateway` |
-| `gateway_target_node_root` | String | Gateway target node root dirctory | `{{ offline_target_node_root }}/{{ gateway_offline_packages_root }}` |
-| `gateway_control_node_root` | String | Gateway control node root dirctory | `{{ offline_control_node_root }}/{{ gateway_offline_packages_root }}` |
+| `gateway_offline_packages_root` | String | Gateway packages root directory | `{{ offline_itential_packages_path }}/{{ iag_release }}/gateway` |
+| `gateway_target_node_root` | String | Gateway target node root directory | `{{ offline_target_node_root }}/{{ gateway_offline_packages_root }}` |
+| `gateway_control_node_root` | String | Gateway control node root directory | `{{ offline_control_node_root }}/{{ gateway_offline_packages_root }}` |
 | `gateway_offline_target_node_rpms_dir` | String | Gateway target node RPMs directory | `{{ gateway_target_node_root }}/rpms` |
 | `gateway_offline_target_node_wheels_dir` | String | Gateway target node wheels directory | `{{ gateway_target_node_root }}/wheels` |
 | `gateway_offline_target_node_archives_dir` | String | Gateway target node archives directory | `{{ gateway_target_node_root }}/archives` |
@@ -234,9 +234,9 @@ The following variables are defined in the `mongodb` role.
 
 | Variable | Type | Description | Default |
 | :------- | :--- | :---------- | :------ |
-| `mongodb_offline_packages_root` | String | MongoDB packages root dirctory | `{{ offline_itential_packages_path }}/{{ platform_release }}/mongodb` |
-| `mongodb_offline_target_node_root` | String | MongoDB target node root dirctory | `{{ offline_target_node_root }}/{{ mongodb_offline_packages_root }}` |
-| `mongodb_offline_control_node_root` | String |MongoDB control node root dirctory | `{{ offline_control_node_root }}/{{ mongodb_offline_packages_root }}` |
+| `mongodb_offline_packages_root` | String | MongoDB packages root directory | `{{ offline_itential_packages_path }}/{{ platform_release }}/mongodb` |
+| `mongodb_offline_target_node_root` | String | MongoDB target node root directory | `{{ offline_target_node_root }}/{{ mongodb_offline_packages_root }}` |
+| `mongodb_offline_control_node_root` | String |MongoDB control node root directory | `{{ offline_control_node_root }}/{{ mongodb_offline_packages_root }}` |
 | `mongodb_offline_target_node_rpms_dir` | String | MongoDB target node RPMs directory | `{{ mongodb_offline_target_node_root }}/rpms` |
 | `mongodb_offline_target_node_wheels_dir` | String | MongoDB target node wheels directory | `{{ mongodb_offline_target_node_root }}/wheels` |
 | `mongodb_offline_control_node_rpms_dir` | String |MongoDB control node RPMs directory | `{{ mongodb_offline_control_node_root }}/rpms` |
@@ -248,9 +248,9 @@ The following variables are defined in the `os` role.
 
 | Variable | Type | Description | Default |
 | :------- | :--- | :---------- | :------ |
-| `os_offline_packages_root` | String | OS packages root dirctory | `{{ offline_itential_packages_path }}/{{ platform_release }}/os` |
-| `os_offline_target_node_root` | String | OS target node root dirctory | `{{ offline_target_node_root }}/{{ os_offline_packages_root }}` |
-| `os_offline_control_node_root` | String | OS control node root dirctory | `{{ offline_control_node_root }}/{{ os_offline_packages_root }}` |
+| `os_offline_packages_root` | String | OS packages root directory | `{{ offline_itential_packages_path }}/{{ platform_release }}/os` |
+| `os_offline_target_node_root` | String | OS target node root directory | `{{ offline_target_node_root }}/{{ os_offline_packages_root }}` |
+| `os_offline_control_node_root` | String | OS control node root directory | `{{ offline_control_node_root }}/{{ os_offline_packages_root }}` |
 | `os_offline_target_node_rpms_dir` | String | OS target node RPMs directory | `{{ os_offline_target_node_root }}/rpms` |
 | `os_offline_control_node_rpms_dir` | String | OS control node RPMs directory | `{{ os_offline_control_node_root }}/rpms` |
 
@@ -260,9 +260,9 @@ The following variables are defined in the `redis` role.
 
 | Variable | Type | Description | Default |
 | :------- | :--- | :---------- | :------ |
-| `redis_offline_packages_root` | String | Redis packages root dirctory | `{{ offline_itential_packages_path }}/{{ platform_release }}/redis` |
-| `redis_offline_target_node_root` | String | Redis target node root dirctory | `{{ offline_target_node_root }}/{{ redis_offline_packages_root }}` |
-| `redis_offline_control_node_root` | String | Redis control node root dirctory | `{{ offline_control_node_root }}/{{ redis_offline_packages_root }}` |
+| `redis_offline_packages_root` | String | Redis packages root directory | `{{ offline_itential_packages_path }}/{{ platform_release }}/redis` |
+| `redis_offline_target_node_root` | String | Redis target node root directory | `{{ offline_target_node_root }}/{{ redis_offline_packages_root }}` |
+| `redis_offline_control_node_root` | String | Redis control node root directory | `{{ offline_control_node_root }}/{{ redis_offline_packages_root }}` |
 | `redis_offline_target_node_rpms_dir` | String | Redis target node RPMs directory | `{{ redis_offline_target_node_root }}/rpms` |
 | `redis_offline_target_node_archives_dir` | String | Redis target node archives directory | `{{ redis_offline_target_node_root }}/archives` |
 | `redis_offline_control_node_rpms_dir` | String | Redis control node RPMs directory | `{{ redis_offline_control_node_root }}/rpms` |
@@ -274,8 +274,8 @@ The following variables are defined in the `vault` role.
 
 | Variable | Type | Description | Default |
 | :------- | :--- | :---------- | :------ |
-| `vault_offline_packages_root` | String | Vault packages root dirctory | `{{ offline_itential_packages_path }}/{{ platform_release }}/vault` |
-| `vault_offline_target_node_root` | String | Vault target node root dirctory | `{{ offline_target_node_root }}/{{ vault_offline_packages_root }}` |
-| `vault_offline_control_node_root` | String | Vault control node root dirctory | `{{ offline_control_node_root }}/{{ vault_offline_packages_root }}` |
+| `vault_offline_packages_root` | String | Vault packages root directory | `{{ offline_itential_packages_path }}/{{ platform_release }}/vault` |
+| `vault_offline_target_node_root` | String | Vault target node root directory | `{{ offline_target_node_root }}/{{ vault_offline_packages_root }}` |
+| `vault_offline_control_node_root` | String | Vault control node root directory | `{{ offline_control_node_root }}/{{ vault_offline_packages_root }}` |
 | `vault_offline_target_node_rpms_dir` | String | Vault target node RPMs directory | `{{ vault_offline_target_node_root }}/rpms` |
 | `vault_offline_control_node_rpms_dir` | String | Vault control node RPMs directory | `{{ vault_offline_control_node_root }}/rpms` |

@@ -171,7 +171,7 @@ all:
           ansible_host: <addr1>
 ```
 
-## Example Inventory - Single MongoDB Node overridding the default MongoDB version
+## Example Inventory - Single MongoDB Node overriding the default MongoDB version
 
 This example shows how to override the default version of MongoDB that is installed. Note that the
 `platform_release` variable is NOT specified and the packages are explicitly defined in the

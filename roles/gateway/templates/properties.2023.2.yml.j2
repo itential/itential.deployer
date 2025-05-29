@@ -127,10 +127,10 @@ audit: true
 # Records earlier than the specified days will be deleted. (default=None if absent/misconfigured)
 audit_retention_days: 30
 
-# Path to the auxillary Automation Gateway sqlite database file for audit logs.
+# Path to the auxiliary Automation Gateway sqlite database file for audit logs.
 audit_db_file: "sqlite:///{{ gateway_data_dir }}/automation-gateway_audit.db"
 
-# Path to the auxillary Automation Gateway sqlite database file for execution logs.
+# Path to the auxiliary Automation Gateway sqlite database file for execution logs.
 exec_history_db_file: "sqlite:///{{ gateway_data_dir }}/automation-gateway_exec_history.db"
 
 #######################
@@ -157,7 +157,7 @@ ldap_bind_user_dn: 'CN=admin,CN=users,DC=example,DC=com'
 ldap_bind_user_password: '<password>'
 
 #
-# LDAP Securitry
+# LDAP Security
 #
 
 # Enable LDAPS
@@ -385,7 +385,7 @@ vault_enabled: false
 # Hashicorp Vault operations. The file should be secured with 0400 permissions.
 #vault_access_token: "{{ gateway_install_dir }}/conf/.vault_token_file"
 
-# A flag that enables TLS certificate verification when sending reqests to the Hashicorp
+# A flag that enables TLS certificate verification when sending requests to the Hashicorp
 # Vault Server. (default=false if absent/misconfigured)
 #vault_cert_verification: false
 
