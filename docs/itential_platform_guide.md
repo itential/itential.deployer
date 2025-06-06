@@ -173,7 +173,7 @@ variables located in `roles/platform/defaults/main/redis.yml`.
 | Variable | Type | Description | Default Value |
 | :------- | :--- | :---------- | :------------ |
 | platform_redis_db | Integer | The Redis keyspace (database number) to use for the connection. | 0 |
-| platform_redis_auth_enabled | String | Flag to enable Redis authentication. | `false` |
+| platform_redis_auth_enabled | String | Flag to enable Redis authentication. | `true` |
 | platform_redis_username | String | The username to use when connecting to Redis. | `itential` |
 | platform_redis_password | String | The password to use when connecting to Redis. | `itential` |
 | platform_redis_max_retries_per_request | Integer |  The maximum number of times to retry a request to Redis when the connection is lost. | 20 |
@@ -253,7 +253,7 @@ variables located in `roles/platform/defaults/main/mongodb.yml`.
 
 | Variable | Type | Description | Default Value |
 | :------- | :--- | :---------- | :------------ |
-| platform_mongo_auth_enabled | Boolean | Instructs the MongoDB driver to use the configured username/password when connecting to MongoDB. | `false` |
+| platform_mongo_auth_enabled | Boolean | Instructs the MongoDB driver to use the configured username/password when connecting to MongoDB. | `true` |
 | platform_mongo_user | String | The username to use when connecting to MongoDB. | `itential` |
 | platform_mongo_password | String | The password to use when connecting to MongoDB. | `itential` |
 | platform_mongo_auth_db | String | The name of the database that the MongoDB user must authenticate against. |  |
@@ -308,7 +308,6 @@ located in `roles/platform/defaults/main/server.yml`.
 | platform_services | List | A whitelist of services (applications/adapters) to initialize on startup of the platform. If no value is given, all services will be initialized. |  |
 | platform_service_blacklist | List | The service type that will be denied CRUD operation access. |  |
 | platform_encrypted | Boolean | Indicates whether the platform is using encrypted code files. | `true` |
-| platform_encryption_key | String | 64-length hex string describing a 256 bit encryption key. This MUST be provided to deployer! |  |
 | platform_shutdown_timeout | Integer | The amount of time a service should wait before shutting down, in seconds. | 3 |
 | platform_service_launch_delay | Integer | The application/adapter launch delay, in seconds. | 1 |
 | platform_service_launch_timeout | Integer | The application/adapter launch timeout, in seconds. | 600 |
@@ -369,18 +368,11 @@ all:
         platform_packages:
           - <rpm1>
           - <rpmN>
-        platform_adapters: true
         platform_adapters:
           - <git_repo1>
           - <git_repoN>
           - <zip_archive1>
           - <zip_archiveN>
-        platform_custom_adapters:
-          - <git_repo1>
-          - <git_repoN>
-          - <zip_archive1>
-          - <zip_archiveN>
-        platform_custom_location: <location>
 ```
 
 ### Example Inventory - Install App-Artifact
