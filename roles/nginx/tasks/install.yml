@@ -1,0 +1,28 @@
+# Copyright (c) 2025, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Add NGINX repository
+  ansible.builtin.yum_repository:
+    name: nginx
+    description: nginx repo
+    baseurl: http://nginx.org/packages/rhel/$releasever/$basearch/
+    gpgcheck: true
+    gpgkey: https://nginx.org/keys/nginx_signing.key
+    enabled: true
+
+- name: Install NGINX
+  ansible.builtin.package:
+    name: nginx
+    state: present
+
+- name: Ensure Nginx directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  loop:
+    - "{{ nginx_sites_available }}"
+    - "{{ nginx_sites_enabled }}"
+    - /var/log/nginx

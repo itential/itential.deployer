@@ -1,0 +1,19 @@
+# Copyright (c) 2025, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+
+- name: Install and configure Nginx
+  ansible.builtin.include_tasks: install.yml
+
+- name: Configure load balancer
+  ansible.builtin.include_tasks: configure.yml
+
+- name: Setup SSL (if enabled)
+  ansible.builtin.include_tasks: ssl.yml
+  when: nginx_enable_ssl | bool
+
+- name: Start and enable Nginx service
+  ansible.builtin.include_tasks: service.yml
+
+- name: Validate configuration
+  ansible.builtin.include_tasks: validate.yml

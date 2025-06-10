@@ -1,0 +1,10 @@
+# Copyright (c) 2025, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+
+# Internal variables
+nginx_upstream_name: backend_servers
+nginx_conf_dir: /etc/nginx
+nginx_conf_file: "{{ nginx_conf_dir }}/nginx.conf"
+nginx_sites_available: "{{ nginx_conf_dir }}/sites-available"
+nginx_sites_enabled: "{{ nginx_conf_dir }}/sites-enabled"

@@ -1,0 +1,40 @@
+# Copyright (c) 2025, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Ensure SSL certificate directory exists
+  ansible.builtin.file:
+    path: "{{ item | dirname }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  loop:
+    - "{{ nginx_ssl_certificate }}"
+    - "{{ nginx_ssl_certificate_key }}"
+
+- name: Check if SSL certificates exist
+  ansible.builtin.stat:
+    path: "{{ item }}"
+  register: ssl_cert_check
+  loop:
+    - "{{ nginx_ssl_certificate }}"
+    - "{{ nginx_ssl_certificate_key }}"
+
+- name: Generate self-signed certificate (if certificates don't exist)
+  ansible.builtin.command: |
+    openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+    -keyout {{ nginx_ssl_certificate_key }} \
+    -out {{ nginx_ssl_certificate }} \
+    -subj "/C=US/ST=State/L=City/O=Organization/CN={{ nginx_vhost_domain }}"
+  when: ssl_cert_check.results | selectattr('stat.exists', 'equalto', false) | list | length > 0
+  changed_when: true
+
+- name: Set proper permissions on SSL files
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - { path: "{{ nginx_ssl_certificate }}", mode: '0644' }
+    - { path: "{{ nginx_ssl_certificate_key }}", mode: '0600' }

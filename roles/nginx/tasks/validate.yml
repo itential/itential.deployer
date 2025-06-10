@@ -1,0 +1,21 @@
+# Copyright (c) 2025, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Test Nginx configuration
+  ansible.builtin.command: nginx -t
+  register: nginx_config_test
+  changed_when: false
+
+- name: Display configuration test results
+  ansible.builtin.debug:
+    msg: "Nginx configuration test: {{ nginx_config_test.stderr }}"
+
+- name: Verify Nginx is listening on configured ports
+  ansible.builtin.wait_for:
+    port: "{{ item }}"
+    host: 0.0.0.0
+    timeout: 10
+  loop:
+    - "{{ nginx_vhost_port }}"
+    - "{{ nginx_vhost_ssl_port if nginx_enable_ssl else [] }}"
+  when: item != []

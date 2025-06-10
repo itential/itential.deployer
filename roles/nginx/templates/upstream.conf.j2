@@ -1,0 +1,12 @@
+upstream {{ nginx_upstream_name }} {
+    {% if nginx_lb_method is defined %}
+    {{ nginx_lb_method }}; 
+    {% endif %}
+    {% if nginx_lb_keepalive is defined %}
+    keepalive {{ nginx_lb_keepalive }};
+    {% endif %}
+    
+{% for server in nginx_backend_servers %}
+    server {{ server.address }}:{{ server.port }}{% if server.weight is defined %} weight={{ server.weight }}{% endif %}{% if server.max_fails is defined %} max_fails={{ server.max_fails }}{% endif %}{% if server.fail_timeout is defined %} fail_timeout={{ server.fail_timeout }}{% endif %};
+{% endfor %}
+}

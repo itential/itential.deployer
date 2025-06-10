@@ -1,0 +1,44 @@
+# Copyright (c) 2025, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+
+# Nginx installation settings
+nginx_type: opensource
+nginx_branch: mainline
+nginx_install_from: nginx_repository
+
+# Load balancer configuration
+nginx_lb_method: least_conn  # least_conn, ip_hash, hash, random
+nginx_lb_keepalive: 65
+
+# Virtual host configuration
+nginx_vhost_domain: itential
+nginx_vhost_port: 3000
+nginx_vhost_ssl_port: 3443
+
+
+nginx_enable_ssl: false
+
+# SSL configuration (when enabled)
+nginx_ssl_certificate: /etc/ssl/certs/nginx.crt
+nginx_ssl_certificate_key: /etc/ssl/private/nginx.key
+nginx_ssl_protocols: "TLSv1.2 TLSv1.3"
+nginx_ssl_ciphers: "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384"
+
+# Health check configuration
+nginx_health_check_enabled: false
+nginx_health_check_path: /health
+nginx_health_check_interval: 30s
+nginx_health_check_timeout: 5s
+
+# Logging configuration
+nginx_access_log: /var/log/nginx/access.log
+nginx_error_log: /var/log/nginx/error.log
+nginx_log_level: warn
+
+# Additional Nginx modules
+nginx_modules:
+  - name: http_realip_module
+    enable: true
+  - name: http_stub_status_module
+    enable: true

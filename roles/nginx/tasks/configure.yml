@@ -1,0 +1,74 @@
+# Copyright (c) 2025, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Generate main Nginx configuration
+  ansible.builtin.template:
+    src: nginx.conf.j2
+    dest: "{{ nginx_conf_file }}"
+    owner: root
+    group: root
+    mode: '0644'
+    backup: true
+  notify: reload nginx
+
+- name: Generate upstream configuration
+  ansible.builtin.template:
+    src: upstream.conf.j2
+    dest: "{{ nginx_conf_dir }}/conf.d/upstream.conf"
+    owner: root
+    group: root
+    mode: '0644'
+  notify: reload nginx
+
+- name: Generate virtual host configuration
+  ansible.builtin.template:
+    src: vhost.conf.j2
+    dest: "{{ nginx_sites_available }}/{{ nginx_vhost_domain }}"
+    owner: root
+    group: root
+    mode: '0644'
+  notify: reload nginx
+
+- name: Enable virtual host
+  ansible.builtin.file:
+    src: "{{ nginx_sites_available }}/{{ nginx_vhost_domain }}"
+    dest: "{{ nginx_sites_enabled }}/{{ nginx_vhost_domain }}"
+    state: link
+  notify: reload nginx
+
+- name: Remove default Nginx site
+  ansible.builtin.file:
+    path: "{{ nginx_sites_enabled }}/default"
+    state: absent
+  notify: reload nginx
+
+- name: Check SELinux status
+  ansible.builtin.command: getenforce
+  register: selinux_status
+  changed_when: false
+
+- name: Set SELinux booleans for nginx
+  ansible.posix.seboolean:
+    name: "{{ item }}"
+    state: true
+    persistent: true
+  loop:
+    - httpd_can_network_connect
+    - httpd_unified
+    - nis_enabled
+    - httpd_enable_homedirs
+  when: selinux_status.stdout == "Enforcing"
+
+- name: Restore SELinux context for nginx files and dirs
+  ansible.builtin.command: restorecon -Rv {{ item }}
+  loop:
+    - /var/log/nginx
+    - /run
+    - /etc/nginx
+  when: selinux_status.stdout == "Enforcing"
+  changed_when: restorecon_result.stdout != ""
+
+- name: Inform if SELinux is not Enforcing
+  ansible.builtin.debug:
+    msg: "SELinux is not enforcing. Skipping SELinux config."
+  when: selinux_status.stdout != "Enforcing"
