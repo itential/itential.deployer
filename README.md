@@ -235,6 +235,11 @@ the Deployer will either install the required repository or download the package
 If internal YUM repositories are used, refer to the
 [Using Internal YUM Repositories](#using-internal-yum-repositories) section.
 
+> [! WARNING]
+> The Itential Deployer nor the maintainers of the project can not know if any of the above URLs
+> will result in a redirect. If a customer is using a proxy or other such method to restrict access
+> this list may not represent the final URLs that are used.
+
 ### Ports and Networking
 
 In a clustered environment where components are installed on more than one host, the following
