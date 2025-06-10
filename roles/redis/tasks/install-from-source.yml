@@ -97,7 +97,6 @@
         target: install
         params:
           USE_SYSTEMD: true
-          BULID_TLS: true
           PREFIX: "{{ redis_bin_dir | dirname }}"
       tags: make_redis
 
