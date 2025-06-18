@@ -19,9 +19,6 @@ redis_db_filename: dump.rdb
 # The location of the Redis data directory
 redis_data_dir: "{{ redis_data_dir_default }}"
 
-# The location of the Redis data directory
-redis_pid_dir: "{{ redis_pid_dir_default }}"
-
 # Redis user and group
 redis_owner: redis
 redis_group: redis

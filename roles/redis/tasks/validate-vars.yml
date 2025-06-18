@@ -60,6 +60,15 @@
               redis_source_url cannot be defined
               when redis_install_from_source is set to false
 
+        - name: Validate directories are not overridden when installing from packages
+          ansible.builtin.assert:
+            that:
+              - redis_bin_dir == redis_bin_dir_default_packages
+              - redis_conf_dir == redis_conf_dir_default
+              - redis_data_dir == redis_data_dir_default
+              - redis_log_dir == redis_log_dir_default
+            fail_msg: default directories cannot be overridden when installing from packages
+
     - name: Set installation variables when using Itential Platform release defaults
       when: platform_release is defined
       block:

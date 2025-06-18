@@ -26,7 +26,7 @@
         tasks_from: download-rpms
       vars:
         offline_download_method: yum_module
-        offline_download_packages: "{{ redis_package_dependencies }} "
+        offline_download_packages: "{{ redis_dependency_packages }} "
         offline_download_dir: "{{ redis_offline_target_node_rpms_dir }}/dependencies"
 
     - name: Copy Redis dependency RPMs to control node
