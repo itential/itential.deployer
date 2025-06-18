@@ -80,8 +80,9 @@ The following tables lists the default variables located in `roles/redis/default
 | Variable | Type | Description | Default Value |
 | :------- | :--- | :---------- | :------------ |
 | `redis_install_from_source` | String | The method used to install Redis. Set to `true` to install from source (default). Set to `false` to install using DNF packages. | `true` |
-| `redis_package_dependencies` | List | The dependency packages required to run Redis | See role. |
-| `redis_build_dependencies` | List | The packages required to build Redis from source | See role. |
+| `redis_dependency_packages` | List | The dependency packages required to run Redis | See role. |
+| `redis_build_packages` | List | The packages required to build Redis from source | See role. |
+| `redis_security_packages` | List | The packages required to configure SELinux | See role. |
 | `redis_packages` | List | The Redis packages to install | Varies depending on OS and Platform release |
 | `redis_source_url` | String | The Redis source URL | Varies depending on OS and Platform release |
 | `redis_remi_repo_url` | String | The URL of the Remi repo RPM. Note: this is only used when the `redis_install_from_source` is set to `false` and the Remi packages are being installed. | `http://rpms.remirepo.net/enterprise/remi-release-{{ ansible_distribution_major_version }}.rpm` |
@@ -100,7 +101,6 @@ The following tables lists the default variables located in `roles/redis/default
 | `redis_log` | String | The location of the Redis log file. | `/var/log/redis/redis.log` |
 | `redis_db_filename` | String | The name of the Redis data file. | `dump.rdb` |
 | `redis_data_dir` | String | The location of the Redis data directory. | `/var/lib/redis` |
-| `redis_pid_dir` | String | The Redis PID directory. | `/var/run` |
 | `redis_port` | Integer | The Redis listen port. | `6379` |
 | `redis_owner` | String | The Redis Linux user. | `redis` |
 | `redis_group` | String | The Redis Linux group. | `redis` |

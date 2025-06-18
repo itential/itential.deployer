@@ -43,7 +43,9 @@
         - name: Include tasks to configure SELinux
           ansible.builtin.include_tasks:
             file: configure-selinux.yml
-          when: ansible_selinux.status == "enabled"
+          when:
+            - ansible_selinux.status == "enabled"
+            - redis_install_from_source | bool
 
     - name: Configure Redis/Sentinel
       tags: configure_redis
