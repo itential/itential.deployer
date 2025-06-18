@@ -1,5 +1,20 @@
 # Changelog
 
+## v3.2.0 (June 18, 2025)
+
+* Add warning to docs about urls that may include redirects  https://github.com/itential/itential.deployer/pull/205
+* Change Remi repo URL to use OS version instead of major version  https://github.com/itential/itential.deployer/pull/201
+* Consolidate common configuration tasks in platform role  https://github.com/itential/itential.deployer/pull/203
+* Copy edits  https://github.com/itential/itential.deployer/pull/197
+* Fix inconsistencies in Platform Guide  https://github.com/itential/itential.deployer/pull/204
+* Fix redis selinux configuration  https://github.com/itential/itential.deployer/pull/207
+* Update prometheus documentation  https://github.com/itential/itential.deployer/pull/202
+* Update required repositories in README  https://github.com/itential/itential.deployer/pull/200
+* updated README to include platform rpm  https://github.com/itential/itential.deployer/pull/196
+
+Full Changelog: https://github.com/itential/itential.deployer/compare/v3.1.1...v3.2.0 
+
+
 ## v3.1.1 (April 07, 2025)
 
 * Add umask to offline pip installs  https://github.com/itential/itential.deployer/pull/192
@@ -7,6 +22,7 @@
 * Offline install adapter overwrite fix  https://github.com/itential/itential.deployer/pull/194
 * Remove build packages only when installed with deployer  https://github.com/itential/itential.deployer/pull/191
 * Remove default encryption key, require this key for execution  https://github.com/itential/itential.deployer/pull/195
+* Update galaxy version and changelog for release 3.1.1 [skip ci]
 
 Full Changelog: https://github.com/itential/itential.deployer/compare/v3.1.0...v3.1.1 
 
