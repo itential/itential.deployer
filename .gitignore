@@ -8,3 +8,4 @@
 **/*.pem
 **/*.log
 **/*.keep
+hosts.yaml
