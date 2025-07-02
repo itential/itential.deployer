@@ -413,7 +413,7 @@ To execute all Platform roles, run the `platform` playbook:
 ansible-playbook itential.deployer.platform -i <inventory>
 ```
 
-The Platform playbook supports the following tags:
+The Platform playbook and role supports the following tags:
 
 | Tag | Tasks |
 | :-- | :---- |
@@ -429,7 +429,7 @@ The Platform playbook supports the following tags:
 | configure_platform | Configure Itential Platform systemd service and properties file |
 
 For example, to regenerate the systemd service script and platform.properties file run the platform 
-role with the `configure_platform` tag:
+playbook with the `configure_platform` tag:
 
 ```bash
 ansible-playbook itential.deployer.platform -i <inventory> --tags configure_platform
