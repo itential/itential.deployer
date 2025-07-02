@@ -57,7 +57,7 @@ mongodb_itential_db_name: itential
 # or TLS settings applied.
 mongodb_replication_enabled: false
 mongodb_auth_enabled: true
-mongodb_tls_enabled: true
+mongodb_tls_enabled: false
 
 # Default mongo user passwords
 # These are meant to be changed by the customer. By default they are meant to
