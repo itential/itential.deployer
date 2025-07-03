@@ -14,7 +14,7 @@ generating the root key for the server, and enabling the KV secrets engine used 
 Platform secrets.
 
 This role should not be used on production as it does not follow robust security practices. It is
-intended to for development environments as an integration testing point. The root token and the
+intended for development environments as an integration testing point. The root token and the
 unseal keys are written to the local file system. They must be backed up and considered carefully.
 
 ## Variables
