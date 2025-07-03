@@ -39,3 +39,9 @@
     mode: "0644"
   vars:
     stage: "tls"
+
+- name: Start mongo
+  ansible.builtin.systemd:
+    name: mongod
+    state: restarted
+    enabled: true
