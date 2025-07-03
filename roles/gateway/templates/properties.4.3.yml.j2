@@ -89,6 +89,10 @@ http_logging_level: INFO
 #          variable from your host's variables "{% raw %}{{commands}}{% endraw %}", etc.
 strict_args: true
 
+# Enabling this property masks the device variables "password" and "ansible_password" in any GET
+# request response for any device type.
+mask_device_passwords: true
+
 ################
 # SSL Settings #
 ################
