@@ -85,6 +85,7 @@
     - "{{ gateway_install_dir }}/repos"
     - "{{ gateway_install_dir }}/scripts"
     - "{{ gateway_install_dir }}/ssh"
+    - "{{ gateway_ssl_dir }}"
 
 - name: Create Python venv directory
   ansible.builtin.file:

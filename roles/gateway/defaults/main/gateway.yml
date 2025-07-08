@@ -39,7 +39,7 @@ gateway_group: itential
 gateway_https: false
 gateway_https_port: 8443
 gateway_ssl_copy_certs: true
-gateway_ssl_dir: "{{ gateway_install_dir }}/conf/certs"
+gateway_ssl_dir: "/etc/ssl/itential-gateway"
 gateway_ssl_cert_src: server.crt
 gateway_ssl_cert_dest: "{{ gateway_ssl_dir }}/{{ gateway_ssl_cert_src }}"
 gateway_ssl_key_src: server.key
