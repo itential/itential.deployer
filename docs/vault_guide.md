@@ -13,6 +13,11 @@ required to setup the Vault server. Steps include initializing the server, unsea
 generating the root key for the server, and enabling the KV secrets engine used to store Itential
 Platform secrets.
 
+[!WARNING] This role should not be used on production as it does not follow robust security
+practices. It is intended for development environments as an integration testing point. The
+root token and the unseal keys are written to the local file system. They must be backed up and
+considered carefully.
+
 ## Variables
 
 ### Static Variables
