@@ -2,8 +2,8 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
 platform_nodejs_package_default:
-  "8": "@nodejs:22/common"
-  "9": "@nodejs:22"
+  "8": "@nodejs:20/common"
+  "9": "@nodejs:20"
   "2023": "nodejs"
 
 platform_python_version_default:
