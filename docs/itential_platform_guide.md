@@ -184,7 +184,7 @@ variables located in `roles/platform/defaults/main/redis.yml`.
 | platform_redis_sentinel_username | String | The username to use when connecting to Sentinel. | `sentineluser` |
 | platform_redis_sentinel_password | String | The password to use when connecting to Sentinel. | `sentineluser` |
 | platform_redis_name | String | The Redis primary name. This only has meaning when Redis is running with replication enabled. The sentinels will monitor this node and consider it down only when the sentinels agree. Note: The primary name should not include special characters other than: .-_ and no whitespaces. | `itentialmaster` |
-| platform_redis_tls_enabled | Object | Redis TLS configuration options for secure connections. Refer to NodeJS TLS library for all supported options. |  |
+| platform_redis_tls | Object | Redis TLS configuration options for secure connections. Refer to NodeJS TLS library for all supported options. |  |
 
 #### SNMP Variables
 
