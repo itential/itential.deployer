@@ -1,0 +1,13 @@
+{{ mongodb_log_dir }}/mongod.log {
+    daily
+    rotate 7
+    compress
+    delaycompress
+    missingok
+    notifempty
+    create 0640 {{ mongodb_owner }} {{ mongodb_group }}
+    sharedscripts
+    postrotate
+        /bin/systemctl kill -s HUP mongod.service >/dev/null 2>&1 || true
+    endscript
+}

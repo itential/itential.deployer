@@ -1,0 +1,22 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Ensure logrotate is installed
+  ansible.builtin.package:
+    name: logrotate
+    state: present
+  tags: enable_logrotate
+
+- name: Deploy logrotate configuration for MongoDB
+  ansible.builtin.template:
+    src: mongod.logrotate.j2
+    dest: /etc/logrotate.d/mongod
+    owner: root
+    group: root
+    mode: '0644'
+  tags: enable_logrotate
+
+- name: (Optional) Force logrotate for MongoDB (for testing)
+  ansible.builtin.command: logrotate -f /etc/logrotate.d/mongod
+  when: force_logrotate|default(false)
+  tags: configure_logrotate
