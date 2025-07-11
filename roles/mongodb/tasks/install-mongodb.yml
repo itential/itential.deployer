@@ -63,6 +63,11 @@
     - ansible_facts.selinux.status == 'enabled'
     - ansible_facts.selinux.mode == 'enforcing'
 
+- name: Configure logrotate for MongoDB
+  ansible.builtin.include_tasks:
+    file: configure-mongodb-logrotate.yml
+  tags: configure_logrotate
+
 # Check if firewalld is running, if it is then open the appropriate ports
 - name: Gather service facts
   ansible.builtin.service_facts:
