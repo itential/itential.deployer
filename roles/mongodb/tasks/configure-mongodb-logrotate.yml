@@ -2,6 +2,7 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
 - name: "Patch mongod.conf to ensure logRotate: reopen is present (backward compatibility)"
+  tags: configure_logrotate
   block:
     - name: "Check if logRotate: reopen is present in mongod.conf"
       ansible.builtin.shell: "grep -E '^\\s*logRotate:\\s*reopen' {{ mongodb_conf_file }}"
@@ -17,7 +18,6 @@
         insertafter: '^systemLog:'
         state: present
       when: logrotate_line.rc != 0
-  tags: configure_logrotate
 
 - name: Deploy logrotate configuration for MongoDB
   ansible.builtin.template:
