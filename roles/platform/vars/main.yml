@@ -6,3 +6,4 @@ platform_root_dir: /opt/itential/platform
 platform_install_dir: "{{ platform_root_dir }}/server"
 platform_service_dir: "{{ platform_root_dir }}/services"
 platform_config_dir: /etc/itential
+platform_tls_dir: /etc/ssl/itential-platform
