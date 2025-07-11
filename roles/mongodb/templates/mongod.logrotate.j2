@@ -1,13 +1,37 @@
+# Logrotate configuration for MongoDB logs
+# -----------------------------------------------------
+# This file is managed by Ansible.
+# Safe to edit, but if you re-run automation, it may be overwritten.
+#
+# To customize retention, compression, or post-rotate actions, edit below.
+# You can change values such as 'rotate', 'daily', or the 'create' directive
+# as needed for your environment.
+
 {{ mongodb_log_dir }}/mongod.log {
+    # How often to rotate (change to weekly/monthly if desired)
     daily
+
+    # How many rotations to keep (increase/decrease as needed)
     rotate 7
+
+    # Enable compression for old logs (can comment to disable)
     compress
     delaycompress
+
+    # Don't complain if log is missing or empty
     missingok
     notifempty
+
+    # File permissions & ownership for new logs
     create 0640 {{ mongodb_owner }} {{ mongodb_group }}
+
+    # Ensures only one rotation at a time if multiple logs exist
     sharedscripts
+
+    # What to do after rotation (do not remove HUP unless you know what you are doing)
     postrotate
         /bin/systemctl kill -s HUP mongod.service >/dev/null 2>&1 || true
     endscript
 }
+
+# For further options, see 'man logrotate' or consult Ansible role documentation.
