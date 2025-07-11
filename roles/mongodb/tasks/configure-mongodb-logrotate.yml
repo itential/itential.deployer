@@ -5,7 +5,7 @@
   ansible.builtin.package:
     name: logrotate
     state: present
-  tags: enable_logrotate
+  tags: configure_logrotate
 
 - name: Deploy logrotate configuration for MongoDB
   ansible.builtin.template:
