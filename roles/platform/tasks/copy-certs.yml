@@ -21,7 +21,7 @@
 - name: Put the HTTPS key file in the correct location
   ansible.builtin.copy:
     src: "{{ platform_keyfile_source }}"
-    dest: "{{ platform_tls_dir }}/private"
+    dest: "{{ platform_tls_dir }}/private/server.key"
     mode: "0640"
     owner: root
     group: itential
@@ -29,7 +29,7 @@
 - name: Put the HTTPS cert file in the correct location
   ansible.builtin.copy:
     src: "{{ platform_certfile_source }}"
-    dest: "{{ platform_tls_dir }}"
+    dest: "{{ platform_tls_dir }}/certs/server.crt"
     mode: "0644"
     owner: root
     group: root
