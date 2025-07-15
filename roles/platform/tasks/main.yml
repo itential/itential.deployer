@@ -102,13 +102,12 @@
           ansible.builtin.include_tasks:
             file: configure-vault.yml
 
-    # TODO: Re-work the copy certs tasks
-    # - name: Copy certs
-    #   tags: copy_certs
-    #   block:
-    #     - name: Copy certs
-    #       ansible.builtin.include_tasks:
-    #         file: copy-certs.yml
+    - name: Copy certs
+      tags: copy_certs
+      block:
+        - name: Copy certs
+          ansible.builtin.include_tasks:
+            file: copy-certs.yml
 
     - name: Configure Platform
       tags: configure_platform
