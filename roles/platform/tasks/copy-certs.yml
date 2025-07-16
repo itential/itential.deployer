@@ -2,34 +2,45 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
 
-# TODO:  Do we want to continue to support copying the cert?
-#        Should the cert/key be copied to /etc/ssl?
+- name: Ensure the private directory exists
+  ansible.builtin.file:
+    path: "{{ platform_tls_dir }}/private"
+    state: directory
+    owner: root
+    group: itential
+    mode: '0750'
+
+- name: Ensure the certs directory exists
+  ansible.builtin.file:
+    path: "{{ platform_tls_dir }}/certs"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
 
 - name: Put the HTTPS key file in the correct location
   ansible.builtin.copy:
-    remote_src: true
-    src: "{{ platform_install_dir }}/keys/key.pem"
-    dest: "{{ platform_install_dir }}/keys/itential.key"
-    mode: "0400"
-    owner: "{{ platform_user }}"
-    group: "{{ platform_group }}"
+    src: "{{ platform_keyfile_source }}"
+    dest: "{{ platform_webserver_https_key }}"
+    mode: "0640"
+    owner: root
+    group: itential
 
 - name: Put the HTTPS cert file in the correct location
   ansible.builtin.copy:
-    remote_src: true
-    src: "{{ platform_install_dir }}/keys/cert.pem"
-    dest: "{{ platform_install_dir }}/keys/itential.cert"
-    mode: "0400"
-    owner: "{{ platform_user }}"
-    group: "{{ platform_group }}"
+    src: "{{ platform_certfile_source }}"
+    dest: "{{ platform_webserver_https_cert }}"
+    mode: "0644"
+    owner: root
+    group: root
 
 - name: Copy MongoDB root CA file to the appropriate location
   ansible.builtin.copy:
     src: "{{ platform_mongodb_root_ca_file_source }}"
     dest: "{{ platform_mongodb_root_ca_file_destination }}"
     mode: "0400"
-    group: "{{ platform_group }}"
     owner: "{{ platform_user }}"
+    group: "{{ platform_group }}"
   when:
-    - mongodb_tls_enabled | bool
+    - platform_mongo_tls_enabled | bool
     - platform_mongodb_root_ca_file_source is defined
