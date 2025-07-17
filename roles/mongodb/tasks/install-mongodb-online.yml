@@ -12,20 +12,10 @@
   ansible.builtin.yum_repository:
     name: "mongodb"
     description: MongoDB Repository
-    baseurl: >-
-      {% if ansible_facts['distribution'] == 'OracleLinux' and ansible_facts['distribution_major_version'] == '9' %}
-      https://repo.mongodb.org/yum/redhat/9/mongodb-org/{{ mongodb_version }}/x86_64/
-      {% else %}
-      {{ mongodb_release_url }}
-      {% endif %}
+    baseurl: "{{ mongodb_release_url }}"
     enabled: true
     gpgcheck: true
-    gpgkey: >-
-      {% if ansible_facts['distribution'] == 'OracleLinux' and ansible_facts['distribution_major_version'] == '9' %}
-      https://www.mongodb.org/static/pgp/server-{{ mongodb_version }}.asc
-      {% else %}
-      {{ mongodb_gpgkey_url }}
-      {% endif %}
+    gpgkey: "{{ mongodb_gpgkey_url }}"
   when:
     - common_install_yum_repos | bool
     - "'mongodb-org' not in ansible_facts.packages"
