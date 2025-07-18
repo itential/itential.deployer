@@ -8,7 +8,7 @@
     update_cache: true
 
 # Install the mongodb repo if mongodb is not already installed
-- name: Install MongoDB repo (with Oracle Linux 9 handling)
+- name: Install MongoDB repo
   ansible.builtin.yum_repository:
     name: "mongodb"
     description: MongoDB Repository
@@ -19,7 +19,6 @@
   when:
     - common_install_yum_repos | bool
     - "'mongodb-org' not in ansible_facts.packages"
-
 
 # Install mongodb if mongodb is not already installed
 - name: Install MongoDB packages
