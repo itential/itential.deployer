@@ -14,7 +14,10 @@
     cmd: "{{ gateway_python_executable }} -m venv {{ gateway_venv_name }}"
   changed_when: true
 
-- name: Include the virtual environment in default shell
-  ansible.builtin.shell:
-    cmd: echo source {{ gateway_install_dir }}/{{ gateway_venv_name }}/bin/activate > /etc/profile.d/venv.sh
-  changed_when: true
+- name: Creat file to activate the virtual environment
+  ansible.builtin.template:
+    src: venv.sh.j2
+    dest: /etc/profile.d/venv.sh
+    mode: "0644"
+    owner: root
+    group: root
