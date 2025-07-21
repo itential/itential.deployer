@@ -1,5 +1,18 @@
 #! /bin/bash
 
+#
+# This script is intended to be used by Itential engineers for setting up their Deployer
+# development environments. It takes two arguments - a root directory and the URL of the
+# Deployer Git repo. The Deployer collection will be cloned into the directory
+# $ROOT_DIR/ansible_collections/itential/deployer. A default ansible.cfg will be created that
+# points Ansible to the cloned Deployer collection. Users must be in the
+# $ROOT_DIR/ansible_collections/itential/deployer directory when running the Deployer in order
+# to guarantee the correct playbooks and roles are executed.
+#
+# Example usage:
+#   $ sh init_dev_env.sh ~/deployer_workspace git@github.com:<USER>/deployer.git
+#
+
 if [ "$#" -ne 2 ]
 then
   echo "Usage: $0 <ROOT_DIR> <DEPLOYER_GIT_REPO>"
