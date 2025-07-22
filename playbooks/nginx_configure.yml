@@ -1,0 +1,94 @@
+# Copyright (c) 2025, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)---
+---
+- name: Configure nginx
+  hosts: nginx
+  become: true
+
+  tasks:
+    - name: Create SSL certificate directory
+      ansible.builtin.file:
+        path: "{{ nginx_config_http_template[0].config.servers[0].ssl.certificate | dirname }}"
+        state: directory
+        mode: "0755"
+        owner: "root"
+        group: "root"
+      when: nginx_config_http_template[0].config.servers[0].ssl.certificate is defined
+
+    - name: Copy the certificate file
+      ansible.builtin.copy:
+        src: "{{ nginx_ssl_certificate_file }}"
+        dest: "{{ nginx_config_http_template[0].config.servers[0].ssl.certificate }}"
+        mode: "0644"
+        owner: "root"
+        group: "root"
+      when: nginx_config_http_template[0].config.servers[0].ssl.certificate is defined
+
+    - name: Create SSL key directory
+      ansible.builtin.file:
+        path: "{{ nginx_config_http_template[0].config.servers[0].ssl.certificate_key | dirname }}"
+        state: directory
+        mode: "0755"
+        owner: "root"
+        group: "root"
+      when: nginx_config_http_template[0].config.servers[0].ssl.certificate_key is defined
+
+    - name: Copy the key file
+      ansible.builtin.copy:
+        src: "{{ nginx_ssl_key_file }}"
+        dest: "{{ nginx_config_http_template[0].config.servers[0].ssl.certificate_key }}"
+        mode: "0600"
+        owner: "{{ nginx_user }}"
+        group: "{{ nginx_group }}"
+      when: nginx_config_http_template[0].config.servers[0].ssl.certificate_key is defined
+
+    - name: Configure nginx
+      ansible.builtin.include_role:
+        name: nginxinc.nginx_config
+
+    - name: Configure SELinux http_port_t for port {{ nginx_config_http_template[0].config.servers[0].core.listen[0].port }}
+      community.general.seport:
+        ports: "{{ nginx_config_http_template[0].config.servers[0].core.listen[0].port }}"
+        proto: tcp
+        setype: http_port_t
+        state: present
+
+    - name: Allow nginx to make network connections
+      ansible.posix.seboolean:
+        name: httpd_can_network_connect
+        state: true
+        persistent: true
+
+    - name: Allow nginx to modify system files
+      ansible.posix.seboolean:
+        name: httpd_setrlimit
+        state: true
+        persistent: true
+
+    - name: Open Port on FirewallD Public Zone
+      ansible.posix.firewalld:
+        port: "{{ nginx_config_http_template[0].config.servers[0].core.listen[0].port }}/tcp"
+        permanent: true
+        state: enabled
+        zone: public
+        immediate: true
+      when:
+        - ansible_facts.services["firewalld.service"] is defined
+        - ansible_facts.services["firewalld.service"].state == "running"
+        - ansible_facts.services["firewalld.service"].status == "enabled"
+
+    - name: Restart nginx after configuration
+      ansible.builtin.systemd:
+        name: nginx
+        state: restarted
+
+    - name: Check nginx service status
+      ansible.builtin.systemd:
+        name: nginx
+        state: started
+      register: nginx_service_status
+
+    - name: Display nginx status summary
+      ansible.builtin.debug:
+        msg:
+          - "Nginx service status: {{ nginx_service_status.status.ActiveState }}"
