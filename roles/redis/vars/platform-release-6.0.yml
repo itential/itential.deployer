@@ -6,11 +6,11 @@
 # The redis_packages_default is used when the redis_install_from_source is set to 'false'
 redis_packages_default:
   "8":
-    - "@redis:remi-7.4"
+    - "@redis:remi-7.2"
   "9":
-    - "@redis:remi-7.4"
+    - "@redis:remi-7.2"
   "2023":
-    - "@redis:remi-7.4"
+    - "@redis:remi-7.2"
 
 # The redis_source_url_default is used when the redis_install_from_source is set to 'true'
 redis_source_url_default:
