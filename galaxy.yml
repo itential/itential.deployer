@@ -69,17 +69,27 @@ issues: https://github.com/itential/deployer/issues
 # Some directories and files like 'galaxy.yml', '*.pyc', '*.retry', and '.git' are always filtered.
 # Mutually exclusive with 'manifest'.
 build_ignore:
-  - .gitignore
-  - .gitlab-ci.yml
-  - ansible.cfg
-  - '*.log'
-  - '*.bin'
-  - '*.whl'
-  - '*.tgz'
-  - '*.gz'
-  - '*.pem'
-  - '*.cert'
+  # hidden directories
+  - .git
+  - .github
+  # hidden files
+  - .ansible-lint
+  - .git*
+  - .swp*
+  - .yamllint
+  - .DS_Store
+  # directories
   - scripts
+  # files
+  - ansible.cfg
+  - '*.bin'
+  - '*.cert'
+  - '*.gz'
+  - '*.keep*'
+  - '*.log'
+  - '*.pem'
+  - '*.tgz'
+  - '*.whl'
 
 # A dict controlling use of manifest directives used in building the collection artifact. The key
 # 'directives' is a list of MANIFEST.in style
