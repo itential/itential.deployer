@@ -80,12 +80,9 @@
     - name: Restart nginx after configuration
       ansible.builtin.systemd:
         name: nginx
-        state: restarted
-
-    - name: Check nginx service status
-      ansible.builtin.systemd:
-        name: nginx
         state: started
+        enabled: true
+        daemon_reload: true
       register: nginx_service_status
 
     - name: Display nginx status summary
