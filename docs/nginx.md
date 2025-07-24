@@ -252,28 +252,6 @@ all:
                 ip_hash: true
 ```
 
-### Example Inventory - SSL load balancer
-```yaml
-all:
-  vars:
-    platform_release: 6.0
-
-  children:
-    nginx:
-      hosts:
-        <host1>:
-          ansible_host: <nginx_ip_addr>
-      vars:
-        nginx_backend_servers:
-          - name: <backend_host_addr1>
-            address: <backend_ip_addr1>
-            port: <backend_port1>
-          - name: <backend_host_addr2>
-            address: <backend_ip_addr2>
-            port: <backend_port2>
-        nginx_vhost_ssl_port: <nginx_listening port>
-```
-
 ## Running the Playbooks
 
 To execute the installation and configuration of Nginx, run the `nginx` playbook:
