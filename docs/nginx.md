@@ -30,7 +30,7 @@ There are two `nginxinc.nginx_core` roles responsible for installing and configu
 There are no global variables.
 
 ### Nginx Role Variables
-There are many variable that can be used to install and configure Nginx that are documented in [nginxinc.nginx](https://github.com/nginxinc/ansible-role-nginx) and 
+There are many variables that can be used to install and configure Nginx that are documented in [nginxinc.nginx](https://github.com/nginxinc/ansible-role-nginx) and 
 [nginxinc.nginx_config](https://github.com/nginxinc/ansible-role-nginx-config) codebase
 
 ### Install Role Variables
