@@ -6,7 +6,7 @@
   block:
     - name: Ensure the private directory exists
       ansible.builtin.file:
-        path: "{{ platform_tls_dir }}/private"
+        path: "{{ platform_webserver_https_key | dirname }}"
         state: directory
         owner: root
         group: itential
@@ -14,7 +14,7 @@
 
     - name: Ensure the certs directory exists
       ansible.builtin.file:
-        path: "{{ platform_tls_dir }}/certs"
+        path: "{{ platform_webserver_https_cert | dirname }}"
         state: directory
         owner: root
         group: root
@@ -23,7 +23,7 @@
     - name: Put the HTTPS key file in the correct location
       ansible.builtin.copy:
         src: "{{ platform_keyfile_source }}"
-        dest: "{{ platform_tls_dir }}/private/{{ platform_webserver_https_key }}"
+        dest: "{{ platform_webserver_https_key }}"
         mode: "0640"
         owner: root
         group: itential
@@ -31,7 +31,7 @@
     - name: Put the HTTPS cert file in the correct location
       ansible.builtin.copy:
         src: "{{ platform_certfile_source }}"
-        dest: "{{ platform_tls_dir }}/certs/{{ platform_webserver_https_cert }}"
+        dest: "{{ platform_webserver_https_cert }}"
         mode: "0644"
         owner: root
         group: root
