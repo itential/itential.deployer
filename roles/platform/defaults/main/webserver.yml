@@ -23,14 +23,12 @@ platform_webserver_https_enabled: false
 platform_webserver_https_port: 3443
 
 # The path to the public key file used for HTTPS connections.
-# platform_webserver_https_key: "{{ platform_tls_dir }}/private/server.key"
 platform_webserver_https_key: "server.key"
 
 # The passphrase for the private key used to enable TLS sessions.
 platform_webserver_https_passphrase:
 
 # The path to the certificate file used for HTTPS connections.
-# platform_webserver_https_cert: "{{ platform_tls_dir }}/certs/server.crt"
 platform_webserver_https_cert: "server.crt"
 
 # The set of allowed SSL/TLS protocol versions.
