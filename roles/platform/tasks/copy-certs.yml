@@ -1,38 +1,40 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
+- name: Copy HTTPS key and cert files
+  when: platform_webserver_https_enabled | bool
+  block:
+    - name: Ensure the private directory exists
+      ansible.builtin.file:
+        path: "{{ platform_webserver_https_key | dirname }}"
+        state: directory
+        owner: root
+        group: itential
+        mode: '0750'
 
-- name: Ensure the private directory exists
-  ansible.builtin.file:
-    path: "{{ platform_tls_dir }}/private"
-    state: directory
-    owner: root
-    group: itential
-    mode: '0750'
+    - name: Ensure the certs directory exists
+      ansible.builtin.file:
+        path: "{{ platform_webserver_https_cert | dirname }}"
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
 
-- name: Ensure the certs directory exists
-  ansible.builtin.file:
-    path: "{{ platform_tls_dir }}/certs"
-    state: directory
-    owner: root
-    group: root
-    mode: '0755'
+    - name: Put the HTTPS key file in the correct location
+      ansible.builtin.copy:
+        src: "{{ platform_keyfile_source }}"
+        dest: "{{ platform_webserver_https_key }}"
+        mode: "0640"
+        owner: root
+        group: itential
 
-- name: Put the HTTPS key file in the correct location
-  ansible.builtin.copy:
-    src: "{{ platform_keyfile_source }}"
-    dest: "{{ platform_webserver_https_key }}"
-    mode: "0640"
-    owner: root
-    group: itential
-
-- name: Put the HTTPS cert file in the correct location
-  ansible.builtin.copy:
-    src: "{{ platform_certfile_source }}"
-    dest: "{{ platform_webserver_https_cert }}"
-    mode: "0644"
-    owner: root
-    group: root
+    - name: Put the HTTPS cert file in the correct location
+      ansible.builtin.copy:
+        src: "{{ platform_certfile_source }}"
+        dest: "{{ platform_webserver_https_cert }}"
+        mode: "0644"
+        owner: root
+        group: root
 
 - name: Copy MongoDB root CA file to the appropriate location
   ansible.builtin.copy:
