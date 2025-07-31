@@ -15,7 +15,7 @@
     dest: "{{ redis_sentinel_conf_file }}"
     owner: "{{ redis_owner }}"
     group: "{{ redis_group }}"
-    mode: "0660"
+    mode: "0640"
     setype: redis_conf_t
     backup: true
   when:
@@ -28,7 +28,7 @@
     dest: "{{ redis_sentinel_conf_file }}"
     owner: "{{ redis_owner }}"
     group: "{{ redis_group }}"
-    mode: "0660"
+    mode: "0640"
     setype: redis_conf_t
     backup: true
   when:
