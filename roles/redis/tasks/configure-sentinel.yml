@@ -15,7 +15,8 @@
     dest: "{{ redis_sentinel_conf_file }}"
     owner: "{{ redis_owner }}"
     group: "{{ redis_group }}"
-    mode: "0640"
+    mode: "0660"
+    setype: redis_conf_t
     backup: true
   when:
     - groups['redis'] is defined
@@ -27,7 +28,8 @@
     dest: "{{ redis_sentinel_conf_file }}"
     owner: "{{ redis_owner }}"
     group: "{{ redis_group }}"
-    mode: "0640"
+    mode: "0660"
+    setype: redis_conf_t
     backup: true
   when:
     - groups['redis_secondary'] is defined
