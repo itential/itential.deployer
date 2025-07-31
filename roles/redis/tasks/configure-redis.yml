@@ -16,5 +16,6 @@
     owner: "{{ redis_owner }}"
     group: "{{ redis_group }}"
     mode: "0640"
+    setype: redis_conf_t
     backup: true
   tags: configure_redis
