@@ -1,0 +1,17 @@
+# Copyright (c) 2025, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Install nginx
+  hosts: nginx
+  become: true
+
+  tasks:
+    - name: Install nginx
+      ansible.builtin.include_role:
+        name: nginxinc.nginx
+
+    - name: Ensure nginx is started and enabled
+      ansible.builtin.systemd:
+        name: nginx
+        state: started
+        enabled: true
