@@ -5,7 +5,9 @@
   ansible.builtin.include_vars:
     file: "{{ item }}"
   with_first_found:
-    - "{{ iag_release }}-{{ ansible_distribution | lower }}-{{ ansible_distribution_major_version }}.yml"
+    - "gateway-release-{{ gateway_release }}.yml" # Prefer this new format
+    - "{{ gateway_release }}-{{ ansible_distribution
+      | lower }}-{{ ansible_distribution_major_version }}.yml"
     - "release-undefined.yml"
 
 - name: Run common checks
@@ -26,7 +28,8 @@
     - results.cpuCores >= gateway_cpu_cores
     - results.get(mountvarname, 0) >= gateway_free_disk_space
     - results.memory >= gateway_ram
-    - results.url_status.values() | unique | length == 1 and results.url_status.values() | unique | first == 200
+    - results.url_status.values() | unique | length == 1 and
+      results.url_status.values() | unique | first == 200
 
 - name: Create Gateway preflight results
   ansible.builtin.template:
