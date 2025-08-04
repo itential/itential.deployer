@@ -248,18 +248,18 @@ inventory_file: "{{ iag_install_dir }}/ansible/inventory/hosts"
 # NOTE: Use only the site-packages paths you need for your installation to avoid
 #       cross environment issues in the case where multiple of these paths exist
 module_path:
-  - "{{ iag_install_dir }}/venv/lib/python3.9/site-packages/ansible/modules/network"
   - "{{ iag_install_dir }}/venv/lib/python3.9/site-packages/ansible/modules"
+  - "{{ iag_install_dir }}/ansible/modules"
 
 # Path(s) to the Ansible collections that should be discovered by Automation Gateway and exclusively used in Ansible's execution environment.
 # Due to differences in collections before/after Ansible 2.9, these will be the only paths relevant during discovery AND execution.
 collection_path:
   - "{{ iag_install_dir }}/ansible/collections"
-  - "{{ iag_install_dir }}/venv/lib/python3.9/site-packages/ansible_collections"
 
 # Path(s) to the Ansible roles that should be discovered by Automation Gateway and appended to Ansible's execution environment.
 role_path:
   - "{{ iag_install_dir }}/venv/lib/python3.9/site-packages/automation_gateway/integrations/roles"
+  - "{{ iag_install_dir }}/ansible/roles"
 
 # Path(s) to customized roles that extend device support of the Itential roles found in the release, i.e., itential_cli, itential_get_config.
 #extended_device_role_path:
@@ -274,6 +274,7 @@ playbook_recursive: true
 # Path(s) to the Ansible playbooks that should be discovered by Automation Gateway and appended to Ansible's execution environment.
 playbook_path:
   - "{{ iag_install_dir }}/venv/lib/python3.9/site-packages/automation_gateway/integrations/playbooks"
+  - "{{ iag_install_dir }}/ansible/playbooks"
 
 #################
 # HTTP_Requests #
