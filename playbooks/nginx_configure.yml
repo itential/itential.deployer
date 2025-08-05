@@ -10,6 +10,7 @@
       ansible.builtin.include_role:
         name: nginxinc.nginx_config
 
+    # TODO: Use NGINX variables to properly configure SELINUX and remove redundant tasks.
     - name: Configure SELinux http_port_t for port {{ nginx_config_http_template[0].config.servers[0].core.listen[0].port }}
       community.general.seport:
         ports: "{{ nginx_config_http_template[0].config.servers[0].core.listen[0].port }}"
