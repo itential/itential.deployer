@@ -6,6 +6,12 @@ This script outputs a changelog markdown to stdout.
 
 import subprocess
 import re
+import argparse
+from packaging.version import Version
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--end-tag', type=str, help='Optional end tag')
+args = parser.parse_args()
 
 # Get all the tags for the project
 git_tag_result = subprocess.run(
@@ -24,6 +30,10 @@ tags[:] = [x for x in tags if x]
 
 # Sort tags by semver number
 tags.sort(key = lambda x: [int(y) for y in x.split('.')])
+
+# Remove all tags newer than end tag
+if args.end_tag:
+    tags = [tag for tag in tags if Version(tag) <= Version(args.end_tag.lstrip('v'))]
 
 # Add v back into tags
 for i in range(len(tags)):

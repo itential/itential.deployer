@@ -1,6 +1,13 @@
 # Changelog
 
-## v2.6.0 (January 22, 2025)
+## v2.6.1 (August 07, 2025)
+
+* Fix Gateway Ansible config paths  https://github.com/itential/itential.deployer/pull/229
+
+Full Changelog: https://github.com/itential/itential.deployer/compare/v2.6.0...v2.6.1 
+
+
+## v2.6.0 (January 28, 2025)
 
 * Add support for installing Ansible collections on IAG servers  https://github.com/itential/itential.deployer/pull/110
 * Allow core to cleanup on systemctl stop  https://github.com/itential/itential.deployer/pull/113
@@ -10,6 +17,7 @@
 * Readme updates  https://github.com/itential/itential.deployer/pull/108
 * Uninstall build packages after installation  https://github.com/itential/itential.deployer/pull/105
 * Update ansible-lint.yml
+* Update galaxy version and changelog for release 2.6.0 [skip ci]
 * Update the mongo-key tasks change from single copy to slurp  https://github.com/itential/itential.deployer/pull/118
 
 Full Changelog: https://github.com/itential/itential.deployer/compare/v2.5.0...v2.6.0 
