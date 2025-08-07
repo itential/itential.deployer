@@ -1,5 +1,29 @@
 # Changelog
 
+## v3.3.0 (August 07, 2025)
+
+*  Set SELinux file type for redis config templates @Nick-Andreano  https://github.com/itential/itential.deployer/pull/227
+* Add Nginx support for setting up proxy to Platform  https://github.com/itential/itential.deployer/pull/225
+* Add disclaimer to vault role, its not intended for production use  https://github.com/itential/itential.deployer/pull/212
+* Add new property with default value  https://github.com/itential/itential.deployer/pull/208
+* Add script to initialize Deployer development environment  https://github.com/itential/itential.deployer/pull/223
+* Added conditional to move Platform HTTPS cert and key files  https://github.com/itential/itential.deployer/pull/226
+* Added logrotate configuration for MongoDB  https://github.com/itential/itential.deployer/pull/216
+* Change Redis version  https://github.com/itential/itential.deployer/pull/220
+* Change `venv.sh` permissions  https://github.com/itential/itential.deployer/pull/222
+* Change platform Nodejs version from 22 to 20  https://github.com/itential/itential.deployer/pull/217
+* Changed the directory structure for certificates for Platform  https://github.com/itential/itential.deployer/pull/215
+* Fix vars include in Gateway download and preflight  https://github.com/itential/itential.deployer/pull/228
+* Optimize ansible config paths  https://github.com/itential/itential.deployer/pull/218
+* Redis version  https://github.com/itential/itential.deployer/pull/224
+* Support Oracle Linux 9  https://github.com/itential/itential.deployer/pull/219
+* Support for ARM in mongo role  https://github.com/itential/itential.deployer/pull/221
+* TLS enabled for mongodb  https://github.com/itential/itential.deployer/pull/210
+* Update Platform Guide  https://github.com/itential/itential.deployer/pull/209
+
+Full Changelog: https://github.com/itential/itential.deployer/compare/v3.2.0...v3.3.0 
+
+
 ## v3.2.0 (June 18, 2025)
 
 * Add warning to docs about urls that may include redirects  https://github.com/itential/itential.deployer/pull/205
@@ -8,6 +32,7 @@
 * Copy edits  https://github.com/itential/itential.deployer/pull/197
 * Fix inconsistencies in Platform Guide  https://github.com/itential/itential.deployer/pull/204
 * Fix redis selinux configuration  https://github.com/itential/itential.deployer/pull/207
+* Update galaxy version and changelog for release 3.2.0 [skip ci]
 * Update prometheus documentation  https://github.com/itential/itential.deployer/pull/202
 * Update required repositories in README  https://github.com/itential/itential.deployer/pull/200
 * updated README to include platform rpm  https://github.com/itential/itential.deployer/pull/196
@@ -53,11 +78,19 @@ Full Changelog: https://github.com/itential/itential.deployer/compare/v3.0.0...v
 
 ## v3.0.0 (March 14, 2025)
 
+* Fix Gateway Ansible config paths  https://github.com/itential/itential.deployer/pull/229
 * Preflight Checks  https://github.com/itential/itential.deployer/pull/116
 * Release v3.0.0
 * Update galaxy version and changelog for release 3.0.0 [skip ci]
 
-Full Changelog: https://github.com/itential/itential.deployer/compare/v2.6.0...v3.0.0 
+Full Changelog: https://github.com/itential/itential.deployer/compare/v2.6.1...v3.0.0 
+
+
+## v2.6.1 (August 07, 2025)
+
+* Fix Gateway Ansible config paths  https://github.com/itential/itential.deployer/pull/229
+
+Full Changelog: https://github.com/itential/itential.deployer/compare/v2.6.0...v2.6.1 
 
 
 ## v2.6.0 (January 28, 2025)
