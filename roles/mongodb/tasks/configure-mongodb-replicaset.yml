@@ -31,7 +31,7 @@
     msg: "{{ mongodb_state }}"
 
 # Execute the template to apply changes to the mongo.conf for replication
-- name: Create MongoDB config file
+- name: Create MongoDB config file (replicaset)
   ansible.builtin.template:
     src: mongod.conf.j2
     dest: "{{ mongodb_conf_file }}"
@@ -43,10 +43,14 @@
     stage: "replication"
 
 - name: Start mongo
-  ansible.builtin.systemd:
+  ansible.builtin.service:
     name: mongod
     state: restarted
     enabled: true
+  register: mongod_service_result
+  until: mongod_service_result.status.ActiveState == "active"
+  retries: 15
+  delay: 20
   when: not mongodb_state.replication_enabled
 
 - name: Set empty array of mongo servers
