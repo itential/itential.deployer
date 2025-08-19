@@ -3,22 +3,22 @@
 ---
 - name: Ensure remote cert directory exists
   ansible.builtin.file:
-    path: "{{ certs_remote_cert_dir }}"
+    path: "{{ ssl_remote_cert_dir }}"
     state: directory
     mode: '0755'
 
 - name: Copy private key
   ansible.builtin.copy:
-    src: "{{ certs_local_key_path }}"
-    dest: "{{ certs_remote_cert_dir }}/{{ certs_remote_key_file }}"
+    src: "{{ ssl_local_key_path }}"
+    dest: "{{ ssl_remote_cert_dir }}/{{ ssl_remote_key_file }}"
     owner: root
     group: root
     mode: '0600'
 
 - name: Copy certificate
   ansible.builtin.copy:
-    src: "{{ certs_local_crt_path }}"
-    dest: "{{ certs_remote_cert_dir }}/{{ certs_remote_crt_file }}"
+    src: "{{ ssl_local_crt_path }}"
+    dest: "{{ ssl_remote_cert_dir }}/{{ ssl_remote_crt_file }}"
     owner: root
     group: root
     mode: '0644'

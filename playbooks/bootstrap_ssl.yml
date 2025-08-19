@@ -7,9 +7,9 @@
   tasks:
     - name: Generate one self-signed cert for all hosts
       ansible.builtin.import_role:
-        name: itential.deployer.certs
-        tasks_from: gen_certs
-      tags: gen_certs
+        name: itential.deployer.ssl
+        tasks_from: gen_selfsigned_cert
+      tags: gen_selfsigned_cert
 
 - name: Propagate cert and key to all hosts
   hosts: all
@@ -17,6 +17,6 @@
   tasks:
     - name: Propagate cert and key to all hosts
       ansible.builtin.import_role:
-        name: itential.deployer.certs
-        tasks_from: propagate_certs
-      tags: propagate_certs
+        name: itential.deployer.ssl
+        tasks_from: propagate_cert
+      tags: propagate_cert

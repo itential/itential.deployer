@@ -1,0 +1,21 @@
+# Copyright (c) 2025, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+# The SSL key, csr and cert are generated on the control node
+ssl_local_cert_dir: ./itential_certs
+ssl_local_key_path: "{{ ssl_local_cert_dir }}/server.key"
+ssl_local_csr_path: "{{ ssl_local_cert_dir }}/server.csr"
+ssl_local_crt_path: "{{ ssl_local_cert_dir }}/server.crt"
+
+# The csr defaults
+ssl_csr_common_name: itential.local
+ssl_csr_country_name: US
+ssl_csr_organization_name: Itential
+ssl_csr_organizational_unit_name: IT
+ssl_csr_state_or_province_name: Georgia
+ssl_csr_locality_name: Atlanta
+
+# The key and cert are copied to the target nodes
+ssl_remote_cert_dir: /etc/ssl/itential
+ssl_remote_key_file: "{{ ssl_local_key_path | basename }}"
+ssl_remote_crt_file: "{{ ssl_local_crt_path | basename }}"
