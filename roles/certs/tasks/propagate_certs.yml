@@ -9,7 +9,7 @@
 
 - name: Copy private key
   ansible.builtin.copy:
-    src: "{{ certs_key_path }}"
+    src: "{{ certs_local_key_path }}"
     dest: "{{ certs_remote_cert_dir }}/{{ certs_remote_key_file }}"
     owner: root
     group: root
@@ -17,7 +17,7 @@
 
 - name: Copy certificate
   ansible.builtin.copy:
-    src: "{{ certs_crt_path }}"
+    src: "{{ certs_local_crt_path }}"
     dest: "{{ certs_remote_cert_dir }}/{{ certs_remote_crt_file }}"
     owner: root
     group: root

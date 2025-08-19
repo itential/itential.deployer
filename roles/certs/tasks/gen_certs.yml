@@ -3,7 +3,7 @@
 ---
 - name: Ensure cert directory exists locally
   ansible.builtin.file:
-    path: "{{ certs_cert_dir }}"
+    path: "{{ certs_local_cert_dir }}"
     state: directory
     mode: '0755'
 
@@ -50,15 +50,15 @@
 
 - name: Generate private key
   community.crypto.openssl_privatekey:
-    path: "{{ certs_key_path }}"
+    path: "{{ certs_local_key_path }}"
     size: 2048
     type: RSA
     mode: '0600'
 
 - name: Generate CSR with SANs for all hosts
   community.crypto.openssl_csr:
-    path: "{{ certs_csr_path }}"
-    privatekey_path: "{{ certs_key_path }}"
+    path: "{{ certs_local_csr_path }}"
+    privatekey_path: "{{ certs_local_key_path }}"
     common_name: "itential.local"
     country_name: US
     organization_name: Itential
@@ -69,8 +69,8 @@
 
 - name: Generate self-signed certificate
   community.crypto.x509_certificate:
-    path: "{{ certs_crt_path }}"
-    csr_path: "{{ certs_csr_path }}"
-    privatekey_path: "{{ certs_key_path }}"
+    path: "{{ certs_local_crt_path }}"
+    csr_path: "{{ certs_local_csr_path }}"
+    privatekey_path: "{{ certs_local_key_path }}"
     provider: selfsigned
     selfsigned_not_after: +365d
