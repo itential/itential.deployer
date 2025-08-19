@@ -1,0 +1,13 @@
+# Copyright (c) 2025, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+certs_cert_dir: ./itential_certs   # stored on control node
+certs_key_path: "{{ certs_cert_dir }}/server.key"
+certs_csr_path: "{{ certs_cert_dir }}/server.csr"
+certs_crt_path: "{{ certs_cert_dir }}/server.crt"
+
+certs_cn_name: "itential.local"
+
+certs_remote_cert_dir: /etc/ssl/itential
+certs_remote_key_file: "{{ certs_key_path | basename }}"
+certs_remote_crt_file: "{{ certs_crt_path | basename }}"

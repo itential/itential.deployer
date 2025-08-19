@@ -1,0 +1,76 @@
+# Copyright (c) 2025, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Ensure cert directory exists locally
+  ansible.builtin.file:
+    path: "{{ certs_cert_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: Start SAN list with DNS:inventory_hostname
+  ansible.builtin.set_fact:
+    san_list: "{{ groups['all'] | map('regex_replace', '^(.*)$', 'DNS:\\1') | list }}"
+
+- name: Add DNS:ansible_fqdn when present
+  ansible.builtin.set_fact:
+    san_list: "{{ (san_list + ['DNS:' + hostvars[item].ansible_fqdn]) | unique }}"
+  loop: "{{ groups['all'] }}"
+  when: hostvars[item].ansible_fqdn is defined
+
+- name: Add IP/DNS from ansible_host if defined (regex detect IP)
+  ansible.builtin.set_fact:
+    san_list: >-
+      {{
+        (san_list + [
+          ('IP:'  + hostvars[item].ansible_host)
+          if (hostvars[item].ansible_host is match('^\\d+\\.\\d+\\.\\d+\\.\\d+$'))
+          else ('DNS:' + hostvars[item].ansible_host)
+        ]) | unique
+      }}
+  loop: "{{ groups['all'] }}"
+  when: hostvars[item].ansible_host is defined
+
+
+- name: Add fallback IP from ansible_default_ipv4.address when ansible_host absent
+  ansible.builtin.set_fact:
+    san_list: "{{ (san_list + ['IP:' + hostvars[item].ansible_default_ipv4.address]) | unique }}"
+  loop: "{{ groups['all'] }}"
+  when:
+    - hostvars[item].ansible_host is not defined
+    - hostvars[item].ansible_default_ipv4 is defined
+    - hostvars[item].ansible_default_ipv4.address is defined
+
+- name: Sort SAN list for stable idempotent output
+  ansible.builtin.set_fact:
+    san_list: "{{ san_list | sort }}"
+
+- name: Show SANs
+  ansible.builtin.debug:
+    var: san_list
+
+- name: Generate private key
+  community.crypto.openssl_privatekey:
+    path: "{{ certs_key_path }}"
+    size: 2048
+    type: RSA
+    mode: '0600'
+
+- name: Generate CSR with SANs for all hosts
+  community.crypto.openssl_csr:
+    path: "{{ certs_csr_path }}"
+    privatekey_path: "{{ certs_key_path }}"
+    common_name: "itential.local"
+    country_name: US
+    organization_name: Itential
+    organizational_unit_name: IT
+    state_or_province_name: Georgia
+    locality_name: Atlanta
+    subject_alt_name: "{{ san_list }}"
+
+- name: Generate self-signed certificate
+  community.crypto.x509_certificate:
+    path: "{{ certs_crt_path }}"
+    csr_path: "{{ certs_csr_path }}"
+    privatekey_path: "{{ certs_key_path }}"
+    provider: selfsigned
+    selfsigned_not_after: +365d
