@@ -1,6 +1,10 @@
 # Copyright (c) 2025, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
+# User/group info
+ssl_user: itential
+ssl_group: itential
+
 # The SSL key, csr and cert are generated on the control node
 ssl_local_cert_dir: ./itential_certs
 ssl_local_key_path: "{{ ssl_local_cert_dir }}/server.key"

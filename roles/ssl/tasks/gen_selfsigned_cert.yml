@@ -23,7 +23,7 @@
       {{
         (ssl_san_list + [
           ('IP:'  + hostvars[item].ansible_host)
-          if (hostvars[item].ansible_host is match('^\\d+\\.\\d+\\.\\d+\\.\\d+$'))
+          if (hostvars[item].ansible_host is match('^[0-9]{1,3}(?:\.[0-9]{1,3}){3}$'))
           else ('DNS:' + hostvars[item].ansible_host)
         ]) | unique
       }}

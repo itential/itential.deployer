@@ -5,20 +5,22 @@
   ansible.builtin.file:
     path: "{{ ssl_remote_cert_dir }}"
     state: directory
+    owner: "{{ ssl_user }}"
+    group: "{{ ssl_group }}"
     mode: '0755'
 
 - name: Copy private key
   ansible.builtin.copy:
     src: "{{ ssl_local_key_path }}"
     dest: "{{ ssl_remote_cert_dir }}/{{ ssl_remote_key_file }}"
-    owner: root
-    group: root
+    owner: "{{ ssl_user }}"
+    group: "{{ ssl_group }}"
     mode: '0600'
 
 - name: Copy certificate
   ansible.builtin.copy:
     src: "{{ ssl_local_crt_path }}"
     dest: "{{ ssl_remote_cert_dir }}/{{ ssl_remote_crt_file }}"
-    owner: root
-    group: root
+    owner: "{{ ssl_user }}"
+    group: "{{ ssl_group }}"
     mode: '0644'
