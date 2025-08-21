@@ -1,0 +1,8 @@
+# Copyright (c) 2025, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+# The port on which the gateway manager listens for HTTPS requests.
+platform_gateway_manager_https_port: 8080
+
+# The gateway manager package name used in string search
+platform_gateway_manager_package_name: itential-gateway_manager
