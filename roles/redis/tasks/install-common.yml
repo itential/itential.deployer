@@ -111,6 +111,11 @@
     - redis_log_dir != redis_log_dir_default or redis_install_from_source | bool
     - not redis_log_dir_stat.stat.exists
 
+- name: Configure logrotate for Redis
+  ansible.builtin.include_tasks:
+    file: configure-redis-logrotate.yml
+  tags: configure_redis_logrotate
+
 - name: Check to see if Redis configuration directory exists
   ansible.builtin.stat:
     path: "{{ redis_conf_dir }}"
