@@ -34,3 +34,11 @@
   when:
     - groups['redis_secondary'] is defined
     - inventory_hostname in groups['redis_secondary']
+
+- name: Deploy logrotate config for Redis Sentinel
+  ansible.builtin.template:
+    src: redis-sentinel.logrotate.j2
+    dest: /etc/logrotate.d/redis-sentinel
+    owner: root
+    group: root
+    mode: '0644'
