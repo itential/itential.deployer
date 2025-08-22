@@ -1,13 +1,16 @@
-- name: Deploy logrotate configs for Redis & Sentinel
+- name: Deploy logrotate config for Redis
   ansible.builtin.template:
-    src: "{{ item.src }}"
-    dest: "{{ item.dest }}"
+    src: redis.logrotate.j2
+    dest: /etc/logrotate.d/redis
     owner: root
     group: root
     mode: '0644'
-  loop:
-    - { name: "redis",    src: "redis.logrotate.j2",          dest: "/etc/logrotate.d/redis" }
-    - { name: "sentinel", src: "redis-sentinel.logrotate.j2", dest: "/etc/logrotate.d/redis-sentinel" }
-  when: >
-    item.name != 'sentinel'
-    or (groups['redis'] is defined and (groups['redis'] | length) > 1)
+
+- name: Deploy logrotate config for Redis Sentinel
+  ansible.builtin.template:
+    src: redis-sentinel.logrotate.j2
+    dest: /etc/logrotate.d/redis-sentinel
+    owner: root
+    group: root
+    mode: '0644'
+  when: redis_replication | bool
