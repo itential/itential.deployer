@@ -6,8 +6,8 @@
     group: root
     mode: '0644'
   loop:
-    - { name: "redis",  src: "redis.logrotate.j2",  dest: "/etc/logrotate.d/redis" }
+    - { name: "redis",    src: "redis.logrotate.j2",          dest: "/etc/logrotate.d/redis" }
     - { name: "sentinel", src: "redis-sentinel.logrotate.j2", dest: "/etc/logrotate.d/redis-sentinel" }
   when: >
     item.name != 'sentinel'
-    or (groups['redis'] is defined and inventory_hostname in groups['redis'])
+    or (groups['redis'] is defined and (groups['redis'] | length) > 1)
