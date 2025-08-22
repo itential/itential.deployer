@@ -19,3 +19,11 @@
     setype: redis_conf_t
     backup: true
   tags: configure_redis
+
+- name: Deploy logrotate config for Redis
+  ansible.builtin.template:
+    src: redis.logrotate.j2
+    dest: /etc/logrotate.d/redis
+    owner: root
+    group: root
+    mode: '0644'
