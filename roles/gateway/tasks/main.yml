@@ -368,6 +368,19 @@
     state: restarted
     daemon_reload: true
 
+- name: Assert that Automation Gateway is running
+  block:
+    - name: Get Automation Gateway service status
+      ansible.builtin.service:
+        name: automation-gateway
+      register: gateway_status
+
+    - name: Assert that Automation Gateway is running
+      ansible.builtin.assert:
+        that: gateway_status.status.ActiveState == "active"
+        fail_msg: "Automation Gateway service is not running (state: {{ gateway_status.status.ActiveState }})"
+        success_msg: "Automation Gateway service is running correctly"
+
 - name: Update release file
   ansible.builtin.include_tasks:
     file: update-release-file.yml
