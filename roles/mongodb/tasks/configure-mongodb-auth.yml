@@ -76,3 +76,16 @@
     name: mongod
     state: restarted
     enabled: true
+
+- name: Assert that MongoDB is running
+  block:
+    - name: Get MongoDB service status
+      ansible.builtin.systemd:
+        name: mongod
+      register: mongodb_status
+
+    - name: Assert that MongoDB is running
+      ansible.builtin.assert:
+        that: mongodb_status.status.ActiveState == "active"
+        fail_msg: "MongoDB service is not running (state: {{ mongodb_status.status.ActiveState }})"
+        success_msg: "MongoDB service is running correctly"

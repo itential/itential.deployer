@@ -49,6 +49,20 @@
     enabled: true
   when: not mongodb_state.replication_enabled
 
+- name: Assert that MongoDB is running
+  when: not mongodb_state.replication_enabled
+  block:
+    - name: Get MongoDB service status
+      ansible.builtin.systemd:
+        name: mongod
+      register: mongodb_status
+
+    - name: Assert that MongoDB is running
+      ansible.builtin.assert:
+        that: mongodb_status.status.ActiveState == "active"
+        fail_msg: "MongoDB service is not running (state: {{ mongodb_status.status.ActiveState }})"
+        success_msg: "MongoDB service is running correctly"
+
 - name: Set empty array of mongo servers
   ansible.builtin.set_fact:
     mongodb_servers: []
