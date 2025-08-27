@@ -58,3 +58,48 @@
           ansible.builtin.include_tasks:
             file: configure-sentinel.yml
           when: redis_replication_enabled | bool
+
+- name: Flush all handlers
+  ansible.builtin.meta: flush_handlers
+
+- name: Ensure Redis is running
+  tags: always
+  block:
+    - name: Start Redis
+      ansible.builtin.systemd:
+        name: redis
+        state: started
+
+    - name: Assert that Redis is running
+      block:
+        - name: Get Redis service status
+          ansible.builtin.systemd:
+            name: redis
+          register: redis_status
+
+        - name: Assert that Redis is running
+          ansible.builtin.assert:
+            that: redis_status.status.ActiveState == "active"
+            fail_msg: "Redis service is not running (state: {{ redis_status.status.ActiveState }})"
+            success_msg: "Redis service is running correctly"
+
+- name: Ensure Sentinel is running
+  when: redis_replication_enabled | bool
+  block:
+    - name: Start Sentinel
+      ansible.builtin.systemd:
+        name: redis-sentinel
+        state: started
+
+    - name: Assert that Sentinel is running
+      block:
+        - name: Get Sentinel service status
+          ansible.builtin.systemd:
+            name: redis-sentinel
+          register: redis_sentinel_status
+
+        - name: Assert that Sentinel is running
+          ansible.builtin.assert:
+            that: redis_sentinel_status.status.ActiveState == "active"
+            fail_msg: "Sentinel service is not running (state: {{ redis_sentinel_status.status.ActiveState }})"
+            success_msg: "Sentinel service is running correctly"
