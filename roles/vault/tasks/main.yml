@@ -33,11 +33,11 @@
           ansible.builtin.include_tasks:
             file: configure-vault.yml
 
-- name: Restart Vault if needed
-  ansible.builtin.meta: flush_handlers
-
 - name: Ensure Vault is running
   block:
+    - name: Flush all handlers
+      ansible.builtin.meta: flush_handlers
+
     - name: Start Vault
       ansible.builtin.systemd:
         name: vault
