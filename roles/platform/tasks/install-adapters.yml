@@ -124,11 +124,11 @@
         mode: '0644'
       loop: "{{ adapter_names }}"
 
-- name: Flush all handlers
-  ansible.builtin.meta: flush_handlers
-
 - name: Ensure Itential Platform is running
   block:
+    - name: Flush all handlers
+      ansible.builtin.meta: flush_handlers
+
     - name: Start Itential Platform
       ansible.builtin.systemd:
         name: itential-platform

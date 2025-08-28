@@ -59,12 +59,11 @@
             file: configure-sentinel.yml
           when: redis_replication_enabled | bool
 
-- name: Flush all handlers
-  ansible.builtin.meta: flush_handlers
-
 - name: Ensure Redis is running
-  tags: always
   block:
+    - name: Flush all handlers
+      ansible.builtin.meta: flush_handlers
+
     - name: Start Redis
       ansible.builtin.systemd:
         name: redis

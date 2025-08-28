@@ -49,12 +49,11 @@
           changed_when: result.rc == 0
           failed_when: result.rc > 0
 
-- name: Flush all handlers
-  ansible.builtin.meta: flush_handlers
-
 - name: Ensure Itential Platform is running
-  tags: always
   block:
+    - name: Flush all handlers
+      ansible.builtin.meta: flush_handlers
+
     - name: Start Itential Platform
       ansible.builtin.systemd:
         name: itential-platform

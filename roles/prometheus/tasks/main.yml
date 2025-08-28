@@ -18,12 +18,11 @@
         mode: "0644"
         lstrip_blocks: true
 
-- name: Flush all handlers
-  ansible.builtin.meta: flush_handlers
-
 - name: Ensure Prometheus is running
-  tags: always
   block:
+    - name: Flush all handlers
+      ansible.builtin.meta: flush_handlers
+
     - name: Start Prometheus
       ansible.builtin.systemd:
         name: prometheus
