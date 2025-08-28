@@ -60,6 +60,7 @@
           when: redis_replication_enabled | bool
 
 - name: Ensure Redis is running
+  tags: always
   block:
     - name: Flush all handlers
       ansible.builtin.meta: flush_handlers
@@ -84,6 +85,7 @@
 
 - name: Ensure Sentinel is running
   when: redis_replication_enabled | bool
+  tags: always
   block:
     - name: Start Sentinel
       ansible.builtin.systemd:

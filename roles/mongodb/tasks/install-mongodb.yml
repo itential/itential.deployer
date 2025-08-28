@@ -109,7 +109,7 @@
   tags: initialize_mongo_config
 
 - name: Assert that MongoDB is running
-  tags: initialize_mongo_config
+  tags: always
   block:
     - name: Get MongoDB service status
       ansible.builtin.systemd:

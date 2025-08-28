@@ -80,6 +80,7 @@
     enabled: true
 
 - name: Assert that Grafana is running
+  tags: always
   block:
     - name: Get Grafana service status
       ansible.builtin.systemd:

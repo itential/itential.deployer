@@ -17,6 +17,7 @@
         enabled: true
 
     - name: Assert that nginx is running
+      tags: always
       block:
         - name: Get nginx service status
           ansible.builtin.systemd:

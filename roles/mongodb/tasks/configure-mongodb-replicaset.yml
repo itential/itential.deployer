@@ -51,6 +51,7 @@
 
 - name: Assert that MongoDB is running
   when: not mongodb_state.replication_enabled
+  tags: always
   block:
     - name: Get MongoDB service status
       ansible.builtin.systemd:

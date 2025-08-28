@@ -19,6 +19,7 @@
         lstrip_blocks: true
 
 - name: Ensure Prometheus is running
+  tags: always
   block:
     - name: Flush all handlers
       ansible.builtin.meta: flush_handlers

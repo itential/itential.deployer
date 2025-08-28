@@ -369,6 +369,7 @@
     daemon_reload: true
 
 - name: Assert that Automation Gateway is running
+  tags: always
   block:
     - name: Get Automation Gateway service status
       ansible.builtin.service:

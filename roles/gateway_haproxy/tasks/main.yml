@@ -44,6 +44,7 @@
     state: restarted
 
 - name: Assert that HAProxy is running
+  tags: always
   block:
     - name: Get HAProxy service status
       ansible.builtin.service:

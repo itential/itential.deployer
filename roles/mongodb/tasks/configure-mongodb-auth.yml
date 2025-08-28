@@ -78,6 +78,7 @@
     enabled: true
 
 - name: Assert that MongoDB is running
+  tags: always
   block:
     - name: Get MongoDB service status
       ansible.builtin.systemd:

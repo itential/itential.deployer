@@ -125,6 +125,7 @@
       loop: "{{ adapter_names }}"
 
 - name: Ensure Itential Platform is running
+  tags: always
   block:
     - name: Flush all handlers
       ansible.builtin.meta: flush_handlers

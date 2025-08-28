@@ -34,6 +34,7 @@
             file: configure-vault.yml
 
 - name: Ensure Vault is running
+  tags: always
   block:
     - name: Flush all handlers
       ansible.builtin.meta: flush_handlers

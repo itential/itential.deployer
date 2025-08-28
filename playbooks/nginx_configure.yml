@@ -56,6 +56,7 @@
           - "Nginx service status: {{ nginx_service_status.status.ActiveState }}"
 
     - name: Assert that nginx is running
+      tags: always
       block:
         - name: Get nginx service status
           ansible.builtin.systemd:
