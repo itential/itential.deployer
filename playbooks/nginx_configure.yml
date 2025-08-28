@@ -54,3 +54,16 @@
       ansible.builtin.debug:
         msg:
           - "Nginx service status: {{ nginx_service_status.status.ActiveState }}"
+
+    - name: Assert that nginx is running
+      block:
+        - name: Get nginx service status
+          ansible.builtin.systemd:
+            name: nginx
+          register: nginx_status
+
+        - name: Assert that nginx is running
+          ansible.builtin.assert:
+            that: nginx_status.status.ActiveState == "active"
+            fail_msg: "Nginx service is not running (state: {{ nginx_status.status.ActiveState }})"
+            success_msg: "Nginx service is running correctly"
