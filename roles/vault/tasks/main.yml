@@ -55,3 +55,21 @@
     line: "VAULT={{ vault_installed_version.stdout }}"
     mode: "0644"
     create: true
+
+- name: Ensure Vault is running
+  tags: always
+  block:
+    - name: Flush all handlers
+      ansible.builtin.meta: flush_handlers
+
+    - name: Start Vault
+      ansible.builtin.systemd:
+        name: vault
+        state: started
+        daemon_reload: true
+
+    - name: Assert that Vault is running
+      ansible.builtin.systemd:
+        name: vault
+      register: vault_status
+      failed_when: vault_status.status.ActiveState != "active"

@@ -22,3 +22,21 @@
     file: configure-mongodb.yml
   tags: configure_mongodb
   when: mongodb_auth_enabled | bool or mongodb_tls_enabled | bool or mongodb_replication_enabled | bool
+
+- name: Ensure MongoDB is running
+  tags: always
+  block:
+    - name: Flush all handlers
+      ansible.builtin.meta: flush_handlers
+
+    - name: Start MongoDB
+      ansible.builtin.systemd:
+        name: mongod
+        state: started
+        daemon_reload: true
+
+    - name: Assert that MongoDB is running
+      ansible.builtin.systemd:
+        name: mongod
+      register: mongodb_status
+      failed_when: mongodb_status.status.ActiveState != "active"

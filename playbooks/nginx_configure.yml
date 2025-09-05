@@ -48,9 +48,10 @@
         state: restarted
         enabled: true
         daemon_reload: true
-      register: nginx_service_status
 
-    - name: Display nginx status summary
-      ansible.builtin.debug:
-        msg:
-          - "Nginx service status: {{ nginx_service_status.status.ActiveState }}"
+    - name: Assert that nginx is running
+      ansible.builtin.systemd:
+        name: nginx
+      register: nginx_status
+      failed_when: nginx_status.status.ActiveState != "active"
+      tags: always
