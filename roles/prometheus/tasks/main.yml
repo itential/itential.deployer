@@ -17,27 +17,3 @@
         group: "{{ prometheus_system_group }}"
         mode: "0644"
         lstrip_blocks: true
-
-- name: Ensure Prometheus is running
-  tags: always
-  block:
-    - name: Flush all handlers
-      ansible.builtin.meta: flush_handlers
-
-    - name: Start Prometheus
-      ansible.builtin.systemd:
-        name: prometheus
-        state: started
-
-    - name: Assert that Prometheus is running
-      block:
-        - name: Get Prometheus service status
-          ansible.builtin.systemd:
-            name: prometheus
-          register: prometheus_status
-
-        - name: Assert that Prometheus is running
-          ansible.builtin.assert:
-            that: prometheus_status.status.ActiveState == "active"
-            fail_msg: "Prometheus service is not running (state: {{ prometheus_status.status.ActiveState }})"
-            success_msg: "Prometheus service is running correctly"

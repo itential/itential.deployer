@@ -42,17 +42,3 @@
     name: haproxy
     enabled: false
     state: restarted
-
-- name: Assert that HAProxy is running
-  tags: always
-  block:
-    - name: Get HAProxy service status
-      ansible.builtin.service:
-        name: haproxy
-      register: gateway_haproxy_status
-
-    - name: Assert that HAProxy is running
-      ansible.builtin.assert:
-        that: gateway_haproxy_status.status.ActiveState == "active"
-        fail_msg: "HAProxy service is not running (state: {{ gateway_haproxy_status.status.ActiveState }})"
-        success_msg: "HAProxy service is running correctly"

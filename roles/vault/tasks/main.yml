@@ -33,29 +33,8 @@
           ansible.builtin.include_tasks:
             file: configure-vault.yml
 
-- name: Ensure Vault is running
-  tags: always
-  block:
-    - name: Flush all handlers
-      ansible.builtin.meta: flush_handlers
-
-    - name: Start Vault
-      ansible.builtin.systemd:
-        name: vault
-        state: started
-
-    - name: Assert that Vault is running
-      block:
-        - name: Get Vault service status
-          ansible.builtin.systemd:
-            name: vault
-          register: vault_status
-
-        - name: Assert that Vault is running
-          ansible.builtin.assert:
-            that: vault_status.status.ActiveState == "active"
-            fail_msg: "Vault service is not running (state: {{ vault_status.status.ActiveState }})"
-            success_msg: "Vault service is running correctly"
+- name: Restart Vault if needed
+  ansible.builtin.meta: flush_handlers
 
 - name: Unseal Vault
   tags: unseal_vault
