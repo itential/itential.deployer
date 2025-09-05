@@ -75,3 +75,10 @@
   ansible.builtin.file:
     path: "{{ workingdir.path }}"
     state: absent
+
+- name: Assert that Gateway is running
+  ansible.builtin.systemd:
+    name: automation-gateway
+  register: gateway_status
+  failed_when: gateway_status.status.ActiveState != "active"
+  tags: always
