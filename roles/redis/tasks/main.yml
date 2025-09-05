@@ -69,7 +69,6 @@
       ansible.builtin.systemd:
         name: redis
         state: started
-        daemon_reload: true
 
     - name: Assert that Redis is running
       ansible.builtin.systemd:
@@ -88,7 +87,6 @@
       ansible.builtin.systemd:
         name: redis-sentinel
         state: started
-        daemon_reload: true
 
     - name: Assert that Redis Sentinel is running
       ansible.builtin.systemd:

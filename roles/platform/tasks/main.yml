@@ -126,7 +126,6 @@
       ansible.builtin.systemd:
         name: itential-platform
         state: started
-        daemon_reload: true
 
     - name: Assert that Itential Platform is running
       ansible.builtin.systemd:

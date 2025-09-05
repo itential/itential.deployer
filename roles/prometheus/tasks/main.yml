@@ -28,7 +28,6 @@
       ansible.builtin.systemd:
         name: prometheus
         state: started
-        daemon_reload: true
 
     - name: Assert that Prometheus is running
       ansible.builtin.systemd:
