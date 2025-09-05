@@ -78,3 +78,10 @@
     name: grafana-server
     state: restarted
     enabled: true
+
+- name: Assert that Grafana is running
+  ansible.builtin.systemd:
+    name: grafana-server
+  register: grafana_status
+  failed_when: grafana_status.status.ActiveState != "active"
+  tags: always

@@ -17,3 +17,20 @@
         group: "{{ prometheus_system_group }}"
         mode: "0644"
         lstrip_blocks: true
+
+- name: Ensure Prometheus is running
+  tags: always
+  block:
+    - name: Flush all handlers
+      ansible.builtin.meta: flush_handlers
+
+    - name: Start Prometheus
+      ansible.builtin.systemd:
+        name: prometheus
+        state: started
+
+    - name: Assert that Prometheus is running
+      ansible.builtin.systemd:
+        name: prometheus
+      register: prometheus_status
+      failed_when: prometheus_status.status.ActiveState != "active"
