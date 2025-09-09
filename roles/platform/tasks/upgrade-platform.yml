@@ -19,3 +19,20 @@
     - name: Configure Platform
       ansible.builtin.include_tasks:
         file: configure-platform.yml
+
+- name: Ensure Itential Platform is running
+  tags: always
+  block:
+    - name: Flush all handlers
+      ansible.builtin.meta: flush_handlers
+
+    - name: Start Itential Platform
+      ansible.builtin.systemd:
+        name: itential-platform
+        state: started
+
+    - name: Assert that Itential Platform is running
+      ansible.builtin.systemd:
+        name: itential-platform
+      register: platform_status
+      failed_when: platform_status.status.ActiveState != "active"
