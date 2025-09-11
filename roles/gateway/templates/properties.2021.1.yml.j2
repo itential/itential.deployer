@@ -29,7 +29,8 @@ bind_address: {{ inventory_hostname }}
 # external_address: 'http://automation-gateway.example.com:8080'
 
 # The number of http server threads for handling requests.
-# A good starting point is 2-4 x NUM_CORES then adjust based on observed workload.
+# It is recommended to set this to 4 x NUM_CORES.
+# E.g. for a 16 core machine, the value should be set to 64.
 http_server_threads: {{ gateway_http_server_threads }}
 
 # A flag that determines whether authentication is disabled or not.
