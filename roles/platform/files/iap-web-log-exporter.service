@@ -1,0 +1,29 @@
+[Unit]
+Description=Itential IAP Web Log Prometheus Exporter
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=itential
+Group=itential
+WorkingDirectory=/opt/itential/exporters
+ExecStart=/usr/bin/python3 /opt/itential/exporters/iap-web-log-exporter.py --log-file /var/log/itential/platform/webserver.log --port 8000 --interval 30
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+# Security settings
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/opt/itential/exporters
+
+# Environment
+Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+Environment=PYTHONPATH=/home/itential/.local/lib/python3.11/site-packages
+
+[Install]
+WantedBy=multi-user.target
