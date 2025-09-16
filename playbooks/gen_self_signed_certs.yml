@@ -1,0 +1,17 @@
+# Copyright (c) 2025, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Generate self-signed certificates with SANs for all hosts
+  hosts: all
+  gather_facts: true
+  become: true
+  vars:
+    ssl_remote_key_path: "{{ ssl_remote_key_dir }}/{{ inventory_hostname }}.pem"
+    ssl_remote_csr_path: "{{ ssl_remote_cert_dir }}/{{ inventory_hostname }}.csr"
+    ssl_remote_cert_path: "{{ ssl_remote_cert_dir }}/{{ inventory_hostname }}.crt"
+  tasks:
+    - name: Generate self-signed certs for all hosts
+      ansible.builtin.import_role:
+        name: itential.deployer.ssl
+        tasks_from: gen_self_signed_certs
+      tags: gen_certs

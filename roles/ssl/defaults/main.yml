@@ -5,21 +5,59 @@
 ssl_user: itential
 ssl_group: itential
 
-# The SSL key, csr and cert are generated on the control node
-ssl_local_cert_dir: ./itential_certs
-ssl_local_key_path: "{{ ssl_local_cert_dir }}/server.key"
-ssl_local_csr_path: "{{ ssl_local_cert_dir }}/server.csr"
-ssl_local_crt_path: "{{ ssl_local_cert_dir }}/server.crt"
+# The Key, Cert and CSR suffix defaults
+ssl_key_suffix: .key
+ssl_cert_suffix: .crt
+ssl_csr_suffix: .csr
 
-# The csr defaults
-ssl_csr_common_name: itential.local
+# SSL common defaults
+ssl_generate_ca_cert: true
+ssl_upload_certs: true
+
+# Multi-Domain defaults
+ssl_multi_domain_filename_root: itential
+
+# When generating a Multi-Domain Key and Cert, the CA, Key and Cert are generated
+# on the control node
+ssl_local_cert_dir: ./certs
+ssl_local_key_filename: "{{ ssl_multi_domain_filename_root }}{{ ssl_key_suffix }}"
+ssl_local_key_file: "{{ ssl_local_cert_dir }}/{{ ssl_local_key_filename }}"
+ssl_local_csr_filename: "{{ ssl_multi_domain_filename_root }}{{ ssl_csr_suffix }}"
+ssl_local_csr_file: "{{ ssl_local_cert_dir }}/{{ ssl_local_csr_filename }}"
+ssl_local_cert_filename: "{{ ssl_multi_domain_filename_root }}{{ ssl_cert_suffix }}"
+ssl_local_cert_file: "{{ ssl_local_cert_dir }}/{{ ssl_local_cert_filename }}"
+
+# The CSR defaults
+ssl_csr_common_name: Itential
 ssl_csr_country_name: US
 ssl_csr_organization_name: Itential
 ssl_csr_organizational_unit_name: IT
 ssl_csr_state_or_province_name: Georgia
 ssl_csr_locality_name: Atlanta
 
-# The key and cert are copied to the target nodes
-ssl_remote_cert_dir: /etc/ssl/itential
-ssl_remote_key_file: "{{ ssl_local_key_path | basename }}"
-ssl_remote_crt_file: "{{ ssl_local_crt_path | basename }}"
+# The Key and Cert target node default locations
+ssl_remote_key_dir: /etc/ssl/itential/private
+ssl_remote_key_filename: "{{ ssl_local_key_file | basename }}"
+ssl_remote_key_file: "{{ ssl_remote_key_dir }}/{{ ssl_remote_key_filename }}"
+ssl_remote_cert_dir: /etc/ssl/itential/certs
+ssl_remote_cert_filename: "{{ ssl_local_cert_file | basename }}"
+ssl_remote_cert_file: "{{ ssl_remote_cert_dir }}/{{ ssl_remote_cert_filename }}"
+
+# The CA defaults
+ssl_own_ca: true
+ssl_ca_common_name: Itential CA
+ssl_ca_organziation_name: Itential
+
+# The CA is generated on localhost
+ssl_local_ca_basename: ca
+ssl_local_ca_key_filename: "{{ ssl_local_ca_basename }}{{ ssl_key_suffix }}"
+ssl_local_ca_key_file: "{{ ssl_local_cert_dir }}/{{ ssl_local_ca_key_filename }}"
+ssl_local_ca_cert_filename: "{{ ssl_local_ca_basename }}{{ ssl_cert_suffix }}"
+ssl_local_ca_cert_file: "{{ ssl_local_cert_dir }}/{{ ssl_local_ca_cert_filename }}"
+ssl_local_ca_csr_filnename: "{{ ssl_local_ca_basename }}{{ ssl_csr_suffix }}"
+ssl_local_ca_csr_file: "{{ ssl_local_cert_dir }}/{{ ssl_local_ca_csr_filnename }}"
+
+# The CA target node default location
+ssl_remote_ca_dir: "{{ ssl_remote_cert_dir }}"
+ssl_remote_ca_cert_filename: "{{ ssl_local_ca_basename }}{{ ssl_cert_suffix }}"
+ssl_remote_ca_cert_file: "{{ ssl_remote_ca_dir }}/{{ ssl_remote_ca_cert_filename }}"

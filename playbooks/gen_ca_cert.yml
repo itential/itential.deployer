@@ -1,27 +1,25 @@
 # Copyright (c) 2025, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Gather facts from all hosts
-  hosts: all
-  gather_facts: yes
-  tasks: []
-
-- name: Generate one self-signed cert for all hosts
+- name: Generate CA cert
   hosts: localhost
   gather_facts: false
   tasks:
-    - name: Generate one self-signed cert for all hosts
+    - name: Generate CA cert
       ansible.builtin.import_role:
         name: itential.deployer.ssl
-        tasks_from: gen_one_self_signed_cert
-      tags: gen_certs
+        tasks_from: gen_ca_cert
+      tags: gen_ca_cert
+      when: generate_ca_cert | bool
 
-- name: Propagate cert and key to all hosts
+- name: Upload CA cert to all hosts
   hosts: all
+  gather_facts: false
   become: true
   tasks:
-    - name: Propagate cert and key to all hosts
+    - name: Upload CA cert to all hosts
       ansible.builtin.import_role:
         name: itential.deployer.ssl
-        tasks_from: propagate_cert
+        tasks_from: propagate_ca_cert
       tags: upload_certs
+      when: ssl_upload_certs | bool

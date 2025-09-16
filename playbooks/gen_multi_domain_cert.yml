@@ -6,22 +6,27 @@
   gather_facts: yes
   tasks: []
 
-- name: Generate one self-signed cert for all hosts
+- name: Generate CA cert
+  import_playbook: itential.deployer.gen_ca_cert
+
+- name: Generate multi-domain cert for all hosts
   hosts: localhost
   gather_facts: false
   tasks:
-    - name: Generate one self-signed cert for all hosts
+    - name: Generate multi-domain cert for all hosts
       ansible.builtin.import_role:
         name: itential.deployer.ssl
-        tasks_from: gen_one_self_signed_cert
+        tasks_from: gen_multi_domain_cert
       tags: gen_certs
 
-- name: Propagate cert and key to all hosts
+- name: Upload multi-domain cert to all hosts
   hosts: all
+  gather_facts: false
   become: true
   tasks:
-    - name: Propagate cert and key to all hosts
+    - name: Upload multi-domain cert to all hosts
       ansible.builtin.import_role:
         name: itential.deployer.ssl
-        tasks_from: propagate_cert
+        tasks_from: propagate_multi_domain_cert
       tags: upload_certs
+      when: ssl_upload_certs | bool

@@ -1,0 +1,31 @@
+# Copyright (c) 2025, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+# -----------------
+# CA (CSR with CA extensions -> self-signed CA cert)
+# -----------------
+- name: Generate CA private key
+  community.crypto.openssl_privatekey:
+    path: "{{ ssl_local_ca_key_file }}"
+    size: 4096
+    type: RSA
+    mode: '0600'
+
+- name: Generate CA CSR with CA extensions
+  community.crypto.openssl_csr:
+    path: "{{ ssl_local_ca_csr_file }}"
+    privatekey_path: "{{ ssl_local_ca_key_file }}"
+    common_name: "{{ ssl_ca_common_name }}"
+    basic_constraints:
+      - "CA:TRUE"
+    key_usage:
+      - keyCertSign
+      - cRLSign
+
+- name: Self-sign the CA CSR
+  community.crypto.x509_certificate:
+    path: "{{ ssl_local_ca_cert_file }}"
+    csr_path: "{{ ssl_local_ca_csr_file }}"
+    privatekey_path: "{{ ssl_local_ca_key_file }}"
+    provider: selfsigned
+    # selfsigned_not_after: "+10y"

@@ -15,13 +15,3 @@
         name: itential.deployer.ssl
         tasks_from: gen_one_self_signed_cert
       tags: gen_certs
-
-- name: Propagate cert and key to all hosts
-  hosts: all
-  become: true
-  tasks:
-    - name: Propagate cert and key to all hosts
-      ansible.builtin.import_role:
-        name: itential.deployer.ssl
-        tasks_from: propagate_cert
-      tags: upload_certs
