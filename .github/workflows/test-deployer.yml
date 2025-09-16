@@ -6,7 +6,6 @@ on:
       - pipeline-test
 
 env:
-  AWS_PROFILE: ${{ secrets.AWS_PROFILE }}
   TF_DIRECTORY: ./tofu_aws
   ANSIBLE_HOST_KEY_CHECKING: "False"
 
@@ -60,11 +59,13 @@ jobs:
         cd ~/themis
         ls -la
 
+    - name: Initialize OpenTofu
+      working-directory: /home/runner/themis/tofu_aws
+      run: tofu init
+
     - name: Provision EC2 instances for Minimal design
       working-directory: /home/runner/themis/tofu_aws
-      run: |
-        tofu init
-        tofu apply -var-file=tfvars/minimal.tfvars -auto-approve
+      run: tofu apply -var-file=tfvars/minimal.tfvars -auto-approve
 
     - name: Generate Ansible inventory hosts file
       working-directory: /home/runner/themis/tofu_aws
