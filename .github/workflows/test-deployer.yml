@@ -45,3 +45,16 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
         aws-region: ${{ vars.AWS_REGION || 'us-east-1' }}
+
+    - name: Setup SSH for GitLab
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.GITLAB_SSH_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H gitlab.com >> ~/.ssh/known_hosts
+        
+    - name: Clone Themis repository
+      run: |
+        git clone "${{ secrets.THEMIS_REPO_SSH_STRING }}" ~/themis
+        cd ~/themis
+        ls -la
