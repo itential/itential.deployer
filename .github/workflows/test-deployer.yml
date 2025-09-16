@@ -36,7 +36,9 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install ansible
-        ansible-galaxy collection install itential.deployer
+
+    - name: Install this collection
+      run: ansible-galaxy collection install .
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
@@ -69,4 +71,15 @@ jobs:
 
     - name: Generate Ansible inventory hosts file
       working-directory: /home/runner/themis/tofu_aws
-      run: python3 ../scripts/generate_inventory.py
+      run: python3 ../scripts/generate_inventory.py > hosts.json
+
+    - name: Wait for EC2 instances to be ready
+      working-directory: /home/runner/themis/tofu_aws
+      run: sleep 60s
+
+    - name: Run deployer on created instances
+      run: ansible-playbook itential.deployer.site -i /home/runner/themis/tofu_aws/hosts.json -v
+
+    - name: Tear down EC2 instances
+      working-directory: /home/runner/themis/tofu_aws
+      run: tofu destroy -var-file=tfvars/minimal.tfvars -auto-approve
