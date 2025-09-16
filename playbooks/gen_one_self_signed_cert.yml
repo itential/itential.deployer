@@ -3,7 +3,7 @@
 ---
 - name: Gather facts from all hosts
   hosts: all
-  gather_facts: yes
+  gather_facts: true
   tasks: []
 
 - name: Generate one self-signed cert for all hosts
