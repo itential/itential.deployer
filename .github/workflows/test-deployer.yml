@@ -58,3 +58,13 @@ jobs:
         git clone "${{ secrets.THEMIS_REPO_SSH_STRING }}" ~/themis
         cd ~/themis
         ls -la
+
+    - name: Provision EC2 instances for Minimal design
+      working-directory: ~/themis/tofu_aws
+      run: |
+        tofu init
+        tofu apply -var-file=tfvars/minimal.tfvars
+
+    - name: Generate Ansible inventory hosts file
+      working-directory: ~/themis/tofu_aws
+      run: python3 ../scripts/generate_inventory.py
