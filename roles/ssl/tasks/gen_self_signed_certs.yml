@@ -1,3 +1,5 @@
+# Copyright (c) 2025, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
 - name: Setup
   tags: setup
@@ -17,28 +19,34 @@
       ansible.builtin.file:
         path: "{{ ssl_remote_cert_dir }}"
         state: directory
+        owner: "{{ ssl_user }}"
+        group: "{{ ssl_group }}"
         mode: '0755'
 
     - name: Ensure key directory exists
       ansible.builtin.file:
         path: "{{ ssl_remote_key_dir }}"
+        owner: "{{ ssl_user }}"
+        group: "{{ ssl_group }}"
         state: directory
         mode: '0750'
-
-    - name: Generate private key
-      community.crypto.openssl_privatekey:
-        path: "{{ ssl_remote_key_path }}"
-        size: 2048
-        type: RSA
-        mode: '0600'
 
 - name: Gen cert
   tags: gen_cert
   block:
+    - name: Generate private key
+      community.crypto.openssl_privatekey:
+        path: "{{ ssl_remote_key_file }}"
+        size: 2048
+        type: RSA
+        owner: "{{ ssl_user }}"
+        group: "{{ ssl_group }}"
+        mode: '0600'
+
     - name: Generate CSR with SANs
       community.crypto.openssl_csr:
-        path: "{{ ssl_remote_csr_path }}"
-        privatekey_path: "{{ ssl_remote_key_path }}"
+        path: "{{ ssl_remote_csr_file }}"
+        privatekey_path: "{{ ssl_remote_key_file }}"
         common_name: "{{ ssl_csr_common_name }}"
         country_name: "{{ ssl_csr_country_name }}"
         organization_name: "{{ ssl_csr_organization_name }}"
@@ -49,31 +57,45 @@
           - "DNS:{{ inventory_hostname }}"
           - "DNS:{{ ansible_fqdn | default(inventory_hostname) }}"
           - "IP:{{ ansible_default_ipv4.address | default('127.0.0.1') }}"
+        owner: "{{ ssl_user }}"
+        group: "{{ ssl_group }}"
 
     - name: Generate self-signed certificate with SANs
       community.crypto.x509_certificate:
-        path: "{{ ssl_remote_crt_path }}"
-        csr_path: "{{ ssl_remote_csr_path }}"
-        privatekey_path: "{{ ssl_remote_key_path }}"
+        path: "{{ ssl_remote_cert_file }}"
+        csr_path: "{{ ssl_remote_csr_file }}"
+        privatekey_path: "{{ ssl_remote_key_file }}"
         provider: selfsigned
         # selfsigned_not_after: +365d
-      when: not ssl_use_own_ca | bool
+        owner: "{{ ssl_user }}"
+        group: "{{ ssl_group }}"
+      when: not ssl_own_ca | bool
 
     - name: Use own CA
-      when: ssl_use_own_ca | bool
+      when: ssl_own_ca | bool
       block:
-        - name: Copy Root CA to target node
+        - name: Copy CA key to target node
           ansible.builtin.copy:
-            src: "{{ ssl_local_ca_cert_path }}"
-            dest: "{{ ssl_remote_ca_cert_path }}"
+            src: "{{ ssl_local_ca_key_file }}"
+            dest: "{{ ssl_remote_ca_key_file }}"
             owner: "{{ ssl_user }}"
             group: "{{ ssl_group }}"
             mode: "0640"
 
-        - name: Generate Root CA self-signed certificate with SANs
+        - name: Copy CA cert to target node
+          ansible.builtin.copy:
+            src: "{{ ssl_local_ca_cert_file }}"
+            dest: "{{ ssl_remote_ca_cert_file }}"
+            owner: "{{ ssl_user }}"
+            group: "{{ ssl_group }}"
+            mode: "0640"
+
+        - name: Generate CA self-signed certificate with SANs
           community.crypto.x509_certificate:
-            path: "{{ ssl_remote_crt_path }}"
-            csr_path: "{{ ssl_remote_csr_path }}"
+            path: "{{ ssl_remote_cert_file }}"
+            csr_path: "{{ ssl_remote_csr_file }}"
             provider: ownca
-            ownca_path: "{{ ssl_remote_ca_cert_path }}"
-            ownca_privatekey_path: "{{ ssl_remote_key_path }}"
+            ownca_path: "{{ ssl_remote_ca_cert_file }}"
+            ownca_privatekey_path: "{{ ssl_remote_ca_key_file }}"
+            owner: "{{ ssl_user }}"
+            group: "{{ ssl_group }}"

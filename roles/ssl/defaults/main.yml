@@ -13,6 +13,7 @@ ssl_csr_suffix: .csr
 # SSL common defaults
 ssl_generate_ca_cert: true
 ssl_upload_certs: true
+ssl_fetch_certs: true
 
 # Multi-Domain defaults
 ssl_multi_domain_filename_root: itential
@@ -37,10 +38,12 @@ ssl_csr_locality_name: Atlanta
 
 # The Key and Cert target node default locations
 ssl_remote_key_dir: /etc/ssl/itential/private
-ssl_remote_key_filename: "{{ ssl_local_key_file | basename }}"
+ssl_remote_key_filename: "{{ inventory_hostname }}{{ ssl_key_suffix }}"
 ssl_remote_key_file: "{{ ssl_remote_key_dir }}/{{ ssl_remote_key_filename }}"
+ssl_remote_csr_filename: "{{ inventory_hostname }}{{ ssl_csr_suffix }}"
+ssl_remote_csr_file: "{{ ssl_remote_key_dir }}/{{ ssl_remote_csr_filename }}"
 ssl_remote_cert_dir: /etc/ssl/itential/certs
-ssl_remote_cert_filename: "{{ ssl_local_cert_file | basename }}"
+ssl_remote_cert_filename: "{{ inventory_hostname }}{{ ssl_cert_suffix }}"
 ssl_remote_cert_file: "{{ ssl_remote_cert_dir }}/{{ ssl_remote_cert_filename }}"
 
 # The CA defaults
@@ -58,6 +61,9 @@ ssl_local_ca_csr_filnename: "{{ ssl_local_ca_basename }}{{ ssl_csr_suffix }}"
 ssl_local_ca_csr_file: "{{ ssl_local_cert_dir }}/{{ ssl_local_ca_csr_filnename }}"
 
 # The CA target node default location
-ssl_remote_ca_dir: "{{ ssl_remote_cert_dir }}"
+ssl_remote_ca_key_dir: "{{ ssl_remote_key_dir }}"
+ssl_remote_ca_key_filename: "{{ ssl_local_ca_basename }}{{ ssl_key_suffix }}"
+ssl_remote_ca_key_file: "{{ ssl_remote_ca_key_dir }}/{{ ssl_remote_ca_key_filename }}"
+ssl_remote_ca_cert_dir: "{{ ssl_remote_cert_dir }}"
 ssl_remote_ca_cert_filename: "{{ ssl_local_ca_basename }}{{ ssl_cert_suffix }}"
-ssl_remote_ca_cert_file: "{{ ssl_remote_ca_dir }}/{{ ssl_remote_ca_cert_filename }}"
+ssl_remote_ca_cert_file: "{{ ssl_remote_ca_cert_dir }}/{{ ssl_remote_ca_cert_filename }}"

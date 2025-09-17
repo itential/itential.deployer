@@ -10,7 +10,7 @@
         name: itential.deployer.ssl
         tasks_from: gen_ca_cert
       tags: gen_ca_cert
-      when: generate_ca_cert | bool
+      when: ssl_generate_ca_cert | bool
 
 - name: Upload CA cert to all hosts
   hosts: all
