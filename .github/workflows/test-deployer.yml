@@ -48,11 +48,13 @@ jobs:
         aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
         aws-region: ${{ vars.AWS_REGION || 'us-east-1' }}
 
-    - name: Setup SSH for GitLab
+    - name: Setup SSH for GitLab and EC2
       run: |
         mkdir -p ~/.ssh
         echo "${{ secrets.GITLAB_SSH_KEY }}" > ~/.ssh/id_rsa
+        echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/pet-east1.open.pem
         chmod 600 ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/pet-east1.open.pem
         ssh-keyscan -H gitlab.com >> ~/.ssh/known_hosts
         
     - name: Clone Themis repository
@@ -78,7 +80,9 @@ jobs:
       run: sleep 60s
 
     - name: Run deployer on created instances
-      run: ansible-playbook itential.deployer.site -i /home/runner/themis/tofu_aws/hosts.json -v
+      env:
+        ANSIBLE_HOST_KEY_CHECKING: "False"
+      run: ansible-playbook itential.deployer.site -i /home/runner/themis/tofu_aws/hosts.json -v --key-file=~/.ssh/pet-east1.open.pem
 
     - name: Tear down EC2 instances
       working-directory: /home/runner/themis/tofu_aws
