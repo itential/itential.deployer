@@ -62,6 +62,7 @@ jobs:
     - name: Clone Themis repository
       working-directory: ".."
       run: |
+        rm -rf themis
         git clone "${{ secrets.THEMIS_REPO_SSH_STRING }}"
         cd themis
         ls -la
