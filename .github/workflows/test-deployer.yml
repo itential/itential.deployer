@@ -23,8 +23,9 @@ jobs:
     #  with:
     #    python-version: '3.11'
 
-    - name: Setup Python
+    - name: Install dnf packages
       run: |
+        sudo dnf groupinstall 'Development Tools' -y
         sudo dnf install python3-pip -y
 
     - name: Install OpenTofu
