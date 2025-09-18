@@ -40,7 +40,15 @@ jobs:
         pip install ansible
 
     - name: Install this collection
-      run: ansible-galaxy collection install .
+      run: ansible-galaxy collection install . --force
+
+    - name: Download Platform and Gateway binaries
+      run: |
+        cd ~/.ansible/collections/ansible_collections/itential/deployer/playbooks
+        mkdir -p files
+        cd files
+        ${{ secrets.PLATFORM_RPM_DOWNLOAD_COMMAND }}
+        ${{ secrets.GATEWAY_WHL_DOWNLOAD_COMMAND }}
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
