@@ -23,6 +23,10 @@ jobs:
     #  with:
     #    python-version: '3.11'
 
+    - name: Setup Python
+      run: |
+        sudo dnf install python3-pip -y
+
     - name: Install OpenTofu
       uses: opentofu/setup-opentofu@v1
       with:
