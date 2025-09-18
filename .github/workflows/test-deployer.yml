@@ -27,6 +27,7 @@ jobs:
       run: |
         sudo dnf groupinstall 'Development Tools' -y
         sudo dnf install python3-pip -y
+        sudo dnf install nodejs -y
 
     - name: Install OpenTofu
       uses: opentofu/setup-opentofu@v1
