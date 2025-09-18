@@ -54,33 +54,35 @@ jobs:
         ssh-keyscan -H gitlab.com >> ~/.ssh/known_hosts
         
     - name: Clone Themis repository
+      working-directory: ".."
       run: |
-        git clone "${{ secrets.THEMIS_REPO_SSH_STRING }}" ~/themis
-        cd ~/themis
+        git clone "${{ secrets.THEMIS_REPO_SSH_STRING }}"
+        cd themis
         ls -la
 
     - name: Initialize OpenTofu
-      working-directory: $HOME/themis/tofu_aws
+      working-directory: ../themis/tofu_aws
       run: tofu init
 
     - name: Provision EC2 instances for Minimal design
-      working-directory: $HOME/themis/tofu_aws
+      working-directory: ../themis/tofu_aws
       run: tofu apply -var-file=tfvars/minimal.tfvars -auto-approve
 
     - name: Generate Ansible inventory hosts file
-      working-directory: $HOME/themis/tofu_aws
+      working-directory: ../themis/tofu_aws
       run: python3 ../scripts/generate_inventory.py --platform-release 6.0 --platform-packages itential-platform-6.0.7-1.noarch.rpm --gateway-release 2023.1 --gateway-whl-file automation_gateway-3.227.0+2023.1.9-py3-none-any.whl -o hosts.json
 
     - name: Wait for EC2 instances to be ready
-      working-directory: $HOME/themis/tofu_aws
+      working-directory: ../themis/tofu_aws
       run: sleep 60s
 
     - name: Run deployer on created instances
+      working-directory: ../themis/tofu_aws
       env:
         ANSIBLE_HOST_KEY_CHECKING: "False"
-      run: ansible-playbook itential.deployer.site -i /home/runner/themis/tofu_aws/hosts.json -v --key-file=~/.ssh/pet-east1.open.pem
+      run: ansible-playbook itential.deployer.site -i hosts.json -v --key-file=~/.ssh/pet-east1.open.pem
 
     - name: Tear down EC2 instances
       if: always()
-      working-directory: $HOME/themis/tofu_aws
+      working-directory: ../themis/tofu_aws
       run: tofu destroy -var-file=tfvars/minimal.tfvars -auto-approve
