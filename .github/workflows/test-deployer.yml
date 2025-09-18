@@ -11,16 +11,12 @@ env:
 
 jobs:
   test-deployer:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     timeout-minutes: 60
     
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
-
-    - name: Set design parameter
-      id: design
-      run: echo "design=aio" >> $GITHUB_OUTPUT
 
     - name: Setup Python
       uses: actions/setup-python@v4
@@ -85,5 +81,6 @@ jobs:
       run: ansible-playbook itential.deployer.site -i /home/runner/themis/tofu_aws/hosts.json -v --key-file=~/.ssh/pet-east1.open.pem
 
     - name: Tear down EC2 instances
+      if: always()
       working-directory: /home/runner/themis/tofu_aws
       run: tofu destroy -var-file=tfvars/minimal.tfvars -auto-approve
