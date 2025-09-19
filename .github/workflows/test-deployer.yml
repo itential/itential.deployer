@@ -88,7 +88,7 @@ jobs:
       run: python3 ../scripts/generate_inventory.py -o hosts.json
 
     - name: Create Ansible playbook to wait for EC2 instances to be ready
-      working-directory: ../themis/tofu_aws
+      working-directory: ../themis
       run: |
         cat > wait-for-instances.yml << 'EOF'
         ---
