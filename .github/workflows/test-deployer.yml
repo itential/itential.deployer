@@ -5,14 +5,14 @@ on:
     branches:
       - pipeline-test
 
-env:
-  TF_DIRECTORY: ./tofu_aws
-  ANSIBLE_HOST_KEY_CHECKING: "False"
-
 jobs:
   test-deployer:
     runs-on: self-hosted
     timeout-minutes: 60
+    strategy:
+      matrix:
+        design: [aio, minimal]
+      fail-fast: false
     
     steps:
     - name: Checkout repository
@@ -79,9 +79,9 @@ jobs:
       working-directory: ../themis/tofu_aws
       run: tofu init
 
-    - name: Provision EC2 instances for Minimal design
+    - name: Provision EC2 instances for ${{ matrix.design }} design
       working-directory: ../themis/tofu_aws
-      run: tofu apply -var-file=tfvars/minimal.tfvars -auto-approve
+      run: tofu apply -var-file=tfvars/${{ matrix.design }}.tfvars -auto-approve
 
     - name: Generate Ansible inventory hosts file
       working-directory: ../themis/tofu_aws
@@ -116,15 +116,15 @@ jobs:
         
     - name: Wait for EC2 instances to be ready
       working-directory: ../themis
-      run: ansible-playbook wait-for-instances.yml -i tofu_aws/hosts.json -i inventories/common -i inventories/minimal -v --key-file=~/.ssh/pet-east1.open.pem
+      run: ansible-playbook wait-for-instances.yml -i tofu_aws/hosts.json -i inventories/common -i inventories/${{ matrix.design }} -v --key-file=~/.ssh/pet-east1.open.pem
 
     - name: Run deployer on created instances
       working-directory: ../themis
       env:
         ANSIBLE_HOST_KEY_CHECKING: "False"
-      run: ansible-playbook itential.deployer.site -i tofu_aws/hosts.json -i inventories/common -i inventories/minimal -v --key-file=~/.ssh/pet-east1.open.pem
+      run: ansible-playbook itential.deployer.site -i tofu_aws/hosts.json -i inventories/common -i inventories/${{ matrix.design }} -v --key-file=~/.ssh/pet-east1.open.pem
 
     - name: Tear down EC2 instances
       if: always()
       working-directory: ../themis/tofu_aws
-      run: tofu destroy -var-file=tfvars/minimal.tfvars -auto-approve
+      run: tofu destroy -var-file=tfvars/${{ matrix.design }}.tfvars -auto-approve
