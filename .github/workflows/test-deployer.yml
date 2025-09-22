@@ -18,16 +18,12 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    #- name: Setup Python
-    #  uses: actions/setup-python@v4
-    #  with:
-    #    python-version: '3.11'
-
     - name: Install dnf packages
       run: |
         sudo dnf groupinstall 'Development Tools' -y
         sudo dnf install python3-pip -y
         sudo dnf install nodejs -y
+        sudo dnf install jq -y
 
     - name: Install OpenTofu
       uses: opentofu/setup-opentofu@v1
@@ -125,6 +121,23 @@ jobs:
       env:
         ANSIBLE_HOST_KEY_CHECKING: "False"
       run: ansible-playbook itential.deployer.site -i tofu_aws/hosts.json -i inventories/common -i inventories/${{ matrix.design }} -v --key-file=~/.ssh/pet-east1.open.pem
+
+    - name: Verify that Platform is running correctly
+      working-directory: ../themis
+      run: |
+        for host in $(jq -r '.all.children.platform.hosts[] | .ansible_host' tofu_aws/hosts.json); do
+          python3 scripts/validate.py platform $host
+        done
+        for host in $(jq -r '(.all.children.platform_secondary.hosts // [])[] | .ansible_host' tofu_aws/hosts.json); do
+          python3 scripts/validate.py platform "http://$host:3000"
+        done
+
+    - name: Verify that Gateway is running correctly
+      working-directory: ../themis
+      run: |
+        for host in $(jq -r '.all.children.gateway.hosts[] | .ansible_host' tofu_aws/hosts.json); do
+          python3 scripts/validate.py gateway "http://$host:8083"
+        done
 
     - name: Tear down EC2 instances
       if: always()
