@@ -27,17 +27,17 @@ jobs:
     - name: Install jq
       run: apt update && apt install -y jq
 
-    #- name: Install Python
-    #  run: |
-    #    apt install -y python3
-    #    wget https://bootstrap.pypa.io/get-pip.py && python3 get-pip.py && rm get-pip.py
-    #    ln -s /usr/bin/python3 /usr/bin/python || true
-    #    ln -s /usr/bin/pip3 /usr/bin/pip || true
+    - name: Install Python
+      run: |
+        apt install -y python3
+        wget https://bootstrap.pypa.io/get-pip.py && python3 get-pip.py && rm get-pip.py
+        ln -s /usr/bin/python3 /usr/bin/python || true
+        ln -s /usr/bin/pip3 /usr/bin/pip || true
 
-    - name: Setup Python
-      uses: actions/setup-python@v6.0.0
-      with:
-        python-version: 3.12
+    #- name: Setup Python
+    #  uses: actions/setup-python@v6.0.0
+    #  with:
+    #    python-version: 3.12
         
     - name: Install OpenTofu
       uses: opentofu/setup-opentofu@v1
