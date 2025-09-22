@@ -59,9 +59,7 @@ jobs:
         tofu_version: latest
 
     - name: Install Ansible
-      run: |
-        python -m pip install --upgrade pip
-        pip install ansible
+      run: pip install ansible
 
     - name: Install this collection
       run: ansible-galaxy collection install . --force
