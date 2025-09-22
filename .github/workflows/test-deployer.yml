@@ -12,10 +12,8 @@ jobs:
       #image: ubuntu:latest
       #options: --privileged
       image: ghcr.io/catthehacker/ubuntu:act-latest
-      options: --privileged
     env:
       #GIT_SSH_COMMAND: ssh -i ~/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no
-      GIT_SSH_COMMAND: ssh -i ~/.ssh/id_rsa
       PIP_BREAK_SYSTEM_PACKAGES: "1"
     timeout-minutes: 60
     strategy:
@@ -134,7 +132,7 @@ jobs:
       working-directory: ../themis
       env:
         ANSIBLE_HOST_KEY_CHECKING: "False"
-      run: ansible-playbook itential.deployer.site -i tofu_aws/hosts.json -i inventories/common -i inventories/${{ matrix.design }} -v --key-file=~/.ssh/pet-east1.open.pem --become
+      run: ansible-playbook itential.deployer.site -i tofu_aws/hosts.json -i inventories/common -i inventories/${{ matrix.design }} -v --key-file=~/.ssh/pet-east1.open.pem
 
     - name: Verify that Platform is running correctly
       working-directory: ../themis
