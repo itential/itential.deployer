@@ -19,7 +19,7 @@ jobs:
     
     steps:
     - name: Install common dependencies
-      run: apt update && apt install -y unzip curl wget git node python3
+      run: apt update && apt install -y unzip curl wget git nodejs python3
       
     - name: Checkout repository
       uses: actions/checkout@v4
