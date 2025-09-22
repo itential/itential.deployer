@@ -9,7 +9,7 @@ jobs:
   test-deployer:
     runs-on: self-hosted
     container:
-      image: ghcr.io/catthehacker/ubuntu:runner-latest
+      image: ubuntu:latest
       options: --privileged
     timeout-minutes: 60
     strategy:
@@ -18,6 +18,9 @@ jobs:
       fail-fast: false
     
     steps:
+    - name: Install common dependencies
+      run: apt install -y unzip curl wget git node python3
+      
     - name: Checkout repository
       uses: actions/checkout@v4
 
