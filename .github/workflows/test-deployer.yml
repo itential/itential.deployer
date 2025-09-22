@@ -154,7 +154,7 @@ jobs:
       working-directory: ../themis
       env:
         ANSIBLE_HOST_KEY_CHECKING: "False"
-      run: ansible-playbook itential.deployer.site -i tofu_aws/hosts.json -i inventories/common -i inventories/${{ matrix.design }} -v --key-file=~/.ssh/pet-east1.open.pem
+      run: ansible-playbook itential.deployer.site -i tofu_aws/hosts.json -i inventories/common -i inventories/${{ matrix.design }} -v --key-file=~/.ssh/pet-east1.open.pem --become
 
     - name: Verify that Platform is running correctly
       continue-on-error: true
