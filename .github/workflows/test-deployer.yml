@@ -22,7 +22,7 @@ jobs:
     
     steps:
     - name: Install common dependencies
-      run: apt update && apt install -y unzip curl wget git nodejs openssh-client
+      run: apt update && apt install -y unzip curl wget git nodejs openssh-client jq
 
     - name: Install Python
       run: |
