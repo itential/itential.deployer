@@ -13,7 +13,8 @@ jobs:
       #options: --privileged
       image: ghcr.io/catthehacker/ubuntu:act-latest
     env:
-      #GIT_SSH_COMMAND: ssh -i ~/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no
+      ANSIBLE_HOST_KEY_CHECKING: "False"
+      GIT_SSH_COMMAND: ssh -i ~/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no
       PIP_BREAK_SYSTEM_PACKAGES: "1"
     timeout-minutes: 60
     strategy:
@@ -22,8 +23,8 @@ jobs:
       fail-fast: false
     
     steps:
-    #- name: Install common dependencies
-    #  run: apt update && apt install -y unzip curl wget git nodejs openssh-client jq
+    - name: Install miscellaneous dependencies
+      run: apt update && apt install -y jq
 
     - name: Install Python
       run: |
@@ -69,7 +70,6 @@ jobs:
         echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/pet-east1.open.pem
         chmod 600 ~/.ssh/id_rsa
         chmod 600 ~/.ssh/pet-east1.open.pem
-        ssh-keyscan -H gitlab.com >> ~/.ssh/known_hosts
         
     - name: Clone Themis repository
       working-directory: ".."
@@ -124,14 +124,10 @@ jobs:
         
     - name: Wait for EC2 instances to be ready
       working-directory: ../themis
-      env:
-        ANSIBLE_HOST_KEY_CHECKING: "False"
       run: ansible-playbook wait-for-instances.yml -i tofu_aws/hosts.json -i inventories/common -i inventories/${{ matrix.design }} -v --key-file=~/.ssh/pet-east1.open.pem
 
     - name: Run deployer on created instances
       working-directory: ../themis
-      env:
-        ANSIBLE_HOST_KEY_CHECKING: "False"
       run: ansible-playbook itential.deployer.site -i tofu_aws/hosts.json -i inventories/common -i inventories/${{ matrix.design }} -v --key-file=~/.ssh/pet-east1.open.pem
 
     - name: Verify that Platform is running correctly
