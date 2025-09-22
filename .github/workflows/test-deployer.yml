@@ -9,10 +9,12 @@ jobs:
   test-deployer:
     runs-on: self-hosted
     container:
-      image: ubuntu:latest
+      #image: ubuntu:latest
+      #options: --privileged
+      image: ghcr.io/catthehacker/ubuntu:act-latest
       options: --privileged
     env:
-      GIT_SSH_COMMAND: ssh -i ~/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no
+      #GIT_SSH_COMMAND: ssh -i ~/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no
       PIP_BREAK_SYSTEM_PACKAGES: "1"
     timeout-minutes: 60
     strategy:
@@ -21,8 +23,8 @@ jobs:
       fail-fast: false
     
     steps:
-    - name: Install common dependencies
-      run: apt update && apt install -y unzip curl wget git nodejs openssh-client jq
+    #- name: Install common dependencies
+    #  run: apt update && apt install -y unzip curl wget git nodejs openssh-client jq
 
     - name: Install Python
       run: |
@@ -157,7 +159,6 @@ jobs:
       run: ansible-playbook itential.deployer.site -i tofu_aws/hosts.json -i inventories/common -i inventories/${{ matrix.design }} -v --key-file=~/.ssh/pet-east1.open.pem --become
 
     - name: Verify that Platform is running correctly
-      continue-on-error: true
       working-directory: ../themis
       run: |
         for host in $(jq -r '.all.children.platform.hosts[] | .ansible_host' tofu_aws/hosts.json); do
@@ -168,11 +169,30 @@ jobs:
         done
 
     - name: Verify that Gateway is running correctly
-      continue-on-error: true
       working-directory: ../themis
       run: |
         for host in $(jq -r '.all.children.gateway.hosts[] | .ansible_host' tofu_aws/hosts.json); do
           python3 scripts/validate.py gateway "http://$host:8083"
+        done
+
+    - name: Verify that Redis is running correctly
+      working-directory: ../themis
+      run: |
+        for host in $(jq -r '.all.children.redis.hosts[] | .ansible_host' tofu_aws/hosts.json); do
+          python3 scripts/validate.py redis "$host"
+        done
+        for host in $(jq -r '(.all.children.redis_secondary.hosts // [])[] | .ansible_host' tofu_aws/hosts.json); do
+          python3 scripts/validate.py redis "$host"
+        done
+
+    - name: Verify that MongoDB is running correctly
+      working-directory: ../themis
+      run: |
+        for host in $(jq -r '.all.children.mongodb.hosts[] | .ansible_host' tofu_aws/hosts.json); do
+          python3 scripts/validate.py mongodb "$host"
+        done
+        for host in $(jq -r '(.all.children.mongodb_arbiter.hosts // [])[] | .ansible_host' tofu_aws/hosts.json); do
+          python3 scripts/validate.py mongodb "$host"
         done
 
     - name: Tear down EC2 instances
