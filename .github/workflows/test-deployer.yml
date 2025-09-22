@@ -167,7 +167,7 @@ jobs:
           python3 scripts/validate.py mongodb "$host"
         done
         for host in $(jq -r '(.all.children.mongodb_arbiter.hosts // [])[] | .ansible_host' tofu_aws/hosts.json); do
-          python3 scripts/validate.py mongodb "$host"
+          python3 scripts/validate.py mongodb "$host" --arbiter
         done
 
     - name: Tear down EC2 instances
