@@ -21,9 +21,23 @@ jobs:
     - name: Install dnf packages
       run: |
         sudo dnf groupinstall 'Development Tools' -y
-        sudo dnf install python3-pip -y
+        sudo dnf install python3.12 python3.12-pip python3.12-devel -y
         sudo dnf install nodejs -y
         sudo dnf install jq -y
+
+    - name: Set Python 3.12 as default
+      run: |
+        alternatives --remove-all python3 2>/dev/null || true
+        alternatives --install /usr/bin/python3 python3 /usr/bin/python3.12 100
+        
+        alternatives --remove-all python 2>/dev/null || true
+        alternatives --install /usr/bin/python python /usr/bin/python3.12 100
+        
+        alternatives --remove-all pip3 2>/dev/null || true
+        alternatives --install /usr/bin/pip3 pip3 /usr/bin/pip3.12 100
+        
+        alternatives --remove-all pip 2>/dev/null || true
+        alternatives --install /usr/bin/pip pip /usr/bin/pip3.12 100
 
     - name: Install OpenTofu
       uses: opentofu/setup-opentofu@v1
