@@ -24,8 +24,8 @@ jobs:
     - name: Install Python
       run: |
         apt install -y python3 python3-pip
-        ln -s /usr/bin/python3 /usr/bin/python
-        ln -s /usr/bin/pip3 /usr/bin/pip
+        ln -s /usr/bin/python3 /usr/bin/python || true
+        ln -s /usr/bin/pip3 /usr/bin/pip || true
       
     - name: Checkout repository
       uses: actions/checkout@v4
