@@ -17,7 +17,7 @@ jobs:
     timeout-minutes: 60
     strategy:
       matrix:
-        design: [aio, minimal]
+        design: [aio, minimal, ha2, asa]
       fail-fast: false
     
     steps:
