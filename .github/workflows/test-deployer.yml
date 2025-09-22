@@ -9,7 +9,7 @@ jobs:
   test-deployer:
     runs-on: self-hosted
     container:
-      image: ghcr.io/actions/runner:latest
+      image: ubuntu:latest
       options: --privileged
     timeout-minutes: 60
     strategy:
@@ -21,12 +21,12 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Install dnf packages
-      run: |
-        sudo dnf groupinstall 'Development Tools' -y
-        sudo dnf install python3.12 python3.12-pip python3.12-devel -y
-        sudo dnf install nodejs -y
-        sudo dnf install jq -y
+    #- name: Install dnf packages
+    #  run: |
+    #    sudo dnf groupinstall 'Development Tools' -y
+    #    sudo dnf install python3.12 python3.12-pip python3.12-devel -y
+    #    sudo dnf install nodejs -y
+    #    sudo dnf install jq -y
 
     #- name: Set Python 3.12 as default
     #  run: |
