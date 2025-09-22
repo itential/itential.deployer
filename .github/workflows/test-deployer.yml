@@ -9,7 +9,7 @@ jobs:
   test-deployer:
     runs-on: self-hosted
     container:
-      image: ubuntu:latest
+      image: ghcr.io/actions/runner:latest
       options: --privileged
     timeout-minutes: 60
     strategy:
