@@ -18,7 +18,10 @@ redis_build_packages:
   - gcc
   - gcc-c++
   - make
+  - systemd
   - systemd-devel
+  - systemd-libs
+  - systemd-pam
 
 # The Remi and EPEL repos are used only when:
 #  - redis_install_from_source is set to 'false'
