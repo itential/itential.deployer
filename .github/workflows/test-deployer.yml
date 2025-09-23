@@ -165,6 +165,7 @@ jobs:
               become: yes
 
             - name: Use specific repository instead of mirrors
+              become: true
               ini_file:
                 path: /etc/yum.repos.d/rocky.repo
                 section: appstream
@@ -173,6 +174,7 @@ jobs:
                 backup: yes
             
             - name: Disable mirrorlist for appstream
+              become: true
               ini_file:
                 path: /etc/yum.repos.d/rocky.repo
                 section: appstream
