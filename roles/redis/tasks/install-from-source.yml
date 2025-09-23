@@ -36,7 +36,7 @@
       when: not offline_install_enabled
       block:
         - name: Refresh repository metadata
-          command: dnf clean metadata && dnf makecache
+          shell: dnf clean metadata && dnf makecache
           
         - name: Install Redis build packages
           ansible.builtin.dnf:
