@@ -153,8 +153,7 @@ jobs:
         
     - name: Wait for EC2 instances to be ready
       working-directory: ../themis
-      run: |
-        ansible-playbook wait-for-instances.yml -i tofu_aws/hosts.json -i inventories/common -i inventories/${{ matrix.design }} -v --key-file=~/.ssh/pet-east1.open.pem
+      run: ansible-playbook wait-for-instances.yml -i tofu_aws/hosts.json -i inventories/common -i inventories/${{ matrix.design }} -v --key-file=~/.ssh/pet-east1.open.pem
 
     - name: Run deployer on created instances
       working-directory: ../themis
