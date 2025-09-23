@@ -35,6 +35,14 @@
     - name: Online install
       when: not offline_install_enabled
       block:
+        - name: Check current systemd packages
+          shell: rpm -qa | grep systemd
+          register: systemd_packages
+
+        - name: Show systemd packages
+          debug:
+            var: systemd_packages.stdout_lines
+            
         - name: Install Redis build packages
           ansible.builtin.dnf:
             name: "{{ item }}"
