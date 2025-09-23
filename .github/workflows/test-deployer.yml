@@ -156,12 +156,12 @@ jobs:
             - name: Wait for SSH connection to be ready
               ansible.builtin.wait_for_connection:
                 delay: 10
-                timeout: 120
+                timeout: 300
               
             - name: Wait for cloud-init to complete (marker file check)
               ansible.builtin.wait_for:
                 path: /var/log/cloud-init-finished.marker
-                timeout: 120
+                timeout: 300
               become: yes
 
             - name: Use specific repository instead of mirrors
