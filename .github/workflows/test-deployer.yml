@@ -45,7 +45,9 @@ jobs:
         tofu_version: latest
 
     - name: Install Ansible
-      run: pip install ansible
+      run: |
+        pip install "ansible>=9.0.0,<10.0.0" "ansible-core>=2.11,<2.17"
+        ansible --version
 
     - name: Install this collection
       run: ansible-galaxy collection install . --force
