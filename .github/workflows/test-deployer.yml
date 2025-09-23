@@ -100,6 +100,14 @@ jobs:
       working-directory: ../themis/tofu_aws
       run: python3 ../scripts/generate_inventory.py -o hosts.json
 
+    - name: Configure Ansible to make all errors fatal
+      run: |
+        cat > ~/.ansible.cfg << 'EOF'
+        [defaults]
+        any_errors_fatal = True
+        max_fail_percentage = 0
+        EOF
+
     - name: Create Ansible playbook to wait for EC2 instances to be ready
       working-directory: ../themis
       run: |
@@ -131,7 +139,6 @@ jobs:
       working-directory: ../themis
       run: |
         ansible-playbook wait-for-instances.yml -i tofu_aws/hosts.json -i inventories/common -i inventories/${{ matrix.design }} -v --key-file=~/.ssh/pet-east1.open.pem
-        sleep 60
 
     - name: Run deployer on created instances
       working-directory: ../themis
