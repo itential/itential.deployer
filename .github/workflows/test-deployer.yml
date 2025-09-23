@@ -133,6 +133,14 @@ jobs:
                 path: /var/log/cloud-init-finished.marker
                 timeout: 60
               become: yes
+
+            - name: Update packages and refresh cache
+              shell: |
+                dnf upgrade --refresh -y
+                dnf clean all
+                dnf makecache
+              become: yes
+              changed_when: true
         EOF
         
     - name: Wait for EC2 instances to be ready
