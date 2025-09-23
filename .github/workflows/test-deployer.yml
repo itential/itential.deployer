@@ -113,7 +113,7 @@ jobs:
         cat > inventories/common/group_vars/gateway.yml << 'EOF'
         ---
         gateway_release: ${{ secrets.GATEWAY_RELEASE }}
-        gateway_whl_file: "${{ secrets.GATEWAY_WHL_URL }}"
+        gateway_archive_download_url: "${{ secrets.GATEWAY_WHL_URL }}"
         repository_username: "${{ secrets.NEXUS_USERNAME }}"
         repository_password: "${{ secrets.NEXUS_PASSWORD }}"
         EOF
