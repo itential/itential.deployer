@@ -52,13 +52,13 @@ jobs:
     - name: Install this collection
       run: ansible-galaxy collection install . --force
 
-    - name: Download Platform and Gateway binaries
-      run: |
-        cd ~/.ansible/collections/ansible_collections/itential/deployer/playbooks
-        mkdir -p files
-        cd files
-        ${{ secrets.PLATFORM_RPM_DOWNLOAD_COMMAND }}
-        ${{ secrets.GATEWAY_WHL_DOWNLOAD_COMMAND }}
+    #- name: Download Platform and Gateway binaries
+    #  run: |
+    #    cd ~/.ansible/collections/ansible_collections/itential/deployer/playbooks
+    #    mkdir -p files
+    #    cd files
+    #    ${{ secrets.PLATFORM_RPM_DOWNLOAD_COMMAND }}
+    #    ${{ secrets.GATEWAY_WHL_DOWNLOAD_COMMAND }}
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
@@ -87,6 +87,36 @@ jobs:
     - name: Install Themis Python script dependencies
       working-directory: ../themis
       run: pip install -r scripts/requirements.txt
+
+    - name: Configure inventory to download Platform from Nexus
+      working-directory: ../themis
+      run: |
+        cat > inventories/common/group_vars/platform.yml << 'EOF'
+        ---
+        platform_packages:
+          - ${{ secrets.PLATFORM_RPM_URL }}
+        repository_username: ${{ secrets.NEXUS_USERNAME }}
+        repository_password: ${{ secrets.NEXUS_PASSWORD }}
+        EOF
+
+        cat > inventories/common/group_vars/platform_secondary.yml << 'EOF'
+        ---
+        platform_packages:
+          - "${{ secrets.PLATFORM_RPM_URL }}"
+        repository_username: "${{ secrets.NEXUS_USERNAME }}"
+        repository_password: "${{ secrets.NEXUS_PASSWORD }}"
+        EOF
+
+    - name: Configure inventory to download Gateway from Nexus
+      working-directory: ../themis
+      run: |
+        cat > inventories/common/group_vars/gateway.yml << 'EOF'
+        ---
+        gateway_release: ${{ secrets.GATEWAY_RELEASE }}
+        gateway_whl_file: "${{ secrets.GATEWAY_WHL_URL }}"
+        repository_username: "${{ secrets.NEXUS_USERNAME }}"
+        repository_password: "${{ secrets.NEXUS_PASSWORD }}"
+        EOF
 
     - name: Initialize OpenTofu
       working-directory: ../themis/tofu_aws
@@ -132,22 +162,6 @@ jobs:
               ansible.builtin.wait_for:
                 path: /var/log/cloud-init-finished.marker
                 timeout: 120
-              become: yes
-
-            - name: Update all packages
-              ansible.builtin.dnf:
-                name: "*"
-                state: latest
-                update_cache: yes
-              become: yes
-            
-            - name: Clean DNF cache
-              command: dnf clean all
-              become: yes
-            
-            - name: Rebuild DNF cache
-              ansible.builtin.dnf:
-                update_cache: yes
               become: yes
         EOF
         
