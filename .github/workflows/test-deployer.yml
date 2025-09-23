@@ -163,6 +163,21 @@ jobs:
                 path: /var/log/cloud-init-finished.marker
                 timeout: 120
               become: yes
+
+            - name: Use specific repository instead of mirrors
+              ini_file:
+                path: /etc/yum.repos.d/rocky.repo
+                section: appstream
+                option: baseurl
+                value: http://dl.rockylinux.org/pub/rocky/9/AppStream/x86_64/os/
+                backup: yes
+            
+            - name: Disable mirrorlist for appstream
+              ini_file:
+                path: /etc/yum.repos.d/rocky.repo
+                section: appstream
+                option: mirrorlist
+                state: absent
         EOF
         
     - name: Wait for EC2 instances to be ready
