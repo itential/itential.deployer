@@ -134,13 +134,23 @@ jobs:
                 timeout: 60
               become: yes
 
-            - name: Update packages and refresh cache
-              shell: |
-                dnf upgrade --refresh -y
-                dnf clean all
-                dnf makecache
+            - name: Update all packages
+              ansible.builtin.dnf:
+                name: "*"
+                state: latest
+                update_cache: yes
               become: yes
-              changed_when: true
+            
+            - name: Clean DNF cache
+              ansible.builtin.dnf:
+                autoremove: yes
+                clean: all
+              become: yes
+            
+            - name: Rebuild DNF cache
+              ansible.builtin.dnf:
+                update_cache: yes
+              become: yes
         EOF
         
     - name: Wait for EC2 instances to be ready
