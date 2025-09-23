@@ -142,9 +142,7 @@ jobs:
               become: yes
             
             - name: Clean DNF cache
-              ansible.builtin.dnf:
-                autoremove: yes
-                clean: all
+              command: dnf clean all
               become: yes
             
             - name: Rebuild DNF cache
