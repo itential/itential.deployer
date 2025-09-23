@@ -35,13 +35,10 @@
     - name: Online install
       when: not offline_install_enabled
       block:
-        - name: Refresh repository metadata
-          shell: dnf clean metadata && dnf makecache
-          
         - name: Install Redis build packages
           ansible.builtin.dnf:
             name: "{{ item }}"
-            state: latest
+            state: present
           register: redis_install_result
           with_items: "{{ redis_build_packages }}"
           when:
