@@ -11,7 +11,6 @@ jobs:
     container:
       image: ghcr.io/catthehacker/ubuntu:act-latest
     env:
-      ANSIBLE_HOST_KEY_CHECKING: "False"
       GIT_SSH_COMMAND: ssh -i ~/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no
       PIP_BREAK_SYSTEM_PACKAGES: "1"
     timeout-minutes: 60
@@ -42,6 +41,17 @@ jobs:
       run: |
         pip install "ansible>=9.0.0,<10.0.0" "ansible-core>=2.11,<2.17"
         ansible --version
+
+    # Configures Ansible to fail fast, skip host key checking, use correct key file
+    - name: Write Ansible configuration file
+      run: |
+        cat > ~/.ansible.cfg << 'EOF'
+        [defaults]
+        any_errors_fatal = True
+        host_key_checking = False
+        max_fail_percentage = 0
+        private_key_file = ~/.ssh/pet-east1.open.pem
+        EOF
 
     - name: Install this collection
       run: ansible-galaxy collection install . --force
@@ -108,61 +118,27 @@ jobs:
       working-directory: ../themis/tofu_aws
       run: tofu init
 
-    - name: Provision EC2 instances for ${{ matrix.design }} design
+    - name: Provision EC2 instances
       working-directory: ../themis/tofu_aws
       run: tofu apply -var-file=tfvars/${{ matrix.design }}.tfvars -auto-approve
 
     - name: Generate Ansible inventory hosts file
       working-directory: ../themis/tofu_aws
-      run: python3 ../scripts/generate_inventory.py -o hosts.json
+      run: python3 ../scripts/generate_inventory.py --validate -o hosts.json
 
-    - name: Configure Ansible to make all errors fatal
-      run: |
-        cat > ~/.ansible.cfg << 'EOF'
-        [defaults]
-        any_errors_fatal = True
-        max_fail_percentage = 0
-        EOF
-
-    #- name: Wait for EC2 instances to be ready
-    #  working-directory: ../themis
-    #  run: |
-    #    cat > wait-for-instances.yml << 'EOF'
-    #    ---
-    #    - name: Wait for instances to initialize
-    #      hosts: all
-    #      gather_facts: no
-    #      become: no
-    #      serial: "{{ ansible_serial | default(10) }}"
-    #      
-    #      vars:
-    #        ssh_port: 22
-    #        
-    #      tasks:
-    #        - name: Wait for SSH connection to be ready
-    #          ansible.builtin.wait_for_connection:
-    #            delay: 10
-    #            timeout: 300
-    #          
-    #        - name: Wait for cloud-init to complete (marker file check)
-    #          ansible.builtin.wait_for:
-    #            path: /var/log/cloud-init-finished.marker
-    #            timeout: 300
-    #          become: yes
-    #    EOF
-    #    ansible-playbook wait-for-instances.yml -i tofu_aws/hosts.json -i inventories/common -i inventories/${{ matrix.design }} -v --key-file=~/.ssh/pet-east1.open.pem
-
+    # Retries until SSH connection is established or timeout is reached
     - name: Wait for EC2 instances to be ready to SSH into
       working-directory: ../themis
-      run: ansible all -m wait_for_connection -a "delay=10 timeout=300" -i tofu_aws/hosts.json -v --key-file=~/.ssh/pet-east1.open.pem
+      run: ansible all -m wait_for_connection -a "delay=10 timeout=300" -i tofu_aws/hosts.json -v
 
-    - name: Wait for cloud-init to complete
+    # Waits for cloud init marker script to be written to disk (see cloud-init.tpl)
+    - name: Wait for cloud init script to complete
       working-directory: ../themis
-      run: ansible all -m wait_for -a "path=/var/log/cloud-init-finished.marker timeout=300" -i tofu_aws/hosts.json -v --key-file=~/.ssh/pet-east1.open.pem
+      run: ansible all -m wait_for -a "path=/var/log/cloud-init-finished.marker timeout=300" -i tofu_aws/hosts.json -v
     
     - name: Run the deployer
       working-directory: ../themis
-      run: ansible-playbook itential.deployer.site -i tofu_aws/hosts.json -i inventories/common -i inventories/${{ matrix.design }} -v --key-file=~/.ssh/pet-east1.open.pem -e "redis_install_from_source=false" -e "redis_remi_repo_url=http://rpms.remirepo.net/enterprise/remi-release-9.rpm"
+      run: ansible-playbook itential.deployer.site -i tofu_aws/hosts.json -i inventories/common -i inventories/${{ matrix.design }} -v -e "redis_install_from_source=false" -e "redis_remi_repo_url=http://rpms.remirepo.net/enterprise/remi-release-9.rpm"
 
     - name: Verify that Platform is running correctly
       working-directory: ../themis
