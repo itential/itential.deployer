@@ -99,7 +99,7 @@ jobs:
         gateway_archive_download_url: "${{ secrets.GATEWAY_WHL_URL }}"
         EOF
 
-    - Add Nexus credentials to inventory
+    - name: Add Nexus credentials to inventory
       working-directory: ../themis
       run: |
         cat 'repository_username: "${{ secrets.NEXUS_USERNAME }}"' >> inventories/common/group_vars/all.yml
