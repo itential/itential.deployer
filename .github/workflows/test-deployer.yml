@@ -99,11 +99,18 @@ jobs:
         gateway_archive_download_url: "${{ secrets.GATEWAY_WHL_URL }}"
         EOF
 
+    - name: Configure Redis to be installed from binary
+      run: |
+        cat > inventories/common/group_vars/redis.yml << 'EOF'
+        ---
+        redis_install_from_source: false
+        EOF
+
     - name: Add Nexus credentials to inventory
       working-directory: ../themis
       run: |
-        cat 'repository_username: "${{ secrets.NEXUS_USERNAME }}"' >> inventories/common/group_vars/all.yml
-        cat 'repository_password: "${{ secrets.NEXUS_PASSWORD }}"' >> inventories/common/group_vars/all.yml
+        echo 'repository_username: "${{ secrets.NEXUS_USERNAME }}"' >> inventories/common/group_vars/all.yml
+        echo 'repository_password: "${{ secrets.NEXUS_PASSWORD }}"' >> inventories/common/group_vars/all.yml
 
     - name: Initialize OpenTofu
       working-directory: ../themis/tofu_aws
