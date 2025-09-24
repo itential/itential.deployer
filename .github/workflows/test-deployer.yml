@@ -5,13 +5,18 @@ on:
     branches:
       - pipeline-test
 
+env:
+  AWS_REGION: us-east-1
+  EC2_KEY_PATH: ~/.ssh/pet-east1.open.pem
+  GITLAB_KEY_PATH: ~/.ssh/id_rsa
+
 jobs:
   test-deployer:
     runs-on: self-hosted
     container:
       image: ghcr.io/catthehacker/ubuntu:act-latest
     env:
-      GIT_SSH_COMMAND: ssh -i ~/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no
+      GIT_SSH_COMMAND: ssh -i ${{ env.GITLAB_KEY_PATH }} -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no
       PIP_BREAK_SYSTEM_PACKAGES: "1"
     timeout-minutes: 60
     strategy:
@@ -42,7 +47,7 @@ jobs:
         pip install "ansible>=9.0.0,<10.0.0" "ansible-core>=2.11,<2.17"
         ansible --version
 
-    # Configures Ansible to fail fast, skip host key checking, use correct key file
+    # Configures Ansible to fail immediately on error, skip host key checking, use correct key file
     - name: Write Ansible configuration file
       run: |
         cat > ~/.ansible.cfg << 'EOF'
@@ -50,7 +55,7 @@ jobs:
         any_errors_fatal = True
         host_key_checking = False
         max_fail_percentage = 0
-        private_key_file = ~/.ssh/pet-east1.open.pem
+        private_key_file = ${{ env.EC2_KEY_PATH }}
         EOF
 
     - name: Install this collection
@@ -62,21 +67,25 @@ jobs:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
-        aws-region: ${{ vars.AWS_REGION || 'us-east-1' }}
+        aws-region: ${{ env.AWS_REGION }}
 
-    - name: Setup SSH for GitLab and EC2
+    - name: Setup SSH for GitLab
       run: |
-        mkdir -p ~/.ssh
-        echo "${{ secrets.GITLAB_SSH_KEY }}" > ~/.ssh/id_rsa
-        echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/pet-east1.open.pem
-        chmod 600 ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/pet-east1.open.pem
+        mkdir -p "$(dirname "${{ env.GITLAB_KEY_PATH }}")"
+        echo "${{ secrets.GITLAB_SSH_KEY }}" > "${{ env.GITLAB_KEY_PATH }}"
+        chmod 600 "${{ env.GITLAB_KEY_PATH }}"
+
+    - name: Setup SSH for EC2
+      run: |
+        mkdir -p "$(dirname "${{ env.EC2_KEY_PATH }}")"
+        echo "${{ secrets.EC2_SSH_KEY }}" > ${{ env.EC2_KEY_PATH }}
+        chmod 600 
         
     - name: Clone Themis repository
       working-directory: ..
       run: |
         rm -rf themis
-        git clone "${{ secrets.THEMIS_REPO_SSH_STRING }}"
+        git clone "${{ secrets.THEMIS_REPO_SSH_URI }}"
         cd themis
         ls -la
 
@@ -90,7 +99,7 @@ jobs:
         cat > inventories/common/group_vars/platform.yml << 'EOF'
         ---
         platform_packages:
-          - ${{ secrets.PLATFORM_RPM_URL }}
+          - "${{ secrets.PLATFORM_RPM_URL }}"
         EOF
 
         cat > inventories/common/group_vars/platform_secondary.yml << 'EOF'
@@ -108,6 +117,7 @@ jobs:
         gateway_archive_download_url: "${{ secrets.GATEWAY_WHL_URL }}"
         EOF
 
+    # This is potentially more secure than adding the credentials as extra vars in the ansible-playbook command
     - name: Add Nexus credentials to inventory
       working-directory: ../themis
       run: |
@@ -117,6 +127,10 @@ jobs:
     - name: Initialize OpenTofu
       working-directory: ../themis/tofu_aws
       run: tofu init
+
+    - name: Generate OpenTofu execution plan
+      working-directory: ../themis/tofu_aws
+      run: tofu plan -var-file=tfvars/${{ matrix.design }}.tfvars -auto-approve
 
     - name: Provision EC2 instances
       working-directory: ../themis/tofu_aws
@@ -131,7 +145,7 @@ jobs:
       working-directory: ../themis
       run: ansible all -m wait_for_connection -a "delay=10 timeout=300" -i tofu_aws/hosts.json -v
 
-    # Waits for cloud init marker script to be written to disk (see cloud-init.tpl)
+    # Waits for cloud init marker file to be written to disk (see cloud-init.tpl)
     - name: Wait for cloud init script to complete
       working-directory: ../themis
       run: ansible all -m wait_for -a "path=/var/log/cloud-init-finished.marker timeout=300" -i tofu_aws/hosts.json -v
