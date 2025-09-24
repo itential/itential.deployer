@@ -78,8 +78,8 @@ jobs:
     - name: Setup SSH for EC2
       run: |
         mkdir -p "$(dirname "${{ env.EC2_KEY_PATH }}")"
-        echo "${{ secrets.EC2_SSH_KEY }}" > ${{ env.EC2_KEY_PATH }}
-        chmod 600 
+        echo "${{ secrets.EC2_SSH_KEY }}" > "${{ env.EC2_KEY_PATH }}"
+        chmod 600 "${{ env.EC2_KEY_PATH }}"
         
     - name: Clone Themis repository
       working-directory: ..
