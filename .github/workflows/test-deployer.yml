@@ -100,6 +100,7 @@ jobs:
         EOF
 
     - name: Configure Redis to be installed from binary
+      working-directory: ../themis
       run: |
         cat > inventories/common/group_vars/redis.yml << 'EOF'
         ---
