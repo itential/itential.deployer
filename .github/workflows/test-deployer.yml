@@ -12,8 +12,6 @@ jobs:
       image: ghcr.io/catthehacker/ubuntu:act-latest
     env:
       ANSIBLE_HOST_KEY_CHECKING: "False"
-      EC2_KEY_PATH: $HOME/.ssh/pet-east1.open.pem
-      GIT_KEY_PATH: $HOME/.ssh/id_rsa
       PIP_BREAK_SYSTEM_PACKAGES: "1"
     timeout-minutes: 60
     strategy:
@@ -58,15 +56,16 @@ jobs:
     - name: Setup SSH for GitLab and EC2
       run: |
         mkdir -p ~/.ssh
-        echo "${{ secrets.GITLAB_SSH_KEY }}" > "$GIT_KEY_PATH"
-        echo "${{ secrets.EC2_SSH_KEY }}" > "$EC2_KEY_PATH"
+        echo "${{ secrets.GITLAB_SSH_KEY }}" > /.ssh/id_rsa
+        echo "${{ secrets.EC2_SSH_KEY }}" > /.ssh/pet-east1.open.pem
         chmod 600 "$GIT_KEY_PATH"
         chmod 600 "$EC2_KEY_PATH"
         
     - name: Clone Themis repository
       working-directory: ".."
+      env:
+        GIT_SSH_COMMAND: ssh -i /.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no
       run: |
-        export GIT_SSH_COMMAND="ssh -i \"$GIT_KEY_PATH\" -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
         git clone "${{ secrets.THEMIS_REPO_SSH_STRING }}"
         cd themis
         ls -la
@@ -145,11 +144,11 @@ jobs:
                 timeout: 300
               become: yes
         EOF
-        ansible-playbook wait-for-instances.yml -i tofu_aws/hosts.json -i inventories/common -i inventories/${{ matrix.design }} -v --key-file="$EC2_KEY_PATH"
+        ansible-playbook wait-for-instances.yml -i tofu_aws/hosts.json -i inventories/common -i inventories/${{ matrix.design }} -v --key-file=~/.ssh/pet-east1.open.pem
         
     - name: Run deployer on created instances
       working-directory: ../themis
-      run: ansible-playbook itential.deployer.site -i tofu_aws/hosts.json -i inventories/common -i inventories/${{ matrix.design }} -vvvv --key-file="$EC2_KEY_PATH" --extra-vars "repository_username=${{ secrets.NEXUS_USERNAME }} repository_password=${{ secrets.NEXUS_PASSWORD }}"
+      run: ansible-playbook itential.deployer.site -i tofu_aws/hosts.json -i inventories/common -i inventories/${{ matrix.design }} -vvvv --key-file=~/.ssh/pet-east1.open.pem --extra-vars "repository_username=${{ secrets.NEXUS_USERNAME }} repository_password=${{ secrets.NEXUS_PASSWORD }}"
 
     - name: Verify that Platform is running correctly
       working-directory: ../themis
