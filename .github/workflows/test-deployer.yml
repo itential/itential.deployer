@@ -107,6 +107,10 @@ jobs:
         ---
         redis_install_from_source: false
         EOF
+        cat > inventories/common/group_vars/redis_secondary.yml << 'EOF'
+        ---
+        redis_install_from_source: false
+        EOF
 
     - name: Add Nexus credentials to inventory
       working-directory: ../themis
@@ -164,7 +168,7 @@ jobs:
         
     - name: Run deployer on created instances
       working-directory: ../themis
-      run: ansible-playbook itential.deployer.site -i tofu_aws/hosts.json -i inventories/common -i inventories/${{ matrix.design }} -vvv --key-file=~/.ssh/pet-east1.open.pem
+      run: ansible-playbook itential.deployer.site -i tofu_aws/hosts.json -i inventories/common -i inventories/${{ matrix.design }} -v --key-file=~/.ssh/pet-east1.open.pem -e "redis_remi_repo_url=http://rpms.remirepo.net/enterprise/remi-release-9.rpm"
 
     - name: Verify that Platform is running correctly
       working-directory: ../themis
