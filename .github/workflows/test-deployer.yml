@@ -12,32 +12,27 @@ jobs:
       image: ghcr.io/catthehacker/ubuntu:act-latest
     env:
       ANSIBLE_HOST_KEY_CHECKING: "False"
-      GIT_SSH_COMMAND: ssh -i ~/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no
+      EC2_KEY_PATH: ~/.ssh/pet-east1.open.pem
+      GIT_KEY_PATH: ~/.ssh/id_rsa
       PIP_BREAK_SYSTEM_PACKAGES: "1"
     timeout-minutes: 60
     strategy:
       matrix:
-        design: [asa, asa, asa, asa]
+        design: [aio, minimal, ha2, asa]
       fail-fast: false
     
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Install jq
-      run: apt update && apt install -y jq
+    - name: Update package lists
+      run: apt update
 
     - name: Install Python
       run: |
         apt install -y python3
         wget https://bootstrap.pypa.io/get-pip.py && python3 get-pip.py && rm get-pip.py
-        ln -s /usr/bin/python3 /usr/bin/python || true
-        ln -s /usr/bin/pip3 /usr/bin/pip || true
-
-    #- name: Setup Python
-    #  uses: actions/setup-python@v6.0.0
-    #  with:
-    #    python-version: 3.12
+        ln -s /usr/bin/python3 /usr/bin/python
         
     - name: Install OpenTofu
       uses: opentofu/setup-opentofu@v1
@@ -52,14 +47,6 @@ jobs:
     - name: Install this collection
       run: ansible-galaxy collection install . --force
 
-    #- name: Download Platform and Gateway binaries
-    #  run: |
-    #    cd ~/.ansible/collections/ansible_collections/itential/deployer/playbooks
-    #    mkdir -p files
-    #    cd files
-    #    ${{ secrets.PLATFORM_RPM_DOWNLOAD_COMMAND }}
-    #    ${{ secrets.GATEWAY_WHL_DOWNLOAD_COMMAND }}
-
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
@@ -71,15 +58,15 @@ jobs:
     - name: Setup SSH for GitLab and EC2
       run: |
         mkdir -p ~/.ssh
-        echo "${{ secrets.GITLAB_SSH_KEY }}" > ~/.ssh/id_rsa
-        echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/pet-east1.open.pem
-        chmod 600 ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/pet-east1.open.pem
+        echo "${{ secrets.GITLAB_SSH_KEY }}" > "$GIT_KEY_PATH"
+        echo "${{ secrets.EC2_SSH_KEY }}" > "$EC2_KEY_PATH"
+        chmod 600 "$GIT_KEY_PATH"
+        chmod 600 "$EC2_KEY_PATH"
         
     - name: Clone Themis repository
       working-directory: ".."
       run: |
-        rm -rf themis
+        export GIT_SSH_COMMAND="ssh -i \"$GIT_KEY_PATH\" -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
         git clone "${{ secrets.THEMIS_REPO_SSH_STRING }}"
         cd themis
         ls -la
@@ -95,16 +82,12 @@ jobs:
         ---
         platform_packages:
           - ${{ secrets.PLATFORM_RPM_URL }}
-        repository_username: ${{ secrets.NEXUS_USERNAME }}
-        repository_password: ${{ secrets.NEXUS_PASSWORD }}
         EOF
 
         cat > inventories/common/group_vars/platform_secondary.yml << 'EOF'
         ---
         platform_packages:
           - "${{ secrets.PLATFORM_RPM_URL }}"
-        repository_username: "${{ secrets.NEXUS_USERNAME }}"
-        repository_password: "${{ secrets.NEXUS_PASSWORD }}"
         EOF
 
     - name: Configure inventory to download Gateway from Nexus
@@ -114,8 +97,6 @@ jobs:
         ---
         gateway_release: ${{ secrets.GATEWAY_RELEASE }}
         gateway_archive_download_url: "${{ secrets.GATEWAY_WHL_URL }}"
-        repository_username: "${{ secrets.NEXUS_USERNAME }}"
-        repository_password: "${{ secrets.NEXUS_PASSWORD }}"
         EOF
 
     - name: Initialize OpenTofu
@@ -138,7 +119,7 @@ jobs:
         max_fail_percentage = 0
         EOF
 
-    - name: Create Ansible playbook to wait for EC2 instances to be ready
+    - name: Wait for EC2 instances to be ready
       working-directory: ../themis
       run: |
         cat > wait-for-instances.yml << 'EOF'
@@ -163,32 +144,12 @@ jobs:
                 path: /var/log/cloud-init-finished.marker
                 timeout: 300
               become: yes
-
-            - name: Use specific repository instead of mirrors
-              become: true
-              ini_file:
-                path: /etc/yum.repos.d/rocky.repo
-                section: appstream
-                option: baseurl
-                value: http://dl.rockylinux.org/pub/rocky/9/AppStream/x86_64/os/
-                backup: yes
-            
-            - name: Disable mirrorlist for appstream
-              become: true
-              ini_file:
-                path: /etc/yum.repos.d/rocky.repo
-                section: appstream
-                option: mirrorlist
-                state: absent
         EOF
+        ansible-playbook wait-for-instances.yml -i tofu_aws/hosts.json -i inventories/common -i inventories/${{ matrix.design }} -v --key-file="$EC2_KEY_PATH"
         
-    - name: Wait for EC2 instances to be ready
-      working-directory: ../themis
-      run: ansible-playbook wait-for-instances.yml -i tofu_aws/hosts.json -i inventories/common -i inventories/${{ matrix.design }} -v --key-file=~/.ssh/pet-east1.open.pem
-
     - name: Run deployer on created instances
       working-directory: ../themis
-      run: ansible-playbook itential.deployer.site -i tofu_aws/hosts.json -i inventories/common -i inventories/${{ matrix.design }} -v --key-file=~/.ssh/pet-east1.open.pem
+      run: ansible-playbook itential.deployer.site -i tofu_aws/hosts.json -i inventories/common -i inventories/${{ matrix.design }} -vvvv --key-file="$EC2_KEY_PATH" --extra-vars "repository_username=${{ secrets.NEXUS_USERNAME }} repository_password=${{ secrets.NEXUS_PASSWORD }}"
 
     - name: Verify that Platform is running correctly
       working-directory: ../themis
