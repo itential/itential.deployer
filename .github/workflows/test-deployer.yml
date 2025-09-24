@@ -12,12 +12,12 @@ jobs:
       image: ghcr.io/catthehacker/ubuntu:act-latest
     env:
       ANSIBLE_HOST_KEY_CHECKING: "False"
+      GIT_SSH_COMMAND: ssh -i ~/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no
       PIP_BREAK_SYSTEM_PACKAGES: "1"
     timeout-minutes: 60
     strategy:
       matrix:
-        #design: [aio, minimal, ha2, asa]
-        design: [minimal]
+        design: [aio, minimal, ha2, asa]
       fail-fast: false
     
     steps:
@@ -63,9 +63,7 @@ jobs:
         chmod 600 ~/.ssh/pet-east1.open.pem
         
     - name: Clone Themis repository
-      working-directory: ".."
-      env:
-        GIT_SSH_COMMAND: ssh -i ~/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no
+      working-directory: ..
       run: |
         rm -rf themis
         git clone "${{ secrets.THEMIS_REPO_SSH_STRING }}"
@@ -98,18 +96,6 @@ jobs:
         ---
         gateway_release: ${{ secrets.GATEWAY_RELEASE }}
         gateway_archive_download_url: "${{ secrets.GATEWAY_WHL_URL }}"
-        EOF
-
-    - name: Configure Redis to be installed from binary
-      working-directory: ../themis
-      run: |
-        cat > inventories/common/group_vars/redis.yml << 'EOF'
-        ---
-        redis_install_from_source: false
-        EOF
-        cat > inventories/common/group_vars/redis_secondary.yml << 'EOF'
-        ---
-        redis_install_from_source: false
         EOF
 
     - name: Add Nexus credentials to inventory
@@ -168,7 +154,7 @@ jobs:
         
     - name: Run deployer on created instances
       working-directory: ../themis
-      run: ansible-playbook itential.deployer.site -i tofu_aws/hosts.json -i inventories/common -i inventories/${{ matrix.design }} -v --key-file=~/.ssh/pet-east1.open.pem -e "redis_remi_repo_url=http://rpms.remirepo.net/enterprise/remi-release-9.rpm"
+      run: ansible-playbook itential.deployer.site -i tofu_aws/hosts.json -i inventories/common -i inventories/${{ matrix.design }} -v --key-file=~/.ssh/pet-east1.open.pem -e "redis_install_from_source=false" -e "redis_remi_repo_url=http://rpms.remirepo.net/enterprise/remi-release-9.rpm"
 
     - name: Verify that Platform is running correctly
       working-directory: ../themis
