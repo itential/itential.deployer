@@ -56,8 +56,8 @@ jobs:
     - name: Setup SSH for GitLab and EC2
       run: |
         mkdir -p ~/.ssh
-        echo "${{ secrets.GITLAB_SSH_KEY }}" > /.ssh/id_rsa
-        echo "${{ secrets.EC2_SSH_KEY }}" > /.ssh/pet-east1.open.pem
+        echo "${{ secrets.GITLAB_SSH_KEY }}" > ~/.ssh/id_rsa
+        echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/pet-east1.open.pem
         chmod 600 "$GIT_KEY_PATH"
         chmod 600 "$EC2_KEY_PATH"
         
