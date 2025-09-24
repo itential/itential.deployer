@@ -12,8 +12,8 @@ jobs:
       image: ghcr.io/catthehacker/ubuntu:act-latest
     env:
       ANSIBLE_HOST_KEY_CHECKING: "False"
-      EC2_KEY_PATH: ~/.ssh/pet-east1.open.pem
-      GIT_KEY_PATH: ~/.ssh/id_rsa
+      EC2_KEY_PATH: $HOME/.ssh/pet-east1.open.pem
+      GIT_KEY_PATH: $HOME/.ssh/id_rsa
       PIP_BREAK_SYSTEM_PACKAGES: "1"
     timeout-minutes: 60
     strategy:
