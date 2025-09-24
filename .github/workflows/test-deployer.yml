@@ -5,11 +5,6 @@ on:
     branches:
       - pipeline-test
 
-env:
-  AWS_REGION: us-east-1
-  EC2_KEY_PATH: ~/.ssh/pet-east1.open.pem
-  GITLAB_KEY_PATH: ~/.ssh/id_rsa
-
 jobs:
   test-deployer:
     runs-on: self-hosted
@@ -55,7 +50,7 @@ jobs:
         any_errors_fatal = True
         host_key_checking = False
         max_fail_percentage = 0
-        private_key_file = ${{ env.EC2_KEY_PATH }}
+        private_key_file = ~/.ssh/pet-east1.open.pem
         EOF
 
     - name: Install this collection
@@ -67,19 +62,18 @@ jobs:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
-        aws-region: ${{ env.AWS_REGION }}
+        aws-region: us-east-1
 
     - name: Setup SSH for GitLab
       run: |
-        mkdir -p "$(dirname "${{ env.GITLAB_KEY_PATH }}")"
-        echo "${{ secrets.GITLAB_SSH_KEY }}" > "${{ env.GITLAB_KEY_PATH }}"
-        chmod 600 "${{ env.GITLAB_KEY_PATH }}"
+        mkdir -p ~/.ssh
+        echo "${{ secrets.GITLAB_SSH_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
 
     - name: Setup SSH for EC2
       run: |
-        mkdir -p "$(dirname "${{ env.EC2_KEY_PATH }}")"
-        echo "${{ secrets.EC2_SSH_KEY }}" > "${{ env.EC2_KEY_PATH }}"
-        chmod 600 "${{ env.EC2_KEY_PATH }}"
+        echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/pet-east1.open.pem
+        chmod 600 ~/.ssh/pet-east1.open.pem
         
     - name: Clone Themis repository
       working-directory: ..
