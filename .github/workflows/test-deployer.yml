@@ -16,7 +16,8 @@ jobs:
     timeout-minutes: 60
     strategy:
       matrix:
-        design: [aio, minimal, ha2, asa]
+        #design: [aio, minimal, ha2, asa]
+        design: [minimal]
       fail-fast: false
     
     steps:
@@ -163,7 +164,7 @@ jobs:
         
     - name: Run deployer on created instances
       working-directory: ../themis
-      run: ansible-playbook itential.deployer.site -i tofu_aws/hosts.json -i inventories/common -i inventories/${{ matrix.design }} -v --key-file=~/.ssh/pet-east1.open.pem
+      run: ansible-playbook itential.deployer.site -i tofu_aws/hosts.json -i inventories/common -i inventories/${{ matrix.design }} -vvv --key-file=~/.ssh/pet-east1.open.pem
 
     - name: Verify that Platform is running correctly
       working-directory: ../themis
