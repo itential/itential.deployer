@@ -58,8 +58,8 @@ jobs:
         mkdir -p ~/.ssh
         echo "${{ secrets.GITLAB_SSH_KEY }}" > ~/.ssh/id_rsa
         echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/pet-east1.open.pem
-        chmod 600 "$GIT_KEY_PATH"
-        chmod 600 "$EC2_KEY_PATH"
+        chmod 600 ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/pet-east1.open.pem
         
     - name: Clone Themis repository
       working-directory: ".."
