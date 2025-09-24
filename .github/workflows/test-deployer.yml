@@ -124,7 +124,7 @@ jobs:
 
     - name: Generate OpenTofu execution plan
       working-directory: ../themis/tofu_aws
-      run: tofu plan -var-file=tfvars/${{ matrix.design }}.tfvars -auto-approve
+      run: tofu plan -var-file=tfvars/${{ matrix.design }}.tfvars
 
     - name: Provision EC2 instances
       working-directory: ../themis/tofu_aws
