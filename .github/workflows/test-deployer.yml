@@ -66,6 +66,7 @@ jobs:
       env:
         GIT_SSH_COMMAND: ssh -i /.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no
       run: |
+        rm -rf themis
         git clone "${{ secrets.THEMIS_REPO_SSH_STRING }}"
         cd themis
         ls -la
