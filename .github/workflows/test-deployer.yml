@@ -99,6 +99,12 @@ jobs:
         gateway_archive_download_url: "${{ secrets.GATEWAY_WHL_URL }}"
         EOF
 
+    - Add Nexus credentials to inventory
+      working-directory: ../themis
+      run: |
+        cat 'repository_username: "${{ secrets.NEXUS_USERNAME }}"' >> inventories/common/group_vars/all.yml
+        cat 'repository_password: "${{ secrets.NEXUS_PASSWORD }}"' >> inventories/common/group_vars/all.yml
+
     - name: Initialize OpenTofu
       working-directory: ../themis/tofu_aws
       run: tofu init
@@ -149,7 +155,7 @@ jobs:
         
     - name: Run deployer on created instances
       working-directory: ../themis
-      run: ansible-playbook itential.deployer.site -i tofu_aws/hosts.json -i inventories/common -i inventories/${{ matrix.design }} -vvvv --key-file=~/.ssh/pet-east1.open.pem --extra-vars "repository_username=${{ secrets.NEXUS_USERNAME }} repository_password=${{ secrets.NEXUS_PASSWORD }}"
+      run: ansible-playbook itential.deployer.site -i tofu_aws/hosts.json -i inventories/common -i inventories/${{ matrix.design }} -vvvv --key-file=~/.ssh/pet-east1.open.pem
 
     - name: Verify that Platform is running correctly
       working-directory: ../themis
