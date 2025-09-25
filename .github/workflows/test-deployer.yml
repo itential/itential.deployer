@@ -1,0 +1,203 @@
+name: Test Deployer
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+    
+jobs:
+  test-deployer:
+    runs-on: self-hosted
+    container:
+      image: ghcr.io/catthehacker/ubuntu:act-latest
+    env:
+      GIT_SSH_COMMAND: ssh -i ~/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no
+      PIP_BREAK_SYSTEM_PACKAGES: "1"
+    timeout-minutes: 60
+    strategy:
+      matrix:
+        design: [aio, minimal, ha2, asa]
+      fail-fast: false
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Update package lists
+      run: apt update
+
+    - name: Install Python
+      run: |
+        apt install -y python3
+        wget https://bootstrap.pypa.io/get-pip.py && python3 get-pip.py && rm get-pip.py
+        ln -s /usr/bin/python3 /usr/bin/python
+        python --version
+        pip --version
+        
+    - name: Install OpenTofu
+      uses: opentofu/setup-opentofu@v1
+      with:
+        tofu_version: latest
+
+    - name: Install Ansible
+      run: |
+        pip install "ansible>=9.0.0,<10.0.0" "ansible-core>=2.11,<2.17"
+        ansible --version
+
+    # Configures Ansible to fail immediately on error, skip host key checking, use correct key file
+    - name: Write Ansible configuration file
+      run: |
+        cat > ~/.ansible.cfg << 'EOF'
+        [defaults]
+        any_errors_fatal = True
+        host_key_checking = False
+        max_fail_percentage = 0
+        private_key_file = ~/.ssh/pet-east1.open.pem
+        EOF
+
+    - name: Install this collection
+      run: ansible-galaxy collection install . --force
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+        aws-region: us-east-1
+
+    - name: Setup SSH for GitLab
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.GITLAB_SSH_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+
+    - name: Setup SSH for EC2
+      run: |
+        echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/pet-east1.open.pem
+        chmod 600 ~/.ssh/pet-east1.open.pem
+        
+    - name: Clone Themis repository
+      working-directory: ..
+      run: |
+        rm -rf themis
+        git clone "${{ secrets.THEMIS_REPO_SSH_URI }}"
+        cd themis
+        ls -la
+
+    - name: Install Themis Python script dependencies
+      working-directory: ../themis
+      run: pip install -r scripts/requirements.txt
+
+    - name: Configure inventory to download Platform from Nexus
+      working-directory: ../themis
+      run: |
+        cat > inventories/common/group_vars/platform.yml << 'EOF'
+        ---
+        platform_packages:
+          - "${{ secrets.PLATFORM_RPM_URL }}"
+        EOF
+
+        cat > inventories/common/group_vars/platform_secondary.yml << 'EOF'
+        ---
+        platform_packages:
+          - "${{ secrets.PLATFORM_RPM_URL }}"
+        EOF
+
+    - name: Configure inventory to download Gateway from Nexus
+      working-directory: ../themis
+      run: |
+        cat > inventories/common/group_vars/gateway.yml << 'EOF'
+        ---
+        gateway_release: ${{ secrets.GATEWAY_RELEASE }}
+        gateway_archive_download_url: "${{ secrets.GATEWAY_WHL_URL }}"
+        EOF
+
+    # This is potentially more secure than adding the credentials as extra vars in the ansible-playbook command
+    - name: Add Nexus credentials to inventory
+      working-directory: ../themis
+      run: |
+        echo 'repository_username: "${{ secrets.NEXUS_USERNAME }}"' >> inventories/common/group_vars/all.yml
+        echo 'repository_password: "${{ secrets.NEXUS_PASSWORD }}"' >> inventories/common/group_vars/all.yml
+
+    - name: Initialize OpenTofu
+      working-directory: ../themis/tofu_aws
+      run: tofu init
+
+    - name: Generate OpenTofu execution plan
+      working-directory: ../themis/tofu_aws
+      run: tofu plan -var-file=tfvars/${{ matrix.design }}.tfvars
+
+    - name: Provision EC2 instances
+      working-directory: ../themis/tofu_aws
+      run: tofu apply -var-file=tfvars/${{ matrix.design }}.tfvars -auto-approve
+
+    - name: Generate Ansible inventory hosts file
+      working-directory: ../themis/tofu_aws
+      run: python3 ../scripts/generate_inventory.py --validate -o hosts.json
+
+    # Retries until SSH connection is established or timeout is reached
+    - name: Wait for EC2 instances to be ready to SSH into
+      working-directory: ../themis
+      run: ansible all -m wait_for_connection -a "delay=10 timeout=300" -i tofu_aws/hosts.json -v
+
+    # Waits for cloud init marker file to be written to disk (see cloud-init.tpl)
+    - name: Wait for cloud init script to complete
+      working-directory: ../themis
+      run: ansible all -m wait_for -a "path=/var/log/cloud-init-finished.marker timeout=300" -i tofu_aws/hosts.json -v
+
+    # Overrides inventory variables to install Redis from the Remi repository using a known working URL, as a 
+    # workaround for bugs in the deployer (dependency resolution errors when building Redis, incorrect Remi URL)
+    - name: Run the deployer
+      working-directory: ../themis
+      run: >
+        ansible-playbook itential.deployer.site 
+        -i tofu_aws/hosts.json 
+        -i inventories/common 
+        -i inventories/${{ matrix.design }} 
+        -e "redis_install_from_source=false" 
+        -e "redis_remi_repo_url=http://rpms.remirepo.net/enterprise/remi-release-9.rpm" 
+        -v
+
+    - name: Verify that Platform is running correctly
+      working-directory: ../themis
+      run: |
+        for host in $(jq -r '.all.children.platform.hosts[] | .ansible_host' tofu_aws/hosts.json); do
+          python3 scripts/validate.py platform "http://$host:3000"
+        done
+        for host in $(jq -r '(.all.children.platform_secondary.hosts // [])[] | .ansible_host' tofu_aws/hosts.json); do
+          python3 scripts/validate.py platform "http://$host:3000"
+        done
+
+    - name: Verify that Gateway is running correctly
+      working-directory: ../themis
+      run: |
+        for host in $(jq -r '.all.children.gateway.hosts[] | .ansible_host' tofu_aws/hosts.json); do
+          python3 scripts/validate.py gateway "http://$host:8083"
+        done
+
+    - name: Verify that Redis is running correctly
+      working-directory: ../themis
+      run: |
+        for host in $(jq -r '.all.children.redis.hosts[] | .ansible_host' tofu_aws/hosts.json); do
+          python3 scripts/validate.py redis "$host"
+        done
+        for host in $(jq -r '(.all.children.redis_secondary.hosts // [])[] | .ansible_host' tofu_aws/hosts.json); do
+          python3 scripts/validate.py redis "$host"
+        done
+
+    - name: Verify that MongoDB is running correctly
+      working-directory: ../themis
+      run: |
+        for host in $(jq -r '.all.children.mongodb.hosts[] | .ansible_host' tofu_aws/hosts.json); do
+          python3 scripts/validate.py mongodb "$host"
+        done
+        for host in $(jq -r '(.all.children.mongodb_arbiter.hosts // [])[] | .ansible_host' tofu_aws/hosts.json); do
+          python3 scripts/validate.py mongodb "$host" --arbiter
+        done
+
+    - name: Terminate EC2 instances
+      if: always()
+      working-directory: ../themis/tofu_aws
+      run: tofu destroy -var-file=tfvars/${{ matrix.design }}.tfvars -auto-approve
