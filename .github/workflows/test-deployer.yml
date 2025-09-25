@@ -34,6 +34,12 @@ jobs:
         sudo ln -s /usr/bin/pip3 /usr/bin/pip || true
         python --version
         pip --version
+
+    # For some reason, Node appears to be a dependency of Themis
+    - name: Install Node.js
+      run: |
+        sudo apt install -y nodejs
+        node --version
         
     - name: Install OpenTofu
       uses: opentofu/setup-opentofu@v1
