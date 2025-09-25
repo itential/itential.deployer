@@ -29,8 +29,9 @@ jobs:
     - name: Install Python
       run: |
         sudo apt install -y python3
-        wget https://bootstrap.pypa.io/get-pip.py && python3 get-pip.py && rm get-pip.py
-        sudo ln -s /usr/bin/python3 /usr/bin/python
+        wget https://bootstrap.pypa.io/get-pip.py && sudo python3 get-pip.py && rm get-pip.py
+        sudo ln -s /usr/bin/python3 /usr/bin/python || true
+        sudo ln -s /usr/bin/pip3 /usr/bin/pip || true
         python --version
         pip --version
         
