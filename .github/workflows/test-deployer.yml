@@ -7,6 +7,12 @@ on:
       design:
         required: true
         type: string
+      os-type:
+        required: true
+        type: string
+      os-version:
+        required: true
+        type: string
     secrets:
       AWS_ACCESS_KEY_ID:
         required: true
