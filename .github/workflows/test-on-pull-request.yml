@@ -14,7 +14,7 @@ jobs:
         design: [minimal]
         os-type: [rocky, rhel]
         os-version: ["8", "9"]
-      fail-fast: true
+      fail-fast: false
     uses: ./.github/workflows/test-deployer.yml
     with:
       design: ${{ matrix.design }}

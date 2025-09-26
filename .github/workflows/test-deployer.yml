@@ -163,7 +163,7 @@ jobs:
 
     - name: Provision EC2 instances
       working-directory: ../themis/tofu_aws
-      run: tofu apply plan.tfplan -auto-approve
+      run: tofu apply plan.tfplan
 
     - name: Generate Ansible inventory hosts file
       working-directory: ../themis/tofu_aws
