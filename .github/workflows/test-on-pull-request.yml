@@ -1,10 +1,10 @@
 name: Test Deployer on Pull Request
 
+
 on:
-  #pull_request:
   push:
     branches:
-      - main
+      - pipeline-test
 
 
 jobs:
