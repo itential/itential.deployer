@@ -1,9 +1,36 @@
 name: Test Deployer
 
+
 on:
-  push:
-    branches:
-      - pipeline-test
+  workflow_call:
+    inputs:
+      design:
+        required: true
+        type: string
+    secrets:
+      AWS_ACCESS_KEY_ID:
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        required: true
+      AWS_SESSION_TOKEN:
+        required: true
+      GITLAB_SSH_KEY:
+        required: true
+      EC2_SSH_KEY:
+        required: true
+      THEMIS_REPO_SSH_URI:
+        required: true
+      NEXUS_USERNAME:
+        required: true
+      NEXUS_PASSWORD:
+        required: true
+      PLATFORM_RPM_URL: 
+        required: true
+      GATEWAY_RELEASE:
+        required: true
+      GATEWAY_WHL_URL:
+        required: true
+
 
 jobs:
   test-deployer:
@@ -12,10 +39,6 @@ jobs:
       GIT_SSH_COMMAND: ssh -i ~/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no
       PIP_BREAK_SYSTEM_PACKAGES: "1"
     timeout-minutes: 60
-    strategy:
-      matrix:
-        design: [aio, minimal, ha2, asa]
-      fail-fast: false
     
     steps:
     - name: Checkout repository
@@ -130,11 +153,11 @@ jobs:
 
     - name: Generate OpenTofu execution plan
       working-directory: ../themis/tofu_aws
-      run: tofu plan -var-file=tfvars/${{ matrix.design }}.tfvars
+      run: tofu plan -var-file=tfvars/${{ inputs.design }}.tfvars
 
     - name: Provision EC2 instances
       working-directory: ../themis/tofu_aws
-      run: tofu apply -var-file=tfvars/${{ matrix.design }}.tfvars -auto-approve
+      run: tofu apply -var-file=tfvars/${{ inputs.design }}.tfvars -auto-approve
 
     - name: Generate Ansible inventory hosts file
       working-directory: ../themis/tofu_aws
@@ -158,7 +181,7 @@ jobs:
         ansible-playbook itential.deployer.site 
         -i tofu_aws/hosts.json 
         -i inventories/common 
-        -i inventories/${{ matrix.design }} 
+        -i inventories/${{ inputs.design }} 
         -e "redis_install_from_source=false" 
         -e "redis_remi_repo_url=http://rpms.remirepo.net/enterprise/remi-release-9.rpm" 
         -v
@@ -203,4 +226,4 @@ jobs:
     - name: Tear down EC2 instances
       if: always()
       working-directory: ../themis/tofu_aws
-      run: tofu destroy -var-file=tfvars/${{ matrix.design }}.tfvars -auto-approve
+      run: tofu destroy -var-file=tfvars/${{ inputs.design }}.tfvars -auto-approve
