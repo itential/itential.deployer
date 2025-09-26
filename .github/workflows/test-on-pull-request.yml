@@ -15,6 +15,10 @@ jobs:
       matrix:
         design: [aio, minimal, ha2, asa]
       fail-fast: true
+    steps:
+      - name: Set output design
+        id: set-output
+        run: echo "design=${{ matrix.design }}" >> $GITHUB_OUTPUT
 
   run-tests:
     needs: generate-test-cases
