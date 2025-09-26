@@ -8,19 +8,11 @@ on:
 
 
 jobs:
-  #generate-test-cases:
-  #  runs-on: ubuntu-latest
-  #  strategy:
-  #    matrix:
-  #      design: [aio, minimal, ha2, asa]
-  #    fail-fast: true
-  #  steps:
-  #    - name: Set output design
-  #      id: set-output
-  #      run: echo "design=${{ matrix.design }}" >> $GITHUB_OUTPUT
-
   run-tests:
+    strategy:
+      matrix:
+        design: [aio, minimal, ha2, asa]
     uses: ./.github/workflows/test-deployer.yml
     with:
-      design: minimal
+      design: ${{ matrix.design }}
     secrets: inherit
