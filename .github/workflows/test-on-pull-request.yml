@@ -21,7 +21,6 @@ jobs:
   #      run: echo "design=${{ matrix.design }}" >> $GITHUB_OUTPUT
 
   run-tests:
-    needs: generate-test-cases
     uses: ./.github/workflows/test-deployer.yml
     with:
       design: minimal
