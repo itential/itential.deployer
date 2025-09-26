@@ -159,7 +159,12 @@ jobs:
 
     - name: Generate OpenTofu execution plan
       working-directory: ../themis/tofu_aws
-      run: tofu plan -var-file=tfvars/${{ inputs.design }}.tfvars -var "os_type=${{ inputs.os-type }}" -var "os_version=${{ inputs.os-version }}" -out=plan.tfplan
+      run: >
+        tofu plan 
+        -var-file=tfvars/${{ inputs.design }}.tfvars 
+        -var "os_type=${{ inputs.os-type }}" 
+        -var "os_version=${{ inputs.os-version }}" 
+        -out=plan.tfplan
 
     - name: Provision EC2 instances
       working-directory: ../themis/tofu_aws
@@ -232,4 +237,9 @@ jobs:
     - name: Terminate EC2 instances
       if: always()
       working-directory: ../themis/tofu_aws
-      run: tofu destroy -auto-approve
+      run: >
+        tofu destroy 
+        -var-file=tfvars/${{ inputs.design }}.tfvars 
+        -var "os_type=${{ inputs.os-type }}" 
+        -var "os_version=${{ inputs.os-version }}" 
+        -auto-approve
