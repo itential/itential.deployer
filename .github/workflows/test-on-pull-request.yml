@@ -11,8 +11,13 @@ jobs:
   run-tests:
     strategy:
       matrix:
-        design: [aio, minimal, ha2, asa]
+        design: [minimal]
+        os-type: [rocky, rhel]
+        os-version: ["8", "9"]
+      fail-fast: true
     uses: ./.github/workflows/test-deployer.yml
     with:
       design: ${{ matrix.design }}
+      os-type: ${{ matrix.os-type }}
+      os-version: ${{ matrix.os-version }}
     secrets: inherit

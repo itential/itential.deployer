@@ -153,11 +153,11 @@ jobs:
 
     - name: Generate OpenTofu execution plan
       working-directory: ../themis/tofu_aws
-      run: tofu plan -var-file=tfvars/${{ inputs.design }}.tfvars
+      run: tofu plan -var-file=tfvars/${{ inputs.design }}.tfvars -var "os_type=${{ inputs.os-type }} -var "os_version=${{ inputs.os-version }}"
 
     - name: Provision EC2 instances
       working-directory: ../themis/tofu_aws
-      run: tofu apply -var-file=tfvars/${{ inputs.design }}.tfvars -auto-approve
+      run: tofu apply -var-file=tfvars/${{ inputs.design }}.tfvars -var "os_type=${{ inputs.os-type }} -var "os_version=${{ inputs.os-version }}" -auto-approve
 
     - name: Generate Ansible inventory hosts file
       working-directory: ../themis/tofu_aws
