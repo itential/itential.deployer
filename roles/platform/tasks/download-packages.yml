@@ -37,27 +37,3 @@
   ansible.builtin.include_tasks:
     file: download-adapters.yml
   when: itential_adapters is defined or custom_adapters is defined
-
-- name: Copy rpms to control node
-  ansible.builtin.import_role:
-    name: offline
-    tasks_from: fetch-packages
-  vars:
-    src_dir: "{{ rpms_download_dir_target_node }}"
-    dest_dir: "{{ rpms_download_dir_control_node }}"
-
-- name: Copy base Python dependencies to control node
-  ansible.builtin.import_role:
-    name: offline
-    tasks_from: fetch-packages
-  vars:
-    src_dir: "{{ wheels_download_dir_target_node }}/base"
-    dest_dir: "{{ wheels_download_dir_control_node }}/base"
-
-- name: Copy IAP Python dependencies to control node
-  ansible.builtin.import_role:
-    name: offline
-    tasks_from: fetch-packages
-  vars:
-    src_dir: "{{ wheels_download_dir_target_node }}/app"
-    dest_dir: "{{ wheels_download_dir_control_node }}/app"

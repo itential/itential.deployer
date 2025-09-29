@@ -9,3 +9,11 @@
     download_method: yum_module
     download_packages: "{{ iap_nodejs_package }}"
     download_dir: "{{ rpms_download_dir_target_node }}"
+
+- name: Copy rpms to control node
+  ansible.builtin.import_role:
+    name: offline
+    tasks_from: fetch-packages
+  vars:
+    src_dir: "{{ rpms_download_dir_target_node }}"
+    dest_dir: "{{ rpms_download_dir_control_node }}"

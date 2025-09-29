@@ -10,6 +10,14 @@
     download_packages: "{{ python_packages }}"
     download_dir: "{{ rpms_download_dir_target_node }}"
 
+- name: Copy rpms to control node
+  ansible.builtin.import_role:
+    name: offline
+    tasks_from: fetch-packages
+  vars:
+    src_dir: "{{ rpms_download_dir_target_node }}"
+    dest_dir: "{{ rpms_download_dir_control_node }}"
+
 - name: Install Python
   ansible.builtin.include_role:
     name: python
@@ -26,6 +34,14 @@
     - base_python_dependencies is defined
     - base_python_dependencies | length > 0
 
+- name: Copy base Python dependencies to control node
+  ansible.builtin.import_role:
+    name: offline
+    tasks_from: fetch-packages
+  vars:
+    src_dir: "{{ wheels_download_dir_target_node }}/base"
+    dest_dir: "{{ wheels_download_dir_control_node }}/base"
+
 - name: Download MongoDB Python dependencies
   ansible.builtin.import_role:
     name: offline
@@ -37,6 +53,14 @@
   when:
     - app_python_dependencies is defined
     - app_python_dependencies | length > 0
+
+- name: Copy MongoDB Python dependencies to control node
+  ansible.builtin.import_role:
+    name: offline
+    tasks_from: fetch-packages
+  vars:
+    src_dir: "{{ wheels_download_dir_target_node }}/app"
+    dest_dir: "{{ wheels_download_dir_control_node }}/app"
 
 - name: Uninstall Python rpms
   ansible.builtin.dnf:
