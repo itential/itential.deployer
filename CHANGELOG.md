@@ -1,5 +1,13 @@
 # Changelog
 
+## v2.6.2 (September 29, 2025)
+
+* Fix issues with download playbooks not copying RPMs to control node  https://github.com/itential/itential.deployer/pull/243
+* Update galaxy.yml and changelog with v2.6.1
+
+Full Changelog: https://github.com/itential/itential.deployer/compare/v2.6.1...v2.6.2 
+
+
 ## v2.6.1 (August 07, 2025)
 
 * Fix Gateway Ansible config paths  https://github.com/itential/itential.deployer/pull/229
