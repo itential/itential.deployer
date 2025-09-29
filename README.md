@@ -224,11 +224,17 @@ the Deployer will either install the required repository or download the package
 | Itential Gateway | <https://galaxy.ansible.com> | TCP | |
 | Itential Gateway | <https://registry.aws.itential.com> | TCP | |
 | Itential Platform | <https://registry.aws.itential.com> | TCP | |
+| Itential Platform | <https://registry.npmjs.org> | TCP | Core npm package access |
+| Itential Platform | <https://github.com> | TCP | GitHub-hosted dependencies |
+| Itential Platform | <https://codeload.github.com> | TCP | GitHub tarballs |
 | MongoDB | <https://repo.mongodb.org> | TCP | |
 | MongoDB | <https://www.mongodb.org> | TCP | |
+| MongoDB | <https://pgp.mongodb.org> | TCP | |
+| MongoDB | <https://pypi.org> | TCP | |
 | Redis | <http://rpms.remirepo.net> | TCP | When installing Redis from the Remi repository |
 | Redis | <https://dl.fedoraproject.org> | TCP | When installing Redis from the Remi repository |
 | Redis | <https://github.com> | TCP | When installing Redis from source |
+| Redis | <https://codeload.github.com> | TCP |  |
 | Vault | <https://rpm.releases.hashicorp.com> | TCP | |
 
 If internal YUM repositories are used, refer to the
