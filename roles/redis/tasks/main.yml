@@ -100,4 +100,6 @@
     autoremove: true
     state: absent
   with_items: "{{ redis_build_packages[ansible_distribution_major_version] }}"
-  when: redis_install_method == "source"
+  when:
+    - redis_install_method == "source"
+    - not offline_install | bool
