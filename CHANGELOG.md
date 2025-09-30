@@ -1,8 +1,16 @@
 # Changelog
 
+## v2.6.3 (September 30, 2025)
+
+* Fix Redis offline install to not uninstall build packages  https://github.com/itential/itential.deployer/pull/245
+
+Full Changelog: https://github.com/itential/itential.deployer/compare/v2.6.2...v2.6.3 
+
+
 ## v2.6.2 (September 29, 2025)
 
 * Fix issues with download playbooks not copying RPMs to control node  https://github.com/itential/itential.deployer/pull/243
+* Update galaxy.yml and changelog for v2.6.2
 * Update galaxy.yml and changelog with v2.6.1
 
 Full Changelog: https://github.com/itential/itential.deployer/compare/v2.6.1...v2.6.2 
