@@ -41,6 +41,8 @@ on:
 jobs:
   test-deployer:
     runs-on: self-hosted
+    container:
+      image: ghcr.io/catthehacker/ubuntu:act-latest
     env:
       GIT_SSH_COMMAND: ssh -i ~/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no
       PIP_BREAK_SYSTEM_PACKAGES: "1"
