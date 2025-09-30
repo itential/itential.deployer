@@ -1,3 +1,16 @@
+# Runs the Itential Deployer on EC2 instances conforming to some validated design and other parameters 
+# (e.g. OS type and version), and validates that the deployed services are all running correctly.
+# This allows for testing deployments on various configurations in parallel in a fully automated manner.
+
+# Main steps performed by this workflow:
+# - Cloning Themis from GitLab
+# - Provisioning EC2 instances using Themis
+# - Converting OpenTofu output to Ansible inventory
+# - Running deployer on newly created instances
+# - Running validation script to test each service (Redis, MongoDB, Platform, Gateway)
+# - Terminating all instances using Themis, irrespective of success
+
+
 name: Test Deployer
 
 
