@@ -24,17 +24,9 @@ on:
         required: true
       EC2_SSH_KEY:
         required: true
-      THEMIS_REPO_SSH_URI:
-        required: true
       NEXUS_USERNAME:
         required: true
       NEXUS_PASSWORD:
-        required: true
-      PLATFORM_RPM_URL: 
-        required: true
-      GATEWAY_RELEASE:
-        required: true
-      GATEWAY_WHL_URL:
         required: true
 
 
@@ -116,37 +108,13 @@ jobs:
     - name: Clone Themis repository
       working-directory: ..
       run: |
-        git clone "${{ secrets.THEMIS_REPO_SSH_URI }}"
+        git clone git@gitlab.com:itential/platform-engineering/themis.git
         cd themis
         ls -la
 
     - name: Install Themis Python script dependencies
       working-directory: ../themis
       run: pip install -r scripts/requirements.txt
-
-    - name: Configure inventory to download Platform from Nexus
-      working-directory: ../themis
-      run: |
-        cat > inventories/common/group_vars/platform.yml << 'EOF'
-        ---
-        platform_packages:
-          - "${{ secrets.PLATFORM_RPM_URL }}"
-        EOF
-
-        cat > inventories/common/group_vars/platform_secondary.yml << 'EOF'
-        ---
-        platform_packages:
-          - "${{ secrets.PLATFORM_RPM_URL }}"
-        EOF
-
-    - name: Configure inventory to download Gateway from Nexus
-      working-directory: ../themis
-      run: |
-        cat > inventories/common/group_vars/gateway.yml << 'EOF'
-        ---
-        gateway_release: ${{ secrets.GATEWAY_RELEASE }}
-        gateway_archive_download_url: "${{ secrets.GATEWAY_WHL_URL }}"
-        EOF
 
     # This is potentially more secure than adding the credentials as extra vars in the ansible-playbook command
     - name: Add Nexus credentials to inventory
