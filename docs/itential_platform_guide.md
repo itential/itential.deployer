@@ -335,6 +335,7 @@ all:
         <host1>:
           ansible_host: <addr1>
       vars:
+        platform_encryption_key: <openssl rand -hex 32> # 64-length hex string, representing a 256-bit AES  encryption key.
         platform_packages:
           - <rpm1>
           - <rpmN>
@@ -356,6 +357,7 @@ all:
         <host1>:
           ansible_host: <addr1>
       vars:
+        platform_encryption_key: <openssl rand -hex 32> # 64-length hex string, representing a 256-bit AES  encryption key.
         platform_packages:
           - <rpm1>
           - <rpmN>
@@ -382,6 +384,7 @@ all:
         host1:
           ansible_host: addr1
       vars:
+        platform_encryption_key: <openssl rand -hex 32> # 64-length hex string, representing a 256-bit AES  encryption key.
         platform_app_artifacts_enabled: true
         platform_app_artifacts_source_file: archive1
 ```
@@ -401,6 +404,7 @@ all:
         <host1>:
           ansible_host: <addr1>
       vars:
+        platform_encryption_key: <openssl rand -hex 32> # 64-length hex string, representing a 256-bit AES  encryption key.
         platform_configure_vault: true
         platform_vault_url: http://hashi-vault-example.com:8200
 ```
@@ -428,7 +432,7 @@ The Platform playbook and role supports the following tags:
 | configure_vault | Configure Hashicorp Vault |
 | configure_platform | Configure Itential Platform systemd service and properties file |
 
-For example, to regenerate the systemd service script and platform.properties file run the platform 
+For example, to regenerate the systemd service script and platform.properties file run the platform
 playbook with the `configure_platform` tag:
 
 ```bash

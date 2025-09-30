@@ -169,6 +169,7 @@ all:
         <PLATFORM-HOST-1>:
         <PLATFORM-HOST-N>:
       vars:
+        platform_encryption_key: <openssl rand -hex 32> # 64-length hex string, representing a 256-bit AES  encryption key.
         process_exporter_names: |
           {% raw %}
             - cmdline:

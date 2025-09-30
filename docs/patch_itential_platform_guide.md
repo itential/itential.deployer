@@ -41,6 +41,7 @@ all:
         <host1>:
           ansible_host: <addr1>
       vars:
+        platform_encryption_key: <openssl rand -hex 32> # 64-length hex string, representing a 256-bit AES  encryption key.
         platform_release: 6.0
         platform_redis_host: redis1.example.com
         platform_mongo_url: mongodb://itential:password@mongo1.example.com:27017/itential
@@ -65,6 +66,7 @@ all:
         <host1>:
           ansible_host: <addr1>
       vars:
+        platform_encryption_key: <openssl rand -hex 32> # 64-length hex string, representing a 256-bit AES  encryption key.
         platform_release: 6.0
         platform_redis_host: redis1.example.com
         platform_mongo_url: mongodb://itential:password@mongo1.example.com:27017/itential
