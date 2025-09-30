@@ -1,0 +1,69 @@
+# Copyright (c) 2025, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+# User/group info
+ssl_user: itential
+ssl_group: itential
+
+# The Key, Cert and CSR suffix defaults
+ssl_key_suffix: .key
+ssl_cert_suffix: .crt
+ssl_csr_suffix: .csr
+
+# SSL common defaults
+ssl_generate_ca_cert: true
+ssl_upload_certs: true
+ssl_fetch_certs: true
+
+# Multi-Domain defaults
+ssl_multi_domain_filename_root: itential
+
+# When generating a Multi-Domain Key and Cert, the CA, Key and Cert are generated
+# on the control node
+ssl_local_cert_dir: ./certs
+ssl_local_key_filename: "{{ ssl_multi_domain_filename_root }}{{ ssl_key_suffix }}"
+ssl_local_key_file: "{{ ssl_local_cert_dir }}/{{ ssl_local_key_filename }}"
+ssl_local_csr_filename: "{{ ssl_multi_domain_filename_root }}{{ ssl_csr_suffix }}"
+ssl_local_csr_file: "{{ ssl_local_cert_dir }}/{{ ssl_local_csr_filename }}"
+ssl_local_cert_filename: "{{ ssl_multi_domain_filename_root }}{{ ssl_cert_suffix }}"
+ssl_local_cert_file: "{{ ssl_local_cert_dir }}/{{ ssl_local_cert_filename }}"
+
+# The CSR defaults
+ssl_csr_common_name: Itential
+ssl_csr_country_name: US
+ssl_csr_organization_name: Itential
+ssl_csr_organizational_unit_name: IT
+ssl_csr_state_or_province_name: Georgia
+ssl_csr_locality_name: Atlanta
+
+# The Key and Cert target node default locations
+ssl_remote_key_dir: /etc/ssl/itential/private
+ssl_remote_key_filename: "{{ inventory_hostname }}{{ ssl_key_suffix }}"
+ssl_remote_key_file: "{{ ssl_remote_key_dir }}/{{ ssl_remote_key_filename }}"
+ssl_remote_csr_filename: "{{ inventory_hostname }}{{ ssl_csr_suffix }}"
+ssl_remote_csr_file: "{{ ssl_remote_key_dir }}/{{ ssl_remote_csr_filename }}"
+ssl_remote_cert_dir: /etc/ssl/itential/certs
+ssl_remote_cert_filename: "{{ inventory_hostname }}{{ ssl_cert_suffix }}"
+ssl_remote_cert_file: "{{ ssl_remote_cert_dir }}/{{ ssl_remote_cert_filename }}"
+
+# The CA defaults
+ssl_own_ca: true
+ssl_ca_common_name: Itential CA
+ssl_ca_organziation_name: Itential
+
+# The CA is generated on localhost
+ssl_local_ca_basename: ca
+ssl_local_ca_key_filename: "{{ ssl_local_ca_basename }}{{ ssl_key_suffix }}"
+ssl_local_ca_key_file: "{{ ssl_local_cert_dir }}/{{ ssl_local_ca_key_filename }}"
+ssl_local_ca_cert_filename: "{{ ssl_local_ca_basename }}{{ ssl_cert_suffix }}"
+ssl_local_ca_cert_file: "{{ ssl_local_cert_dir }}/{{ ssl_local_ca_cert_filename }}"
+ssl_local_ca_csr_filnename: "{{ ssl_local_ca_basename }}{{ ssl_csr_suffix }}"
+ssl_local_ca_csr_file: "{{ ssl_local_cert_dir }}/{{ ssl_local_ca_csr_filnename }}"
+
+# The CA target node default location
+ssl_remote_ca_key_dir: "{{ ssl_remote_key_dir }}"
+ssl_remote_ca_key_filename: "{{ ssl_local_ca_basename }}{{ ssl_key_suffix }}"
+ssl_remote_ca_key_file: "{{ ssl_remote_ca_key_dir }}/{{ ssl_remote_ca_key_filename }}"
+ssl_remote_ca_cert_dir: "{{ ssl_remote_cert_dir }}"
+ssl_remote_ca_cert_filename: "{{ ssl_local_ca_basename }}{{ ssl_cert_suffix }}"
+ssl_remote_ca_cert_file: "{{ ssl_remote_ca_cert_dir }}/{{ ssl_remote_ca_cert_filename }}"

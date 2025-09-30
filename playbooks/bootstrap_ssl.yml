@@ -1,0 +1,27 @@
+# Copyright (c) 2025, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Gather facts from all hosts
+  hosts: all
+  gather_facts: true
+  tasks: []
+
+- name: Generate one self-signed cert for all hosts
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Generate one self-signed cert for all hosts
+      ansible.builtin.import_role:
+        name: itential.deployer.ssl
+        tasks_from: gen_one_self_signed_cert
+      tags: gen_certs
+
+- name: Propagate cert and key to all hosts
+  hosts: all
+  become: true
+  tasks:
+    - name: Propagate cert and key to all hosts
+      ansible.builtin.import_role:
+        name: itential.deployer.ssl
+        tasks_from: propagate_cert
+      tags: upload_certs

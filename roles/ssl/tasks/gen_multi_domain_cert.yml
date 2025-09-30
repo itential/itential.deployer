@@ -1,0 +1,116 @@
+# Copyright (c) 2025, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Ensure cert directory exists
+  ansible.builtin.file:
+    path: "{{ ssl_local_cert_dir }}"
+    state: directory
+    mode: '0755'
+
+# -----------------
+# Build SAN list
+# -----------------
+- name: Start SAN list with DNS:inventory_hostname
+  ansible.builtin.set_fact:
+    san_list: "{{ groups['all'] | map('regex_replace', '^(.*)$', 'DNS:\\1') | list }}"
+
+- name: Add DNS:ansible_fqdn when present
+  ansible.builtin.set_fact:
+    san_list: "{{ (san_list + ['DNS:' + hostvars[item].ansible_fqdn]) | unique }}"
+  loop: "{{ groups['all'] }}"
+  when: hostvars[item].ansible_fqdn is defined
+
+- name: Add IP/DNS from ansible_host if defined (regex detect IP)
+  ansible.builtin.set_fact:
+    san_list: >-
+      {{
+        (san_list + [
+          ('IP:'  + hostvars[item].ansible_host)
+          if (hostvars[item].ansible_host is match('^[0-9]{1,3}(?:\.[0-9]{1,3}){3}$'))
+          else ('DNS:' + hostvars[item].ansible_host)
+        ]) | unique
+      }}
+  loop: "{{ groups['all'] }}"
+  when: hostvars[item].ansible_host is defined
+
+- name: Add fallback IP from ansible_default_ipv4.address when ansible_host absent
+  ansible.builtin.set_fact:
+    san_list: "{{ (san_list + ['IP:' + hostvars[item].ansible_default_ipv4.address]) | unique }}"
+  loop: "{{ groups['all'] }}"
+  when:
+    - hostvars[item].ansible_default_ipv4 is defined
+    - hostvars[item].ansible_default_ipv4.address is defined
+
+- name: Sort SAN list for stable idempotent output
+  ansible.builtin.set_fact:
+    san_list: "{{ san_list | sort }}"
+
+- name: Ensure SAN list is not empty
+  ansible.builtin.assert:
+    that: san_list | length > 0
+    fail_msg: "SAN list is empty; inventory produced no names/addresses."
+
+- name: Show SAN list
+  ansible.builtin.debug:
+    var: san_list
+
+# -----------------
+# CA (CSR with CA extensions -> self-signed CA cert)
+# -----------------
+# - name: Generate CA private key
+#   community.crypto.openssl_privatekey:
+#     path: "{{ ssl_local_ca_key_file }}"
+#     size: 4096
+#     type: RSA
+#     mode: '0600'
+
+# - name: Generate CA CSR with CA extensions
+#   community.crypto.openssl_csr:
+#     path: "{{ ssl_local_ca_csr_file }}"
+#     privatekey_path: "{{ ssl_local_ca_key_file }}"
+#     common_name: "{{ ssl_ca_common_name }}"
+#     basic_constraints:
+#       - "CA:TRUE"
+#     key_usage:
+#       - keyCertSign
+#       - cRLSign
+
+# - name: Self-sign the CA CSR
+#   community.crypto.x509_certificate:
+#     path: "{{ ssl_local_ca_cert_file }}"
+#     csr_path: "{{ ssl_local_ca_csr_file }}"
+#     privatekey_path: "{{ ssl_local_ca_key_file }}"
+#     provider: selfsigned
+    # selfsigned_not_after: "+10y"
+
+# -----------------
+# Multi-Domain leaf cert signed by CA
+# -----------------
+- name: Generate private key for multi-domain cert
+  community.crypto.openssl_privatekey:
+    path: "{{ ssl_local_key_file }}"
+    size: 2048
+    type: RSA
+    mode: '0600'
+
+- name: Generate CSR with SANs (leaf)
+  community.crypto.openssl_csr:
+    path: "{{ ssl_local_csr_file }}"
+    privatekey_path: "{{ ssl_local_key_file }}"
+    common_name: "{{ ssl_csr_common_name }}"
+    subject_alt_name: "{{ san_list }}"
+    key_usage:
+      - digitalSignature
+      - keyEncipherment
+    extended_key_usage:
+      - serverAuth
+      - clientAuth
+
+- name: Sign CSR with CA (leaf cert)
+  community.crypto.x509_certificate:
+    path: "{{ ssl_local_cert_file }}"
+    csr_path: "{{ ssl_local_csr_file }}"
+    provider: ownca
+    ownca_path: "{{ ssl_local_ca_cert_file }}"
+    ownca_privatekey_path: "{{ ssl_local_ca_key_file }}"
+    ownca_not_after: "+365d"

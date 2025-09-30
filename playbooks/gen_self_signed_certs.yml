@@ -1,0 +1,20 @@
+# Copyright (c) 2025, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Generate self-signed certificates with SANs for all hosts
+  hosts: all
+  gather_facts: true
+  become: true
+  tasks:
+    - name: Generate self-signed certs for all hosts
+      ansible.builtin.import_role:
+        name: itential.deployer.ssl
+        tasks_from: gen_self_signed_certs
+      tags: gen_certs
+
+    - name: Fetch self-signed certs from all hosts
+      ansible.builtin.import_role:
+        name: itential.deployer.ssl
+        tasks_from: fetch_self_signed_certs
+      tags: fetch_certs
+      when: ssl_fetch_certs | bool

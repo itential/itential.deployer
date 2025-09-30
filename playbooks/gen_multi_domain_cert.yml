@@ -1,0 +1,32 @@
+# Copyright (c) 2025, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Gather facts from all hosts
+  hosts: all
+  gather_facts: true
+  tasks: []
+
+- name: Generate CA cert
+  import_playbook: itential.deployer.gen_ca_cert
+
+- name: Generate multi-domain cert for all hosts
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Generate multi-domain cert for all hosts
+      ansible.builtin.import_role:
+        name: itential.deployer.ssl
+        tasks_from: gen_multi_domain_cert
+      tags: gen_certs
+
+- name: Upload multi-domain cert to all hosts
+  hosts: all
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Upload multi-domain cert to all hosts
+      ansible.builtin.import_role:
+        name: itential.deployer.ssl
+        tasks_from: propagate_multi_domain_cert
+      tags: upload_certs
+      when: ssl_upload_certs | bool

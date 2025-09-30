@@ -1,0 +1,14 @@
+# Copyright (c) 2025, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Fetch key from server
+  ansible.builtin.fetch:
+    src: "{{ ssl_remote_key_file }}"
+    dest: "{{ ssl_local_cert_dir }}/"
+    flat: true
+
+- name: Fetch cert from server
+  ansible.builtin.fetch:
+    src: "{{ ssl_remote_cert_file }}"
+    dest: "{{ ssl_local_cert_dir }}/"
+    flat: true

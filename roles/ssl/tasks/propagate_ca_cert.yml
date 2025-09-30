@@ -1,0 +1,18 @@
+# Copyright (c) 2025, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Ensure remote cert directory exists
+  ansible.builtin.file:
+    path: "{{ ssl_remote_cert_dir }}"
+    state: directory
+    owner: "{{ ssl_user }}"
+    group: "{{ ssl_group }}"
+    mode: '0755'
+
+- name: Copy CA certificate
+  ansible.builtin.copy:
+    src: "{{ ssl_local_ca_cert_file }}"
+    dest: "{{ ssl_remote_ca_cert_file }}"
+    owner: "{{ ssl_user }}"
+    group: "{{ ssl_group }}"
+    mode: '0644'
