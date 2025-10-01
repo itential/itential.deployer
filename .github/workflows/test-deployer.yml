@@ -140,13 +140,21 @@ jobs:
       working-directory: ../themis/tofu_aws
       run: tofu init
 
+    - name: Create .tfvars file with additional job-specific variables
+      working-directory: ../themis/tofu_aws
+      run: |
+        cat > github_actions.tfvars << 'EOF'
+        prefix = "github"
+        os_type = "${{ inputs.os-type }}"
+        os_version = "${{ inputs.os-version }}"
+        EOF
+
     - name: Generate OpenTofu execution plan
       working-directory: ../themis/tofu_aws
       run: >
         tofu plan 
         -var-file=tfvars/${{ inputs.design }}.tfvars 
-        -var "os_type=${{ inputs.os-type }}" 
-        -var "os_version=${{ inputs.os-version }}" 
+        -var-file=github_actions.tfvars 
         -out=plan.tfplan
 
     - name: Provision EC2 instances
@@ -223,6 +231,5 @@ jobs:
       run: >
         tofu destroy 
         -var-file=tfvars/${{ inputs.design }}.tfvars 
-        -var "os_type=${{ inputs.os-type }}" 
-        -var "os_version=${{ inputs.os-version }}" 
+        -var-file=github_actions.tfvars 
         -auto-approve
