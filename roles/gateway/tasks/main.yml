@@ -362,7 +362,7 @@
   when: ansible_selinux.status == "enabled"
 
 - name: Start Automation Gateway service
-  ansible.builtin.service:
+  ansible.builtin.systemd:
     name: automation-gateway
     enabled: true
     state: restarted
@@ -409,3 +409,10 @@
             enablerepo: []
             disablerepo: "{{ repolist_result.stdout_lines[1:] | map('split', ' ')
                          | map('first') | list }}"
+
+- name: Assert that Gateway is running
+  ansible.builtin.systemd:
+    name: automation-gateway
+  register: gateway_status
+  failed_when: gateway_status.status.ActiveState != "active"
+  tags: always
