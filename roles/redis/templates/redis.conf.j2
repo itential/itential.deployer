@@ -663,6 +663,7 @@ repl-disable-tcp-nodelay no
 # The backlog is only allocated if there is at least one replica connected.
 #
 # repl-backlog-size 1mb
+repl-backlog-size 536870912
 
 # After a master has no connected replicas for some time, the backlog will be
 # freed. The following option configures the amount of seconds that need to
@@ -727,6 +728,7 @@ replica-priority 100
 # min-replicas-max-lag is set to 10.
 {% if redis_replication_enabled | bool %}
 min-replicas-to-write 1
+min-replicas-max-lag 30
 {% endif %}
 
 # A Redis master is able to list the address and port of the attached
@@ -903,11 +905,11 @@ replica-announce-port {{ redis_port }}
 {% if redis_auth_enabled %}
 user default off
 user admin on allkeys allchannels allcommands >{{ redis_user_admin_password }}
-user itential on allkeys allchannels allcommands -asking -cluster -readonly -readwrite -bgrewriteaof -bgsave -failover -flushall -flushdb -psync -replconf -replicaof -save -shutdown -sync >{{ redis_user_itential_password }}
+user itential on ~* &* -@all +@read +@write +@scripting +@connection +@pubsub +script|load +script|exists -script|flush -flushall -flushdb -save -bgsave -bgrewriteaof -replicaof -psync -replconf -shutdown -failover -cluster -asking -sync -readonly -readwrite +info +role >{{ redis_user_itential_password }}
 user prometheus on -@all +@connection +memory -readonly +strlen +config|get +xinfo +pfcount +zcard +type +xlen -readwrite -command +client -wait +scard +llen +hlen +get +eval +slowlog +cluster|info -hello -echo +info +latency +scan -reset -auth -asking >{{ redis_user_prometheus_password }}
 {%  if redis_replication_enabled %}
 user repluser on allchannels +psync +replconf +ping >{{ redis_user_repluser_password }}
-user sentineluser on allchannels +multi +slaveof +ping +exec +subscribe +config|rewrite +role +publish +info +client|setname +client|kill +script|kill >{{ redis_user_sentineluser_password }}
+user sentineluser on &* -@all +slaveof +ping +info +role +publish +subscribe +psubscribe +punsubscribe +client|setname +client|kill +multi +exec +replicaof +script|kill +config|rewrite >{{ redis_user_sentineluser_password }}
 {%  endif %}
 {% endif %}
 
@@ -1343,7 +1345,7 @@ appendfsync everysec
 # If you have latency problems turn this to "yes". Otherwise leave it as
 # "no" that is the safest pick from the point of view of durability.
 
-no-appendfsync-on-rewrite no
+no-appendfsync-on-rewrite yes
 
 # Automatic rewrite of the append only file.
 # Redis is able to automatically rewrite the log file implicitly calling
@@ -1879,7 +1881,7 @@ activerehashing yes
 #
 # Both the hard or the soft limit can be disabled by setting them to zero.
 client-output-buffer-limit normal 0 0 0
-client-output-buffer-limit replica 256mb 64mb 60
+client-output-buffer-limit replica 512mb 128mb 60
 client-output-buffer-limit pubsub 32mb 8mb 60
 
 # Client query buffers accumulate new commands. They are limited to a fixed

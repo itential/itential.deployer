@@ -1,13 +1,6 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Disable safe repository checks
-  community.general.git_config:
-    name: safe.directory
-    scope: global
-    value: '*'
-  when: platform_disable_git_safe_repo_checks
-
 - name: Install any configured adapters
   notify: Enable and Start Platform
   when:
@@ -23,39 +16,49 @@
         mode: '0775'
         state: directory
 
-    - name: Find all adapters already installed
-      ansible.builtin.find:
-        paths: "{{ platform_service_dir }}"
-        recurse: false
-        file_type: directory
-      register: installed_adapters_result
-
-    - name: Create a list of adapters already installed
-      ansible.builtin.set_fact:
-        installed_adapters: "{{ installed_adapters | default([]) + [item.path | basename] }}"
-      loop: "{{ installed_adapters_result.files }}"
-
-    - name: Remove the adapters already installed from the list of adapters
-      ansible.builtin.set_fact:
-        platform_adapters: "{{ platform_adapters | reject('search', item) }}"
-      loop: "{{ installed_adapters }}"
-      when:
-        - installed_adapters is defined
-        - installed_adapters is iterable
-        - installed_adapters | length > 0
-
-    # From the list of repos provided, extract the name of the adapter. This name
-    # will be used in a later step to perform the npm install.
-    - name: Make a list of the adapter names
-      ansible.builtin.set_fact:
-        adapter_names: "{{ adapter_names + [item | basename | split('.') | first] }}"
-      loop: "{{ platform_adapters | default([], true) }}"
-      vars:
-        adapter_names: []
-
     - name: Install adapters
       when: not offline_install_enabled
       block:
+        # From the list of repos/zip files provided, extract the name of the adapter. This name
+        # will be used in a later step to perform the npm install.
+        # Examples:
+        #   https://gitlab.com/itentialopensource/adapters/<ADAPTER_NAME>.git
+        #   <ADAPTER_NAME>.zip
+        - name: Make a list of the adapter names
+          ansible.builtin.set_fact:
+            adapter_names: "{{ adapter_names + [item | basename | split('.') | first] }}"
+          loop: "{{ platform_adapters | default([], true) }}"
+          vars:
+            adapter_names: []
+
+        - name: Find all adapters already installed
+          ansible.builtin.find:
+            paths: "{{ platform_service_dir }}"
+            recurse: false
+            file_type: directory
+          register: installed_adapters_result
+
+        - name: Create a list of adapters already installed
+          ansible.builtin.set_fact:
+            installed_adapters: "{{ installed_adapters | default([]) + [item.path | basename] }}"
+          loop: "{{ installed_adapters_result.files }}"
+
+        - name: Remove the adapters already installed from the list of adapters
+          ansible.builtin.set_fact:
+            platform_adapters: "{{ platform_adapters | reject('search', item) }}"
+          loop: "{{ installed_adapters }}"
+          when:
+            - installed_adapters is defined
+            - installed_adapters is iterable
+            - installed_adapters | length > 0
+
+        - name: Disable safe repository checks
+          community.general.git_config:
+            name: safe.directory
+            scope: global
+            value: '*'
+          when: platform_disable_git_safe_repo_checks
+
         - name: Git clone adapter # noqa: latest (always clone the latest)
           ansible.builtin.git:
             repo: "{{ item }}"
@@ -89,16 +92,30 @@
           loop: "{{ adapter_names }}"
 
     - name: Install adapters (offline)
-      ansible.builtin.include_role:
-        name: offline
-        tasks_from: install-adapter
-      vars:
-        offline_src_adapters_path: "{{ platform_offline_control_node_adapters_dir }}"
-        offline_dest_adapters_path: "{{ platform_service_dir }}"
-      loop: "{{ adapter_names }}"
-      loop_control:
-        loop_var: adapter_name
       when: offline_install_enabled
+      block:
+        # From the list of archives provided, extract the name of the adapter. This name
+        # will be used in a later step to perform the npm install.
+        # Examples:
+        #   <SCOPE>-<ADAPTER_NAME>-<VERSION>.tgz
+        - name: Make a list of the adapter names (offline)
+          ansible.builtin.set_fact:
+            adapter_names: "{{ adapter_names + [item |
+              regex_replace('^.*?(adapter-[^-]+(?:[_-][^-]+)*)-\\d.*\\.tgz$', '\\1')] }}"
+          loop: "{{ platform_adapters | default([], true) }}"
+          vars:
+            adapter_names: []
+
+        - name: Install adapters (offline)
+          ansible.builtin.include_role:
+            name: offline
+            tasks_from: install-adapter
+          vars:
+            offline_src_adapters_path: "{{ platform_offline_control_node_adapters_dir }}"
+            offline_dest_adapters_path: "{{ platform_service_dir }}"
+          loop: "{{ adapter_names }}"
+          loop_control:
+            loop_var: adapter_name
 
     # Using chown and chmod is a faster way to enforce the file ownership and
     # permissions. The file module in ansible checks each and every file/dir

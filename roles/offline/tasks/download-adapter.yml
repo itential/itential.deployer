@@ -28,6 +28,12 @@
     dest: "{{ offline_download_dir }}"
   when: (offline_adapter | basename | split('.') | last) == "zip"
 
+- name: Delete package-lock.json file
+  ansible.builtin.file:
+    path: "{{ offline_download_dir }}/{{ adapter_name }}/package-lock.json"
+    state: absent
+  when: platform_delete_package_lock_file
+
 - name: Install {{ adapter_name }}
   ansible.builtin.command:
     cmd: npm install
@@ -39,6 +45,15 @@
 # when publishing the package.  This really should be defined in the package.json
 # when it's downloaded.  If it is not already defined, set it to true.  A value of true
 # will bundle all dependencies.
+- name: Check if dependencies is already defined in package.json
+  ansible.builtin.lineinfile:
+    state: absent
+    path: "{{ offline_download_dir }}/{{ adapter_name }}/package.json"
+    regexp: '"dependencies":'
+  check_mode: true
+  changed_when: false
+  register: dependencies_check
+
 - name: Check if bundleDependencies is already defined in package.json
   ansible.builtin.lineinfile:
     state: absent
@@ -53,8 +68,10 @@
     state: present
     path: "{{ offline_download_dir }}/{{ adapter_name }}/package.json"
     line: '  "bundleDependencies": true,'
-    insertbefore: '"dependencies"'
-  when: bundle_dependencies_check.found == 0
+    insertbefore: '^\s*"dependencies"\s*:\s*{'
+  when:
+    - dependencies_check.found == 1
+    - bundle_dependencies_check.found == 0
 
 - name: Re-pack {{ adapter_name }}
   ansible.builtin.command:

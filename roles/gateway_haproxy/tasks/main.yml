@@ -38,7 +38,14 @@
     mode: "0660"
 
 - name: Start HAProxy
-  ansible.builtin.service:
+  ansible.builtin.systemd:
     name: haproxy
     enabled: false
     state: restarted
+
+- name: Assert that HAProxy is running
+  ansible.builtin.systemd:
+    name: haproxy
+  register: gateway_haproxy_status
+  failed_when: gateway_haproxy_status.status.ActiveState != "active"
+  tags: always
