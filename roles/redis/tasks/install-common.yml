@@ -63,8 +63,7 @@
     owner: "{{ redis_owner }}"
     group: "{{ redis_group }}"
     mode: "0755"
-  when:
-    - (redis_bin_dir != redis_bin_dir_default_packages or
+  when: (redis_bin_dir != redis_bin_dir_default_packages or
        (redis_bin_dir != redis_bin_dir_default_source and redis_install_from_source | bool))
 
 - name: Create Redis data directory
@@ -77,8 +76,7 @@
     seuser: system_u
     serole: object_r
     setype: redis_var_lib_t
-  when:
-    - redis_data_dir != redis_data_dir_default or redis_install_from_source | bool
+  when: redis_data_dir != redis_data_dir_default or redis_install_from_source | bool
 
 - name: Create Redis log directory
   ansible.builtin.file:
@@ -90,8 +88,7 @@
     seuser: system_u
     serole: object_r
     setype: redis_log_t
-  when:
-    - redis_log_dir != redis_log_dir_default or redis_install_from_source | bool
+  when: redis_log_dir != redis_log_dir_default or redis_install_from_source | bool
 
 - name: Create Redis configuration directory
   ansible.builtin.file:
@@ -103,5 +100,4 @@
     seuser: system_u
     serole: object_r
     setype: redis_conf_t
-  when:
-    - redis_conf_dir != redis_conf_dir_default or redis_install_from_source | bool
+  when: redis_conf_dir != redis_conf_dir_default or redis_install_from_source | bool
