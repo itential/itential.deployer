@@ -30,7 +30,7 @@
 
     # What to do after rotation (do not remove HUP unless you know what you are doing)
     postrotate
-        /bin/systemctl kill -s HUP mongod.service >/dev/null 2>&1 || true
+        /bin/kill -USR1 $(/usr/bin/pgrep -xo mongod) >/dev/null 2>&1 || true
     endscript
 }
 
