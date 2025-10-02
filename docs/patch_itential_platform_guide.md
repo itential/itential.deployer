@@ -1,9 +1,11 @@
 # Patch IAP
 
-The Itential Deployer supports patch upgrades for Itential Platform.  These are also referred to as
-monthly releases.  For example, if Itential Platform version 6.0.0 is currently installed, it
-could be upgraded to any 6.0.X version.  The patch upgrade playbook **DOES NOT** support major
-upgrades.  For major upgrades, please work with your Itential Professional Services representative.
+Itential uses semantic versioning to articulate changes made to the core products. The Itential
+Deployer supports patch and minor upgrades for Itential Platform.  The patch upgrade playbook
+**DOES NOT** support major upgrades, for example going from 6.X.X to 7.X.X.  For major upgrades,
+there are typically other components that might need to be upgraded such as the dependencies.
+Please work with your Itential Professional Services representative before doing an upgrade to a
+new major version.
 
 ## Requirements
 
@@ -41,6 +43,7 @@ all:
         <host1>:
           ansible_host: <addr1>
       vars:
+        platform_encryption_key: <openssl rand -hex 32> # 64-length hex string, representing a 256-bit AES  encryption key.
         platform_release: 6.0
         platform_redis_host: redis1.example.com
         platform_mongo_url: mongodb://itential:password@mongo1.example.com:27017/itential
@@ -65,6 +68,7 @@ all:
         <host1>:
           ansible_host: <addr1>
       vars:
+        platform_encryption_key: <openssl rand -hex 32> # 64-length hex string, representing a 256-bit AES  encryption key.
         platform_release: 6.0
         platform_redis_host: redis1.example.com
         platform_mongo_url: mongodb://itential:password@mongo1.example.com:27017/itential

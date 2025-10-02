@@ -556,6 +556,7 @@ all:
       hosts:
         example1.host.com:
       vars:
+        platform_encryption_key: <openssl rand -hex 32> # 64-length hex string, representing a 256-bit AES  encryption key.
         platform_packages:
           - https://registry.aws.itential.com/repository/PLATFORM/Platform%206.0.0/itential-platform-6.0.0-1.noarch.rpm
         repository_username: user.name
@@ -724,6 +725,7 @@ all:
       hosts:
         example1.host.com:
       vars:
+        platform_encryption_key: <openssl rand -hex 32> # 64-length hex string, representing a 256-bit AES  encryption key.
         platform_packages:
           - itential-platform-6.0.0-1.noarch.rpm
 
@@ -759,6 +761,7 @@ all:
       hosts:
         itential-platform.host.com:
       vars:
+        platform_encryption_key: <openssl rand -hex 32> # 64-length hex string, representing a 256-bit AES  encryption key.
         platform_packages:
           - itential-platform-6.0.0-1.noarch.rpm
         # MongoDB config
