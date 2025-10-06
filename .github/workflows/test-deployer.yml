@@ -140,22 +140,23 @@ jobs:
       working-directory: ../themis/tofu_aws
       run: tofu init
 
-    - name: Create .tfvars file with additional job-specific variables
+    # Copies the vars file for the selected design to the working directory to be imported automatically
+    - name: Set validated design
+      working-directory: ../themis/tofu_aws
+      run: cp tfvars/${{ inputs.design }}.tfvars design.auto.tfvars
+
+    - name: Set additional job-specific variables
       working-directory: ../themis/tofu_aws
       run: |
-        cat > github_actions.tfvars << 'EOF'
-        prefix = "github"
+        cat > github_actions.auto.tfvars << 'EOF'
+        owner = "github"
         os_type = "${{ inputs.os-type }}"
         os_version = "${{ inputs.os-version }}"
         EOF
 
     - name: Generate OpenTofu execution plan
       working-directory: ../themis/tofu_aws
-      run: >
-        tofu plan 
-        -var-file=tfvars/${{ inputs.design }}.tfvars 
-        -var-file=github_actions.tfvars 
-        -out=plan.tfplan
+      run: tofu plan -out=plan.tfplan
 
     - name: Provision EC2 instances
       working-directory: ../themis/tofu_aws
@@ -175,8 +176,6 @@ jobs:
       working-directory: ../themis
       run: ansible all -m wait_for -a "path=/var/log/cloud-init-finished.marker timeout=300" -i tofu_aws/hosts.json -v
 
-    # Overrides inventory variables to install Redis from the Remi repository using a known working URL, as a 
-    # workaround for bugs in the deployer (dependency resolution errors when building Redis, incorrect Remi URL)
     - name: Run the deployer
       working-directory: ../themis
       run: >
@@ -184,8 +183,6 @@ jobs:
         -i tofu_aws/hosts.json 
         -i inventories/common 
         -i inventories/${{ inputs.design }} 
-        -e "redis_install_from_source=false" 
-        -e "redis_remi_repo_url=http://rpms.remirepo.net/enterprise/remi-release-9.rpm" 
         -v
 
     - name: Verify that Platform is running correctly
@@ -228,8 +225,4 @@ jobs:
     - name: Terminate EC2 instances
       if: always()
       working-directory: ../themis/tofu_aws
-      run: >
-        tofu destroy 
-        -var-file=tfvars/${{ inputs.design }}.tfvars 
-        -var-file=github_actions.tfvars 
-        -auto-approve
+      run: tofu destroy -auto-approve
