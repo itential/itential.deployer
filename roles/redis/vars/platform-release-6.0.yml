@@ -14,6 +14,6 @@ redis_packages_default:
 
 # The redis_source_url_default is used when the redis_install_from_source is set to 'true'
 redis_source_url_default:
-  "8": "https://github.com/redis/redis/archive/7.4.2.tar.gz"
-  "9": "https://github.com/redis/redis/archive/7.4.2.tar.gz"
-  "2023": "https://github.com/redis/redis/archive/7.4.2.tar.gz"
+  "8": "https://github.com/redis/redis/archive/7.4.6.tar.gz"
+  "9": "https://github.com/redis/redis/archive/7.4.6.tar.gz"
+  "2023": "https://github.com/redis/redis/archive/7.4.6.tar.gz"
