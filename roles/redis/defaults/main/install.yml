@@ -1,10 +1,7 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-redis_dependency_packages:
-  - tar
-  - unzip
-
+# Packages required to configure SELinux
 redis_security_packages:
   - policycoreutils-python-utils
 
@@ -15,6 +12,8 @@ redis_install_from_source: true
 
 # Packages required to build Redis from source
 redis_build_packages:
+  - tar
+  - unzip
   - gcc
   - gcc-c++
   - make

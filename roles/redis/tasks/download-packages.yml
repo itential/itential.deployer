@@ -10,6 +10,23 @@
   ansible.builtin.include_tasks:
     file: validate-vars-offline.yml
 
+- name: Download Redis security RPMs
+  ansible.builtin.import_role:
+    name: offline
+    tasks_from: download-rpms
+  vars:
+    offline_download_method: yum_module
+    offline_download_packages: "{{ redis_security_packages }} "
+    offline_download_dir: "{{ redis_offline_target_node_rpms_dir }}/security"
+
+- name: Copy Redis dependency RPMs to control node
+  ansible.builtin.import_role:
+    name: offline
+    tasks_from: fetch-packages
+  vars:
+    offline_src_dir: "{{ redis_offline_target_node_rpms_dir }}/security"
+    offline_dest_dir: "{{ redis_offline_control_node_rpms_dir }}/security"
+
 - name: Download package from Remi repo
   when: not redis_install_from_source | bool
   block:
@@ -19,23 +36,6 @@
       when:
         - redis_packages is defined
         - redis_packages is search('remi')
-
-    - name: Download Redis dependency RPMs
-      ansible.builtin.import_role:
-        name: offline
-        tasks_from: download-rpms
-      vars:
-        offline_download_method: yum_module
-        offline_download_packages: "{{ redis_dependency_packages }} "
-        offline_download_dir: "{{ redis_offline_target_node_rpms_dir }}/dependencies"
-
-    - name: Copy Redis dependency RPMs to control node
-      ansible.builtin.import_role:
-        name: offline
-        tasks_from: fetch-packages
-      vars:
-        offline_src_dir: "{{ redis_offline_target_node_rpms_dir }}/dependencies"
-        offline_dest_dir: "{{ redis_offline_control_node_rpms_dir }}/dependencies"
 
     - name: Download Redis RPMs
       ansible.builtin.import_role:

@@ -67,6 +67,13 @@
     - name: Offline install
       when: offline_install_enabled
       block:
+        - name: Install Redis build packages (offline)
+          ansible.builtin.import_role:
+            name: offline
+            tasks_from: install-rpms
+          vars:
+            offline_rpms_path: "{{ redis_offline_control_node_rpms_dir }}/build"
+
         - name: Copy Redis archive (offline)
           ansible.builtin.copy:
             src: "{{ item }}"
@@ -87,7 +94,7 @@
             remote_src: true
           register: unarchive_result
 
-        - name: Set the Redis build directory
+        - name: Set the Redis build directory (offline)
           ansible.builtin.set_fact:
             redis_build_dir: "{{ unarchive_result.src.split('.tar.gz')[0] }}"
 

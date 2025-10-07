@@ -80,7 +80,6 @@ The following tables lists the default variables located in `roles/redis/default
 | Variable | Type | Description | Default Value |
 | :------- | :--- | :---------- | :------------ |
 | `redis_install_from_source` | String | The method used to install Redis. Set to `true` to install from source (default). Set to `false` to install using DNF packages. | `true` |
-| `redis_dependency_packages` | List | The dependency packages required to run Redis | See role. |
 | `redis_build_packages` | List | The packages required to build Redis from source | See role. |
 | `redis_security_packages` | List | The packages required to configure SELinux | See role. |
 | `redis_packages` | List | The Redis packages to install | Varies depending on OS and Platform release |
