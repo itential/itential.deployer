@@ -19,23 +19,15 @@
           ansible.builtin.include_tasks:
             file: install-common.yml
 
-        - name: Include tasks to perform online installation
-          when: not offline_install_enabled
-          block:
-            - name: Include tasks to install Redis using source
-              ansible.builtin.include_tasks:
-                file: install-from-source.yml
-              when: redis_install_from_source | bool
-
-            - name: Include tasks to install Redis using repo
-              ansible.builtin.include_tasks:
-                file: install-from-repo.yml
-              when: not redis_install_from_source | bool
-
-        - name: Include tasks to perform offline installation
+        - name: Include tasks to install Redis from source
           ansible.builtin.include_tasks:
-            file: install-offline.yml
-          when: offline_install_enabled
+            file: install-from-source.yml
+          when: redis_install_from_source | bool
+
+        - name: Include tasks to install Redis using repo
+          ansible.builtin.include_tasks:
+            file: install-from-repo.yml
+          when: not redis_install_from_source | bool
 
     - name: Configure SELinux
       tags: configure_selinux

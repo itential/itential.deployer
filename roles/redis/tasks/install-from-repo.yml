@@ -1,16 +1,27 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Include tasks to install Remi repo
-  ansible.builtin.include_tasks:
-    file: install-remi-repo.yml
-  when:
-    - redis_packages is defined
-    - redis_packages is search('remi')
+- name: Install Redis from packages
+  when: not offline_install_enabled | bool
+  block:
+    - name: Include tasks to install Remi repo
+      ansible.builtin.include_tasks:
+        file: install-remi-repo.yml
+      when:
+        - redis_packages is defined
+        - redis_packages is search('remi')
 
-- name: Install Redis from YUM repo
-  ansible.builtin.package:
-    name: '{{ redis_packages }}'
-    state: present
-    update_cache: true
-    enablerepo: "{{ redis_packages is search('remi') | ternary('remi', omit) }}"
+    - name: Install Redis from packages
+      ansible.builtin.dnf:
+        name: '{{ redis_packages }}'
+        state: present
+        update_cache: true
+        enablerepo: "{{ redis_packages is search('remi') | ternary('remi', omit) }}"
+
+- name: Install Redis from packages (offline)
+  ansible.builtin.import_role:
+    name: offline
+    tasks_from: install-rpms
+  when: offline_install_enabled | bool
+  vars:
+    offline_rpms_path: "{{ redis_offline_control_node_rpms_dir }}/redis"

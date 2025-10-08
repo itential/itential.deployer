@@ -10,9 +10,18 @@
         state: present
         update_cache: true
       when:
+        - not offline_install_enabled | bool
         - redis_security_packages is defined
         - redis_security_packages is iterable
         - redis_security_packages | length > 0
+
+    - name: Install Redis security packages (offline)
+      ansible.builtin.import_role:
+        name: offline
+        tasks_from: install-rpms
+      when: offline_install_enabled | bool
+      vars:
+        offline_rpms_path: "{{ redis_offline_control_node_rpms_dir }}/security"
 
     - name: SELinux - Install custom profiles
       ansible.builtin.include_role:

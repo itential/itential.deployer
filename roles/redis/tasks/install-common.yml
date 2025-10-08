@@ -11,12 +11,6 @@
     name: vm.overcommit_memory
     value: 1
 
-- name: Install Redis dependency packages
-  ansible.builtin.dnf:
-    name: "{{ redis_dependency_packages }}"
-    state: present
-    update_cache: true
-
 # Check if firewalld is running, if it is then open the appropriate ports
 - name: Gather service facts
   ansible.builtin.service_facts:
