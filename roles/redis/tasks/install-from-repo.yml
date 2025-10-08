@@ -12,7 +12,7 @@
         - redis_packages is search('remi')
 
     - name: Install Redis from packages
-      ansible.builtin.package:
+      ansible.builtin.dnf:
         name: '{{ redis_packages }}'
         state: present
         update_cache: true

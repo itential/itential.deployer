@@ -33,7 +33,7 @@
       register: redis_build_temp_dir
 
     - name: Online install
-      when: not offline_install_enabled
+      when: not offline_install_enabled | bool
       block:
         - name: Install Redis build packages
           ansible.builtin.dnf:
@@ -65,7 +65,7 @@
             redis_build_dir: "{{ unarchive_result.src.split('.tar.gz')[0] }}"
 
     - name: Offline install
-      when: offline_install_enabled
+      when: offline_install_enabled | bool
       block:
         - name: Install Redis build packages (offline)
           ansible.builtin.import_role:
@@ -112,7 +112,7 @@
         path: "{{ redis_build_temp_dir.path }}"
         state: absent
 
-    - name: Uninstall Redis build packages
+    - name: Uninstall Redis build packages (offline)
       ansible.builtin.dnf:
         name: "{{ item }}"
         allowerasing: true
@@ -121,7 +121,7 @@
       with_items: "{{ redis_install_result.results | selectattr('changed', 'equalto', true)
                   | map(attribute='item') }}"
       when:
-        - not offline_install_enabled
+        - not offline_install_enabled | bool
         - redis_install_result.results is defined
         - redis_install_result.results is iterable
         - redis_install_result.results | length > 0
