@@ -93,12 +93,20 @@
             - redis_source_url is not defined
             - redis_install_from_source | bool
 
-        - name: Set redis_packages to the default value when not defined in inventory
-          ansible.builtin.set_fact:
-            redis_packages: "{{ redis_packages_default[ansible_distribution_major_version] }}"
+        - name: Set the Redis packages
           when:
             - redis_packages is not defined
             - not redis_install_from_source | bool
+          block:
+            - name: Set redis_packages to the Remi default value when not defined in inventory
+              ansible.builtin.set_fact:
+                redis_packages: "{{ redis_remi_packages_default[ansible_distribution_major_version] }}"
+              when: redis_yum_repo == 'remi'
+
+            - name: Set redis_packages to the Redis.io default value when not defined in inventory
+              ansible.builtin.set_fact:
+                redis_packages: "{{ redis_redis_io_packages_default[ansible_distribution_major_version] }}"
+              when: redis_yum_repo == 'Redis'
 
     - name: Print Redis installation details
       when: not offline_install_enabled | bool
@@ -110,7 +118,9 @@
 
         - name: Print Redis installation details when installing from repo
           ansible.builtin.debug:
-            msg: "Redis packages: {{ redis_packages }}"
+            msg:
+              - "Redis packages: {{ redis_packages }}"
+              - "Redis yum repo: {{ redis_yum_repo }}"
           when: not redis_install_from_source | bool
 
     - name: Print Redis installation details (offline)

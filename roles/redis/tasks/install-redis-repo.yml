@@ -1,0 +1,20 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Install Redis.io repo and GPG key
+  when:
+    - common_install_yum_repos | bool
+    - redis_yum_repo  == 'Redis'
+  block:
+    - name: Install Redis.io repo
+      ansible.builtin.template:
+        src: "redis.repo.j2"
+        dest: "{{ redis_redis_io_repo }}"
+        owner: root
+        group: root
+        mode: "0644"
+
+    - name: Import DNF repository GPG key
+      ansible.builtin.rpm_key:
+        state: present
+        key: "{{ redis_redis_io_gpg_key }}"

@@ -8,9 +8,34 @@ redis_security_packages:
 # Redis install from source - boolean
 # When set to 'true' Redis will be installed from source.
 # Otherwise Redis will be installed from YUM.
-redis_install_from_source: true
+redis_install_from_source: false
 
-# Packages required to build Redis from source
+# The Redis repo to use - string
+# Default - Redis
+# Valid options are 'Redis', 'remi', 'default'.
+# When set to 'default', neither the Remi or Redis.io repos will be installed and Redis
+# will be installed from the repos already installed on the target and appstream can be used.
+redis_yum_repo: Redis
+
+# The Redis.io repo is used when:
+#  - redis_install_from_source is set to 'false'
+#  - common_install_yum_repos is set to 'true'
+#  - redis_yum_repo is set to 'Redis'
+redis_redis_io_repo: /etc/yum.repos.d/redis.repo
+redis_redis_io_base_url: "http://packages.redis.io/rpm/rockylinux{{ ansible_distribution_major_version }}"
+redis_redis_io_gpg_key: https://packages.redis.io/gpg
+
+# The Remi and EPEL repos are used when:
+#  - redis_install_from_source is set to 'false'
+#  - common_install_yum_repos is set to 'true'
+#  - redis_yum_repo is set to 'remi'
+redis_remi_repo_url: "http://rpms.remirepo.net/enterprise/remi-release-\
+                     {{ ansible_distribution_version }}.rpm"
+redis_epel_repo_url: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-\
+                     {{ ansible_distribution_major_version }}.noarch.rpm"
+
+# The build packages are used when:
+#  - redis_install_from_source is set to 'true'
 redis_build_packages:
   - tar
   - unzip
@@ -18,12 +43,3 @@ redis_build_packages:
   - gcc-c++
   - make
   - systemd-devel
-
-# The Remi and EPEL repos are used only when:
-#  - redis_install_from_source is set to 'false'
-#  - common_install_yum_repos is set to 'true'
-#  - redis_packages contains 'remi'
-redis_remi_repo_url: "http://rpms.remirepo.net/enterprise/remi-release-\
-                     {{ ansible_distribution_version }}.rpm"
-redis_epel_repo_url: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-\
-                     {{ ansible_distribution_major_version }}.noarch.rpm"
