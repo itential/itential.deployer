@@ -42,15 +42,15 @@
   vars:
     stage: "replication"
 
-- name: Start mongo
+- name: Start mongo (replicaset)
   ansible.builtin.service:
     name: mongod
     state: restarted
     enabled: true
   register: mongod_service_result
   until: mongod_service_result.status.ActiveState == "active"
-  retries: 15
-  delay: 20
+  retries: "{{ mongodb_mongod_service_retries }}"
+  delay: "{{ mongodb_mongod_service_delay }}"
   when: not mongodb_state.replication_enabled
 
 - name: Set empty array of mongo servers
@@ -106,8 +106,8 @@
     login_database: admin
     login_host: "{{ inventory_hostname }}"
     replica_set: "{{ mongodb_replset_name }}"
-    poll: 3
-    interval: 10
+    poll: "{{ mongodb_status_poll }}"
+    interval: "{{ mongodb_status_interval }}"
     validate: minimal
   register: rs
   failed_when:

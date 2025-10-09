@@ -30,7 +30,7 @@
     owner: "{{ mongodb_owner }}"
 
 # Execute the template to apply changes to the mongo.conf for TLS support
-- name: Create MongoDB config file
+- name: Create MongoDB config file (TLS)
   ansible.builtin.template:
     src: mongod.conf.j2
     dest: "{{ mongodb_conf_file }}"
@@ -40,8 +40,12 @@
   vars:
     stage: "tls"
 
-- name: Start mongo
-  ansible.builtin.systemd:
+- name: Start mongo (TLS)
+  ansible.builtin.service:
     name: mongod
     state: restarted
     enabled: true
+  register: mongod_service_result
+  until: mongod_service_result.status.ActiveState == "active"
+  retries: "{{ mongodb_mongod_service_retries }}"
+  delay: "{{ mongodb_mongod_service_delay }}"

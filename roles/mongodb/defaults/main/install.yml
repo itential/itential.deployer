@@ -16,3 +16,11 @@ mongodb_python_app_dependencies:
 mongodb_python_venv_root: /var/tmp
 mongodb_python_venv_name: mongodb_venv
 mongodb_python_venv: "{{ mongodb_python_venv_root }}/{{ mongodb_python_venv_name }}"
+
+# Mongod service settings
+mongodb_mongod_service_retries: 5
+mongodb_mongod_service_delay: 10
+
+# MongoDB status settings
+mongodb_status_poll: 3
+mongodb_status_interval: 10

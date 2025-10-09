@@ -101,15 +101,15 @@
     stage: initialize
   tags: initialize_mongo_config
 
-- name: Start mongo
+- name: Start mongo (initial)
   ansible.builtin.service:
     name: mongod
     state: restarted
     enabled: true
   register: mongod_service_result
   until: mongod_service_result.status.ActiveState == "active"
-  retries: 15
-  delay: 20
+  retries: "{{ mongodb_mongod_service_retries }}"
+  delay: "{{ mongodb_mongod_service_delay }}"
   tags: initialize_mongo_config
 
 - name: Add users to database

@@ -134,6 +134,10 @@ These variables apply to advanced situations.
 | `mongodb_python_venv_name` | String | The name of the Python virtual environment used by this deployer. | `mongodb_venv` |
 | `mongodb_bind_ipv6` | Boolean | Flag to enable binding to IPv6. | `true` |
 | `mongodb_bind_addrs` | String | The hostnames and/or IP addresses and/or full Unix domain socket paths on which mongos or mongod should listen for client connections. You may attach mongos or mongod to any interface. To bind to multiple addresses, enter a list of comma-separated values. The inventory_hostname will be automatically added to `mongodb_bind_addrs`.  If `mongodb_bind_ipv6` is set to true, '::1' will be added to `mongodb_bind_addrs`. | `127.0.0.1` |
+| `mongodb_mongod_service_retries` | Integer | The number of retries when starting the mongod service. | 5 |
+| `mongodb_mongod_service_delay` | Integer | The time in seconds between retries when starting the mongod service. | 10 |
+| `mongodb_status_poll` | Integer | The maximum number of times to query for the replicaset status before the set converges or we fail. | 3 |
+| `mongodb_status_interval` | Integer | The number of seconds to wait between polling executions. | 10 |
 
 ## Configuring TLS
 
