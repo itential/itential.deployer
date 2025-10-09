@@ -333,7 +333,7 @@
   ansible.posix.firewalld:
     port: "{{ gateway_port }}/tcp"
     permanent: true
-    state: "{{ gateway_https or gateway_haproxy_enabled | ternary('disabled', 'enabled') }}"
+    state: "{{ (gateway_https or gateway_haproxy_enabled) | ternary('disabled', 'enabled') }}"
     zone: public
     immediate: true
   when:
@@ -345,7 +345,7 @@
   ansible.posix.firewalld:
     port: "{{ gateway_https_port }}/tcp"
     permanent: true
-    state: "{{ gateway_https or gateway_haproxy_enabled | ternary('enabled', 'disabled') }}"
+    state: "{{ (gateway_https or gateway_haproxy_enabled) | ternary('enabled', 'disabled') }}"
     zone: public
     immediate: true
   when:
