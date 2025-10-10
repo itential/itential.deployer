@@ -1,0 +1,20 @@
+name: Test Deployer on Pull Request
+
+on:
+  pull_request_target:
+    branches:
+      - main
+
+jobs:
+  run-test:
+    strategy:
+      matrix:
+        design: [aio, minimal, ha2, asa]
+      fail-fast: false
+    uses: ./.github/workflows/test-deployer.yml
+    with:
+      ref: ${{ github.event.pull_request.head.sha }}
+      design: ${{ matrix.design }}
+      os-type: rocky
+      os-version: "9"
+    secrets: inherit
