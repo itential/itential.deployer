@@ -18,7 +18,7 @@
 
 - name: Install collections
   ansible.builtin.command:
-    cmd: "ansible-galaxy collection install -p {{ gateway_ansible_collections_path }}
+    cmd: "{{ gateway_python_venv }}/bin/ansible-galaxy collection install -p {{ gateway_ansible_collections_path }}
          -r requirements.yml"
     chdir: "{{ install_collections_temp_dir.path }}"
   register: install_result
