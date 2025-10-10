@@ -17,6 +17,9 @@ name: Test Deployer
 on:
   workflow_call:
     inputs:
+      ref:
+        required: false
+        type: string
       design:
         required: true
         type: string
@@ -56,6 +59,8 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+      with:
+        ref: ${{ inputs.ref }}
 
     - name: Update package lists
       run: sudo apt update
@@ -149,6 +154,7 @@ jobs:
       working-directory: ../themis/tofu_aws
       run: |
         cat > github_actions.auto.tfvars << 'EOF'
+        profile = ""
         owner = "github"
         os_type = "${{ inputs.os-type }}"
         os_version = "${{ inputs.os-version }}"
