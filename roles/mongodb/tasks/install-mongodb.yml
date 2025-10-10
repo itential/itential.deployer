@@ -90,7 +90,7 @@
 # users. That can not be done if all of these features are enabled. The
 # variable "stage" is used to provide this template context. When stage is
 # "initialize" the template will be forced to create a simple config.
-- name: Create MongoDB config file
+- name: Create MongoDB config file (initial)
   ansible.builtin.template:
     src: mongod.conf.j2
     dest: "{{ mongodb_conf_file }}"
@@ -101,11 +101,15 @@
     stage: initialize
   tags: initialize_mongo_config
 
-- name: Start mongo
-  ansible.builtin.systemd:
+- name: Start mongo (initial)
+  ansible.builtin.service:
     name: mongod
     state: restarted
     enabled: true
+  register: mongod_service_result
+  until: mongod_service_result.status.ActiveState == "active"
+  retries: "{{ mongodb_mongod_service_retries }}"
+  delay: "{{ mongodb_mongod_service_delay }}"
   tags: initialize_mongo_config
 
 - name: Add users to database
