@@ -4,8 +4,7 @@
 - name: Install Remi-related repos
   when:
     - common_install_yum_repos | bool
-    - redis_packages is defined
-    - redis_packages is search('remi')
+    - redis_yum_repo  == 'remi'
   block:
     - name: Install EPEL repo
       ansible.builtin.dnf:

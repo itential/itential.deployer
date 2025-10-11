@@ -3,8 +3,19 @@
 ---
 # The keys represent the EL major version (ansible_distribution_major_version)
 
-# The redis_packages_default is used when the redis_install_from_source is set to 'false'
-redis_packages_default:
+# The redis_redis_io_packages_default is used when the redis_install_from_source is set to 'false'
+# and redis_yum_repo is 'Redis'
+redis_redis_io_packages_default:
+  "8":
+    - "redis"
+  "9":
+    - "redis"
+  "2023":
+    - "redis"
+
+# The redis_remi_packages_default is used when the redis_install_from_source is set to 'false'
+# and redis_yum_repo is 'remi'
+redis_remi_packages_default:
   "8":
     - "@redis:remi-7.2"
   "9":

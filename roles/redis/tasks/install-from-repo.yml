@@ -2,21 +2,48 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
 - name: Install Redis from packages
-  when: not offline_install_enabled | bool
+  when:
+    - not offline_install_enabled | bool
+    - redis_packages is defined
+    - redis_packages is not none
+    - redis_packages is iterable
   block:
-    - name: Include tasks to install Remi repo
-      ansible.builtin.include_tasks:
-        file: install-remi-repo.yml
-      when:
-        - redis_packages is defined
-        - redis_packages is search('remi')
+    - name: Get list of yum repos (to disable temporarily) # noqa command-instead-of-module
+      ansible.builtin.command: yum -q repolist
+      register: repolist_result
+      changed_when: false
 
-    - name: Install Redis from packages
-      ansible.builtin.dnf:
-        name: '{{ redis_packages }}'
-        state: present
-        update_cache: true
-        enablerepo: "{{ redis_packages is search('remi') | ternary('remi', omit) }}"
+    - name: Install using Remi packages
+      when: redis_yum_repo == 'remi'
+      block:
+        - name: Include tasks to install Remi repo
+          ansible.builtin.include_tasks:
+            file: install-remi-repo.yml
+
+        - name: Install Redis using Remi packages
+          ansible.builtin.dnf:
+            name: '{{ redis_packages }}'
+            state: present
+            update_cache: true
+            enablerepo: "{{ redis_yum_repo }}"
+            disablerepo: "{{ repolist_result.stdout_lines[1:] | map('split', ' ')
+                          | map('first') | list }}"
+
+    - name: Install Redis using Redis.io packages
+      when: redis_yum_repo == 'Redis'
+      block:
+        - name: Include tasks to install Redis.io repo
+          ansible.builtin.include_tasks:
+            file: install-redis-repo.yml
+
+        - name: Install Redis using Redis.io packages
+          ansible.builtin.dnf:
+            name: '{{ redis_packages }}'
+            state: installed
+            update_cache: true
+            enablerepo: "{{ redis_yum_repo }}"
+            disablerepo: "{{ repolist_result.stdout_lines[1:] | map('split', ' ')
+                          | map('first') | list }}"
 
 - name: Install Redis from packages (offline)
   ansible.builtin.import_role:
