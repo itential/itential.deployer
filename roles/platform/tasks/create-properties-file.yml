@@ -4,6 +4,19 @@
 
 # TODO: Do we still need to support the primary/secondary concept?
 
+- name: Generate encrypted default password
+  ansible.builtin.shell: >
+    (echo "{{ platform_default_user_password }}"; sleep 2; echo "{{ platform_encryption_key }}") 
+    | node {{ platform_install_dir }}/utils/encrypt.js 2>&1 
+    | tail -n 1
+  register: encrypt_util_output
+  no_log: true
+
+- name: Set encrypted default password
+  ansible.builtin.set_fact:
+    platform_default_user_password_encrypted: "{{ encrypt_util_output.stdout }}"
+  no_log: true
+
 - name: Create the platform.properties file
   ansible.builtin.template:
     src: "{{ platform_release }}-properties.j2"
