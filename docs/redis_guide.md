@@ -181,7 +181,7 @@ all:
         <host1>:
           ansible_host: <addr1>
     vars:
-        platform_release: 6.0
+        platform_release: 6
 ```
 
 ### Example Inventory - Single Redis Node, Override Source URL
@@ -207,7 +207,7 @@ all:
         <host1>:
           ansible_host: <addr1>
       vars:
-        platform_release: 6.0
+        platform_release: 6
         redis_install_from_source: false
 ```
 
@@ -223,7 +223,7 @@ all:
         <host1>:
           ansible_host: <addr1>
       vars:
-        platform_release: 6.0
+        platform_release: 6
         redis_auth_enabled: true
 ```
 
@@ -243,7 +243,7 @@ all:
         <host3>:
           ansible_host: <addr3>
       vars:
-        platform_release: 6.0
+        platform_release: 6
         redis_auth_enabled: true
         redis_replication_enabled: true
 ```

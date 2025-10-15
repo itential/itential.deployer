@@ -61,7 +61,7 @@ This is an example directory structure on a Target Node on a RedHat 9 server:
     │       └── wheels
     │           ├── app
     │           └── base
-    └── 6.0
+    └── 6
         ├── mongodb
         │   ├── rpms
         │   └── wheels
@@ -106,7 +106,7 @@ playbooks/files/itential_packages
     │       └── wheels
     │           ├── app
     │           └── base
-    └── 6.0
+    └── 6
         ├── mongodb
         │   ├── rpms
         │   └── wheels
