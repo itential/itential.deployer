@@ -364,7 +364,7 @@
 - name: Add Python test script
   ansible.builtin.copy:
     src: verify-iag-environment.py
-    dest: /opt/automation-gateway/scripts/verify-iag-environment.py
+    dest: "{{ gateway_install_dir }}/scripts/verify-iag-environment.py"
     owner: "{{ gateway_user }}"
     group: "{{ gateway_group }}"
     mode: "0775"
