@@ -10,22 +10,22 @@
 - name: Encrypt default password
   when: not (platform_configure_vault | bool)
   block:
-  - name: Generate encrypted default password
-    ansible.builtin.shell: >
-      set -o pipefail &&
-      (echo "{{ platform_default_user_password }}"; sleep 2; echo "{{ platform_encryption_key }}")
-      | node {{ platform_install_dir }}/utils/encrypt.js 2>&1
-      | tail -n 1
-    args:
-      executable: /bin/bash
-    register: encrypt_util_output
-    no_log: true
-    changed_when: false
+    - name: Generate encrypted default password
+      ansible.builtin.shell: >
+        set -o pipefail &&
+        (echo "{{ platform_default_user_password }}"; sleep 2; echo "{{ platform_encryption_key }}")
+        | node {{ platform_install_dir }}/utils/encrypt.js 2>&1
+        | tail -n 1
+      args:
+        executable: /bin/bash
+      register: encrypt_util_output
+      no_log: true
+      changed_when: false
 
-  - name: Set encrypted default password
-    ansible.builtin.set_fact:
-      platform_default_user_password_encrypted: "{{ encrypt_util_output.stdout }}"
-    no_log: true
+    - name: Set encrypted default password
+      ansible.builtin.set_fact:
+        platform_default_user_password_encrypted: "{{ encrypt_util_output.stdout }}"
+      no_log: true
 
 - name: Create the platform.properties file
   ansible.builtin.template:
