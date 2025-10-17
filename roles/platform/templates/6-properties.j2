@@ -531,9 +531,7 @@ default_user_username = {{ platform_default_user_username }}
 {% endif %}
 
 # The password of the default user.
-{% if platform_default_user_password_encrypted %}
-default_user_password = {{ platform_default_user_password_encrypted }}
-{% elif platform_default_user_password %}
+{% if platform_default_user_password %}
 default_user_password = {{ platform_default_user_password }}
 {% else %}
 # default_user_password =
