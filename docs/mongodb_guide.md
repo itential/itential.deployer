@@ -157,16 +157,16 @@ by the role.
 To install and configure MongoDB, add a `mongodb` group and host(s) to your inventory file.  The
 following inventory examples demonstrate some common installation patterns.
 
-## Example Inventory - Single MongoDB Node accepting all defaults for Platform 6.0
+## Example Inventory - Single MongoDB Node accepting all defaults for Platform 6
 
 This example shows a basic MongoDB configuration with a single MongoDB node accepting all default
-values defined with Platform 6.0.
+values defined with Platform 6.
 
 ```yaml
 all:
   vars:
     repository_api_key: #key
-    platform_release: 6.0
+    platform_release: 6
 
   children:
     mongodb:
@@ -210,7 +210,7 @@ override the replica set name.
 all:
   vars:
     repository_api_key: #key
-    platform_release: 6.0
+    platform_release: 6
 
   children:
     mongodb:
@@ -236,7 +236,7 @@ and configure the `mongo_cert_keyfile_source` and `mongo_root_ca_file_source`.
 all:
   vars:
     repository_api_key: #key
-    platform_release: 6.0
+    platform_release: 6
 
   children:
     mongodb:

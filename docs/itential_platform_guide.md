@@ -327,7 +327,7 @@ with a single node.
 ```yaml
 all:
   vars:
-    platform_release: 6.0
+    platform_release: 6
 
   children:
     platform:
@@ -349,7 +349,7 @@ to `true`, and configure the adapters in the `platform_adapters` variable.
 ```yaml
 all:
   vars:
-    platform_release: 6.0
+    platform_release: 6
 
   children:
     platform:
@@ -376,7 +376,7 @@ set it to `true` and configure the `platform_app_artifacts_source_file`.
 ```yaml
 all:
   vars:
-    platform_release: 6.0
+    platform_release: 6
 
   children:
     platform:
@@ -396,7 +396,7 @@ To configure the Platform to integrate with Hashicorp Vault for secrets manageme
 ```yaml
 all:
   vars:
-    platform_release: 6.0
+    platform_release: 6
 
   children:
     platform:
