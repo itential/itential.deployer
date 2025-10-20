@@ -361,13 +361,14 @@
     state: present
   when: ansible_selinux.status == "enabled"
 
-- name: Add Python test script
+- name: Add test scripts
   ansible.builtin.copy:
-    src: verify-iag-environment.py
-    dest: "{{ gateway_install_dir }}/scripts/verify-iag-environment.py"
+    src: scripts
+    dest: "{{ gateway_install_dir }}/"
     owner: "{{ gateway_user }}"
     group: "{{ gateway_group }}"
     mode: "0775"
+    directory_mode: "0775"
 
 - name: Start Automation Gateway service
   ansible.builtin.systemd:
