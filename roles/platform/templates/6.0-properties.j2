@@ -165,7 +165,9 @@ mongo_user = {{ platform_mongo_user }}
 {% endif %}
 
 # The password to use when connecting to MongoDB.
-{% if platform_mongo_password %}
+{% if platform_mongo_password_encrypted is defined %}
+mongo_password = {{ platform_mongo_password_encrypted }}
+{% elif platform_mongo_password %}
 mongo_password = {{ platform_mongo_password }}
 {% else %}
 # mongo_password =
@@ -253,7 +255,9 @@ redis_username = {{ platform_redis_username }}
 {% endif %}
 
 # The password to use when connecting to Redis.
-{% if platform_redis_password and platform_redis_auth_enabled | bool %}
+{% if platform_redis_password_encrypted is defined and platform_redis_auth_enabled | bool %}
+redis_password = {{ platform_redis_password_encrypted }}
+{% elif platform_redis_password and platform_redis_auth_enabled | bool %}
 redis_password = {{ platform_redis_password }}
 {% else %}
 # redis_password =
@@ -295,7 +299,9 @@ redis_sentinel_username = {{ platform_redis_sentinel_username }}
 {% endif %}
 
 # The password to use when authenticating with a Redis Sentinel cluster
-{% if platform_redis_sentinel_password and platform_redis_auth_enabled | bool %}
+{% if platform_redis_sentinel_password_encrypted is defined and platform_redis_auth_enabled | bool %}
+redis_sentinel_password = {{ platform_redis_sentinel_password_encrypted }}
+{% elif platform_redis_sentinel_password and platform_redis_auth_enabled | bool %}
 redis_sentinel_password = {{ platform_redis_sentinel_password }}
 {% else %}
 # redis_sentinel_password =
@@ -531,7 +537,7 @@ default_user_username = {{ platform_default_user_username }}
 {% endif %}
 
 # The password of the default user.
-{% if platform_default_user_password_encrypted %}
+{% if platform_default_user_password_encrypted is defined %}
 default_user_password = {{ platform_default_user_password_encrypted }}
 {% elif platform_default_user_password %}
 default_user_password = {{ platform_default_user_password }}

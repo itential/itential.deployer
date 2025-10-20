@@ -7,31 +7,41 @@
 # Note: Platform's encrypt.js script does not take command line arguments.
 # Instead, it prompts the user for input, reads it from stdin, and prints the key on the last line.
 # This necessitates the use of the workaround below.
-- name: Encrypt default password
+- name: Encrypt default passwords
   when: not (platform_configure_vault | bool)
   no_log: true
   block:
-    - name: Generate encrypted default password
+    - name: Generate encrypted passwords
       ansible.builtin.shell: >
         set -o pipefail &&
-        (echo "{{ platform_default_user_password }}"; sleep 2; echo "{{ platform_encryption_key }}") |
+        (echo "{{ item.plaintext }}"; sleep 2; echo "{{ platform_encryption_key }}") |
         node {{ platform_install_dir }}/utils/encrypt.js 2>&1 |
         tail -n 1
       args:
         executable: /bin/bash
-      register: encrypt_util_output
+      loop:
+        - name: platform_redis_password_encrypted
+          plaintext: "{{ platform_redis_password }}"
+        - name: platform_redis_sentinel_password_encrypted
+          plaintext: "{{ platform_redis_sentinel_password }}"
+        - name: platform_mongo_password_encrypted
+          plaintext: "{{ platform_mongo_password }}"
+        - name: platform_default_user_password_encrypted
+          plaintext: "{{ platform_default_user_password }}"
+      register: encrypt_results
       changed_when: false
+      failed_when: >
+        encrypt_results.rc != 0 or
+        encrypt_results.stdout == "" or
+        not encrypt_results.stdout.startswith("$ENC") or
+        (encrypt_results.stdout.split(':') | last | length) != 32
 
-    - name: Validate encryption utility output
-      ansible.builtin.assert:
-        that:
-          - encrypt_util_output.stdout != ""
-          - encrypt_util_output.stdout.startswith("$ENC")
-          - (encrypt_util_output.stdout.split(':') | last | length) == 32
-
-    - name: Set encrypted default password
+    - name: Set encrypted passwords
       ansible.builtin.set_fact:
-        platform_default_user_password_encrypted: "{{ encrypt_util_output.stdout }}"
+        "{{ item.item.name }}": "{{ item.stdout }}"
+      loop: "{{ encrypt_results.results }}"
+      loop_control:
+        label: "{{ item.item.name }}"
 
 - name: Create the platform.properties file
   ansible.builtin.template:
