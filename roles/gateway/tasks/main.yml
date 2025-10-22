@@ -361,6 +361,15 @@
     state: present
   when: ansible_selinux.status == "enabled"
 
+- name: Add test scripts
+  ansible.builtin.copy:
+    src: scripts
+    dest: "{{ gateway_install_dir }}/"
+    owner: "{{ gateway_user }}"
+    group: "{{ gateway_group }}"
+    mode: "0775"
+    directory_mode: "0775"
+
 - name: Start Automation Gateway service
   ansible.builtin.systemd:
     name: automation-gateway
