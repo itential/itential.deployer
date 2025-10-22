@@ -1,0 +1,56 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Copy IAG archive from local
+  ansible.builtin.copy:
+    src: "{{ gateway_whl_file }}"
+    dest: "{{ gateway_offline_target_node_wheels_dir }}/gateway/"
+    mode: '0644'
+  when:
+    - gateway_whl_file is defined
+    - gateway_archive_download_url is not defined
+
+- name: Download IAG archive from repository
+  when:
+    - gateway_archive_download_url is defined
+    - gateway_whl_file is not defined
+  block:
+    - name: Create Gateway wheel directory
+      ansible.builtin.file:
+        path: "{{ gateway_offline_target_node_wheels_dir }}/gateway"
+        state: directory
+        mode: '0755'
+
+    - name: Download IAG archive from repository
+      ansible.builtin.get_url:
+        url: "{{ gateway_archive_download_url }}"
+        dest: "{{ gateway_offline_target_node_wheels_dir }}/gateway/"
+        mode: '0644'
+        # Sets the appropriate header based on the repository type:
+        # - For JFrog: Uses the "X-JFrog-Art-Api" header with the API key if "repository_api_key"
+        #   is defined and "jfrog" is part of the download URL.
+        # - For Nexus: Uses a default header ("Accept: application/octet-stream") since Nexus
+        #   doesn't support API key authentication.
+        headers: >-
+          {%- if repository_api_key is defined and gateway_archive_download_url is search("jfrog") -%}
+            {"X-JFrog-Art-Api": "{{ repository_api_key }}", "Accept": "application/octet-stream"}
+          {%- else -%}
+            {"Accept": "application/octet-stream"}
+          {%- endif -%}
+        url_username: "{{ repository_username | default(omit) }}"
+        url_password: "{{ repository_password | default(omit) }}"
+        validate_certs: true
+
+- name: Copy Gateway to control node
+  ansible.builtin.import_role:
+    name: offline
+    tasks_from: fetch-packages
+  vars:
+    offline_src_dir: "{{ gateway_offline_target_node_wheels_dir }}/gateway"
+    offline_dest_dir: "{{ gateway_offline_control_node_wheels_dir }}/gateway"
+
+- name: Find downloaded Gateway wheel file
+  ansible.builtin.find:
+    paths: "{{ gateway_offline_target_node_wheels_dir }}/gateway/"
+    patterns: "*.whl"
+  register: gateway_wheel_download
