@@ -155,7 +155,7 @@
                 gateway_build_package_remove_list:
                   "{{ gateway_build_package_remove_list | default([]) + [item] }}"
               with_items: "{{ gateway_build_packages }}"
-              when: gateway_installed_build_package_list | select('search', item) | list | length > 0
+              when: gateway_installed_build_package_list | select('search', item | regex_escape) | list | length > 0
 
     - name: Install Python dependencies
       tags: install_python_dependencies
@@ -377,6 +377,15 @@
         setype: http_port_t
         state: present
       when: ansible_selinux.status == "enabled"
+
+    - name: Add test scripts
+      ansible.builtin.copy:
+        src: scripts
+        dest: "{{ gateway_install_dir }}/"
+        owner: "{{ gateway_user }}"
+        group: "{{ gateway_group }}"
+        mode: "0775"
+        directory_mode: "0775"
 
     - name: Start Automation Gateway service
       ansible.builtin.systemd:

@@ -1,5 +1,30 @@
 # Changelog
 
+## v3.4.0 (October 10, 2025)
+
+* Add assertion tasks to deployer roles  https://github.com/itential/itential.deployer/pull/236
+* Add assertions after platform and gateway upgrades  https://github.com/itential/itential.deployer/pull/237
+* Add end-tag option to changelog.py  https://github.com/itential/itential.deployer/pull/232
+* Add wait until active to mongod startup  https://github.com/itential/itential.deployer/pull/198
+* Configuration optimizations  https://github.com/itential/itential.deployer/pull/247
+* Enable logrotate for redis  https://github.com/itential/itential.deployer/pull/235
+* Fix Gateway offline collection install bug  https://github.com/itential/itential.deployer/pull/255
+* Fix Vault download packages  https://github.com/itential/itential.deployer/pull/240
+* Fix adapter download for offline installs  https://github.com/itential/itential.deployer/pull/230
+* Fix gateway firewall configuration tasks  https://github.com/itential/itential.deployer/pull/254
+* Fix issue with offline adapter install  https://github.com/itential/itential.deployer/pull/234
+* Fix posrotate mongod command  https://github.com/itential/itential.deployer/pull/250
+* Fix redis offline install  https://github.com/itential/itential.deployer/pull/252
+* Fix uninstall of NodeJS in adapter download  https://github.com/itential/itential.deployer/pull/231
+* Modified recommended http server threads comment per performance tests  https://github.com/itential/itential.deployer/pull/238
+* Readme updates  https://github.com/itential/itential.deployer/pull/249
+* Remove condition that prevents adjusting SELinux labels  https://github.com/itential/itential.deployer/pull/246
+* Update Redis to 7.4.6 - [CVE-2025-49844]  https://github.com/itential/itential.deployer/pull/251
+* Updated public repositories  https://github.com/itential/itential.deployer/pull/244
+
+Full Changelog: https://github.com/itential/itential.deployer/compare/v3.3.0...v3.4.0 
+
+
 ## v3.3.0 (August 07, 2025)
 
 *  Set SELinux file type for redis config templates @Nick-Andreano  https://github.com/itential/itential.deployer/pull/227
@@ -20,6 +45,7 @@
 * Support for ARM in mongo role  https://github.com/itential/itential.deployer/pull/221
 * TLS enabled for mongodb  https://github.com/itential/itential.deployer/pull/210
 * Update Platform Guide  https://github.com/itential/itential.deployer/pull/209
+* Update galaxy version and changelog for release 3.3.0 [skip ci]
 
 Full Changelog: https://github.com/itential/itential.deployer/compare/v3.2.0...v3.3.0 
 
@@ -79,11 +105,33 @@ Full Changelog: https://github.com/itential/itential.deployer/compare/v3.0.0...v
 ## v3.0.0 (March 14, 2025)
 
 * Fix Gateway Ansible config paths  https://github.com/itential/itential.deployer/pull/229
+* Fix Redis offline install to not uninstall build packages  https://github.com/itential/itential.deployer/pull/245
+* Fix issues with download playbooks not copying RPMs to control node  https://github.com/itential/itential.deployer/pull/243
 * Preflight Checks  https://github.com/itential/itential.deployer/pull/116
 * Release v3.0.0
+* Update galaxy and changelog for v2.6.3
 * Update galaxy version and changelog for release 3.0.0 [skip ci]
+* Update galaxy.yml and changelog for v2.6.2
+* Update galaxy.yml and changelog with v2.6.1
 
-Full Changelog: https://github.com/itential/itential.deployer/compare/v2.6.1...v3.0.0 
+Full Changelog: https://github.com/itential/itential.deployer/compare/v2.6.3...v3.0.0 
+
+
+## v2.6.3 (September 30, 2025)
+
+* Fix Redis offline install to not uninstall build packages  https://github.com/itential/itential.deployer/pull/245
+* Update galaxy and changelog for v2.6.3
+
+Full Changelog: https://github.com/itential/itential.deployer/compare/v2.6.2...v2.6.3 
+
+
+## v2.6.2 (September 29, 2025)
+
+* Fix issues with download playbooks not copying RPMs to control node  https://github.com/itential/itential.deployer/pull/243
+* Update galaxy.yml and changelog for v2.6.2
+* Update galaxy.yml and changelog with v2.6.1
+
+Full Changelog: https://github.com/itential/itential.deployer/compare/v2.6.1...v2.6.2 
 
 
 ## v2.6.1 (August 07, 2025)

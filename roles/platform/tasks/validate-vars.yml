@@ -59,6 +59,7 @@
       ansible.builtin.assert:
         that: platform_encryption_key is defined
         fail_msg: platform_encryption_key variable must be defined
+      when: validate_platform_encryption_key | default(true)
 
     - name: Validate that the platform_encryption_key variable is correctly formatted
       ansible.builtin.assert:
@@ -66,6 +67,7 @@
           - platform_encryption_key is match('^[0-9a-fA-F]+$')
           - platform_encryption_key | length == 64
         fail_msg: platform_encryption_key must be a 64 character hexadecimal string
+      when: validate_platform_encryption_key | default(true)
 
     - name: Set installation variables when using Itential Platform release defaults
       when: platform_release is defined
