@@ -153,7 +153,7 @@
             gateway_build_package_remove_list:
               "{{ gateway_build_package_remove_list | default([]) + [item] }}"
           with_items: "{{ gateway_build_packages }}"
-          when: installed_gateway_build_package_list | select('search', item) | list | length > 0
+          when: installed_gateway_build_package_list | select('search', item | regex_escape) | list | length > 0
 
 - name: Install Python dependencies
   tags: install_python_dependencies
