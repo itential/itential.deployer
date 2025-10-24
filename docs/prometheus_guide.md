@@ -147,7 +147,7 @@ your inventory (in addition to the other Itential-related groups and hosts).
 ```yaml
 all:
   vars:
-    platform_release: 6.0
+    platform_release: 6
 
   children:
     redis:
