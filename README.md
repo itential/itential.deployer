@@ -541,7 +541,7 @@ vi inventories/dev/hosts
 ```yaml
 all:
   vars:
-    platform_release: 6.0
+    platform_release: 6
 
   children:
     redis:
@@ -710,7 +710,7 @@ Simple environment. Itential Platform and all of its dependencies all on one hos
 ```yaml
 all:
   vars:
-    platform_release: 6.0
+    platform_release: 6
 
   children:
     redis:
@@ -746,7 +746,7 @@ Similar to All-in-one but installs components on separate hosts.
 ```yaml
 all:
   vars:
-    platform_release: 6.0
+    platform_release: 6
 
   children:
     redis:
@@ -786,7 +786,7 @@ Fault tolerant architecture.
 ```yaml
 all:
   vars:
-    platform_release: 6.0
+    platform_release: 6
 
   children:
     redis:
@@ -840,7 +840,7 @@ Fault tolerant architecture using external dependencies.
 ```yaml
 all:
   vars:
-    platform_release: 6.0
+    platform_release: 6
   children:
     platform:
       hosts:
@@ -880,7 +880,7 @@ all:
 ```yaml
 all:
   vars:
-    platform_release: 6.0
+    platform_release: 6
 
   children:
     redis:

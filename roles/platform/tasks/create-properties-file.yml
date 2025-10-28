@@ -6,13 +6,16 @@
 
 - name: Create the platform.properties file
   ansible.builtin.template:
-    src: "{{ platform_release }}-properties.j2"
+    src: "{{ item }}"
     dest: "{{ platform_config_dir }}/platform.properties"
     mode: "0600"
     owner: "{{ platform_user }}"
     group: "{{ platform_group }}"
     lstrip_blocks: true
     backup: true
+  with_first_found:
+    - "{{ platform_release }}-properties.j2"
+    - "{{ platform_release | string | split('.') | first }}-properties.j2"
   vars:
     profile_name: Local_AAA
   when: groups["platform_secondary"] is not defined or groups["platform_secondary"] | length < 1
@@ -22,26 +25,32 @@
   block:
     - name: Create the platform.properties file for the primary
       ansible.builtin.template:
-        src: "{{ platform_release }}-properties.j2"
+        src: "{{ item }}"
         dest: "{{ platform_config_dir }}/platform.properties"
         mode: "0600"
         owner: "{{ platform_user }}"
         group: "{{ platform_group }}"
         lstrip_blocks: true
         backup: true
+      with_first_found:
+        - "{{ platform_release }}-properties.j2"
+        - "{{ platform_release | string | split('.') | first }}-properties.j2"
       vars:
         profile_name: Primary_Local_AAA
       when: inventory_hostname in groups['platform']
 
     - name: Create the platform.properties file for the secondary
       ansible.builtin.template:
-        src: "{{ platform_release }}-properties.j2"
+        src: "{{ item }}"
         dest: "{{ platform_config_dir }}/platform.properties"
         mode: "0600"
         owner: "{{ platform_user }}"
         group: "{{ platform_group }}"
         lstrip_blocks: true
         backup: true
+      with_first_found:
+        - "{{ platform_release }}-properties.j2"
+        - "{{ platform_release | string | split('.') | first }}-properties.j2"
       vars:
         profile_name: Secondary_Local_AAA
       when: inventory_hostname in groups['platform_secondary']
