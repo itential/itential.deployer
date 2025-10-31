@@ -286,6 +286,7 @@ located in `roles/platform/defaults/main/platform.yml`.
 | platform_disable_git_safe_repo_checks | Boolean | Flag to disable Git safe repo check. | `true` |
 | platform_npm_ignore_scripts | Boolean | Flag to prevent the NPM scripts from running when running the NPM install. | `true` |
 | platform_app_artifacts_enabled | Boolean | Flag to install app-artifacts. | `false` |
+| platform_start_service | Boolean | Flag to determine if the Itential Platform service is started. | `true` |
 
 #### Server Variables
 
