@@ -25,10 +25,16 @@
         cmd: "{{ gateway_python_executable }} -m venv {{ gateway_venv_name }}"
       changed_when: true
 
-    - name: Create file to activate the virtual environment
-      ansible.builtin.template:
-        src: venv.sh.j2
-        dest: /etc/profile.d/venv.sh
+    - name: Configure gateway user to activate the virtual environment at login
+      ansible.builtin.blockinfile:
+        path: "{{ gateway_user_shell_rc_file }}"
+        block: |
+          # Auto-activate Gateway Python virtual environment
+          if [ -f {{ gateway_python_venv }}/bin/activate ]; then
+              source {{ gateway_python_venv }}/bin/activate
+          fi
+        marker: "# {mark} ANSIBLE MANAGED - Gateway Python venv"
+        create: true
+        owner: "{{ gateway_user }}"
+        group: "{{ gateway_group }}"
         mode: "0644"
-        owner: root
-        group: root

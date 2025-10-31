@@ -20,23 +20,12 @@
     - name: Install adapters
       when: not offline_install_enabled
       block:
-        # From the list of repos/zip files provided, extract the name of the adapter. This name
-        # will be used in a later step to perform the npm install.
-        # Examples:
-        #   https://gitlab.com/itentialopensource/adapters/<ADAPTER_NAME>.git
-        #   <ADAPTER_NAME>.zip
-        - name: Make a list of the adapter names
-          ansible.builtin.set_fact:
-            adapter_names: "{{ adapter_names + [item | basename | split('.') | first] }}"
-          loop: "{{ platform_adapters | default([], true) }}"
-          vars:
-            adapter_names: []
-
         - name: Find all adapters already installed
           ansible.builtin.find:
             paths: "{{ platform_service_dir }}"
             recurse: false
             file_type: directory
+            patterns: "adapter-*"
           register: installed_adapters_result
 
         - name: Create a list of adapters already installed
@@ -52,6 +41,18 @@
             - installed_adapters is defined
             - installed_adapters is iterable
             - installed_adapters | length > 0
+
+        # From the list of repos/zip files provided, extract the name of the adapter. This name
+        # will be used in a later step to perform the npm install.
+        # Examples:
+        #   https://gitlab.com/itentialopensource/adapters/<ADAPTER_NAME>.git
+        #   <ADAPTER_NAME>.zip
+        - name: Make a list of the adapter names
+          ansible.builtin.set_fact:
+            adapter_names: "{{ adapter_names + [item | basename | split('.') | first] }}"
+          loop: "{{ platform_adapters | default([], true) }}"
+          vars:
+            adapter_names: []
 
         - name: Disable safe repository checks
           community.general.git_config:
