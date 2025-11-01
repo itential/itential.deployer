@@ -17,30 +17,30 @@
         mode: '0775'
         state: directory
 
+    - name: Find all adapters already installed
+      ansible.builtin.find:
+        paths: "{{ platform_service_dir }}"
+        recurse: false
+        file_type: directory
+        patterns: "adapter-*"
+      register: platform_installed_adapters_find_result
+
+    - name: Create a list of adapters already installed
+      ansible.builtin.set_fact:
+        platform_installed_adapters: "{{ platform_installed_adapters | default([]) + [item.path | basename] }}"
+      loop: "{{ platform_installed_adapters_find_result.files }}"
+
     - name: Install adapters
       when: not offline_install_enabled
       block:
-        - name: Find all adapters already installed
-          ansible.builtin.find:
-            paths: "{{ platform_service_dir }}"
-            recurse: false
-            file_type: directory
-            patterns: "adapter-*"
-          register: installed_adapters_result
-
-        - name: Create a list of adapters already installed
-          ansible.builtin.set_fact:
-            installed_adapters: "{{ installed_adapters | default([]) + [item.path | basename] }}"
-          loop: "{{ installed_adapters_result.files }}"
-
         - name: Remove the adapters already installed from the list of adapters
           ansible.builtin.set_fact:
             platform_adapters: "{{ platform_adapters | reject('search', item) }}"
-          loop: "{{ installed_adapters }}"
+          loop: "{{ platform_installed_adapters }}"
           when:
-            - installed_adapters is defined
-            - installed_adapters is iterable
-            - installed_adapters | length > 0
+            - platform_installed_adapters is defined
+            - platform_installed_adapters is iterable
+            - platform_installed_adapters | length > 0
 
         # From the list of repos/zip files provided, extract the name of the adapter. This name
         # will be used in a later step to perform the npm install.
@@ -49,10 +49,10 @@
         #   <ADAPTER_NAME>.zip
         - name: Make a list of the adapter names
           ansible.builtin.set_fact:
-            adapter_names: "{{ adapter_names + [item | basename | split('.') | first] }}"
+            platform_adapter_names: "{{ platform_adapter_names + [item | basename | split('.') | first] }}"
           loop: "{{ platform_adapters | default([], true) }}"
           vars:
-            adapter_names: []
+            platform_adapter_names: []
 
         - name: Disable safe repository checks
           community.general.git_config:
@@ -64,7 +64,7 @@
         - name: Git clone adapter # noqa: latest (always clone the latest)
           ansible.builtin.git:
             repo: "{{ item }}"
-            dest: "{{ platform_service_dir }}/{{ adapter_names[i] }}"
+            dest: "{{ platform_service_dir }}/{{ platform_adapter_names[i] }}"
             force: true
           loop: "{{ platform_adapters | default([], true) }}"
           loop_control:
@@ -84,14 +84,14 @@
           ansible.builtin.file:
             path: "{{ platform_service_dir }}/{{ item }}/package-lock.json"
             state: absent
-          loop: "{{ adapter_names }}"
+          loop: "{{ platform_adapter_names }}"
           when: platform_delete_package_lock_file
 
         - name: Run npm install
           community.general.npm:
             path: "{{ platform_service_dir }}/{{ item }}"
             ignore_scripts: "{{ platform_npm_ignore_scripts }}"
-          loop: "{{ adapter_names }}"
+          loop: "{{ platform_adapter_names }}"
 
     - name: Install adapters (offline)
       when: offline_install_enabled
@@ -110,16 +110,25 @@
         #   <SCOPE>-<ADAPTER_NAME>-<VERSION>.tgz
         - name: Make a list of the adapter names (offline)
           ansible.builtin.set_fact:
-            adapter_names: "{{ adapter_names + [item.path |
+            platform_adapter_names: "{{ platform_adapter_names + [item.path |
               regex_replace('^.*?(adapter-[^-]+(?:[_-][^-]+)*)-\\d.*\\.tgz$', '\\1')] }}"
           loop: "{{ platform_downloaded_adapters.files | default([], true) }}"
           vars:
-            adapter_names: []
+            platform_adapter_names: []
           when:
             - platform_downloaded_adapters is defined
             - platform_downloaded_adapters.files is defined
             - platform_downloaded_adapters.files is iterable
             - platform_downloaded_adapters.files | length > 0
+
+        - name: Remove the adapters already installed from the list of adapters names (offline)
+          ansible.builtin.set_fact:
+            platform_adapter_names: "{{ platform_adapter_names | reject('search', item) }}"
+          loop: "{{ platform_installed_adapters }}"
+          when:
+            - platform_installed_adapters is defined
+            - platform_installed_adapters is iterable
+            - platform_installed_adapters | length > 0
 
         - name: Install adapters (offline)
           ansible.builtin.include_role:
@@ -128,19 +137,19 @@
           vars:
             offline_src_adapters_path: "{{ platform_offline_control_node_adapters_dir }}"
             offline_dest_adapters_path: "{{ platform_service_dir }}"
-          loop: "{{ adapter_names }}"
+          loop: "{{ platform_adapter_names }}"
           loop_control:
             loop_var: adapter_name
           when:
-            - adapter_names is defined
-            - adapter_names is iterable
-            - adapter_names | length > 0
+            - platform_adapter_names is defined
+            - platform_adapter_names is iterable
+            - platform_adapter_names | length > 0
 
     - name: Set ownership and permissions and update release file
       when:
-        - adapter_names is defined
-        - adapter_names is iterable
-        - adapter_names | length > 0
+        - platform_adapter_names is defined
+        - platform_adapter_names is iterable
+        - platform_adapter_names | length > 0
       block:
         # Using chown and chmod is a faster way to enforce the file ownership and
         # permissions. The file module in ansible checks each and every file/dir
@@ -149,13 +158,13 @@
           ansible.builtin.command:
             cmd: "chown -R {{ platform_user }}:{{ platform_group }}
                 {{ platform_service_dir }}/{{ item }}"
-          loop: "{{ adapter_names }}"
+          loop: "{{ platform_adapter_names }}"
           changed_when: true
 
         - name: Set appropriate permissions on all itential files
           ansible.builtin.command:
             cmd: "chmod -R 775 {{ platform_service_dir }}/{{ item }}"
-          loop: "{{ adapter_names }}"
+          loop: "{{ platform_adapter_names }}"
           changed_when: true
 
         - name: Write adapter names to release file
@@ -164,4 +173,4 @@
             line: "ADAPTER={{ item }}"
             create: true
             mode: '0644'
-          loop: "{{ adapter_names }}"
+          loop: "{{ platform_adapter_names }}"
