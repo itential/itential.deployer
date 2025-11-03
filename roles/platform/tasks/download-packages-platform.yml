@@ -1,14 +1,37 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
+- name: Create list of Itential Platform RPM URLs
+  ansible.builtin.set_fact:
+    platform_package_urls: "{{ platform_packages | select('match', '^(https?|ftp)://') | list }}"
+
 - name: Download Itential Platform RPMs
   ansible.builtin.import_role:
     name: offline
     tasks_from: download-rpms
   vars:
     offline_download_method: get_url
-    offline_download_packages: "{{ platform_packages }}"
+    offline_download_packages: "{{ platform_package_urls }}"
     offline_download_dir: "{{ platform_offline_target_node_rpms_dir }}/platform"
+  when:
+    - platform_package_urls is defined
+    - platform_package_urls is iterable
+    - platform_package_urls | length > 0
+
+- name: Create list of Itential Platform RPMs (non-URLs)
+  ansible.builtin.set_fact:
+    platform_package_local_rpms: "{{ platform_packages | reject('match', '^(https?|ftp)://') | list }}"
+
+- name: Upload Itential Platform RPMs
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ platform_offline_target_node_rpms_dir }}/platform/"
+    mode: "0775"
+  loop: "{{ platform_package_local_rpms }}"
+  when:
+    - platform_package_local_rpms is defined
+    - platform_package_local_rpms is iterable
+    - platform_package_local_rpms | length > 0
 
 - name: Copy Itential Platform RPMs to control node
   ansible.builtin.import_role:
