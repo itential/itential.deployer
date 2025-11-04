@@ -286,6 +286,7 @@ located in `roles/platform/defaults/main/platform.yml`.
 | platform_disable_git_safe_repo_checks | Boolean | Flag to disable Git safe repo check. | `true` |
 | platform_npm_ignore_scripts | Boolean | Flag to prevent the NPM scripts from running when running the NPM install. | `true` |
 | platform_app_artifacts_enabled | Boolean | Flag to install app-artifacts. | `false` |
+| platform_start_service | Boolean | Flag to determine if the Itential Platform service is started. | `true` |
 
 #### Server Variables
 
@@ -327,7 +328,7 @@ with a single node.
 ```yaml
 all:
   vars:
-    platform_release: 6.0
+    platform_release: 6
 
   children:
     platform:
@@ -349,7 +350,7 @@ to `true`, and configure the adapters in the `platform_adapters` variable.
 ```yaml
 all:
   vars:
-    platform_release: 6.0
+    platform_release: 6
 
   children:
     platform:
@@ -376,7 +377,7 @@ set it to `true` and configure the `platform_app_artifacts_source_file`.
 ```yaml
 all:
   vars:
-    platform_release: 6.0
+    platform_release: 6
 
   children:
     platform:
@@ -396,7 +397,7 @@ To configure the Platform to integrate with Hashicorp Vault for secrets manageme
 ```yaml
 all:
   vars:
-    platform_release: 6.0
+    platform_release: 6
 
   children:
     platform:

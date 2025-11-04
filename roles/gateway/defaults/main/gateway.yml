@@ -34,6 +34,8 @@ gateway_properties_location: /etc/automation-gateway
 
 gateway_user: itential
 gateway_group: itential
+gateway_user_home_dir: "/home/{{ gateway_user }}"
+gateway_user_shell_rc_file: "{{ gateway_user_home_dir }}/.bashrc"
 
 # Default HTTPS/SSL settings
 gateway_https: false

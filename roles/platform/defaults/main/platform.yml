@@ -54,3 +54,6 @@ platform_npm_ignore_scripts: true
 
 # Flag to install app-artifacts
 platform_app_artifacts_enabled: false
+
+# Flag to determine if the service is started
+platform_start_service: true

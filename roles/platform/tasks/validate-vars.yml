@@ -1,9 +1,6 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-
-# TODO: Replace the asserts with a plugin/module
-
 - name: Validate and set installation variables
   tags: always
   block:
@@ -14,12 +11,14 @@
           - platform_packages is iterable
           - platform_packages | length > 0
         fail_msg: platform_packages must be defined and contain as least one artifact
+      when: not offline_install_enabled | bool
 
     - name: Validate Itential Platform packages array contains only RPMs
       ansible.builtin.assert:
         that: "{{ item.endswith('.rpm') }}"
         fail_msg: platform_packages can only contain RPM packages ending in .rpm"
       loop: "{{ platform_packages }}"
+      when: not offline_install_enabled | bool
 
     - name: Validate download auth method is defined when downloading Itential Platform packages
       ansible.builtin.assert:
@@ -28,7 +27,9 @@
         fail_msg: >-
           repository_api_key or repository_username/repository_password
           must be defined when downloading platform_packages
-      when: platform_packages is search('http')
+      when:
+        - not offline_install_enabled | bool
+        - platform_packages is search('http')
 
     - name: Validate installation variables are defined
       ansible.builtin.assert:
@@ -59,6 +60,7 @@
       ansible.builtin.assert:
         that: platform_encryption_key is defined
         fail_msg: platform_encryption_key variable must be defined
+      when: validate_platform_encryption_key | default(true)
 
     - name: Validate that the platform_encryption_key variable is correctly formatted
       ansible.builtin.assert:
@@ -66,6 +68,7 @@
           - platform_encryption_key is match('^[0-9a-fA-F]+$')
           - platform_encryption_key | length == 64
         fail_msg: platform_encryption_key must be a 64 character hexadecimal string
+      when: validate_platform_encryption_key | default(true)
 
     - name: Set installation variables when using Itential Platform release defaults
       when: platform_release is defined
@@ -75,6 +78,7 @@
             file: "{{ item }}"
           with_first_found:
             - "platform-release-{{ platform_release }}.yml"
+            - "platform-release-{{ platform_release | string | split('.') | first }}.yml"
             - "platform-release-undefined.yml"
 
         - name: Check for valid Itential Platform release
@@ -128,4 +132,9 @@
           - "Python packages: {{ platform_python_packages }}"
           - "Python base dependencies: {{ platform_python_base_dependencies }}"
           - "Python Platform dependencies: {{ platform_python_app_dependencies }}"
-      when: not offline_install_enabled
+      when: not offline_install_enabled | bool
+
+    - name: Print Itential Platform installation details (offline)
+      ansible.builtin.debug:
+        msg: "Offline install using packages from {{ platform_offline_control_node_root }}"
+      when: offline_install_enabled | bool
