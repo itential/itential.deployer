@@ -126,6 +126,9 @@
             platform_adapter_names: "{{ platform_adapter_names | reject('search', item) }}"
           loop: "{{ platform_installed_adapters }}"
           when:
+            - platform_adapter_names is defined
+            - platform_adapter_names is iterable
+            - platform_adapter_names | length > 0
             - platform_installed_adapters is defined
             - platform_installed_adapters is iterable
             - platform_installed_adapters | length > 0
