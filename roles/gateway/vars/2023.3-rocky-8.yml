@@ -2,6 +2,8 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
 gateway_packages:
+  - selinux-policy
+  - selinux-policy-targeted
 
 gateway_build_packages:
   - gcc-c++
@@ -40,7 +42,3 @@ gateway_python_app_dependencies:
   - pygnmi==0.8.9
 
 gateway_ansible_version: ansible==8.7.0
-
-gateway_application_dependencies:
-  - selinux-policy
-  - selinux-policy-targeted
