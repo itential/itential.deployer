@@ -9,14 +9,17 @@ gateway_build_packages_map:
   "8":
     - gcc-c++
     - make
+    - pkgconf-pkg-config
     - python39-devel
   "9":
     - gcc-c++
     - make
+    - pkgconf-pkg-config
     - python3-devel
   "2023":
     - gcc-c++
     - make
+    - pkgconf-pkg-config
     - python3-devel
 
 # Backwards compatible variable name references the appropriate list from the map
