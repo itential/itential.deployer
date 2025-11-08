@@ -8,6 +8,7 @@ gateway_packages:
 gateway_build_packages:
   - gcc-c++
   - make
+  - pkgconf-pkg-config
   - python3-devel
 
 gateway_python_version: 3.9
