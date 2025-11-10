@@ -30,3 +30,16 @@
     - ansible_facts.services["firewalld.service"].state == "running"
     - ansible_facts.services["firewalld.service"].status == "enabled"
     - platform_webserver_https_enabled | bool
+
+- name: Open Gateway Manager Port on FirewallD Public Zone
+  ansible.posix.firewalld:
+    port: "{{ platform_gateway_manager_websocket_port }}/tcp"
+    permanent: true
+    state: enabled
+    zone: public
+    immediate: true
+  when:
+    - ansible_facts.services["firewalld.service"] is defined
+    - ansible_facts.services["firewalld.service"].state == "running"
+    - ansible_facts.services["firewalld.service"].status == "enabled"
+    - platform_packages | select ('search', 'itential-gateway_manager') | list | length > 0
