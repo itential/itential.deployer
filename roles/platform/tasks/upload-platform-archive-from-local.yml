@@ -4,7 +4,7 @@
 - name: Upload the Itential Platform artifact file using rsync
   ansible.posix.synchronize:
     src: "{{ artifact }}"
-    dest: "{{ downloaddir.path }}/{{ artifact }}"
+    dest: "{{ platform_package_temp_download_dir.path }}/{{ artifact }}"
     rsync_opts: "--copy-links"
   when: platform_upload_using_rsync
   changed_when: false
@@ -12,7 +12,7 @@
 - name: Upload the Itential Platform artifact file using copy
   ansible.builtin.copy:
     src: "{{ artifact }}"
-    dest: "{{ downloaddir.path }}/{{ artifact }}"
+    dest: "{{ platform_package_temp_download_dir.path }}/{{ artifact }}"
     owner: "{{ platform_user }}"
     group: "{{ platform_group }}"
     mode: "0775"

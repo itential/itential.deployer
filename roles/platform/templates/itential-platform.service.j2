@@ -7,7 +7,7 @@ Requires=network.target
 Type=simple
 User={{ platform_user }}
 WorkingDirectory={{ platform_install_dir }}
-ExecStart=/usr/bin/node --max-old-space-size=8192 server.js
+ExecStart=/usr/bin/node --max-old-space-size=8192 server.js --config-file {{ platform_config_dir }}/platform.properties
 Restart=on-failure
 ExecReload=/bin/kill -USR2 $MAINPID
 KillMode=mixed

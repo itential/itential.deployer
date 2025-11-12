@@ -49,7 +49,7 @@
           block:
             - name: Install Platform package dependencies
               ansible.builtin.include_tasks:
-                file: install-platform-packages.yml
+                file: install-platform-dependency-packages.yml
 
             - name: Install NodeJS
               tags: install_nodejs
