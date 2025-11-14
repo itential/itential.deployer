@@ -127,7 +127,7 @@
   ansible.builtin.debug:
     msg: "{{ mongodb_state }}"
 
-- name: Add admin user to database
+- name: Add users to database
   when: inventory_hostname == groups['mongodb'][0]
   tags: create_mongo_users
   block:
