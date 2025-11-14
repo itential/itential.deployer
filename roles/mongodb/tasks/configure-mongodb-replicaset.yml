@@ -83,7 +83,7 @@
   community.mongodb.mongodb_replicaset:
     arbiter_at_index: "{{ (groups.mongodb_arbiter | default([]) | length > 0) | ternary(mongodb_servers | length - 1, omit) }}"
     auth_mechanism: "SCRAM-SHA-256"
-    login_user: "{{ (mongodb_state.auth_enabled | bool) | ternary('admin', omit) }}"
+    login_user: "{{ (mongodb_state.auth_enabled | bool) | ternary(mongodb_user_admin, omit) }}"
     login_password: "{{ (mongodb_state.auth_enabled | bool) | ternary(mongodb_user_admin_password, omit) }}"
     login_port: "{{ mongodb_port }}"
     login_database: admin
@@ -100,7 +100,7 @@
 
 - name: Ensure replicaset is stable before continuing
   community.mongodb.mongodb_status:
-    login_user: "{{ mongodb_state.auth_enabled | ternary('admin', omit) }}"
+    login_user: "{{ mongodb_state.auth_enabled | ternary(mongodb_user_admin, omit) }}"
     login_password: "{{ mongodb_state.auth_enabled | ternary(mongodb_user_admin_password, omit) }}"
     login_port: "{{ mongodb_port }}"
     login_database: admin
@@ -147,7 +147,7 @@
 - name: Adjust the default writeConcern if there are arbiters
   community.mongodb.mongodb_shell:
     mongo_cmd: auto
-    login_user: "{{ mongodb_state.auth_enabled | ternary('admin', omit) }}"
+    login_user: "{{ mongodb_state.auth_enabled | ternary(mongodb_user_admin, omit) }}"
     login_password: "{{ mongodb_state.auth_enabled | ternary(mongodb_user_admin_password, omit) }}"
     login_port: "{{ mongodb_port }}"
     login_database: admin
