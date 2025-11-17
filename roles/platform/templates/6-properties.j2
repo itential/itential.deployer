@@ -241,7 +241,7 @@ mongo_max_pool_size = {{ platform_mongo_max_pool_size }}
 # REDIS CONNECTION #
 ####################
 # The Redis keyspace (database number) to use for the connection.
-{% if platform_redis_db and platform_redis_db is boolean %}
+{% if platform_redis_db %}
 redis_db = {{ platform_redis_db }}
 {% else %}
 # redis_db =
