@@ -90,81 +90,118 @@
 # users. That can not be done if all of these features are enabled. The
 # variable "stage" is used to provide this template context. When stage is
 # "initialize" the template will be forced to create a simple config.
-- name: Create MongoDB config file (initial)
-  ansible.builtin.template:
-    src: mongod.conf.j2
-    dest: "{{ mongodb_conf_file }}"
-    owner: "{{ mongodb_owner }}"
-    group: "{{ mongodb_group }}"
-    mode: "0644"
-  vars:
-    stage: initialize
-  tags: initialize_mongo_config
+# - name: Create MongoDB config file (initial)
+#   ansible.builtin.template:
+#     src: mongod.conf.j2
+#     dest: "{{ mongodb_conf_file }}"
+#     owner: "{{ mongodb_owner }}"
+#     group: "{{ mongodb_group }}"
+#     mode: "0644"
+#   vars:
+#     stage: initialize
+#   tags: initialize_mongo_config
 
-- name: Start mongo (initial)
-  ansible.builtin.service:
-    name: mongod
-    state: restarted
-    enabled: true
-  register: mongod_service_result
-  until: mongod_service_result.status.ActiveState == "active"
-  retries: "{{ mongodb_mongod_service_retries }}"
-  delay: "{{ mongodb_mongod_service_delay }}"
-  tags: initialize_mongo_config
+# - name: Start mongo (initial)
+#   ansible.builtin.service:
+#     name: mongod
+#     state: restarted
+#     enabled: true
+#   register: mongod_service_result
+#   until: mongod_service_result.status.ActiveState == "active"
+#   retries: "{{ mongodb_mongod_service_retries }}"
+#   delay: "{{ mongodb_mongod_service_delay }}"
+#   tags: initialize_mongo_config
+
+# - name: Discover MongoDB configuration state
+#   tags: create_mongo_users
+#   itential.deployer.mongodb_config_state:
+#     login_database: admin
+#     login_host: "{{ inventory_hostname }}"
+#     login_port: "{{ mongodb_port }}"
+#   register: mongodb_state
+#   vars:
+#     ansible_python_interpreter: "{{ mongodb_python_venv }}/bin/python3"
+
+# - name: Print MongoDB configuration state
+#   tags: create_mongo_users
+#   ansible.builtin.debug:
+#     msg: "{{ mongodb_state }}"
 
 - name: Discover MongoDB configuration state
   tags: create_mongo_users
-  itential.deployer.mongodb_config_state:
-    login_database: admin
-    login_host: "{{ inventory_hostname }}"
-    login_port: "{{ mongodb_port }}"
+  itential.deployer.mongodb_state:
+    host: "{{ ansible_host }}"
+    port: "{{ mongodb_port | default(27017) }}"
+    admin_user: "{{ mongodb_user_admin }}"
+    admin_password: "{{ mongodb_user_admin_password }}"
+    hosts: "{{ groups['mongodb'] }}"
   register: mongodb_state
+  run_once: true
+  delegate_to: "{{ groups['mongodb'][0] }}"
   vars:
     ansible_python_interpreter: "{{ mongodb_python_venv }}/bin/python3"
 
-- name: Print MongoDB configuration state
+- name: Display MongoDB state
   tags: create_mongo_users
   ansible.builtin.debug:
-    msg: "{{ mongodb_state }}"
+    msg:
+      - "MongoDB running: {{ mongodb_state.mongodb_running }}"
+      - "Service running: {{ mongodb_state.service_running | default('N/A') }}"
+      - "Port open: {{ mongodb_state.port_open }}"
+      - "Service state: {{ mongodb_state.service_state | default('N/A') }}"
+      - "Authentication enabled: {{ mongodb_state.auth_enabled }}"
+      - "Credentials valid: {{ mongodb_state.auth_valid | default('N/A') }}"
+      - "Replica set enabled: {{ mongodb_state.replication_enabled }}"
+      - "Replica set name: {{ mongodb_state.replica_set_name | default('N/A') }}"
+      - "Primary host: {{ mongodb_state.primary_host }}"
+      - "TLS enabled: {{ mongodb_state.tls_enabled }}"
+      - "TLS mode: {{ mongodb_state.tls_mode }}"
+      - "MongoDB version: {{ mongodb_state.mongodb_version }}"
+  run_once: true
 
-- name: Add users to database
-  when: inventory_hostname == groups['mongodb'][0]
+- name: Create MongoDB config file and start if its not running
+  when:
+    - not mongodb_state.mongodb_running | bool
+    - not mongodb_state.service_running | bool
   tags: create_mongo_users
   block:
-    # The tasks in this file should only run on one host if configuring a replica set
-    # This creates the admin user that has root access to the database.
-    - name: Add admin user to database
-      community.mongodb.mongodb_user:
-        login_user: "{{ mongodb_user_admin if mongodb_state.auth_enabled else omit }}"
-        login_password: "{{ mongodb_user_admin_password if mongodb_state.auth_enabled else omit }}"
-        login_port: "{{ mongodb_port }}"
-        login_host: "{{ mongodb_state.primary if mongodb_state.replication_enabled else groups['mongodb'][0] }}"
-        database: "{{ mongodb_admin_db_name }}"
-        name: "{{ mongodb_user_admin }}"
-        password: "{{ mongodb_user_admin_password }}"
-        state: present
-        roles:
-          - db: "{{ mongodb_admin_db_name }}"
-            role: root
-        update_password: always
-      vars:
-        ansible_python_interpreter: "{{ mongodb_python_venv }}/bin/python3"
 
-    # This creates the itential user that only has read & write access to the
-    # itential database.  It is used by Itential Platform to connect to the db.
-    - name: Add itential user to database
-      community.mongodb.mongodb_user:
-        login_user: "{{ mongodb_user_admin if mongodb_state.auth_enabled else omit }}"
-        login_password: "{{ mongodb_user_admin_password if mongodb_state.auth_enabled else omit }}"
-        login_port: "{{ mongodb_port }}"
-        login_host: "{{ mongodb_state.primary if mongodb_state.replication_enabled else groups['mongodb'][0] }}"
-        database: "{{ mongodb_itential_db_name }}"
-        user: "{{ mongodb_user_itential }}"
-        password: "{{ mongodb_user_itential_password }}"
-        state: present
-        roles:
-          - db: "{{ mongodb_itential_db_name }}"
-            role: readWrite
-        update_password: always
+    - name: Declare intention to create config and start service
+      ansible.builtin.debug:
+        msg: "MongoDB is not running. Creating initial config file and starting service..."
+
+    # The config file will be generated a few times as we go through the process
+    # of configuring MongoDB. This first time we will ignore any of the auth, TLS,
+    # and replication settings. The reason is so that we can create the database
+    # users. That can not be done if all of these features are enabled. The
+    # variable "stage" is used to provide this template context. When stage is
+    # "initialize" the template will be forced to create a simple config.
+    - name: Create MongoDB config file (initial)
+      ansible.builtin.template:
+        src: mongod.conf.j2
+        dest: "{{ mongodb_conf_file }}"
+        owner: "{{ mongodb_owner }}"
+        group: "{{ mongodb_group }}"
+        mode: "0644"
       vars:
-        ansible_python_interpreter: "{{ mongodb_python_venv }}/bin/python3"
+        stage: initialize
+      tags: initialize_mongo_config
+
+    - name: Start mongo (initial)
+      ansible.builtin.service:
+        name: mongod
+        state: restarted
+        enabled: true
+      register: mongod_service_result
+      until: mongod_service_result.status.ActiveState == "active"
+      retries: "{{ mongodb_mongod_service_retries }}"
+      delay: "{{ mongodb_mongod_service_delay }}"
+      tags: initialize_mongo_config
+
+- name: Configure MongoDB Users
+  ansible.builtin.include_tasks:
+    file: create-mongodb-users.yml
+    apply:
+      tags:
+        - create_mongo_users
+  tags: create_mongo_users
