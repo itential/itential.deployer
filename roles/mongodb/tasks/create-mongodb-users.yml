@@ -1,0 +1,104 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+
+- name: Set the host, either the primary or the first defined mongodb host
+  ansible.builtin.set_fact:
+    mongodb_write_host: "{{ mongodb_state.primary_host if mongodb_state.replication_enabled else groups['mongodb'][0] }}"
+  run_once: true
+
+- name: Display write host
+  ansible.builtin.debug:
+    msg: "Write host was determined to be: {{ mongodb_write_host }}"
+
+- name: Check if MongoDB admin user exists
+  community.mongodb.mongodb_shell:
+    eval: "db.getSiblingDB('admin').getUser('{{ mongodb_user_admin }}') !== null"
+    login_database: "admin"
+    login_host: "{{ mongodb_write_host }}"
+    login_password: "{{ mongodb_user_admin_password if mongodb_state.auth_enabled else omit }}"
+    login_port: "{{ mongodb_port }}"
+    login_user: "{{ mongodb_user_admin if mongodb_state.auth_enabled else omit }}"
+    mongo_cmd: auto
+  register: admin_user_check
+  failed_when: false
+  changed_when: false
+  run_once: true
+  vars:
+    ansible_python_interpreter: "{{ mongodb_python_venv }}/bin/python3"
+
+- name: Set admin user existence fact
+  ansible.builtin.set_fact:
+    admin_user_exists: "{{ (admin_user_check.transformed_output | first | string) == 'true' }}"
+  run_once: true
+
+- name: Check if MongoDB itential user exists
+  community.mongodb.mongodb_shell:
+    eval: "db.getSiblingDB('{{ mongodb_itential_db_name }}').getUser('{{ mongodb_user_itential }}') !== null"
+    login_database: "admin"
+    login_host: "{{ mongodb_write_host }}"
+    login_password: "{{ mongodb_user_admin_password if mongodb_state.auth_enabled else omit }}"
+    login_port: "{{ mongodb_port }}"
+    login_user: "{{ mongodb_user_admin if mongodb_state.auth_enabled else omit }}"
+    mongo_cmd: auto
+  register: itential_user_check
+  failed_when: false
+  changed_when: false
+  run_once: true
+  vars:
+    ansible_python_interpreter: "{{ mongodb_python_venv }}/bin/python3"
+
+- name: Set itential user existence fact
+  ansible.builtin.set_fact:
+    itential_user_exists: "{{ (itential_user_check.transformed_output | first | string) == 'true' }}"
+  run_once: true
+
+- name: Display result of user checks
+  ansible.builtin.debug:
+    msg:
+      - "MongoDB user {{ mongodb_user_admin }} {{ 'exists' if admin_user_exists else 'does not exist' }}"
+      - "MongoDB user {{ mongodb_user_itential }} {{ 'exists' if itential_user_exists else 'does not exist' }}"
+  run_once: true
+
+- name: Create missing admin user
+  when: not admin_user_exists | bool
+  community.mongodb.mongodb_user:
+    login_user: "{{ mongodb_user_admin if mongodb_state.auth_enabled else omit }}"
+    login_password: "{{ mongodb_user_admin_password if mongodb_state.auth_enabled else omit }}"
+    login_port: "{{ mongodb_port }}"
+    login_host: "{{ mongodb_write_host }}"
+    database: "{{ mongodb_admin_db_name }}"
+    name: "{{ mongodb_user_admin }}"
+    password: "{{ mongodb_user_admin_password }}"
+    state: present
+    replica_set: "{{ mongodb_state.replica_set_name if mongodb_state.replication_enabled else omit }}"
+    roles:
+      - db: "{{ mongodb_admin_db_name }}"
+        role: root
+    update_password: always
+  register: admin_user_creation_result
+  run_once: true
+  vars:
+    ansible_python_interpreter: "{{ mongodb_python_venv }}/bin/python3"
+
+- name: Create missing itential user
+  when: not itential_user_exists
+  community.mongodb.mongodb_user:
+    login_user: "{{ mongodb_user_admin if mongodb_state.auth_enabled else omit }}"
+    login_password: "{{ mongodb_user_admin_password if mongodb_state.auth_enabled else omit }}"
+    login_database: "{{ 'admin' if mongodb_state.auth_enabled else omit }}"
+    login_port: "{{ mongodb_port }}"
+    login_host: "{{ mongodb_write_host }}"
+    database: "{{ mongodb_itential_db_name }}"
+    user: "{{ mongodb_user_itential }}"
+    password: "{{ mongodb_user_itential_password }}"
+    state: present
+    replica_set: "{{ mongodb_state.replica_set_name if mongodb_state.replication_enabled else omit }}"
+    roles:
+      - db: "{{ mongodb_itential_db_name }}"
+        role: readWrite
+    update_password: always
+  register: itential_user_creation_result
+  run_once: true
+  vars:
+    ansible_python_interpreter: "{{ mongodb_python_venv }}/bin/python3"

@@ -32,33 +32,6 @@
       - "TLS mode: {{ mongodb_state.tls_mode }}"
       - "MongoDB version: {{ mongodb_state.mongodb_version }}"
   run_once: true
-# Check the state of the MongoDB servers. This might or might not be a replicaset.
-# This might or might not have authorization enabled. This module returns an
-# object that looks like this:
-# {
-#   "auth_enabled": true,
-#   "changed": false,
-#   "failed": false,
-#   "members": [
-#     "example1.host.com:27017",
-#     "example2.host.com:27017",
-#     "example3.host.com:27017"
-#   ],
-#   "primary": "ip-10-0-0-28.ec2.internal:27017",
-#   "replication_enabled": true
-# }
-# - name: Discover MongoDB configuration state
-#   itential.deployer.mongodb_config_state:
-#     login_database: admin
-#     login_host: "{{ inventory_hostname }}"
-#     login_port: "{{ mongodb_port }}"
-#   register: mongodb_state
-#   vars:
-#     ansible_python_interpreter: "{{ mongodb_python_venv }}/bin/python3"
-
-# - name: Print MongoDB configuration state
-#   ansible.builtin.debug:
-#     msg: "{{ mongodb_state }}"
 
 # Execute the template to apply changes to the mongo.conf for replication
 - name: Create MongoDB config file (replicaset)
