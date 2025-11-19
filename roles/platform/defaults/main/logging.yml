@@ -20,7 +20,7 @@ platform_log_filename: platform.log
 platform_log_level_console: warn
 
 # The absolute directory path where webserver log files are written.
-platform_webserver_log_directory: "{{ platform_log_dir_default }}"
+platform_webserver_log_directory: "{{ platform_log_dir }}"
 
 # The name of the webserver log file.
 platform_webserver_log_filename: webserver.log
