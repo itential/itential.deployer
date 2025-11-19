@@ -60,7 +60,7 @@
       - "MongoDB user {{ mongodb_user_itential }} {{ 'exists' if itential_user_exists else 'does not exist' }}"
   run_once: true
 
-- name: Create missing admin user
+- name: Create admin user
   when: not admin_user_exists | bool
   community.mongodb.mongodb_user:
     login_user: "{{ mongodb_user_admin if mongodb_state.auth_enabled else omit }}"
@@ -81,7 +81,7 @@
   vars:
     ansible_python_interpreter: "{{ mongodb_python_venv }}/bin/python3"
 
-- name: Create missing itential user
+- name: Create itential user
   when: not itential_user_exists
   community.mongodb.mongodb_user:
     login_user: "{{ mongodb_user_admin if mongodb_state.auth_enabled else omit }}"
