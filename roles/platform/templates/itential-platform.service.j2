@@ -6,7 +6,7 @@ Requires=network.target
 [Service]
 Type=simple
 User={{ platform_user }}
-WorkingDirectory={{ platform_install_dir }}
+WorkingDirectory={{ platform_server_dir }}
 ExecStart=/usr/bin/node --max-old-space-size=8192 server.js --config-file {{ platform_config_dir }}/platform.properties
 Restart=on-failure
 ExecReload=/bin/kill -USR2 $MAINPID

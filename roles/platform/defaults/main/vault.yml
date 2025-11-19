@@ -5,7 +5,7 @@
 platform_configure_vault: false
 
 # The directory to store the vault root key in
-platform_vault_token_dir: "{{ platform_install_dir }}/keys"
+platform_vault_token_dir: "{{ platform_server_dir }}/keys"
 
 # The URL to the Hashicorp Vault server.
 platform_vault_url: http://localhost:8200

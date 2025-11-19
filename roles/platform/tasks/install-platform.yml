@@ -44,12 +44,10 @@
           ansible.builtin.set_fact:
             platform_relocate_packages: true
           when: >
-            - (platform_root_dir != platform_root_dir_default or
-               platform_install_dir != platform_install_dir_default or
-               platform_services_dir != platform_services_dir_default or
-               platform_log_dir != platform_log_dir_default or
-               platform_config_dir != platform_config_dir_default or
-               platform_itential_home_dir != platform_itential_home_dir_default)
+            (platform_root_dir != platform_root_dir_default or
+             platform_log_dir != platform_log_dir_default or
+             platform_config_dir != platform_config_dir_default or
+             platform_itential_home_dir != platform_itential_home_dir_default)
 
         - name: Install the Itential Platform packages (standard install directories)
           ansible.builtin.dnf:

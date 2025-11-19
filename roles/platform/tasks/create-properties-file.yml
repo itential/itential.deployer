@@ -15,7 +15,7 @@
       ansible.builtin.shell: >
         set -o pipefail &&
         (echo "{{ item.plaintext }}"; sleep 2; echo "{{ platform_encryption_key }}") |
-        node {{ platform_install_dir }}/utils/encrypt.js 2>&1 |
+        node {{ platform_server_dir }}/utils/encrypt.js 2>&1 |
         tail -n 1
       args:
         executable: /bin/bash

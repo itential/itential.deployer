@@ -27,18 +27,6 @@ an IAG adapter that points to the gateway server(s) named in the `gateway` group
 
 ## Variables
 
-### Static Variables
-
-The variables located in the `vars` directory of each role are "static" and not meant to be
-overridden by the user.  Since these variable files are included at run-time based on the Itential
-Platform release and OS major version, they have a higher precedence than the variables in the
-inventory and are not easily overridden.
-
-| Variable | Group | Type | Description | Default Value |
-| :------- | :---- | :--- | :---------- | :------------ |
-| `platform_install_dir` | `platform` | String | The Itential Platform installation directory. | `/opt/itential/platform/server` |
-| `platform_log_dir` | `platform` | String | The Itential Platform log directory. | `/var/log/itential` |
-
 ### Global Variables
 
 The variables in this section are configured in the inventory in the `all` group vars.
@@ -203,7 +191,7 @@ default variables located in `roles/platform/defaults/main/vault.yml`.
 | Variable | Type | Description | Default Value |
 | :------- | :--- | :---------- | :------------ |
 | platform_configure_vault | Boolean | Flag to enable/disable configuring Vault in Itential Platform | `false` |
-| platform_vault_token_dir | String | The directory to store the vault root key in | `{{ platform_install_dir }}/keys` |
+| platform_vault_token_dir | String | The directory to store the vault root key in | `{{ platform_server_dir }}/keys` |
 | platform_vault_url | String | The URL to the Hashicorp Vault server. | `http://localhost:8200` |
 | platform_vault_auth_method | String | The authorization method to connect to Hashicorp Vault. Either token or approle. | `token` |
 | platform_vault_role_id | String | Hashicorp Vault Role ID used for AppRole authentication. |  |
@@ -272,6 +260,10 @@ located in `roles/platform/defaults/main/platform.yml`.
 
 | Variable | Type | Description | Default Value |
 | :------- | :--- | :---------- | :------------ |
+| platform_server_dir | String | The Itential Platform installation directory. | `/opt/itential/platform/server` |
+| platform_config_dir | String | The Itential Platform configuration directory. | `/etc/itential` |
+| platform_tls_dir | String | The Itential Platform TLS directory. | `/etc/ssl/itential-platform` |
+| platform_itential_home_dir | String | The Itential Platform itential user home directory. | `/home/itential` |
 | platform_mongodb_root_ca_file_destination | String | Destination as referenced by itential user when connecting from itential host. This is ultimately stored in the mongo database to be read by Itential Platform, therefore this is the location as seen from the Itential Platform host. | `/opt/itential/keys/mongo-rootCA.pem` |
 | platform_package_dependencies | List(String) | Required OS packages for install. | `glibc-common, openldap, openldap-clients, openssl, git` |
 | platform_python_base_dependencies | List(String) | Required python packages for install. | `pip, setuptools, wheel` |
