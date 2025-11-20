@@ -11,8 +11,20 @@ profile_id = {{ platform_profile_id }}
 {% endif %}
 
 # The file path to the directory containing additional services (applications and adapters).
-{# The service_directory cannot be configured #}
+# If the platform_root_dir is overridden, the service_directory in will include the
+# platform_services_dir.
+{% set service_dirs = [] %}
+{% if platform_root_dir != platform_root_dir_default %}
+{% set service_dirs = service_dirs + [platform_services_dir] %}
+{% endif %}
+{% if platform_service_directory %}
+{% set service_dirs = service_dirs + (platform_service_directory | select() | list) %}
+{% endif %}
+{% if service_dirs %}
+service_directory = {{ service_dirs | unique | join(',') }}
+{% else %}
 # service_directory =
+{% endif %}
 
 # An identifier for the server instance. This is used to uniquely identify the server in a
 # multi-server environment. If not provided, the server will generate one on startup.

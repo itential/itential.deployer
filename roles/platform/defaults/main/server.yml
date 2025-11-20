@@ -6,6 +6,13 @@
 # Not required for installations that are using environment variables or a properties file.
 platform_profile_id:
 
+# The file path to the directory containing additional services (applications and adapters).
+# Although the name implies only one service directory can be provisioned, it's actually
+# a list.
+# Note - If the platform_root_dir is overridden, the service_directory in platform.properties will
+# include the platform_services_dir. This is handled in the properties jinja2 template.
+platform_service_directory:
+
 # An identifier for the server instance. This is used to uniquely identify the server in a
 # multi-server environment.
 # If not provided, the server will generate one on startup.

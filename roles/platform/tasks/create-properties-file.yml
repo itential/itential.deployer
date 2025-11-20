@@ -9,6 +9,7 @@
 # This necessitates the use of the workaround below.
 - name: Encrypt default passwords
   when: not (platform_configure_vault | bool)
+  tags: encrypt_default_passwords
   no_log: true
   block:
     - name: Generate encrypted passwords
