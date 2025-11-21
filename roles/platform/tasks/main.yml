@@ -26,7 +26,7 @@
             group: "{{ platform_group }}"
             mode: "0775"
           with_items:
-            - "{{ platform_install_dir }}"
+            - "{{ platform_server_dir }}"
             - "{{ platform_config_dir }}"
             - "{{ platform_log_dir }}"
 
@@ -49,7 +49,7 @@
           block:
             - name: Install Platform package dependencies
               ansible.builtin.include_tasks:
-                file: install-platform-packages.yml
+                file: install-platform-dependency-packages.yml
 
             - name: Install NodeJS
               tags: install_nodejs
