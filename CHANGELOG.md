@@ -1,6 +1,15 @@
 # Changelog
 
-## v3.5.0 (November 11, 2025)
+## v3.6.0 (November 21, 2025)
+
+* Add community.general to galaxy dependencies and pin version  https://github.com/itential/itential.deployer/pull/275
+* Add support for relocating Platform server and service RPMs  https://github.com/itential/itential.deployer/pull/274
+* Changes to support B/G while sharing redis & mongo  https://github.com/itential/itential.deployer/pull/272
+
+Full Changelog: https://github.com/itential/itential.deployer/compare/v3.5.0...v3.6.0 
+
+
+## v3.5.0 (November 12, 2025)
 
 * Activate gateway python venv only for gateway user  https://github.com/itential/itential.deployer/pull/264
 * Add Python test script to Gateway installs  https://github.com/itential/itential.deployer/pull/257
@@ -16,6 +25,7 @@
 * Fix issues with offline gateway install  https://github.com/itential/itential.deployer/pull/268
 * Open Gateway Manager port in firewall  https://github.com/itential/itential.deployer/pull/270
 * Skip encryption key check when downloading Platform packages  https://github.com/itential/itential.deployer/pull/256
+* Update galaxy version and changelog for release 3.5.0 [skip ci]
 * Update platform_release format  https://github.com/itential/itential.deployer/pull/259
 * removing nodejs repo addition on AmazonLinux2023  https://github.com/itential/itential.deployer/pull/271
 
