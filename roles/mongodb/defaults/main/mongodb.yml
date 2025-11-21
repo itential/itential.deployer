@@ -59,6 +59,10 @@ mongodb_replication_enabled: false
 mongodb_auth_enabled: true
 mongodb_tls_enabled: false
 
+# Default mongo user names
+mongodb_user_admin: admin
+mongodb_user_itential: itential
+
 # Default mongo user passwords
 # These are meant to be changed by the customer. By default they are meant to
 # be predictable and simple.

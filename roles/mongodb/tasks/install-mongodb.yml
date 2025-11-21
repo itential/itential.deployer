@@ -112,18 +112,35 @@
   delay: "{{ mongodb_mongod_service_delay }}"
   tags: initialize_mongo_config
 
+- name: Discover MongoDB configuration state
+  tags: create_mongo_users
+  itential.deployer.mongodb_config_state:
+    login_database: admin
+    login_host: "{{ inventory_hostname }}"
+    login_port: "{{ mongodb_port }}"
+  register: mongodb_state
+  vars:
+    ansible_python_interpreter: "{{ mongodb_python_venv }}/bin/python3"
+
+- name: Print MongoDB configuration state
+  tags: create_mongo_users
+  ansible.builtin.debug:
+    msg: "{{ mongodb_state }}"
+
 - name: Add users to database
   when: inventory_hostname == groups['mongodb'][0]
   tags: create_mongo_users
   block:
     # The tasks in this file should only run on one host if configuring a replica set
-    # This creates the admin user that has root access to the database
+    # This creates the admin user that has root access to the database.
     - name: Add admin user to database
       community.mongodb.mongodb_user:
+        login_user: "{{ mongodb_user_admin if mongodb_state.auth_enabled else omit }}"
+        login_password: "{{ mongodb_user_admin_password if mongodb_state.auth_enabled else omit }}"
         login_port: "{{ mongodb_port }}"
-        login_host: "{{ inventory_hostname }}"
+        login_host: "{{ mongodb_state.primary if mongodb_state.replication_enabled else groups['mongodb'][0] }}"
         database: "{{ mongodb_admin_db_name }}"
-        name: admin
+        name: "{{ mongodb_user_admin }}"
         password: "{{ mongodb_user_admin_password }}"
         state: present
         roles:
@@ -137,10 +154,12 @@
     # itential database.  It is used by Itential Platform to connect to the db.
     - name: Add itential user to database
       community.mongodb.mongodb_user:
+        login_user: "{{ mongodb_user_admin if mongodb_state.auth_enabled else omit }}"
+        login_password: "{{ mongodb_user_admin_password if mongodb_state.auth_enabled else omit }}"
         login_port: "{{ mongodb_port }}"
-        login_host: "{{ inventory_hostname }}"
+        login_host: "{{ mongodb_state.primary if mongodb_state.replication_enabled else groups['mongodb'][0] }}"
         database: "{{ mongodb_itential_db_name }}"
-        user: itential
+        user: "{{ mongodb_user_itential }}"
         password: "{{ mongodb_user_itential_password }}"
         state: present
         roles:

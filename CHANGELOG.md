@@ -1,5 +1,27 @@
 # Changelog
 
+## v3.5.0 (November 11, 2025)
+
+* Activate gateway python venv only for gateway user  https://github.com/itential/itential.deployer/pull/264
+* Add Python test script to Gateway installs  https://github.com/itential/itential.deployer/pull/257
+* Add flag to enable/disable starting Platform service  https://github.com/itential/itential.deployer/pull/262
+* Add pkgconf-pkg-config to gateway build packages list for offline install  https://github.com/itential/itential.deployer/pull/269
+* Add regex_escape to package name search query  https://github.com/itential/itential.deployer/pull/260
+* Change gateway offline download to copy gateway wheel  https://github.com/itential/itential.deployer/pull/261
+* Copy local platform packages to download location for offline installs  https://github.com/itential/itential.deployer/pull/266
+* Determine offline adapter install list from download directory  https://github.com/itential/itential.deployer/pull/265
+* Encrypt default Platform password  https://github.com/itential/itential.deployer/pull/258
+* Fix bug when installing new adapters  https://github.com/itential/itential.deployer/pull/263
+* Fix bug with offline platform install when adapter list is empty  https://github.com/itential/itential.deployer/pull/267
+* Fix issues with offline gateway install  https://github.com/itential/itential.deployer/pull/268
+* Open Gateway Manager port in firewall  https://github.com/itential/itential.deployer/pull/270
+* Skip encryption key check when downloading Platform packages  https://github.com/itential/itential.deployer/pull/256
+* Update platform_release format  https://github.com/itential/itential.deployer/pull/259
+* removing nodejs repo addition on AmazonLinux2023  https://github.com/itential/itential.deployer/pull/271
+
+Full Changelog: https://github.com/itential/itential.deployer/compare/v3.4.0...v3.5.0 
+
+
 ## v3.4.0 (October 10, 2025)
 
 * Add assertion tasks to deployer roles  https://github.com/itential/itential.deployer/pull/236
@@ -20,6 +42,7 @@
 * Readme updates  https://github.com/itential/itential.deployer/pull/249
 * Remove condition that prevents adjusting SELinux labels  https://github.com/itential/itential.deployer/pull/246
 * Update Redis to 7.4.6 - [CVE-2025-49844]  https://github.com/itential/itential.deployer/pull/251
+* Update galaxy version and changelog for release 3.4.0 [skip ci]
 * Updated public repositories  https://github.com/itential/itential.deployer/pull/244
 
 Full Changelog: https://github.com/itential/itential.deployer/compare/v3.3.0...v3.4.0 
