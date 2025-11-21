@@ -50,6 +50,7 @@ tags:
 # Multiple version range specifiers can be set and are separated by ','.
 dependencies:
   'ansible.posix': '>=0.0.1'
+  'community.general': '<12.0.0'
   'community.mongodb': '>=0.0.1'
 
 # The URL of the originating SCM repository
