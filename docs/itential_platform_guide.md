@@ -431,3 +431,37 @@ playbook with the `configure_platform` tag:
 ```bash
 ansible-playbook itential.deployer.platform -i <inventory> --tags configure_platform
 ```
+
+## Installing Platform in Alternate Directories
+
+By default the Platform will install files into the following directories:
+
+| Directory | Variable | Can Override? |
+| :-------- | :------- | :------------ |
+| /opt/itential/platform | platform_root_dir | Yes |
+| /opt/itential/platform/server | platform_server_dir | No |
+| /opt/itential/platform/services | platform_services_dir | No |
+| /etc/itential | platform_config_dir | Yes |
+| /etc/ssl/itential-platform | platform_tls_dir | Yes |
+| /var/log/itential | platform_log_dir | Yes |
+| /home/itential | platform_itential_home_dir | Yes |
+
+However, the Platform directories can be overridden in the inventory. If overridden, the Deployer
+will install the RPMs using the `rpm` command instead of using the Ansible `dnf` module so that
+the `--relocate` flag can be used.
+
+Note that `platform_server_dir` and `platform_service_dir` cannot be overridden - only the
+`platform_root_dir` can.
+
+If the `platform_root_dir` is overridden, the `platform_services_dir` will automatically be added
+to the `service_directory` in `platform.properties`.
+
+Example overrides:
+
+```yaml
+platform_root_dir: /app/itential/platform
+platform_config_dir: /app/itential/conf
+platform_tls_dir: /app/itential/ssl
+platform_log_dir: /app/itential/log
+platform_itential_home_dir: /export/home/itential
+```

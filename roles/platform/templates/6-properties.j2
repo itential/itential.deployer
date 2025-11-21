@@ -11,8 +11,6 @@ profile_id = {{ platform_profile_id }}
 {% endif %}
 
 # The file path to the directory containing additional services (applications and adapters).
-# If the platform_root_dir is overridden, the service_directory in will include the
-# platform_services_dir.
 {% set service_dirs = [] %}
 {% if platform_root_dir != platform_root_dir_default %}
 {% set service_dirs = service_dirs + [platform_services_dir] %}
