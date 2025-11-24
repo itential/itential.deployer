@@ -125,15 +125,5 @@
             line: "EnvironmentFile={{ platform_vault_token_dir }}/vault-role-secrets.env"
             state: present
           when: env_file_exists.rc != 0
+          notify: Enable and Start Platform
           register: systemd_service_updated
-
-        - name: Reload systemd daemon
-          ansible.builtin.systemd:
-            daemon_reload: true
-          when: systemd_service_updated.changed
-
-        - name: Restart itential-platform service
-          ansible.builtin.systemd:
-            name: itential-platform
-            state: restarted
-          when: systemd_service_updated.changed
