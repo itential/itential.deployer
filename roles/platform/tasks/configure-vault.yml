@@ -7,7 +7,7 @@
 #       Do we want to create a variable that contains the token?
 #       Do we want to put the Vault token in the files directory and create a file variable?
 
-- name: Make the directory to store vault token.txt
+- name: Make the directory to store vault credentials
   ansible.builtin.file:
     path: "{{ platform_vault_token_dir }}"
     state: directory
@@ -15,16 +15,125 @@
     group: "{{ platform_group }}"
     mode: "0770"
 
-- name: Get the root token from Vault server
-  ansible.builtin.slurp:
-    src: '{{ vault_root_key_dir }}/token.txt'
-  register: root_key
-  delegate_to: "{{ groups['vault'][0] }}"
+- name: Configure Vault with Token authentication
+  when: platform_vault_auth_method == "token"
+  block:
+    - name: Get the root token from Vault server
+      ansible.builtin.slurp:
+        src: '{{ vault_root_key_dir }}/token.txt'
+      register: root_key
+      delegate_to: "{{ groups['vault'][0] }}"
 
-- name: Create the token file
-  ansible.builtin.copy:
-    dest: "{{ platform_vault_token_file }}"
-    content: "{{ root_key.content | b64decode }}"
-    owner: "{{ platform_user }}"
-    group: "{{ platform_group }}"
-    mode: "0400"
+    - name: Create the token file
+      ansible.builtin.copy:
+        dest: "{{ platform_vault_token_file }}"
+        content: "{{ root_key.content | b64decode }}"
+        owner: "{{ platform_user }}"
+        group: "{{ platform_group }}"
+        mode: "0400"
+
+- name: Configure Vault with Token authentication
+  when: platform_vault_auth_method == "token"
+  block:
+    - name: Get the root token from Vault server
+      ansible.builtin.slurp:
+        src: '{{ vault_root_key_dir }}/token.txt'
+      register: root_key
+      delegate_to: "{{ groups['vault'][0] }}"
+
+    - name: Create the token file
+      ansible.builtin.copy:
+        dest: "{{ platform_vault_token_file }}"
+        content: "{{ root_key.content | b64decode }}"
+        owner: "{{ platform_user }}"
+        group: "{{ platform_group }}"
+        mode: "0400"
+
+- name: Configure Vault with AppRole authentication
+  when: platform_vault_auth_method == "approle"
+  block:
+    - name: Check if AppRole credentials exist on Vault server
+      ansible.builtin.stat:
+        path: "{{ vault_approle_dir }}/role_id.txt"
+      register: approle_role_id_file
+      delegate_to: "{{ groups['vault'][0] }}"
+
+    - name: Check if Secret ID exists on Vault server
+      ansible.builtin.stat:
+        path: "{{ vault_approle_dir }}/secret_id.txt"
+      register: approle_secret_id_file
+      delegate_to: "{{ groups['vault'][0] }}"
+
+    - name: Fail if AppRole is not configured on Vault server
+      ansible.builtin.fail:
+        msg: |
+          AppRole credentials not found on Vault server.
+          Please run the configure_approle configuration first
+          Or ensure vault_approle_enabled: true is set when deploying Vault.
+      when: not approle_role_id_file.stat.exists or not approle_secret_id_file.stat.exists
+
+    - name: Get the Role ID from Vault server
+      ansible.builtin.slurp:
+        src: "{{ vault_approle_dir }}/role_id.txt"
+      register: vault_role_id_content
+      delegate_to: "{{ groups['vault'][0] }}"
+      no_log: true
+
+    - name: Get the Secret ID from Vault server
+      ansible.builtin.slurp:
+        src: "{{ vault_approle_dir }}/secret_id.txt"
+      register: vault_secret_id_content
+      delegate_to: "{{ groups['vault'][0] }}"
+      no_log: true
+
+    # Store credentials in .env file instead of directly in systemd service.
+    # This approach prevents secrets from being visible when running
+    # 'systemctl show itential-platform | grep -i vault' command.
+    # The .env file is loaded via EnvironmentFile directive, keeping credentials secure.
+
+    - name: Create vault-role-secrets.env file with credentials
+      ansible.builtin.copy:
+        dest: "{{ platform_vault_token_dir }}/vault-role-secrets.env"
+        content: |
+          ITENTIAL_VAULT_ROLE_ID={{ vault_role_id_content.content | b64decode | trim }}
+          ITENTIAL_VAULT_SECRET_ID={{ vault_secret_id_content.content | b64decode | trim }}
+        owner: "{{ platform_user }}"
+        group: "{{ platform_group }}"
+        mode: "0400"
+      no_log: true
+
+    - name: Check if systemd service file exists
+      ansible.builtin.stat:
+        path: /usr/lib/systemd/system/itential-platform.service
+      register: systemd_service_file
+
+    - name: Update systemd service file to include vault-role-secrets.env
+      when: systemd_service_file.stat.exists
+      block:
+        - name: Check if EnvironmentFile already exists in service
+          ansible.builtin.command: >
+            grep -q "EnvironmentFile={{ platform_vault_token_dir }}/vault-role-secrets.env"
+            /usr/lib/systemd/system/itential-platform.service
+          register: env_file_exists
+          failed_when: false
+          changed_when: false
+
+        - name: Add EnvironmentFile to systemd service
+          ansible.builtin.lineinfile:
+            path: /usr/lib/systemd/system/itential-platform.service
+            insertafter: '^\[Service\]'
+            line: "EnvironmentFile={{ platform_vault_token_dir }}/vault-role-secrets.env"
+            state: present
+          when: env_file_exists.rc != 0
+          register: systemd_service_updated
+
+        - name: Reload systemd daemon
+          ansible.builtin.systemd:
+            daemon_reload: true
+          when: systemd_service_updated.changed
+
+        - name: Restart itential-platform service
+          ansible.builtin.systemd:
+            name: itential-platform
+            state: restarted
+          when: systemd_service_updated.changed

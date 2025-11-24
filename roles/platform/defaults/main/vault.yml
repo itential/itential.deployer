@@ -14,13 +14,13 @@ platform_vault_url: http://localhost:8200
 platform_vault_auth_method: token
 
 # Hashicorp Vault Role ID used for AppRole authentication.
-platform_vault_role_id:
+platform_vault_role_id: "${ITENTIAL_VAULT_ROLE_ID}"
 
 # Hashicorp Vault Secret ID used for AppRole login.
-platform_vault_secret_id:
+platform_vault_secret_id: "${ITENTIAL_VAULT_SECRET_ID}"
 
 # The path where the AppRole was enabled.
-platform_vault_approle_path:
+platform_vault_approle_path: approle
 
 # The file path to a token file. The token is used for authentication to access Vault secrets.
 platform_vault_token_file: "{{ platform_vault_token_dir }}/vault.token"

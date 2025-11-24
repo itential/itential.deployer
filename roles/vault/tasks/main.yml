@@ -72,3 +72,15 @@
         name: vault
       register: vault_status
       failed_when: vault_status.status.ActiveState != "active"
+
+- name: Configure AppRole
+  tags: configure_approle
+  when: vault_approle_enabled | default(false) | bool
+  block:
+    - name: Include tasks to validate AppRole variables
+      ansible.builtin.include_tasks:
+        file: validate-vars-approle.yml
+
+    - name: Include tasks to configure AppRole
+      ansible.builtin.include_tasks:
+        file: configure-approle.yml

@@ -1,0 +1,198 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+# Get root token for Vault operations
+- name: Get root key
+  ansible.builtin.slurp:
+    src: '{{ vault_root_key_dir }}/token.txt'
+  register: root_key
+
+# Step 1: Enable AppRole Auth Method
+- name: Check if AppRole auth method is enabled
+  ansible.builtin.command: vault auth list -format=json
+  environment:
+    VAULT_ADDR: "http://{{ inventory_hostname }}:{{ vault_port }}"
+    VAULT_TOKEN: "{{ root_key.content | b64decode }}"
+  register: auth_methods
+  changed_when: false
+
+- name: Parse auth methods output
+  ansible.builtin.set_fact:
+    auth_methods_parsed: "{{ auth_methods.stdout | from_json }}"
+
+- name: Enable AppRole auth method
+  ansible.builtin.command: vault auth enable approle
+  environment:
+    VAULT_ADDR: "http://{{ inventory_hostname }}:{{ vault_port }}"
+    VAULT_TOKEN: "{{ root_key.content | b64decode }}"
+  register: vault_approle_enable_result
+  changed_when: vault_approle_enable_result.changed
+  when: "'approle/' not in auth_methods_parsed"
+
+# Step 2: Create a Policy for Secret Access
+- name: Create directory for Vault policies
+  ansible.builtin.file:
+    path: "{{ vault_policy_dir }}"
+    state: directory
+    owner: "{{ vault_user }}"
+    group: "{{ vault_group }}"
+    mode: "0750"
+
+- name: Create AppRole policy file
+  ansible.builtin.copy:
+    dest: "{{ vault_policy_dir }}/{{ vault_approle_policy_name }}.hcl"
+    content: |
+      # Read-only permission on secrets path
+      path "{{ vault_name }}/data/*" {
+        capabilities = ["read", "list"]
+      }
+      
+      # List secrets
+      path "{{ vault_name }}/metadata/*" {
+        capabilities = ["list"]
+      }
+    owner: "{{ vault_user }}"
+    group: "{{ vault_group }}"
+    mode: "0640"
+
+- name: Write AppRole policy to Vault
+  ansible.builtin.command: >
+    vault policy write {{ vault_approle_policy_name }}
+    {{ vault_policy_dir }}/{{ vault_approle_policy_name }}.hcl
+  environment:
+    VAULT_ADDR: "http://{{ inventory_hostname }}:{{ vault_port }}"
+    VAULT_TOKEN: "{{ root_key.content | b64decode }}"
+  register: vault_policy_write_result
+  changed_when: vault_policy_write_result.changed
+
+# Step 3: Create the AppRole
+- name: Check if AppRole exists
+  ansible.builtin.command: vault list -format=json auth/approle/role
+  environment:
+    VAULT_ADDR: "http://{{ inventory_hostname }}:{{ vault_port }}"
+    VAULT_TOKEN: "{{ root_key.content | b64decode }}"
+  register: approle_list
+  changed_when: false
+  failed_when: false
+
+- name: Parse AppRole list
+  ansible.builtin.set_fact:
+    approle_list_parsed: "{{ approle_list.stdout | from_json if approle_list.rc == 0 else [] }}"
+
+- name: Create AppRole
+  ansible.builtin.command: >
+    vault write auth/approle/role/{{ vault_approle_name }}
+    token_policies={{ vault_approle_policy_name }}
+    token_ttl={{ vault_approle_token_ttl }}
+    token_max_ttl={{ vault_approle_token_max_ttl }}
+    secret_id_ttl={{ vault_approle_secret_id_ttl }}
+    secret_id_num_uses={{ vault_approle_secret_id_num_uses }}
+  environment:
+    VAULT_ADDR: "http://{{ inventory_hostname }}:{{ vault_port }}"
+    VAULT_TOKEN: "{{ root_key.content | b64decode }}"
+  register: vault_approle_create_result
+  changed_when: vault_approle_create_result.changed
+  when: vault_approle_name not in approle_list_parsed
+
+# Step 4: Get Role ID and Secret ID
+- name: Create directory to store AppRole credentials
+  ansible.builtin.file:
+    path: "{{ vault_approle_dir }}"
+    state: directory
+    owner: "{{ vault_user }}"
+    group: "{{ vault_group }}"
+    mode: "0750"
+
+- name: Get Role ID
+  ansible.builtin.command: vault read -format=json auth/approle/role/{{ vault_approle_name }}/role-id
+  environment:
+    VAULT_ADDR: "http://{{ inventory_hostname }}:{{ vault_port }}"
+    VAULT_TOKEN: "{{ root_key.content | b64decode }}"
+  register: vault_role_id_result
+  changed_when: false
+  no_log: true
+
+- name: Parse Role ID
+  ansible.builtin.set_fact:
+    vault_role_id: "{{ (vault_role_id_result.stdout | from_json).data.role_id }}"
+  no_log: true
+
+- name: Write Role ID to file
+  ansible.builtin.copy:
+    content: "{{ vault_role_id }}"
+    dest: "{{ vault_approle_dir }}/role_id.txt"
+    owner: "{{ vault_user }}"
+    group: "{{ vault_group }}"
+    mode: "0660"
+  no_log: true
+
+- name: Generate Secret ID
+  ansible.builtin.command: vault write -format=json -force auth/approle/role/{{ vault_approle_name }}/secret-id
+  environment:
+    VAULT_ADDR: "http://{{ inventory_hostname }}:{{ vault_port }}"
+    VAULT_TOKEN: "{{ root_key.content | b64decode }}"
+  register: vault_secret_id_result
+  changed_when: vault_secret_id_result.changed
+  no_log: true
+
+- name: Parse Secret ID
+  ansible.builtin.set_fact:
+    vault_secret_id: "{{ (vault_secret_id_result.stdout | from_json).data.secret_id }}"
+  no_log: true
+
+- name: Write Secret ID to file
+  ansible.builtin.copy:
+    content: "{{ vault_secret_id }}"
+    dest: "{{ vault_approle_dir }}/secret_id.txt"
+    owner: "{{ vault_user }}"
+    group: "{{ vault_group }}"
+    mode: "0660"
+  no_log: true
+
+# Step 5: Authenticate with AppRole (Test)
+- name: Authenticate with AppRole
+  ansible.builtin.command: >
+    vault write -format=json auth/approle/login
+    role_id={{ vault_role_id }}
+    secret_id={{ vault_secret_id }}
+  environment:
+    VAULT_ADDR: "http://{{ inventory_hostname }}:{{ vault_port }}"
+  register: vault_approle_login_result
+  changed_when: false
+  no_log: true
+
+- name: Parse AppRole login result
+  ansible.builtin.set_fact:
+    vault_approle_token: "{{ (vault_approle_login_result.stdout | from_json).auth.client_token }}"
+  no_log: true
+
+# Step 6: Verify AppRole can access secrets
+- name: Verify AppRole token can list secrets
+  ansible.builtin.command: vault kv list {{ vault_name }}
+  environment:
+    VAULT_ADDR: "http://{{ inventory_hostname }}:{{ vault_port }}"
+    VAULT_TOKEN: "{{ vault_approle_token }}"
+  register: vault_approle_verify_result
+  changed_when: false
+  failed_when: false
+
+- name: Read secret from itential/data/iap path to verify access
+  ansible.builtin.command: vault kv get itential/iap
+  environment:
+    VAULT_ADDR: "http://{{ inventory_hostname }}:8200"
+    VAULT_TOKEN: "{{ vault_approle_token }}"
+  register: vault_read_secret_result
+  changed_when: false
+  failed_when: false
+
+- name: Display AppRole verification status
+  ansible.builtin.debug:
+    msg: >-
+      AppRole '{{ vault_approle_name }}' successfully created and verified.
+      Role ID and Secret ID saved to {{ vault_approle_dir }}
+  when: vault_approle_verify_result.rc == 0
+
+- name: Fail if AppRole verification failed
+  ansible.builtin.fail:
+    msg: "AppRole authentication succeeded but secret access verification failed"
+  when: vault_approle_verify_result.rc != 0
