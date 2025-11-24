@@ -46,7 +46,7 @@
       path "{{ vault_name }}/data/*" {
         capabilities = ["read", "list"]
       }
-      
+
       # List secrets
       path "{{ vault_name }}/metadata/*" {
         capabilities = ["list"]
