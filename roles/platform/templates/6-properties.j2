@@ -360,15 +360,15 @@ vault_auth_method = {{ platform_vault_auth_method }}
 {% endif %}
 
 # Hashicorp Vault Role ID used for AppRole authentication.
-{% if platform_configure_vault and platform_vault_role_id %}
-vault_role_id = {{ platform_vault_role_id }}
+{% if platform_configure_vault and platform_vault_role_id_property %}
+vault_role_id = {{ platform_vault_role_id_property }}
 {% else %}
 # vault_role_id =
 {% endif %}
 
 # Hashicorp Vault Secret ID used for AppRole login.
-{% if platform_configure_vault and platform_vault_secret_id %}
-vault_secret_id = {{ platform_vault_secret_id }}
+{% if platform_configure_vault and platform_vault_secret_id_property %}
+vault_secret_id = {{ platform_vault_secret_id_property }}
 {% else %}
 # vault_secret_id =
 {% endif %}

@@ -59,7 +59,7 @@ The following table lists the default variables located in `roles/vault/defaults
 | :------- | :--- | :---------- | :------------ |
 | `vault_approle_enabled` | Boolean | Flag to enable/disable configuring Vault Approle in Vault server|  `true` |
 | `vault_approle_name` | String| Name of the AppRole in Vault (used for authentication) | `itential-application` |
-| `vault_approle_policy_name` | String | `itential-app-policy` |
+| `vault_approle_policy_name` | String | Name of the Vault policy attached to this AppRole | `itential-app-policy` |
 | `vault_approle_dir` | String | Name of the Vault policy attached to this AppRole | `/opt/vault/approle` |
 | `vault_policy_dir` | String | Directory where Role ID and Secret ID files are stored on Vault server | `/opt/vault/policies` |
 

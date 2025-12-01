@@ -194,8 +194,10 @@ default variables located in `roles/platform/defaults/main/vault.yml`.
 | platform_vault_token_dir | String | The directory to store the vault root key in | `{{ platform_server_dir }}/keys` |
 | platform_vault_url | String | The URL to the Hashicorp Vault server. | `http://localhost:8200` |
 | platform_vault_auth_method | String | The authorization method to connect to Hashicorp Vault. Either token or approle. | `token` |
-| platform_vault_role_id | String | Hashicorp Vault Role ID variable used for AppRole authentication. | `${ITENTIAL_VAULT_ROLE_ID}` |
-| platform_vault_secret_id | String | Hashicorp Vault Secret ID variable used for AppRole login. | `${ITENTIAL_VAULT_SECRET_ID}` |
+| platform_vault_role_id | String | Hashicorp Vault Role ID variable used for AppRole authentication |  |
+| platform_vault_secret_id | String | Hashicorp Vault Secret ID variable used for AppRole login |  |
+| platform_vault_role_id_property | String | Variable to write in application properties file for Role ID | `${ITENTIAL_VAULT_ROLE_ID}` |
+| platform_vault_secret_id_property | String | Variable to write in application properties file for Secret ID | `${ITENTIAL_VAULT_SECRET_ID}` |
 | platform_vault_approle_path | String | The path where the AppRole was enabled. | `approle` |
 | platform_vault_token_file | String | The file path to a token file. The token is used for authentication to access Vault secrets. | `{{ platform_vault_token_dir }}/vault.token` |
 | platform_vault_secrets_endpoint | String | The endpoint for the Secrets Engine that is used. | `itential/data` |
