@@ -177,6 +177,8 @@ mongo_user = {{ platform_mongo_user }}
 # The password to use when connecting to MongoDB.
 {% if platform_mongo_password_encrypted is defined %}
 mongo_password = {{ platform_mongo_password_encrypted }}
+{% elif platform_mongo_password_vault and platform_configure_vault | bool %}
+mongo_password = {{ platform_mongo_password_vault }}
 {% elif platform_mongo_password %}
 mongo_password = {{ platform_mongo_password }}
 {% else %}
@@ -267,6 +269,8 @@ redis_username = {{ platform_redis_username }}
 # The password to use when connecting to Redis.
 {% if platform_redis_password_encrypted is defined and platform_redis_auth_enabled | bool %}
 redis_password = {{ platform_redis_password_encrypted }}
+{% elif platform_redis_password_vault and platform_configure_vault | bool %}
+redis_password = {{ platform_redis_password_vault }}
 {% elif platform_redis_password and platform_redis_auth_enabled | bool %}
 redis_password = {{ platform_redis_password }}
 {% else %}
@@ -381,7 +385,7 @@ vault_approle_path = {{ platform_vault_approle_path }}
 {% endif %}
 
 # The file path to a token file. The token is used for authentication to access Vault secrets.
-{% if platform_configure_vault and platform_vault_token_file %}
+{% if platform_configure_vault and platform_vault_auth_method == "token" and platform_vault_token_file %}
 vault_token = {{ platform_vault_token_file }}
 {% else %}
 # vault_token =
