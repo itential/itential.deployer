@@ -22,12 +22,6 @@ platform_vault_role_id: ""
 # Hashicorp Vault Secret ID - actual credential value (fetched from server or user-provided)
 platform_vault_secret_id: ""
 
-# What to write in application properties file for Role ID (defaults to env var reference)
-platform_vault_role_id_property: "${ITENTIAL_VAULT_ROLE_ID}"
-
-# What to write in application properties file for Secret ID (defaults to env var reference)
-platform_vault_secret_id_property: "${ITENTIAL_VAULT_SECRET_ID}"
-
 # The path where the AppRole was enabled.
 platform_vault_approle_path: approle
 

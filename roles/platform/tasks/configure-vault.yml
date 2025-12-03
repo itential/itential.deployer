@@ -84,12 +84,12 @@
           ignore_errors: true
 
         - name: Set credentials from Vault server
-          when:
-            - vault_role_id_content is succeeded
-            - vault_secret_id_content is succeeded
           ansible.builtin.set_fact:
             final_role_id: "{{ vault_role_id_content.content | b64decode | trim }}"
             final_secret_id: "{{ vault_secret_id_content.content | b64decode | trim }}"
+          when:
+            - vault_role_id_content is succeeded
+            - vault_secret_id_content is succeeded
           no_log: true
 
     # Use user-provided credentials if server doesn't exist or fetch failed

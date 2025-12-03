@@ -14,31 +14,3 @@ vault_repo_baseurl:
   "8": "https://rpm.releases.hashicorp.com/RHEL/$releasever/$basearch/stable"
   "9": "https://rpm.releases.hashicorp.com/RHEL/$releasever/$basearch/stable"
   "2023": "https://rpm.releases.hashicorp.com/AmazonLinux/latest/$basearch/stable"
-
-# Vault AppRole Configuration
-# Enable AppRole configuration (set to true to configure AppRole)
-vault_approle_enabled: true
-
-# AppRole name
-vault_approle_name: "itential-app"
-
-# AppRole policy name
-vault_approle_policy_name: "itential-app-policy"
-
-# Directory to store AppRole credentials (role_id and secret_id)
-vault_approle_dir: "{{ vault_dir }}/approle"
-
-# Directory to store Vault policies
-vault_policy_dir: "{{ vault_dir }}/policies"
-
-# AppRole token TTL (Time To Live)
-vault_approle_token_ttl: "24h"
-
-# AppRole token max TTL
-vault_approle_token_max_ttl: "24h"
-
-# Secret ID TTL (0 means no expiration)
-vault_approle_secret_id_ttl: "0"
-
-# Number of times a Secret ID can be used (0 means unlimited)
-vault_approle_secret_id_num_uses: 0
