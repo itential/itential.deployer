@@ -26,15 +26,3 @@
   tags: install_python
   vars:
     python_packages: "{{ gateway_python_packages }}"
-
-- name: Include tasks to download IAG dependencies
-  ansible.builtin.include_tasks:
-    file: download-python-dependencies.yml
-
-- name: Uninstall Python RPMs
-  ansible.builtin.dnf:
-    name: "{{ item }}"
-    state: absent
-    autoremove: true
-  with_items: "{{ python_install_result.results | selectattr('changed', 'equalto', true)
-              | map(attribute='item') }}"
