@@ -14,3 +14,9 @@ platform_itential_home_dir_default: /home/itential
 # Platform root directory can.
 platform_server_dir: "{{ platform_root_dir }}/server"
 platform_services_dir: "{{ platform_root_dir }}/services"
+
+# What to write in application properties file for Role ID (defaults to env var reference)
+platform_vault_role_id_property: "${ITENTIAL_VAULT_ROLE_ID}"
+
+# What to write in application properties file for Secret ID (defaults to env var reference)
+platform_vault_secret_id_property: "${ITENTIAL_VAULT_SECRET_ID}"

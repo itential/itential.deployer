@@ -1,10 +1,18 @@
 # Changelog
 
+## v3.6.1 (December 02, 2025)
+
+* Fix issue with installing Platform adapters  https://github.com/itential/itential.deployer/pull/277
+
+Full Changelog: https://github.com/itential/itential.deployer/compare/v3.6.0...v3.6.1 
+
+
 ## v3.6.0 (November 21, 2025)
 
 * Add community.general to galaxy dependencies and pin version  https://github.com/itential/itential.deployer/pull/275
 * Add support for relocating Platform server and service RPMs  https://github.com/itential/itential.deployer/pull/274
 * Changes to support B/G while sharing redis & mongo  https://github.com/itential/itential.deployer/pull/272
+* Update galaxy version and changelog for release 3.6.0 [skip ci]
 
 Full Changelog: https://github.com/itential/itential.deployer/compare/v3.5.0...v3.6.0 
 

@@ -6,3 +6,6 @@ vault_dir: /opt/vault
 
 # Default default to store the root key
 vault_root_key_dir: "{{ vault_dir }}/keys/root_key"
+
+# Directory to store AppRole credentials (role_id and secret_id)
+vault_approle_dir: "{{ vault_dir }}/approle"
