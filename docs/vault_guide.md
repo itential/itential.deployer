@@ -53,6 +53,25 @@ The following table lists the default variables located in `roles/vault/defaults
 | `vault_user` | String |The Vault Linux user. | `vault` |
 | `vault_group` |  String | The Vault Linux group. | `vault` |
 
+### AppRole configuration
+
+| Variable | Type | Description | Default Value |
+| :------- | :--- | :---------- | :------------ |
+| `vault_approle_enabled` | Boolean | Flag to enable/disable configuring Vault Approle in Vault server|  `true` |
+| `vault_approle_name` | String| Name of the AppRole in Vault (used for authentication) | `itential-application` |
+| `vault_approle_policy_name` | String | Name of the Vault policy attached to this AppRole | `itential-app-policy` |
+| `vault_approle_dir` | String | Name of the Vault policy attached to this AppRole | `/opt/vault/approle` |
+| `vault_policy_dir` | String | Directory where Role ID and Secret ID files are stored on Vault server | `/opt/vault/policies` |
+
+### AppRole TTL settings
+
+| Variable | Type | Description | Default Value |
+| :------- | :--- | :---------- | :------------ |
+| `vault_approle_token_ttl` | String | Time-to-live for tokens issued by this AppRole | `1h` |
+| `vault_approle_token_max_ttl` | String | Maximum time-to-live for tokens (cannot be renewed beyond this) | `24h` |
+| `vault_approle_secret_id_ttl` | String | Time-to-live for Secret IDs (0 = never expires) | `0` |
+| `vault_approle_secret_id_num_uses` | Integer | Number of times a Secret ID can be used (0 = unlimited) | `0` |
+
 ## Building Your Inventory
 
 To install and unseal Vault, add a `vault` group and host to your inventory.  The following

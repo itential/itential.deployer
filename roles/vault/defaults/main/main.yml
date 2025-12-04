@@ -18,3 +18,31 @@ vault_user: vault
 
 # The default group that runs vault
 vault_group: vault
+
+# Vault AppRole Configuration
+# Enable AppRole configuration (set to true to configure AppRole)
+vault_approle_enabled: true
+
+# AppRole name
+vault_approle_name: "itential-app"
+
+# AppRole policy name
+vault_approle_policy_name: "itential-app-policy"
+
+# Directory to store Vault policies
+vault_policy_dir: "{{ vault_dir }}/policies"
+
+# AppRole token TTL (Time To Live)
+vault_approle_token_ttl: "24h"
+
+# AppRole token max TTL
+vault_approle_token_max_ttl: "24h"
+
+# Secret ID TTL (0 means no expiration)
+vault_approle_secret_id_ttl: "0"
+
+# Number of times a Secret ID can be used (0 means unlimited)
+vault_approle_secret_id_num_uses: 0
+
+# Vault server address (used for vault CLI commands)
+vault_addr: "http://{{ inventory_hostname }}:{{ vault_port }}"
