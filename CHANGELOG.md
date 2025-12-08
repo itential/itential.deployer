@@ -1,8 +1,17 @@
 # Changelog
 
+## v3.7.0 (December 08, 2025)
+
+* Fix download order in Gateway offline download playbook  https://github.com/itential/itential.deployer/pull/278
+* Integrating Vault approle creation and setup  https://github.com/itential/itential.deployer/pull/276
+
+Full Changelog: https://github.com/itential/itential.deployer/compare/v3.6.1...v3.7.0 
+
+
 ## v3.6.1 (December 02, 2025)
 
 * Fix issue with installing Platform adapters  https://github.com/itential/itential.deployer/pull/277
+* Update galaxy version and changelog for release 3.6.1 [skip ci]
 
 Full Changelog: https://github.com/itential/itential.deployer/compare/v3.6.0...v3.6.1 
 
