@@ -1,13 +1,7 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-
-# TODO: Figure out how we want to handle the Vault token.
-#       Do we want to continue to copy the the token from the Vault server?
-#       Do we want to create a variable that contains the token?
-#       Do we want to put the Vault token in the files directory and create a file variable?
-
-- name: Make the directory to store vault token.txt
+- name: Make the directory to store vault credentials
   ansible.builtin.file:
     path: "{{ platform_vault_token_dir }}"
     state: directory
@@ -15,16 +9,119 @@
     group: "{{ platform_group }}"
     mode: "0770"
 
-- name: Get the root token from Vault server
-  ansible.builtin.slurp:
-    src: '{{ vault_root_key_dir }}/token.txt'
-  register: root_key
-  delegate_to: "{{ groups['vault'][0] }}"
+# Check if Vault server exists in inventory
+- name: Check if Vault server is available
+  ansible.builtin.set_fact:
+    vault_server_exists: "{{ groups['vault'] is defined and groups['vault'] | length > 0 }}"
 
-- name: Create the token file
-  ansible.builtin.copy:
-    dest: "{{ platform_vault_token_file }}"
-    content: "{{ root_key.content | b64decode }}"
-    owner: "{{ platform_user }}"
-    group: "{{ platform_group }}"
-    mode: "0400"
+- name: Configure Vault with Token authentication
+  when: platform_vault_auth_method == "token"
+  block:
+    # Fetch from Vault server if it exists
+    - name: Get token from Vault server
+      when: vault_server_exists | bool
+      block:
+        - name: Get the root token from Vault server
+          ansible.builtin.slurp:
+            src: '{{ vault_root_key_dir }}/token.txt'
+          register: root_key
+          delegate_to: "{{ groups['vault'][0] }}"
+          no_log: true
+          ignore_errors: true
+
+        - name: Set token from Vault server
+          ansible.builtin.set_fact:
+            final_token: "{{ root_key.content | b64decode | trim }}"
+          when: root_key is succeeded
+          no_log: true
+
+    # Use user-provided token if server doesn't exist or fetch failed
+    - name: Set token from user variable
+      when: final_token is not defined
+      block:
+        - name: Validate user-provided token
+          ansible.builtin.assert:
+            that:
+              - platform_vault_token is defined
+              - platform_vault_token | length > 0
+            fail_msg: "platform_vault_token must be provided when Vault server is not available"
+
+        - name: Set token from variable
+          ansible.builtin.set_fact:
+            final_token: "{{ platform_vault_token }}"
+          no_log: true
+
+    - name: Create the token file
+      ansible.builtin.copy:
+        dest: "{{ platform_vault_token_file }}"
+        content: "{{ final_token }}"
+        owner: "{{ platform_user }}"
+        group: "{{ platform_group }}"
+        mode: "0400"
+      no_log: true
+
+- name: Configure Vault with AppRole authentication
+  when: platform_vault_auth_method == "approle"
+  block:
+    # Fetch from Vault server if it exists
+    - name: Get credentials from Vault server
+      when: vault_server_exists | bool
+      block:
+        - name: Get the Role ID from Vault server
+          ansible.builtin.slurp:
+            src: "{{ vault_approle_dir }}/role_id.txt"
+          register: vault_role_id_content
+          delegate_to: "{{ groups['vault'][0] }}"
+          no_log: true
+          ignore_errors: true
+
+        - name: Get the Secret ID from Vault server
+          ansible.builtin.slurp:
+            src: "{{ vault_approle_dir }}/secret_id.txt"
+          register: vault_secret_id_content
+          delegate_to: "{{ groups['vault'][0] }}"
+          no_log: true
+          ignore_errors: true
+
+        - name: Set credentials from Vault server
+          ansible.builtin.set_fact:
+            final_role_id: "{{ vault_role_id_content.content | b64decode | trim }}"
+            final_secret_id: "{{ vault_secret_id_content.content | b64decode | trim }}"
+          when:
+            - vault_role_id_content is succeeded
+            - vault_secret_id_content is succeeded
+          no_log: true
+
+    # Use user-provided credentials if server doesn't exist or fetch failed
+    - name: Set credentials from user variables
+      when: final_role_id is not defined or final_secret_id is not defined
+      block:
+        - name: Validate user-provided credentials
+          ansible.builtin.assert:
+            that:
+              - platform_vault_role_id is defined
+              - platform_vault_role_id | length > 0
+              - platform_vault_secret_id is defined
+              - platform_vault_secret_id | length > 0
+            fail_msg: "platform_vault_role_id and platform_vault_secret_id must be provided when Vault server is not available"
+
+        - name: Set credentials from variables
+          ansible.builtin.set_fact:
+            final_role_id: "{{ platform_vault_role_id }}"
+            final_secret_id: "{{ platform_vault_secret_id }}"
+          no_log: true
+
+    # Store credentials in .env file instead of directly in systemd service.
+    # This approach prevents secrets from being visible when running
+    # 'systemctl show itential-platform | grep -i vault' command.
+    # The .env file is loaded via EnvironmentFile directive, keeping credentials secure.
+    - name: Create vault-role-secrets.env file with credentials
+      ansible.builtin.copy:
+        dest: "{{ platform_vault_token_dir }}/vault-role-secrets.env"
+        content: |
+          ITENTIAL_VAULT_ROLE_ID={{ final_role_id }}
+          ITENTIAL_VAULT_SECRET_ID={{ final_secret_id }}
+        owner: "{{ platform_user }}"
+        group: "{{ platform_group }}"
+        mode: "0400"
+      no_log: true

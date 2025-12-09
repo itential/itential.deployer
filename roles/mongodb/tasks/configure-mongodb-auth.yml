@@ -61,7 +61,7 @@
         mode: '0400'
 
 # Execute the template to apply changes to the mongo.conf for auth
-- name: Create MongoDB config file
+- name: Create MongoDB config file (auth)
   ansible.builtin.template:
     src: mongod.conf.j2
     dest: "{{ mongodb_conf_file }}"
@@ -71,8 +71,12 @@
   vars:
     stage: "auth"
 
-- name: Start mongo
-  ansible.builtin.systemd:
+- name: Start mongo (auth)
+  ansible.builtin.service:
     name: mongod
     state: restarted
     enabled: true
+  register: mongod_service_result
+  until: mongod_service_result.status.ActiveState == "active"
+  retries: "{{ mongodb_mongod_service_retries }}"
+  delay: "{{ mongodb_mongod_service_delay }}"

@@ -11,12 +11,6 @@
     name: vm.overcommit_memory
     value: 1
 
-- name: Install Redis dependency packages
-  ansible.builtin.dnf:
-    name: "{{ redis_dependency_packages }}"
-    state: present
-    update_cache: true
-
 # Check if firewalld is running, if it is then open the appropriate ports
 - name: Gather service facts
   ansible.builtin.service_facts:
@@ -56,11 +50,6 @@
     group: "{{ redis_group }}"
     state: present
 
-- name: Check to see if Redis bin directory exists
-  ansible.builtin.stat:
-    path: "{{ redis_bin_dir }}"
-  register: redis_bin_dir_stat
-
 - name: Create Redis bin directory
   ansible.builtin.file:
     state: directory
@@ -68,15 +57,8 @@
     owner: "{{ redis_owner }}"
     group: "{{ redis_group }}"
     mode: "0755"
-  when:
-    - (redis_bin_dir != redis_bin_dir_default_packages or
+  when: (redis_bin_dir != redis_bin_dir_default_packages or
        (redis_bin_dir != redis_bin_dir_default_source and redis_install_from_source | bool))
-    - not redis_bin_dir_stat.stat.exists
-
-- name: Check to see if Redis data directory exists
-  ansible.builtin.stat:
-    path: "{{ redis_data_dir }}"
-  register: redis_data_dir_stat
 
 - name: Create Redis data directory
   ansible.builtin.file:
@@ -88,14 +70,7 @@
     seuser: system_u
     serole: object_r
     setype: redis_var_lib_t
-  when:
-    - redis_data_dir != redis_data_dir_default or redis_install_from_source | bool
-    - not redis_data_dir_stat.stat.exists
-
-- name: Check to see if Redis log directory exists
-  ansible.builtin.stat:
-    path: "{{ redis_log_dir }}"
-  register: redis_log_dir_stat
+  when: redis_data_dir != redis_data_dir_default or redis_install_from_source | bool
 
 - name: Create Redis log directory
   ansible.builtin.file:
@@ -107,14 +82,7 @@
     seuser: system_u
     serole: object_r
     setype: redis_log_t
-  when:
-    - redis_log_dir != redis_log_dir_default or redis_install_from_source | bool
-    - not redis_log_dir_stat.stat.exists
-
-- name: Check to see if Redis configuration directory exists
-  ansible.builtin.stat:
-    path: "{{ redis_conf_dir }}"
-  register: redis_conf_dir_stat
+  when: redis_log_dir != redis_log_dir_default or redis_install_from_source | bool
 
 - name: Create Redis configuration directory
   ansible.builtin.file:
@@ -126,6 +94,4 @@
     seuser: system_u
     serole: object_r
     setype: redis_conf_t
-  when:
-    - redis_conf_dir != redis_conf_dir_default or redis_install_from_source | bool
-    - not redis_conf_dir_stat.stat.exists
+  when: redis_conf_dir != redis_conf_dir_default or redis_install_from_source | bool

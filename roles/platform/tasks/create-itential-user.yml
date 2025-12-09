@@ -13,4 +13,5 @@
   ansible.builtin.user:
     name: "{{ platform_user }}"
     group: "{{ platform_group }}"
+    home: "{{ platform_itential_home_dir }}"
     state: present

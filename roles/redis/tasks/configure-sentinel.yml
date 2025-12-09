@@ -16,6 +16,7 @@
     owner: "{{ redis_owner }}"
     group: "{{ redis_group }}"
     mode: "0640"
+    setype: redis_conf_t
     backup: true
   when:
     - groups['redis'] is defined
@@ -28,7 +29,16 @@
     owner: "{{ redis_owner }}"
     group: "{{ redis_group }}"
     mode: "0640"
+    setype: redis_conf_t
     backup: true
   when:
     - groups['redis_secondary'] is defined
     - inventory_hostname in groups['redis_secondary']
+
+- name: Deploy logrotate config for Redis Sentinel
+  ansible.builtin.template:
+    src: redis-sentinel.logrotate.j2
+    dest: /etc/logrotate.d/redis-sentinel
+    owner: root
+    group: root
+    mode: '0644'

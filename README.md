@@ -224,11 +224,17 @@ the Deployer will either install the required repository or download the package
 | Itential Gateway | <https://galaxy.ansible.com> | TCP | |
 | Itential Gateway | <https://registry.aws.itential.com> | TCP | |
 | Itential Platform | <https://registry.aws.itential.com> | TCP | |
+| Itential Platform | <https://registry.npmjs.org> | TCP | Core npm package access |
+| Itential Platform | <https://github.com> | TCP | GitHub-hosted dependencies |
+| Itential Platform | <https://codeload.github.com> | TCP | GitHub tarballs |
 | MongoDB | <https://repo.mongodb.org> | TCP | |
 | MongoDB | <https://www.mongodb.org> | TCP | |
+| MongoDB | <https://pgp.mongodb.org> | TCP | |
+| MongoDB | <https://pypi.org> | TCP | |
 | Redis | <http://rpms.remirepo.net> | TCP | When installing Redis from the Remi repository |
 | Redis | <https://dl.fedoraproject.org> | TCP | When installing Redis from the Remi repository |
 | Redis | <https://github.com> | TCP | When installing Redis from source |
+| Redis | <https://codeload.github.com> | TCP |  |
 | Vault | <https://rpm.releases.hashicorp.com> | TCP | |
 
 If internal YUM repositories are used, refer to the
@@ -535,7 +541,7 @@ vi inventories/dev/hosts
 ```yaml
 all:
   vars:
-    platform_release: 6.0
+    platform_release: 6
 
   children:
     redis:
@@ -550,6 +556,7 @@ all:
       hosts:
         example1.host.com:
       vars:
+        platform_encryption_key: <openssl rand -hex 32> # 64-length hex string, representing a 256-bit AES  encryption key.
         platform_packages:
           - https://registry.aws.itential.com/repository/PLATFORM/Platform%206.0.0/itential-platform-6.0.0-1.noarch.rpm
         repository_username: user.name
@@ -703,7 +710,7 @@ Simple environment. Itential Platform and all of its dependencies all on one hos
 ```yaml
 all:
   vars:
-    platform_release: 6.0
+    platform_release: 6
 
   children:
     redis:
@@ -718,6 +725,7 @@ all:
       hosts:
         example1.host.com:
       vars:
+        platform_encryption_key: <openssl rand -hex 32> # 64-length hex string, representing a 256-bit AES  encryption key.
         platform_packages:
           - itential-platform-6.0.0-1.noarch.rpm
 
@@ -738,7 +746,7 @@ Similar to All-in-one but installs components on separate hosts.
 ```yaml
 all:
   vars:
-    platform_release: 6.0
+    platform_release: 6
 
   children:
     redis:
@@ -753,6 +761,7 @@ all:
       hosts:
         itential-platform.host.com:
       vars:
+        platform_encryption_key: <openssl rand -hex 32> # 64-length hex string, representing a 256-bit AES  encryption key.
         platform_packages:
           - itential-platform-6.0.0-1.noarch.rpm
         # MongoDB config
@@ -777,7 +786,7 @@ Fault tolerant architecture.
 ```yaml
 all:
   vars:
-    platform_release: 6.0
+    platform_release: 6
 
   children:
     redis:
@@ -831,7 +840,7 @@ Fault tolerant architecture using external dependencies.
 ```yaml
 all:
   vars:
-    platform_release: 6.0
+    platform_release: 6
   children:
     platform:
       hosts:
@@ -871,7 +880,7 @@ all:
 ```yaml
 all:
   vars:
-    platform_release: 6.0
+    platform_release: 6
 
   children:
     redis:

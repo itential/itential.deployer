@@ -1,104 +1,86 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Validation steps
-  tags: always
+- name: Download packages
   block:
-    - name: Validate offline_install_enabled variable
-      ansible.builtin.fail:
-        msg: offline_install_enabled must be set to false for download
-      when:
-        - offline_install_enabled is defined
-        - offline_install_enabled
+    - name: Validation steps
+      tags: always
+      block:
+        - name: Validate offline_install_enabled variable
+          ansible.builtin.fail:
+            msg: offline_install_enabled must be set to false for download
+          when:
+            - offline_install_enabled is defined
+            - offline_install_enabled
 
-    - name: Include release vars
-      ansible.builtin.include_vars:
-        file: "{{ item }}"
-      with_first_found:
-        - "{{ gateway_release }}-{{ ansible_distribution
-          | lower }}-{{ ansible_distribution_major_version }}.yml"
-        - "release-undefined.yml"
+        - name: Include release vars
+          ansible.builtin.include_vars:
+            file: "{{ item }}"
+          with_first_found:
+            - "gateway-release-{{ gateway_release }}.yml" # Prefer this new format
+            - "{{ gateway_release }}-{{ ansible_distribution
+              | lower }}-{{ ansible_distribution_major_version }}.yml"
+            - "release-undefined.yml"
 
-    - name: Check for valid IAG release
-      ansible.builtin.fail:
-        msg: "Deployer does not support installing Gateway version {{ gateway_release }}
-             on {{ ansible_distribution }}-{{ ansible_distribution_major_version }}"
-      when: gateway_invalid_release is defined
+        - name: Check for valid IAG release
+          ansible.builtin.fail:
+            msg: "Deployer does not support installing Gateway version {{ gateway_release }}
+                on {{ ansible_distribution }}-{{ ansible_distribution_major_version }}"
+          when: gateway_invalid_release is defined
 
-- name: Download Gateway packages
-  tags: download_gateway_packages
-  block:
+    - name: Download Python RPMs
+      ansible.builtin.include_tasks:
+        file: download-python-rpms.yml
+
     - name: Download Gateway dependency RPMs
-      ansible.builtin.import_role:
-        name: offline
-        tasks_from: download-rpms
-      vars:
-        offline_download_method: yum_module
-        offline_download_packages: "{{ gateway_packages }}"
-        offline_download_dir: "{{ gateway_offline_target_node_rpms_dir }}/dependencies"
-
-    - name: Copy Gateway dependency RPMs to control node
-      ansible.builtin.import_role:
-        name: offline
-        tasks_from: fetch-packages
-      vars:
-        offline_src_dir: "{{ gateway_offline_target_node_rpms_dir }}/dependencies"
-        offline_dest_dir: "{{ gateway_offline_control_node_rpms_dir }}/dependencies"
+      ansible.builtin.include_tasks:
+        file: download-dependency-rpms.yml
 
     - name: Download Gateway build RPMs
-      ansible.builtin.import_role:
-        name: offline
-        tasks_from: download-rpms
-      vars:
-        offline_download_method: yum_module
-        offline_download_packages: "{{ gateway_build_packages }}"
-        offline_download_dir: "{{ gateway_offline_target_node_rpms_dir }}/build"
-
-    - name: Copy Gateway build RPMs to control node
-      ansible.builtin.import_role:
-        name: offline
-        tasks_from: fetch-packages
-      vars:
-        offline_src_dir: "{{ gateway_offline_target_node_rpms_dir }}/build"
-        offline_dest_dir: "{{ gateway_offline_control_node_rpms_dir }}/build"
-
-- name: Install Gateway dependency and build packages
-  ansible.builtin.dnf:
-    name: "{{ item }}"
-    state: present
-  with_items: "{{ gateway_packages + gateway_build_packages }}"
-  register: gateway_packages_installed
-  when:
-    - gateway_packages is defined
-    - gateway_packages is iterable
-    - gateway_packages | length > 0
-  tags: install_gateway_packages
-
-- name: Download Python packages
-  tags: download_python_packages
-  block:
-    - name: Download Python packages
       ansible.builtin.include_tasks:
-        file: download-packages-python.yml
+        file: download-build-rpms.yml
 
-    - name: Create archives directory
-      ansible.builtin.file:
-        path: "{{ gateway_offline_target_node_archives_dir }}"
-        state: directory
-        mode: '0755'
+    - name: Download Gateway wheel
+      ansible.builtin.include_tasks:
+        file: download-gateway-wheel.yml
 
-    - name: Copy archives to control node
-      ansible.builtin.import_role:
-        name: offline
-        tasks_from: fetch-packages
-      vars:
-        offline_src_dir: "{{ gateway_offline_target_node_archives_dir }}"
-        offline_dest_dir: "{{ gateway_offline_control_node_archives_dir }}"
+    - name: Download Gateway dependency wheels
+      ansible.builtin.include_tasks:
+        file: download-dependency-wheels.yml
 
-- name: Uninstall Gateway dependency and build packages
-  ansible.builtin.dnf:
-    name: "{{ item }}"
-    state: absent
-    autoremove: true
-  with_items: "{{ gateway_packages_installed.results | selectattr('changed', 'equalto', true)
-              | map(attribute='item') }}"
+  always:
+    - name: Uninstall Python RPMs
+      ansible.builtin.dnf:
+        name: "{{ item }}"
+        state: absent
+        autoremove: true
+      with_items: "{{ python_install_result.results | selectattr('changed', 'equalto', true)
+                  | map(attribute='item') }}"
+      when:
+        - python_install_result is defined
+        - python_install_result.results is defined
+        - python_install_result.results | length > 0
+
+    - name: Uninstall Gateway dependency RPMs
+      ansible.builtin.dnf:
+        name: "{{ item }}"
+        state: absent
+        autoremove: true
+      with_items: "{{ gateway_packages_installed.results | selectattr('changed', 'equalto', true)
+                  | map(attribute='item') }}"
+      when:
+        - gateway_packages_installed is defined
+        - gateway_packages_installed.results is defined
+        - gateway_packages_installed.results | length > 0
+
+    - name: Uninstall Gateway build RPMs
+      ansible.builtin.dnf:
+        name: "{{ item }}"
+        state: absent
+        autoremove: true
+      with_items: "{{ gateway_build_packages_installed.results | selectattr('changed', 'equalto', true)
+                  | map(attribute='item') }}"
+      when:
+        - gateway_build_packages_installed is defined
+        - gateway_build_packages_installed.results is defined
+        - gateway_build_packages_installed.results | length > 0

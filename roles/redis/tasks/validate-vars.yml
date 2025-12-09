@@ -77,6 +77,7 @@
             file: "{{ item }}"
           with_first_found:
             - "platform-release-{{ platform_release }}.yml"
+            - "platform-release-{{ platform_release | string | split('.') | first }}.yml"
             - "platform-release-undefined.yml"
 
         - name: Check for valid Redis release
@@ -101,7 +102,7 @@
             - not redis_install_from_source | bool
 
     - name: Print Redis installation details
-      when: not offline_install_enabled
+      when: not offline_install_enabled | bool
       block:
         - name: Print Redis installation details when installing from source
           ansible.builtin.debug:
@@ -112,3 +113,8 @@
           ansible.builtin.debug:
             msg: "Redis packages: {{ redis_packages }}"
           when: not redis_install_from_source | bool
+
+    - name: Print Redis installation details (offline)
+      ansible.builtin.debug:
+        msg: "Redis offline install using files from {{ redis_offline_control_node_root }}"
+      when: offline_install_enabled | bool

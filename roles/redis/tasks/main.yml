@@ -19,23 +19,15 @@
           ansible.builtin.include_tasks:
             file: install-common.yml
 
-        - name: Include tasks to perform online installation
-          when: not offline_install_enabled
-          block:
-            - name: Include tasks to install Redis using source
-              ansible.builtin.include_tasks:
-                file: install-from-source.yml
-              when: redis_install_from_source | bool
-
-            - name: Include tasks to install Redis using repo
-              ansible.builtin.include_tasks:
-                file: install-from-repo.yml
-              when: not redis_install_from_source | bool
-
-        - name: Include tasks to perform offline installation
+        - name: Include tasks to install Redis from source
           ansible.builtin.include_tasks:
-            file: install-offline.yml
-          when: offline_install_enabled
+            file: install-from-source.yml
+          when: redis_install_from_source | bool
+
+        - name: Include tasks to install Redis using repo
+          ansible.builtin.include_tasks:
+            file: install-from-repo.yml
+          when: not redis_install_from_source | bool
 
     - name: Configure SELinux
       tags: configure_selinux
@@ -58,3 +50,38 @@
           ansible.builtin.include_tasks:
             file: configure-sentinel.yml
           when: redis_replication_enabled | bool
+
+- name: Ensure Redis is running
+  tags: always
+  block:
+    - name: Flush all handlers
+      ansible.builtin.meta: flush_handlers
+
+    - name: Start Redis
+      ansible.builtin.systemd:
+        name: redis
+        state: started
+
+    - name: Assert that Redis is running
+      ansible.builtin.systemd:
+        name: redis
+      register: redis_status
+      failed_when: redis_status.status.ActiveState != "active"
+
+- name: Ensure Redis Sentinel is running
+  tags: always
+  when: redis_replication_enabled | bool
+  block:
+    - name: Flush all handlers
+      ansible.builtin.meta: flush_handlers
+
+    - name: Start Redis Sentinel
+      ansible.builtin.systemd:
+        name: redis-sentinel
+        state: started
+
+    - name: Assert that Redis Sentinel is running
+      ansible.builtin.systemd:
+        name: redis-sentinel
+      register: redis_sentinel_status
+      failed_when: redis_sentinel_status.status.ActiveState != "active"

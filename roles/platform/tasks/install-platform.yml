@@ -7,7 +7,7 @@
     - name: Create temporary download directory
       ansible.builtin.tempfile:
         state: directory
-      register: downloaddir
+      register: platform_package_temp_download_dir
       changed_when: false
 
     - name: Upload packages from control node
@@ -32,34 +32,51 @@
 
     - name: Find downloaded packages
       ansible.builtin.find:
-        paths: "{{ downloaddir.path }}"
+        paths: "{{ platform_package_temp_download_dir.path }}"
         patterns: "*.rpm"
-      register: downloaded_platform_packages
+      register: platform_packages_find_result
       changed_when: false
 
-    - name: Install the Itential Platform packages (local)
-      ansible.builtin.dnf:
-        name: "{{ downloaded_platform_packages.files | map(attribute='path') | join(',') }}"
-        disable_gpg_check: true
-        state: present
-      when: downloaded_platform_packages | length > 0
+    - name: Install the Itential Platform packages
+      when: platform_packages_find_result | length > 0
+      block:
+        - name: Determine if the packages need to be relocated
+          ansible.builtin.set_fact:
+            platform_relocate_packages: true
+          when: >
+            (platform_root_dir != platform_root_dir_default or
+             platform_log_dir != platform_log_dir_default or
+             platform_config_dir != platform_config_dir_default or
+             platform_itential_home_dir != platform_itential_home_dir_default)
 
-    # TODO: Implement installing from a yum repo
-    # - name: Install the Itential Platform packages (YUM repository)
-    #   ansible.builtin.dnf:
-    #     name: "{{ item.path }}"
-    #     disable_gpg_check: true
-    #     state: present
-    #   loop: "{{ platform_packages }}"
-    #   loop_control:
-    #     loop_var: artifact
-    #   when:
-    #     - "'http' not in artifact"
-    #     - not artifact.endswith('.rpm')
+        - name: Install the Itential Platform packages (standard install directories)
+          ansible.builtin.dnf:
+            name: "{{ platform_packages_find_result.files | map(attribute='path') | join(',') }}"
+            disable_gpg_check: true
+            state: present
+          when: platform_relocate_packages is not defined
+
+        - name: Install the Itential Platform packages (relocate install directories)
+          ansible.builtin.include_tasks:
+            file: install-platform-packages-relocate.yml
+          when: platform_relocate_packages is defined
+
+        # TODO: Implement installing from a yum repo
+        # - name: Install the Itential Platform packages (YUM repository)
+        #   ansible.builtin.dnf:
+        #     name: "{{ item.path }}"
+        #     disable_gpg_check: true
+        #     state: present
+        #   loop: "{{ platform_packages }}"
+        #   loop_control:
+        #     loop_var: artifact
+        #   when:
+        #     - "'http' not in artifact"
+        #     - not artifact.endswith('.rpm')
 
     - name: Remove temporary download directory
       ansible.builtin.file:
-        path: "{{ downloaddir.path }}"
+        path: "{{ platform_package_temp_download_dir.path }}"
         state: absent
       changed_when: false
 

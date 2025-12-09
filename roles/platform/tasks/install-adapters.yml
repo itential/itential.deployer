@@ -1,23 +1,17 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Disable safe repository checks
-  community.general.git_config:
-    name: safe.directory
-    scope: global
-    value: '*'
-  when: platform_disable_git_safe_repo_checks
-
 - name: Install any configured adapters
   notify: Enable and Start Platform
-  when:
-    - platform_adapters is defined
-    - platform_adapters is iterable
-    - (platform_adapters | default([], true)) | length > 0
+  when: ( (not offline_install_enabled | bool) and
+          platform_adapters is defined and
+          platform_adapters is iterable and
+          (platform_adapters | default([], true)) | length > 0 ) or
+        offline_install_enabled | bool
   block:
     - name: Ensure adapters directory exists
       ansible.builtin.file:
-        path: "{{ platform_service_dir }}"
+        path: "{{ platform_services_dir }}"
         owner: "{{ platform_user }}"
         group: "{{ platform_group }}"
         mode: '0775'
@@ -25,41 +19,52 @@
 
     - name: Find all adapters already installed
       ansible.builtin.find:
-        paths: "{{ platform_service_dir }}"
+        paths: "{{ platform_services_dir }}"
         recurse: false
         file_type: directory
-      register: installed_adapters_result
+        patterns: "adapter-*"
+      register: platform_installed_adapters_find_result
 
     - name: Create a list of adapters already installed
       ansible.builtin.set_fact:
-        installed_adapters: "{{ installed_adapters | default([]) + [item.path | basename] }}"
-      loop: "{{ installed_adapters_result.files }}"
-
-    - name: Remove the adapters already installed from the list of adapters
-      ansible.builtin.set_fact:
-        platform_adapters: "{{ platform_adapters | reject('search', item) }}"
-      loop: "{{ installed_adapters }}"
-      when:
-        - installed_adapters is defined
-        - installed_adapters is iterable
-        - installed_adapters | length > 0
-
-    # From the list of repos provided, extract the name of the adapter. This name
-    # will be used in a later step to perform the npm install.
-    - name: Make a list of the adapter names
-      ansible.builtin.set_fact:
-        adapter_names: "{{ adapter_names + [item | basename | split('.') | first] }}"
-      loop: "{{ platform_adapters | default([], true) }}"
-      vars:
-        adapter_names: []
+        platform_installed_adapters: "{{ platform_installed_adapters | default([]) + [item.path | basename] }}"
+      loop: "{{ platform_installed_adapters_find_result.files }}"
 
     - name: Install adapters
       when: not offline_install_enabled
       block:
+        - name: Remove the adapters already installed from the list of adapters
+          ansible.builtin.set_fact:
+            platform_adapters: "{{ platform_adapters | reject('search', item) }}"
+          loop: "{{ platform_installed_adapters }}"
+          when:
+            - platform_installed_adapters is defined
+            - platform_installed_adapters is iterable
+            - platform_installed_adapters | length > 0
+
+        # From the list of repos/zip files provided, extract the name of the adapter. This name
+        # will be used in a later step to perform the npm install.
+        # Examples:
+        #   https://gitlab.com/itentialopensource/adapters/<ADAPTER_NAME>.git
+        #   <ADAPTER_NAME>.zip
+        - name: Make a list of the adapter names
+          ansible.builtin.set_fact:
+            platform_adapter_names: "{{ platform_adapter_names + [item | basename | split('.') | first] }}"
+          loop: "{{ platform_adapters | default([], true) }}"
+          vars:
+            platform_adapter_names: []
+
+        - name: Disable safe repository checks
+          community.general.git_config:
+            name: safe.directory
+            scope: global
+            value: '*'
+          when: platform_disable_git_safe_repo_checks
+
         - name: Git clone adapter # noqa: latest (always clone the latest)
           ansible.builtin.git:
             repo: "{{ item }}"
-            dest: "{{ platform_service_dir }}/{{ adapter_names[i] }}"
+            dest: "{{ platform_services_dir }}/{{ platform_adapter_names[i] }}"
             force: true
           loop: "{{ platform_adapters | default([], true) }}"
           loop_control:
@@ -69,7 +74,7 @@
         - name: Unzip adapter archive
           ansible.builtin.unarchive:
             src: "{{ item }}"
-            dest: "{{ platform_service_dir }}"
+            dest: "{{ platform_services_dir }}"
           loop: "{{ platform_adapters | default([], true) }}"
           loop_control:
             index_var: i
@@ -77,49 +82,98 @@
 
         - name: Delete package-lock.json file
           ansible.builtin.file:
-            path: "{{ platform_service_dir }}/{{ item }}/package-lock.json"
+            path: "{{ platform_services_dir }}/{{ item }}/package-lock.json"
             state: absent
-          loop: "{{ adapter_names }}"
+          loop: "{{ platform_adapter_names }}"
           when: platform_delete_package_lock_file
 
         - name: Run npm install
           community.general.npm:
-            path: "{{ platform_service_dir }}/{{ item }}"
+            path: "{{ platform_services_dir }}/{{ item }}"
             ignore_scripts: "{{ platform_npm_ignore_scripts }}"
-          loop: "{{ adapter_names }}"
+          loop: "{{ platform_adapter_names }}"
 
     - name: Install adapters (offline)
-      ansible.builtin.include_role:
-        name: offline
-        tasks_from: install-adapter
-      vars:
-        offline_src_adapters_path: "{{ platform_offline_control_node_adapters_dir }}"
-        offline_dest_adapters_path: "{{ platform_service_dir }}"
-      loop: "{{ adapter_names }}"
-      loop_control:
-        loop_var: adapter_name
       when: offline_install_enabled
+      block:
+        - name: Find downloaded adapters (offline)
+          ansible.builtin.find:
+            paths: "{{ platform_offline_control_node_adapters_dir }}"
+            patterns: "*.tgz"
+          register: platform_downloaded_adapters
+          changed_when: false
+          delegate_to: localhost
+          become: false
 
-    # Using chown and chmod is a faster way to enforce the file ownership and
-    # permissions. The file module in ansible checks each and every file/dir
-    # in the tree, 'chown -R ' does not, it just sets it.
-    - name: Set appropriate ownership on all itential files
-      ansible.builtin.command:
-        cmd: "chown -R {{ platform_user }}:{{ platform_group }}
-             {{ platform_service_dir }}/{{ item }}"
-      loop: "{{ adapter_names }}"
-      changed_when: true
+        # From the list of archives provided, extract the name of the adapter.
+        # Examples:
+        #   <SCOPE>-<ADAPTER_NAME>-<VERSION>.tgz
+        - name: Make a list of the adapter names (offline)
+          ansible.builtin.set_fact:
+            platform_adapter_names: "{{ platform_adapter_names + [item.path |
+              regex_replace('^.*?(adapter-[^-]+(?:[_-][^-]+)*)-\\d.*\\.tgz$', '\\1')] }}"
+          loop: "{{ platform_downloaded_adapters.files | default([], true) }}"
+          vars:
+            platform_adapter_names: []
+          when:
+            - platform_downloaded_adapters is defined
+            - platform_downloaded_adapters.files is defined
+            - platform_downloaded_adapters.files is iterable
+            - platform_downloaded_adapters.files | length > 0
 
-    - name: Set appropriate permissions on all itential files
-      ansible.builtin.command:
-        cmd: "chmod -R 775 {{ platform_service_dir }}/{{ item }}"
-      loop: "{{ adapter_names }}"
-      changed_when: true
+        - name: Remove the adapters already installed from the list of adapters names (offline)
+          ansible.builtin.set_fact:
+            platform_adapter_names: "{{ platform_adapter_names | reject('search', item) }}"
+          loop: "{{ platform_installed_adapters }}"
+          when:
+            - platform_adapter_names is defined
+            - platform_adapter_names is iterable
+            - platform_adapter_names | length > 0
+            - platform_installed_adapters is defined
+            - platform_installed_adapters is iterable
+            - platform_installed_adapters | length > 0
 
-    - name: Write adapter names to release file
-      ansible.builtin.lineinfile:
-        path: "/etc/itential-release"
-        line: "ADAPTER={{ item }}"
-        create: true
-        mode: '0644'
-      loop: "{{ adapter_names }}"
+        - name: Install adapters (offline)
+          ansible.builtin.include_role:
+            name: offline
+            tasks_from: install-adapter
+          vars:
+            offline_src_adapters_path: "{{ platform_offline_control_node_adapters_dir }}"
+            offline_dest_adapters_path: "{{ platform_services_dir }}"
+          loop: "{{ platform_adapter_names }}"
+          loop_control:
+            loop_var: adapter_name
+          when:
+            - platform_adapter_names is defined
+            - platform_adapter_names is iterable
+            - platform_adapter_names | length > 0
+
+    - name: Set ownership and permissions and update release file
+      when:
+        - platform_adapter_names is defined
+        - platform_adapter_names is iterable
+        - platform_adapter_names | length > 0
+      block:
+        # Using chown and chmod is a faster way to enforce the file ownership and
+        # permissions. The file module in ansible checks each and every file/dir
+        # in the tree, 'chown -R ' does not, it just sets it.
+        - name: Set appropriate ownership on all itential files
+          ansible.builtin.command:
+            cmd: "chown -R {{ platform_user }}:{{ platform_group }}
+                {{ platform_services_dir }}/{{ item }}"
+          loop: "{{ platform_adapter_names }}"
+          changed_when: true
+
+        - name: Set appropriate permissions on all itential files
+          ansible.builtin.command:
+            cmd: "chmod -R 775 {{ platform_services_dir }}/{{ item }}"
+          loop: "{{ platform_adapter_names }}"
+          changed_when: true
+
+        - name: Write adapter names to release file
+          ansible.builtin.lineinfile:
+            path: "/etc/itential-release"
+            line: "ADAPTER={{ item }}"
+            create: true
+            mode: '0644'
+          loop: "{{ platform_adapter_names }}"

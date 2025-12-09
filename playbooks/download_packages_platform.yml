@@ -6,6 +6,7 @@
   become: true
   vars:
     offline_install_enabled: false
+    validate_platform_encryption_key: false
   roles:
     - role: itential.deployer.common
     - role: itential.deployer.offline

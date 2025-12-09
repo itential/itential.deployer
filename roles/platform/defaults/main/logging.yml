@@ -11,7 +11,7 @@ platform_log_max_file_size: 1048576
 platform_log_level: info
 
 # The absolute directory path where log files are written.
-platform_log_dir: /var/log/itential/platform
+platform_log_dir: "{{ platform_log_dir_default }}"
 
 # The name of the primary platform log file.
 platform_log_filename: platform.log
@@ -20,7 +20,7 @@ platform_log_filename: platform.log
 platform_log_level_console: warn
 
 # The absolute directory path where webserver log files are written.
-platform_webserver_log_directory: /var/log/itential/platform
+platform_webserver_log_directory: "{{ platform_log_dir }}"
 
 # The name of the webserver log file.
 platform_webserver_log_filename: webserver.log

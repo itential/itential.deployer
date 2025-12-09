@@ -70,31 +70,22 @@
   when: gateway_enable_ansible | bool
 
 - name: Download Ansible collections
-  tags: download_ansible_collections
-  block:
-    - name: Download Ansible collections
-      ansible.builtin.include_tasks:
-        file: download-ansible-collections.yml
-      when:
-        - gateway_ansible_collections is defined
-        - gateway_ansible_collections is iterable
-        - gateway_ansible_collections | length > 0
-
-- name: Copy IAG wheel file to target node
-  ansible.builtin.copy:
-    src: "{{ gateway_whl_file }}"
-    dest: "{{ gateway_pkgs_temp_dir.path }}"
-    mode: '0644'
+  ansible.builtin.include_tasks:
+    file: download-ansible-collections.yml
+  when:
+    - gateway_ansible_collections is defined
+    - gateway_ansible_collections is iterable
+    - gateway_ansible_collections | length > 0
 
 - name: Install IAG
   ansible.builtin.pip:
-    name: "{{ gateway_pkgs_temp_dir.path }}/{{ gateway_whl_file }}"
+    name: "{{ gateway_wheel_download.files[0].path }}"
     virtualenv: "{{ gateway_pkgs_temp_dir.path }}/offline_install"
     extra_args: --log /var/log/pip.log
 
 - name: Uninstall IAG
   ansible.builtin.pip:
-    name: "{{ gateway_pkgs_temp_dir.path }}/{{ gateway_whl_file }}"
+    name: "{{ gateway_wheel_download.files[0].path }}"
     state: absent
     virtualenv: "{{ gateway_pkgs_temp_dir.path }}/offline_install"
     extra_args: --log /var/log/pip.log

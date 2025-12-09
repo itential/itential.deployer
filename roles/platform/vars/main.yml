@@ -1,9 +1,22 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-# Itential Platform directories
-platform_root_dir: /opt/itential/platform
-platform_install_dir: "{{ platform_root_dir }}/server"
-platform_service_dir: "{{ platform_root_dir }}/services"
-platform_config_dir: /etc/itential
-platform_tls_dir: /etc/ssl/itential-platform
+# Itential Platform directory defaults
+platform_root_dir_default: /opt/itential/platform
+platform_server_dir_default: /opt/itential/platform/server
+platform_services_dir_default: /opt/itential/platform/services
+platform_config_dir_default: /etc/itential
+platform_tls_dir_default: /etc/ssl/itential-platform
+platform_log_dir_default: /var/log/itential
+platform_itential_home_dir_default: /home/itential
+
+# The Platform server and services directories cannot be overridden in the inventory. Only the
+# Platform root directory can.
+platform_server_dir: "{{ platform_root_dir }}/server"
+platform_services_dir: "{{ platform_root_dir }}/services"
+
+# What to write in application properties file for Role ID (defaults to env var reference)
+platform_vault_role_id_property: "${ITENTIAL_VAULT_ROLE_ID}"
+
+# What to write in application properties file for Secret ID (defaults to env var reference)
+platform_vault_secret_id_property: "${ITENTIAL_VAULT_SECRET_ID}"

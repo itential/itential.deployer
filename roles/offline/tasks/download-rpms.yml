@@ -51,7 +51,7 @@
 
     - name: Download packages (repotrack)
       ansible.builtin.command:
-        cmd: repotrack "{{ offline_download_packages }}"
+        cmd: "repotrack {{ offline_download_packages | join(' ') }}"
       args:
         chdir: "{{ offline_download_dir }}"
       changed_when: true

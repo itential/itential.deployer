@@ -27,18 +27,6 @@ an IAG adapter that points to the gateway server(s) named in the `gateway` group
 
 ## Variables
 
-### Static Variables
-
-The variables located in the `vars` directory of each role are "static" and not meant to be
-overridden by the user.  Since these variable files are included at run-time based on the Itential
-Platform release and OS major version, they have a higher precedence than the variables in the
-inventory and are not easily overridden.
-
-| Variable | Group | Type | Description | Default Value |
-| :------- | :---- | :--- | :---------- | :------------ |
-| `platform_install_dir` | `platform` | String | The Itential Platform installation directory. | `/opt/itential/platform/server` |
-| `platform_log_dir` | `platform` | String | The Itential Platform log directory. | `/var/log/itential` |
-
 ### Global Variables
 
 The variables in this section are configured in the inventory in the `all` group vars.
@@ -203,13 +191,17 @@ default variables located in `roles/platform/defaults/main/vault.yml`.
 | Variable | Type | Description | Default Value |
 | :------- | :--- | :---------- | :------------ |
 | platform_configure_vault | Boolean | Flag to enable/disable configuring Vault in Itential Platform | `false` |
-| platform_vault_token_dir | String | The directory to store the vault root key in | `{{ platform_install_dir }}/keys` |
+| platform_vault_token_dir | String | The directory to store the vault root key in | `{{ platform_server_dir_default }}/keys` |
 | platform_vault_url | String | The URL to the Hashicorp Vault server. | `http://localhost:8200` |
 | platform_vault_auth_method | String | The authorization method to connect to Hashicorp Vault. Either token or approle. | `token` |
-| platform_vault_role_id | String | Hashicorp Vault Role ID used for AppRole authentication. |  |
-| platform_vault_secret_id | String | Hashicorp Vault Secret ID used for AppRole login. |  |
-| platform_vault_approle_path | String | The path where the AppRole was enabled. |  |
+| platform_vault_token | String | Hashicorp Vault token used for token-based authentication |  |
+| platform_vault_role_id | String | Hashicorp Vault Role ID variable used for AppRole authentication |  |
+| platform_vault_secret_id | String | Hashicorp Vault Secret ID variable used for AppRole login |  |
+| platform_vault_approle_path | String | The path where the AppRole was enabled. | `approle` |
 | platform_vault_token_file | String | The file path to a token file. The token is used for authentication to access Vault secrets. | `{{ platform_vault_token_dir }}/vault.token` |
+| platform_redis_password_vault | Reference for the path to redis password secret and name of key in Hashicorp Vault | `$SECRET_iap $KEY_redisPassword` |
+| platform_mongo_password_vault | Reference for the path to mongodb password secret and name of key in Hashicorp Vault | `$SECRET_iap $KEY_mongoDb` |
+| platform_vault_role_secrets_env_file | The file path to the .env file containing Role ID and Secret ID for AppRole authentication | `{{ platform_vault_token_dir }}/vault-role-secrets.env` |
 | platform_vault_secrets_endpoint | String | The endpoint for the Secrets Engine that is used. | `itential/data` |
 | platform_vault_read_only | Boolean | If true, only reads secrets from Hashicorp Vault. Otherwise, the platform can write secrets to Vault for storage. | `true` |
 
@@ -272,6 +264,10 @@ located in `roles/platform/defaults/main/platform.yml`.
 
 | Variable | Type | Description | Default Value |
 | :------- | :--- | :---------- | :------------ |
+| platform_server_dir | String | The Itential Platform installation directory. | `/opt/itential/platform/server` |
+| platform_config_dir | String | The Itential Platform configuration directory. | `/etc/itential` |
+| platform_tls_dir | String | The Itential Platform TLS directory. | `/etc/ssl/itential-platform` |
+| platform_itential_home_dir | String | The Itential Platform itential user home directory. | `/home/itential` |
 | platform_mongodb_root_ca_file_destination | String | Destination as referenced by itential user when connecting from itential host. This is ultimately stored in the mongo database to be read by Itential Platform, therefore this is the location as seen from the Itential Platform host. | `/opt/itential/keys/mongo-rootCA.pem` |
 | platform_package_dependencies | List(String) | Required OS packages for install. | `glibc-common, openldap, openldap-clients, openssl, git` |
 | platform_python_base_dependencies | List(String) | Required python packages for install. | `pip, setuptools, wheel` |
@@ -286,6 +282,7 @@ located in `roles/platform/defaults/main/platform.yml`.
 | platform_disable_git_safe_repo_checks | Boolean | Flag to disable Git safe repo check. | `true` |
 | platform_npm_ignore_scripts | Boolean | Flag to prevent the NPM scripts from running when running the NPM install. | `true` |
 | platform_app_artifacts_enabled | Boolean | Flag to install app-artifacts. | `false` |
+| platform_start_service | Boolean | Flag to determine if the Itential Platform service is started. | `true` |
 
 #### Server Variables
 
@@ -327,7 +324,7 @@ with a single node.
 ```yaml
 all:
   vars:
-    platform_release: 6.0
+    platform_release: 6
 
   children:
     platform:
@@ -335,6 +332,7 @@ all:
         <host1>:
           ansible_host: <addr1>
       vars:
+        platform_encryption_key: <openssl rand -hex 32> # 64-length hex string, representing a 256-bit AES  encryption key.
         platform_packages:
           - <rpm1>
           - <rpmN>
@@ -348,7 +346,7 @@ to `true`, and configure the adapters in the `platform_adapters` variable.
 ```yaml
 all:
   vars:
-    platform_release: 6.0
+    platform_release: 6
 
   children:
     platform:
@@ -356,6 +354,7 @@ all:
         <host1>:
           ansible_host: <addr1>
       vars:
+        platform_encryption_key: <openssl rand -hex 32> # 64-length hex string, representing a 256-bit AES  encryption key.
         platform_packages:
           - <rpm1>
           - <rpmN>
@@ -374,7 +373,7 @@ set it to `true` and configure the `platform_app_artifacts_source_file`.
 ```yaml
 all:
   vars:
-    platform_release: 6.0
+    platform_release: 6
 
   children:
     platform:
@@ -382,6 +381,7 @@ all:
         host1:
           ansible_host: addr1
       vars:
+        platform_encryption_key: <openssl rand -hex 32> # 64-length hex string, representing a 256-bit AES  encryption key.
         platform_app_artifacts_enabled: true
         platform_app_artifacts_source_file: archive1
 ```
@@ -393,7 +393,7 @@ To configure the Platform to integrate with Hashicorp Vault for secrets manageme
 ```yaml
 all:
   vars:
-    platform_release: 6.0
+    platform_release: 6
 
   children:
     platform:
@@ -401,6 +401,7 @@ all:
         <host1>:
           ansible_host: <addr1>
       vars:
+        platform_encryption_key: <openssl rand -hex 32> # 64-length hex string, representing a 256-bit AES  encryption key.
         platform_configure_vault: true
         platform_vault_url: http://hashi-vault-example.com:8200
 ```
@@ -428,9 +429,43 @@ The Platform playbook and role supports the following tags:
 | configure_vault | Configure Hashicorp Vault |
 | configure_platform | Configure Itential Platform systemd service and properties file |
 
-For example, to regenerate the systemd service script and platform.properties file run the platform 
+For example, to regenerate the systemd service script and platform.properties file run the platform
 playbook with the `configure_platform` tag:
 
 ```bash
 ansible-playbook itential.deployer.platform -i <inventory> --tags configure_platform
+```
+
+## Installing Platform in Alternate Directories
+
+By default the Platform will install files into the following directories:
+
+| Directory | Variable | Can Override? |
+| :-------- | :------- | :------------ |
+| /opt/itential/platform | platform_root_dir | Yes |
+| /opt/itential/platform/server | platform_server_dir | No |
+| /opt/itential/platform/services | platform_services_dir | No |
+| /etc/itential | platform_config_dir | Yes |
+| /etc/ssl/itential-platform | platform_tls_dir | Yes |
+| /var/log/itential | platform_log_dir | Yes |
+| /home/itential | platform_itential_home_dir | Yes |
+
+However, the Platform directories can be overridden in the inventory. If overridden, the Deployer
+will install the RPMs using the `rpm` command instead of using the Ansible `dnf` module so that
+the `--relocate` flag can be used.
+
+Note that `platform_server_dir` and `platform_service_dir` cannot be overridden - only the
+`platform_root_dir` can.
+
+If the `platform_root_dir` is overridden, the `platform_services_dir` will automatically be added
+to the `service_directory` in `platform.properties`.
+
+Example overrides:
+
+```yaml
+platform_root_dir: /app/itential/platform
+platform_config_dir: /app/itential/conf
+platform_tls_dir: /app/itential/ssl
+platform_log_dir: /app/itential/log
+platform_itential_home_dir: /export/home/itential
 ```

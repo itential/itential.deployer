@@ -31,7 +31,7 @@
     msg: "{{ mongodb_state }}"
 
 # Execute the template to apply changes to the mongo.conf for replication
-- name: Create MongoDB config file
+- name: Create MongoDB config file (replicaset)
   ansible.builtin.template:
     src: mongod.conf.j2
     dest: "{{ mongodb_conf_file }}"
@@ -42,11 +42,15 @@
   vars:
     stage: "replication"
 
-- name: Start mongo
-  ansible.builtin.systemd:
+- name: Start mongo (replicaset)
+  ansible.builtin.service:
     name: mongod
     state: restarted
     enabled: true
+  register: mongod_service_result
+  until: mongod_service_result.status.ActiveState == "active"
+  retries: "{{ mongodb_mongod_service_retries }}"
+  delay: "{{ mongodb_mongod_service_delay }}"
   when: not mongodb_state.replication_enabled
 
 - name: Set empty array of mongo servers
@@ -79,7 +83,7 @@
   community.mongodb.mongodb_replicaset:
     arbiter_at_index: "{{ (groups.mongodb_arbiter | default([]) | length > 0) | ternary(mongodb_servers | length - 1, omit) }}"
     auth_mechanism: "SCRAM-SHA-256"
-    login_user: "{{ (mongodb_state.auth_enabled | bool) | ternary('admin', omit) }}"
+    login_user: "{{ (mongodb_state.auth_enabled | bool) | ternary(mongodb_user_admin, omit) }}"
     login_password: "{{ (mongodb_state.auth_enabled | bool) | ternary(mongodb_user_admin_password, omit) }}"
     login_port: "{{ mongodb_port }}"
     login_database: admin
@@ -96,14 +100,14 @@
 
 - name: Ensure replicaset is stable before continuing
   community.mongodb.mongodb_status:
-    login_user: "{{ mongodb_state.auth_enabled | ternary('admin', omit) }}"
+    login_user: "{{ mongodb_state.auth_enabled | ternary(mongodb_user_admin, omit) }}"
     login_password: "{{ mongodb_state.auth_enabled | ternary(mongodb_user_admin_password, omit) }}"
     login_port: "{{ mongodb_port }}"
     login_database: admin
     login_host: "{{ inventory_hostname }}"
     replica_set: "{{ mongodb_replset_name }}"
-    poll: 3
-    interval: 10
+    poll: "{{ mongodb_status_poll }}"
+    interval: "{{ mongodb_status_interval }}"
     validate: minimal
   register: rs
   failed_when:
@@ -143,7 +147,7 @@
 - name: Adjust the default writeConcern if there are arbiters
   community.mongodb.mongodb_shell:
     mongo_cmd: auto
-    login_user: "{{ mongodb_state.auth_enabled | ternary('admin', omit) }}"
+    login_user: "{{ mongodb_state.auth_enabled | ternary(mongodb_user_admin, omit) }}"
     login_password: "{{ mongodb_state.auth_enabled | ternary(mongodb_user_admin_password, omit) }}"
     login_port: "{{ mongodb_port }}"
     login_database: admin

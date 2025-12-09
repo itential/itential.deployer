@@ -61,7 +61,7 @@ This is an example directory structure on a Target Node on a RedHat 9 server:
     │       └── wheels
     │           ├── app
     │           └── base
-    └── 6.0
+    └── 6
         ├── mongodb
         │   ├── rpms
         │   └── wheels
@@ -106,7 +106,7 @@ playbooks/files/itential_packages
     │       └── wheels
     │           ├── app
     │           └── base
-    └── 6.0
+    └── 6
         ├── mongodb
         │   ├── rpms
         │   └── wheels
@@ -221,11 +221,9 @@ The following variables are defined in the `gateway` role.
 | `gateway_control_node_root` | String | Gateway control node root directory | `{{ offline_control_node_root }}/{{ gateway_offline_packages_root }}` |
 | `gateway_offline_target_node_rpms_dir` | String | Gateway target node RPMs directory | `{{ gateway_target_node_root }}/rpms` |
 | `gateway_offline_target_node_wheels_dir` | String | Gateway target node wheels directory | `{{ gateway_target_node_root }}/wheels` |
-| `gateway_offline_target_node_archives_dir` | String | Gateway target node archives directory | `{{ gateway_target_node_root }}/archives` |
 | `gateway_offline_target_node_collections_dir` | String | Gateway target node collections directory | `{{ gateway_target_node_root }}/collections` |
 | `gateway_offline_control_node_rpms_dir` | String | Gateway control node RPMs directory | `{{ gateway_control_node_root }}/rpms` |
 | `gateway_offline_control_node_wheels_dir` | String | Gateway control node wheels directory | `{{ gateway_control_node_root }}/wheels` |
-| `gateway_offline_control_node_archives_dir` | String | Gateway control node archives directory | `{{ gateway_control_node_root }}/archives` |
 | `gateway_offline_control_node_collections_dir` | String | Gateway control node collections directory | `{{ gateway_control_node_root }}/collections` |
 
 ### MongoDB

@@ -20,7 +20,7 @@
     tasks_from: download-rpms
   vars:
     offline_download_method: yum_module
-    offline_download_packages: "{{ vault_packages | split }}"
+    offline_download_packages: "{{ vault_packages }}"
     offline_download_dir: "{{ vault_offline_target_node_rpms_dir }}"
 
 - name: Copy RPMs to control node

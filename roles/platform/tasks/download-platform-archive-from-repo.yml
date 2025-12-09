@@ -4,7 +4,7 @@
 - name: Download the Itential Platform artifact from URL
   ansible.builtin.get_url:
     url: "{{ artifact }}"
-    dest: "{{ downloaddir.path }}/"
+    dest: "{{ platform_package_temp_download_dir.path }}/"
     mode: '0755'
     # Sets the appropriate header based on the repository type:
     # - For JFrog: Uses the "X-JFrog-Art-Api" header with the API key if "repository_api_key"
@@ -24,5 +24,5 @@
     url_username: "{{ repository_username | default(omit) }}"
     url_password: "{{ repository_password | default(omit) }}"
     validate_certs: true
-  register: download_result
+  register: platform_package_download_result
   changed_when: false

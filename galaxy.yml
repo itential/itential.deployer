@@ -8,7 +8,7 @@ namespace: itential
 name: deployer
 
 # The version of the collection. Must be compatible with semantic versioning
-version: 3.2.0
+version: 3.7.0
 
 # The path to the Markdown (.md) readme file. This path is relative to the root of the collection
 readme: README.md
@@ -22,6 +22,7 @@ authors:
   - Peter Sprygada <peter.sprygada@itential.com>
   - Nick Andreano <nick.andreano@itential.com>
   - Marcos Dias <marcos.dias@itential.com>
+  - Hamza Qadri <hamza.qadri@itential.com>
 
 ### OPTIONAL but strongly recommended
 # A short summary description of the collection
@@ -49,6 +50,7 @@ tags:
 # Multiple version range specifiers can be set and are separated by ','.
 dependencies:
   'ansible.posix': '>=0.0.1'
+  'community.general': '<12.0.0'
   'community.mongodb': '>=0.0.1'
 
 # The URL of the originating SCM repository

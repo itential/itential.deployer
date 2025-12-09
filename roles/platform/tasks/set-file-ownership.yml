@@ -9,10 +9,10 @@
 # in the tree, 'chown -R' does not, it just sets it.
 - name: Set appropriate ownership on all itential files
   ansible.builtin.command:
-    cmd: "chown -R {{ platform_user }}:{{ platform_group }} {{ platform_install_dir }}"
+    cmd: "chown -R {{ platform_user }}:{{ platform_group }} {{ platform_server_dir }}"
   changed_when: true
 
 - name: Set appropriate permissions on all itential files
   ansible.builtin.command:
-    cmd: "chmod -R 775 {{ platform_install_dir }}"
+    cmd: "chmod -R 775 {{ platform_server_dir }}"
   changed_when: true

@@ -2,22 +2,39 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
 - name: Install Python
-  ansible.builtin.include_role:
-    name: python
   tags: install_python
-  vars:
-    python_packages: "{{ gateway_python_packages }}"
+  block:
+    - name: Install Python
+      ansible.builtin.include_role:
+        name: python
+      vars:
+        python_packages: "{{ gateway_python_packages }}"
+      when: not offline_install_enabled | bool
 
-- name: Setup python virtual environment
-  ansible.builtin.command:
-    chdir: "{{ gateway_install_dir }}"
-    cmd: "{{ gateway_python_executable }} -m venv {{ gateway_venv_name }}"
-  changed_when: true
+    - name: Install Python (offline)
+      ansible.builtin.import_role:
+        name: offline
+        tasks_from: install-rpms
+      vars:
+        offline_rpms_path: "{{ gateway_offline_control_node_rpms_dir }}/python"
+      when: offline_install_enabled | bool
 
-- name: Creat file to activate the virtual environment
-  ansible.builtin.template:
-    src: venv.sh.j2
-    dest: /etc/profile.d/venv.sh
-    mode: "0644"
-    owner: root
-    group: root
+    - name: Setup Python virtual environment
+      ansible.builtin.command:
+        chdir: "{{ gateway_install_dir }}"
+        cmd: "{{ gateway_python_executable }} -m venv {{ gateway_venv_name }}"
+      changed_when: true
+
+    - name: Configure gateway user to activate the virtual environment at login
+      ansible.builtin.blockinfile:
+        path: "{{ gateway_user_shell_rc_file }}"
+        block: |
+          # Auto-activate Gateway Python virtual environment
+          if [ -f {{ gateway_python_venv }}/bin/activate ]; then
+              source {{ gateway_python_venv }}/bin/activate
+          fi
+        marker: "# {mark} ANSIBLE MANAGED - Gateway Python venv"
+        create: true
+        owner: "{{ gateway_user }}"
+        group: "{{ gateway_group }}"
+        mode: "0644"

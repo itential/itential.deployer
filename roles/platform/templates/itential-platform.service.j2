@@ -6,8 +6,11 @@ Requires=network.target
 [Service]
 Type=simple
 User={{ platform_user }}
-WorkingDirectory={{ platform_install_dir }}
-ExecStart=/usr/bin/node --max-old-space-size=8192 server.js
+WorkingDirectory={{ platform_server_dir }}
+{% if platform_configure_vault and platform_vault_auth_method == "approle" %}
+EnvironmentFile={{ platform_vault_token_dir }}/vault-role-secrets.env
+{% endif %}
+ExecStart=/usr/bin/node --max-old-space-size=8192 server.js --config-file {{ platform_config_dir }}/platform.properties
 Restart=on-failure
 ExecReload=/bin/kill -USR2 $MAINPID
 KillMode=mixed

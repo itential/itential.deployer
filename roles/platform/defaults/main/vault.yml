@@ -5,7 +5,7 @@
 platform_configure_vault: false
 
 # The directory to store the vault root key in
-platform_vault_token_dir: "{{ platform_install_dir }}/keys"
+platform_vault_token_dir: "{{ platform_server_dir_default }}/keys"
 
 # The URL to the Hashicorp Vault server.
 platform_vault_url: http://localhost:8200
@@ -13,17 +13,32 @@ platform_vault_url: http://localhost:8200
 # The authorization method to connect to Hashicorp Vault. Either token or approle.
 platform_vault_auth_method: token
 
-# Hashicorp Vault Role ID used for AppRole authentication.
-platform_vault_role_id:
+# Hashicorp Vault token (optional - if not provided, fetched from Vault server)
+platform_vault_token: ""
 
-# Hashicorp Vault Secret ID used for AppRole login.
-platform_vault_secret_id:
+# Hashicorp Vault Role ID - actual credential value (fetched from server or user-provided)
+platform_vault_role_id: ""
+
+# Hashicorp Vault Secret ID - actual credential value (fetched from server or user-provided)
+platform_vault_secret_id: ""
 
 # The path where the AppRole was enabled.
-platform_vault_approle_path:
+platform_vault_approle_path: approle
 
 # The file path to a token file. The token is used for authentication to access Vault secrets.
 platform_vault_token_file: "{{ platform_vault_token_dir }}/vault.token"
+
+# Reference for the path to secret and name of key in Hashicorp Vault
+# Syntax is $SECRET_{path to secret in Vault} $KEY_{name of key in secretPath}
+# For example, in perf lab Hashi Vault
+# secrets are at Secrets/itential/iap. Hence "$SECRET_iap"
+# Key is "redisPassword" for the password value. Hence "$KEY_redisPassword"
+platform_redis_password_vault: "$SECRET_iap $KEY_redisPassword"
+
+platform_mongo_password_vault: "$SECRET_iap $KEY_mongoDb"
+
+# The file path to the .env file containing Role ID and Secret ID for AppRole authentication.
+platform_vault_role_secrets_env_file: "{{ platform_vault_token_dir }}/vault-role-secrets.env"
 
 # The endpoint for the Secrets Engine that is used.
 platform_vault_secrets_endpoint: itential/data
