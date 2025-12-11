@@ -133,7 +133,7 @@ user sentineluser on >{{ redis_user_sentineluser_password }} &* -@all +auth +cli
 # Down).
 #
 # Default is 30 seconds.
-sentinel down-after-milliseconds {{ redis_master_name }} 10000
+sentinel down-after-milliseconds {{ redis_master_name }} 5000
 
 # IMPORTANT NOTE: starting with Redis 6.2 ACL capability is supported for
 # Sentinel mode, please refer to the Redis website https://redis.io/topics/acl
@@ -237,7 +237,7 @@ sentinel parallel-syncs {{ redis_master_name }} 1
 #   the exact parallel-syncs progression as specified.
 #
 # Default is 3 minutes.
-sentinel failover-timeout {{ redis_master_name }} 30000
+sentinel failover-timeout {{ redis_master_name }} 60000
 
 # SCRIPTS EXECUTION
 #
