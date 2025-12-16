@@ -273,8 +273,6 @@ located in `roles/platform/defaults/main/platform.yml`.
 | platform_python_base_dependencies | List(String) | Required python packages for install. | `pip, setuptools, wheel` |
 | platform_python_executable | String | The python executable locations. These will be symlinks to the appropriate executables in /usr/bin. | `/usr/bin/python{{ platform_python_version }}` |
 | platform_pip_executable | String | The pip executable locations. These will be symlinks to the appropriate executables in /usr/bin. | `/usr/bin/pip{{ platform_python_version }}` |
-| platform_configure_iag_adapters | Boolean | Should the platform configure and add any IAG adapters that it discovers? Based on the presence of devices in the gateway group this will build adapter configs for each that it finds and insert them into the mongo database. | `true` |
-| platform_iag_adapter_token_timeout | Integer | If the IAG adapters are configured, set the token timeout. The default value is 3600000 milliseconds (60 minutes). | 3600000 |
 | platform_user | String | The default user that runs the server process. | `itential` |
 | platform_group | String | The default group that runs the server process. | `itential` |
 | platform_upload_using_rsync | Boolean | Flag to determine whether to use rsync when uploading artifacts. | `false` |
