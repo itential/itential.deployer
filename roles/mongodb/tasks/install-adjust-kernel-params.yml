@@ -29,6 +29,11 @@
     name: net.core.somaxconn
     value: 65535
 
+- name: Set vm swappiness
+  ansible.posix.sysctl:
+    name: vm.swappiness
+    value: 1
+
 # Set Soft User Limits
 - name: Set number of procs
   community.general.pam_limits:
