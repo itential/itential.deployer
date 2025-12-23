@@ -218,32 +218,34 @@ the Deployer will either install the required repository or download the package
 
 | Component | Location | Protocol | Notes |
 | :-------- | :------- | :------- | :---- |
-| Ansible Control Node | <https://pypi.org> | TCP | |
-| Ansible Control Node | <https://galaxy.ansible.com> | TCP | |
-| Itential Gateway | <https://pypi.org> | TCP | |
-| Itential Gateway | <https://galaxy.ansible.com> | TCP | |
-| Itential Gateway | <https://registry.aws.itential.com> | TCP | |
-| Itential Platform | <https://registry.aws.itential.com> | TCP | |
-| Itential Platform | <https://registry.npmjs.org> | TCP | Core npm package access |
-| Itential Platform | <https://github.com> | TCP | GitHub-hosted dependencies |
-| Itential Platform | <https://codeload.github.com> | TCP | GitHub tarballs |
-| MongoDB | <https://repo.mongodb.org> | TCP | |
-| MongoDB | <https://www.mongodb.org> | TCP | |
-| MongoDB | <https://pgp.mongodb.org> | TCP | |
-| MongoDB | <https://pypi.org> | TCP | |
-| Redis | <http://rpms.remirepo.net> | TCP | When installing Redis from the Remi repository |
-| Redis | <https://dl.fedoraproject.org> | TCP | When installing Redis from the Remi repository |
-| Redis | <https://github.com> | TCP | When installing Redis from source |
-| Redis | <https://codeload.github.com> | TCP |  |
-| Vault | <https://rpm.releases.hashicorp.com> | TCP | |
+| Ansible Control Node | <https://galaxy.ansible.com> | TCP | Itential and community Ansible collections |
+| Ansible Control Node | <https://pypi.org> | TCP | Python modules |
+| Itential Gateway | <https://registry.aws.itential.com> | TCP | Itential packages |
+| Itential Gateway | <https://galaxy.ansible.com> | TCP | Community Ansible collections |
+| Itential Gateway | <https://pypi.org> | TCP | Python modules |
+| Itential Platform | <https://registry.aws.itential.com> | TCP | Itential packages |
+| Itential Platform | <https://registry.npmjs.org> | TCP | Core NPM packages |
+| Itential Platform | <https://pypi.org> | TCP | Python modules |
+| Itential Platform | <https://gitlab.com> | TCP | Platform Opensource Adapter packages |
+| MongoDB | <https://repo.mongodb.org> | TCP | MongoDB YUM RPMs |
+| MongoDB | <https://www.mongodb.org> | TCP | MongoDB YUM RPMs |
+| MongoDB | <https://pgp.mongodb.org> | TCP | MongoDB YUM repository GPG Key |
+| MongoDB | <https://pgp.mongodb.com> | TCP | MongoDB YUM repository GPG Key |
+| MongoDB | <https://pypi.org> | TCP | Python modules |
+| Redis | <http://rpms.remirepo.net> | TCP | Redis YUM RPMs<br>When installing Redis from the Remi repository |
+| Redis | <https://dl.fedoraproject.org> | TCP | EPEL YUM RPMs<bt>When installing Redis from the Remi repository |
+| Redis | <https://github.com> | TCP | Redis source packages <br>When installing Redis from source |
+| Redis | <https://codeload.github.com> | TCP | Redis source packages<br>When installing Redis from source |
+| Vault | <https://rpm.releases.hashicorp.com> | TCP | Vault YUM RPMs |
 
 If internal YUM repositories are used, refer to the
 [Using Internal YUM Repositories](#using-internal-yum-repositories) section.
 
 > [! WARNING]
-> The Itential Deployer nor the maintainers of the project can not know if any of the above URLs
-> will result in a redirect. If a customer is using a proxy or other such method to restrict access
-> this list may not represent the final URLs that are used.
+> The Itential Deployer and the maintainers of the project can not know if any of the above URLs
+> will result in a redirect. Reporitories may rely on CDNs or mirrors. If a customer is using a
+> proxy or other such method to restrict access, this list may not represent the final URLs that are
+> required.
 
 ### Ports and Networking
 
