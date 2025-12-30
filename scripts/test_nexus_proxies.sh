@@ -18,7 +18,7 @@ for repo in "${!NEXUS_REPOS[@]}"; do
     path="${NEXUS_REPOS[$repo]}"
     url="$NEXUS_BASE/$repo/$path"
     
-    echo -n "Testing $repo... "
+    echo "Testing $repo... "
     
     status=$(curl -s -o /dev/null -w "%{http_code}" "$url")
     

@@ -71,8 +71,8 @@ check_redirects() {
         return 1
     fi
     
-    # Extract all Location headers
-    local locations=$(echo "$output" | grep -i "^Location:" | sed 's/Location: //i' | tr -d '\r')
+    # Extract all Location headers and join with arrow separator
+    local locations=$(echo "$output" | grep -i "^Location:" | sed 's/Location: //i' | tr -d '\r' | tr '\n' ' → ' | sed 's/ → $//')
     
     if [ -n "$locations" ]; then
         echo "$locations"
@@ -147,14 +147,14 @@ cat > "$CSV_OUTPUT" << 'EOF'
 "Component","Base URL","DNS Resolution","HTTP Redirects","CDN Provider","Auth Status","Notes"
 EOF
 
-echo -e "${BLUE}╔════════════════════════════════════════════════════════════════╗${NC}"
-echo -e "${BLUE}║     Nexus Upstream Mirror Discovery Tool                      ║${NC}"
-echo -e "${BLUE}╚════════════════════════════════════════════════════════════════╝${NC}"
-echo ""
-echo -e "Output files:"
-echo -e "  - Markdown: ${GREEN}$MARKDOWN_OUTPUT${NC}"
-echo -e "  - CSV:      ${GREEN}$CSV_OUTPUT${NC}"
-echo ""
+printf "${BLUE}╔════════════════════════════════════════════════════════════════╗${NC}\n"
+printf "${BLUE}║     Nexus Upstream Mirror Discovery Tool                       ║${NC}\n"
+printf "${BLUE}╚════════════════════════════════════════════════════════════════╝${NC}\n"
+printf "\n"
+printf "Output files:\n"
+printf "  - Markdown: ${GREEN}%s${NC}\n" "$MARKDOWN_OUTPUT"
+printf "  - CSV:      ${GREEN}%s${NC}\n" "$CSV_OUTPUT"
+printf "\n"
 
 # Process each URL
 total=${#URLS[@]}
@@ -168,23 +168,23 @@ for entry in "${URLS[@]}"; do
     url=$(echo "$entry" | cut -d'|' -f2)
     domain=$(extract_domain "$url")
     
-    echo -e "\n${YELLOW}[$current/$total]${NC} Processing: ${GREEN}$name${NC}"
-    echo -e "         URL: $url"
+    printf "\n${YELLOW}[%d/%d]${NC} Processing: ${GREEN}%s${NC}\n" "$current" "$total" "$name"
+    printf "         URL: %s\n" "$url"
     
     # Gather information
-    echo -n "         DNS: "
+    printf "         DNS: "
     dns_info=$(check_dns "$domain")
     echo "$dns_info"
     
-    echo -n "   Redirects: "
+    printf "   Redirects: "
     redirect_info=$(check_redirects "$url")
     echo "$redirect_info"
     
-    echo -n "         CDN: "
+    printf "         CDN: "
     cdn_info=$(identify_cdn "$url")
     echo "$cdn_info"
     
-    echo -n "        Auth: "
+    printf "        Auth: "
     auth_info=$(check_auth "$url")
     echo "$auth_info"
     
@@ -255,25 +255,25 @@ For YUM repositories, import GPG keys separately or host in Nexus raw repository
 
 EOF
 
-echo ""
-echo -e "${GREEN}╔════════════════════════════════════════════════════════════════╗${NC}"
-echo -e "${GREEN}║  Discovery Complete!                                           ║${NC}"
-echo -e "${GREEN}╚════════════════════════════════════════════════════════════════╝${NC}"
-echo ""
-echo -e "Reports generated:"
-echo -e "  📄 Markdown: ${GREEN}$MARKDOWN_OUTPUT${NC}"
-echo -e "  📊 CSV:      ${GREEN}$CSV_OUTPUT${NC}"
-echo ""
-echo -e "Next steps:"
-echo -e "  1. Review the generated reports"
-echo -e "  2. Configure Nexus proxy repositories using base URLs"
-echo -e "  3. Test proxy access from your air-gapped environment"
-echo -e "  4. Update your Ansible playbooks to use Nexus URLs"
-echo ""
+printf "\n"
+printf "${GREEN}╔════════════════════════════════════════════════════════════════╗${NC}\n"
+printf "${GREEN}║  Discovery Complete!                                           ║${NC}\n"
+printf "${GREEN}╚════════════════════════════════════════════════════════════════╝${NC}\n"
+printf "\n"
+printf "Reports generated:\n"
+printf "  📄 Markdown: ${GREEN}%s${NC}\n" "$MARKDOWN_OUTPUT"
+printf "  📊 CSV:      ${GREEN}%s${NC}\n" "$CSV_OUTPUT"
+printf "\n"
+printf "Next steps:\n"
+printf "  1. Review the generated reports\n"
+printf "  2. Configure Nexus proxy repositories using base URLs\n"
+printf "  3. Test proxy access from your air-gapped environment\n"
+printf "  4. Update your Ansible playbooks to use Nexus URLs\n"
+printf "\n"
 
 # Optional: Display summary table
-echo -e "${BLUE}Quick Summary:${NC}"
-echo ""
+printf "${BLUE}Quick Summary:${NC}\n"
+printf "\n"
 printf "%-25s %-15s %-20s\n" "Component" "CDN Provider" "Auth Status"
 echo "───────────────────────────────────────────────────────────────"
 
