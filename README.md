@@ -226,14 +226,14 @@ the Deployer will either install the required repository or download the package
 | Itential Platform | <https://registry.aws.itential.com> | TCP | Itential packages |
 | Itential Platform | <https://registry.npmjs.org> | TCP | Core NPM packages |
 | Itential Platform | <https://pypi.org> | TCP | Python modules |
-| Itential Platform | <https://gitlab.com> | TCP | Platform Opensource Adapter packages |
+| Itential Platform | <https://gitlab.com> | TCP | Platform Opensource Adapters NodeJS source repository |
 | MongoDB | <https://repo.mongodb.org> | TCP | MongoDB YUM RPMs |
 | MongoDB | <https://www.mongodb.org> | TCP | MongoDB YUM RPMs |
 | MongoDB | <https://pgp.mongodb.org> | TCP | MongoDB YUM repository GPG Key |
 | MongoDB | <https://pgp.mongodb.com> | TCP | MongoDB YUM repository GPG Key |
 | MongoDB | <https://pypi.org> | TCP | Python modules |
 | Redis | <http://rpms.remirepo.net> | TCP | Redis YUM RPMs<br>When installing Redis from the Remi repository |
-| Redis | <https://dl.fedoraproject.org> | TCP | EPEL YUM RPMs<bt>When installing Redis from the Remi repository |
+| Redis | <https://dl.fedoraproject.org> | TCP | EPEL YUM RPMs<br>When installing Redis from the Remi repository |
 | Redis | <https://github.com> | TCP | Redis source packages <br>When installing Redis from source |
 | Redis | <https://codeload.github.com> | TCP | Redis source packages<br>When installing Redis from source |
 | Vault | <https://rpm.releases.hashicorp.com> | TCP | Vault YUM RPMs |
