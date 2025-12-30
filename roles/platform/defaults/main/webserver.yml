@@ -32,7 +32,7 @@ platform_webserver_https_passphrase:
 platform_webserver_https_cert: "{{ platform_tls_dir }}/certs/server.crt"
 
 # The set of allowed SSL/TLS protocol versions.
-platform_webserver_https_secure_protocol: TLSv1_2_method
+platform_webserver_https_secure_protocol: TLS_method
 
 # The allowed SSL/TLS cipher suite.
 platform_webserver_https_ciphers: "ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA384:DHE-RSA-AES256-SHA384:ECDHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA256:HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA" # noqa line-length yaml[line-length]
