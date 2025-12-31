@@ -72,6 +72,19 @@
               ansible.builtin.include_tasks:
                 file: install-platform.yml
 
+        - name: Copy Platform License
+          when: platform_license_key_file is defined and platform_license_key_file != ""
+          tags: copy_license
+          block:
+            - name: Copy license file to platform directory
+              ansible.builtin.copy:
+                src: "{{ platform_license_key_file }}"
+                dest: /opt/itential/platform/server/license.txt
+                owner: "{{ platform_user }}"
+                group: "{{ platform_group }}"
+                mode: "0644"
+                backup: true
+
         - name: Install Adapters
           tags: install_adapters
           block:

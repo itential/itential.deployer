@@ -56,3 +56,6 @@ gateway_http_server_threads: "{{ ansible_processor_cores * 4 }}"
 # Python virtual environment settings
 gateway_venv_name: venv
 gateway_python_venv: "{{ gateway_install_dir }}/{{ gateway_venv_name }}"
+
+# License key string to be added to properties files
+gateway_license_key: ""
