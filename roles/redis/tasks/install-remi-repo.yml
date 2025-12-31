@@ -13,6 +13,8 @@
         state: present
         update_cache: true
         disable_gpg_check: true
+      retries: 3
+      delay: 5
 
     - name: Install Remi repo
       ansible.builtin.dnf:
