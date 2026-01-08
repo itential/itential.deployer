@@ -571,8 +571,8 @@ all:
       hosts:
         example2.host.com:
       vars:
-        gateway_release: 2023.1
-        gateway_whl_file: automation_gateway-3.227.0+2023.1.9-py3-none-any.whl
+        gateway_release: 4.3
+        gateway_whl_file: automation_gateway-4.3.56-py3-none-any.whl
 ```
 
 ### Run the Itential Deployer
@@ -733,8 +733,8 @@ all:
       hosts:
         example2.host.com:
       vars:
-        gateway_release: 2023.1
-        gateway_whl_file: automation_gateway-3.227.0+2023.1.9-py3-none-any.whl
+        gateway_release: 4.3
+        gateway_whl_file: automation_gateway-4.3.56-py3-none-any.whl
 ```
 
 ### Minimal Architecture Inventory
@@ -773,8 +773,8 @@ all:
       hosts:
         automation-gateway.host.com:
       vars:
-        gateway_release: 2023.1
-        gateway_whl_file: automation_gateway-3.227.0+2023.1.9-py3-none-any.whl
+        gateway_release: 4.3
+        gateway_whl_file: automation_gateway-4.3.56-py3-none-any.whl
 ```
 
 ### Highly Available Architecture Inventory
@@ -827,8 +827,8 @@ all:
       hosts:
         automation-gateway1.host.com:
       vars:
-        gateway_release: 2023.1
-        gateway_whl_file: automation_gateway-3.227.0+2023.1.9-py3-none-any.whl
+        gateway_release: 4.3
+        gateway_whl_file: automation_gateway-4.3.56-py3-none-any.whl
 ```
 
 ### Highly Available Architecture Inventory leveraging external dependencies
@@ -869,8 +869,8 @@ all:
       hosts:
         automation-gateway1.host.com:
       vars:
-        gateway_release: 2023.1
-        gateway_whl_file: automation_gateway-3.227.0+2023.1.9-py3-none-any.whl
+        gateway_release: 4.3
+        gateway_whl_file: automation_gateway-4.3.56-py3-none-any.whl
 ```
 
 ### Active/Standby Architecture Inventory
@@ -962,8 +962,8 @@ all:
       hosts:
         datacenter2.automation-gateway1.host.com:
       vars:
-        gateway_release: 2023.1
-        gateway_whl_file: automation_gateway-3.227.0+2023.1.9-py3-none-any.whl
+        gateway_release: 4.3
+        gateway_whl_file: automation_gateway-4.3.56-py3-none-any.whl
 ```
 
 ## Component Guides
