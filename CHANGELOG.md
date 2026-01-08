@@ -1,9 +1,20 @@
 # Changelog
 
+## v3.7.1 (December 19, 2025)
+
+* Redis config updates  https://github.com/itential/itential.deployer/pull/279
+* Remove old variables that are no longer used  https://github.com/itential/itential.deployer/pull/280
+* Remove platform password encryption  https://github.com/itential/itential.deployer/pull/281
+* setting vm swappiness to recommended value 1  https://github.com/itential/itential.deployer/pull/282
+
+Full Changelog: https://github.com/itential/itential.deployer/compare/v3.7.0...v3.7.1 
+
+
 ## v3.7.0 (December 08, 2025)
 
 * Fix download order in Gateway offline download playbook  https://github.com/itential/itential.deployer/pull/278
 * Integrating Vault approle creation and setup  https://github.com/itential/itential.deployer/pull/276
+* Update galaxy version and changelog for release 3.7.0 [skip ci]
 
 Full Changelog: https://github.com/itential/itential.deployer/compare/v3.6.1...v3.7.0 
 

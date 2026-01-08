@@ -222,7 +222,7 @@ located in `roles/platform/defaults/main/webserver.yml`.
 | platform_webserver_https_key | String | The path to the public key file used for HTTPS connections. | `/opt/itential/platform/keys/key.pem` |
 | platform_webserver_https_passphrase | String | The passphrase for the private key used to enable TLS sessions. |  |
 | platform_webserver_https_cert | String | The path to the certificate file used for HTTPS connections. | `/opt/itential/platform/keys/cert.pem` |
-| platform_webserver_https_secure_protocol | String | The set of allowed SSL/TLS protocol versions. | `TLSv1_2_method` |
+| platform_webserver_https_secure_protocol | String | The set of allowed SSL/TLS protocol versions. | `TLS_method` |
 | platform_webserver_https_ciphers | String |  The allowed SSL/TLS cipher suite. | `ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA384:DHE-RSA-AES256-SHA384:ECDHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA256:HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA` |
 | platform_webserver_https_client_reneg_limit | Integer | Specifies the number of renegotiations that are allowed in a single HTTPS connection. | 3 |
 | platform_webserver_https_client_reneg_window | Integer | Specifies the time renegotiation window in seconds for a single HTTPS connection. | 600 |
