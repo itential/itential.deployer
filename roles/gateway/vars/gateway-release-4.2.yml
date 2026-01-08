@@ -62,5 +62,3 @@ gateway_python_wheel_build_dependencies:
 # These Python modules are pinned here because we are using 'pip download' and not 'pip install'
 # for offline installs.
 gateway_python_app_dependencies:
-
-gateway_ansible_version: ansible==8.7.0

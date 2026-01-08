@@ -63,5 +63,3 @@ gateway_python_wheel_build_dependencies:
 gateway_python_app_dependencies:
   - importlib-metadata==4.13.0
   - grpcio-tools==1.53.0
-
-gateway_ansible_version: ansible==8.7.0

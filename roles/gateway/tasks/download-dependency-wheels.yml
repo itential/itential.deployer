@@ -63,14 +63,6 @@
     - gateway_python_app_dependencies is iterable
     - gateway_python_app_dependencies | length > 0
 
-- name: Install Ansible
-  ansible.builtin.pip:
-    name: "{{ gateway_ansible_version }}"
-    state: present
-    virtualenv: "{{ gateway_pkgs_temp_dir.path }}/offline_download"
-    extra_args: --log /var/log/pip.log
-  when: gateway_enable_ansible | bool
-
 - name: Download Ansible collections
   ansible.builtin.include_tasks:
     file: download-ansible-collections.yml

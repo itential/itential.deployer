@@ -132,18 +132,13 @@
             file: install-python-dependencies.yml
 
     # Need to install ansible within the virtual environment
-    - name: Install Ansible
-      tags: install_ansible
+    - name: Configure Ansible
+      tags: configure_ansible
       when: gateway_enable_ansible | bool
       block:
-        - name: Install Ansible and Ansible collections
+        - name: Install Ansible collections
           when: not offline_install_enabled | bool
           block:
-            - name: Install Ansible into the python virtual environment
-              ansible.builtin.pip:
-                name: "{{ gateway_ansible_version }}"
-                virtualenv: "{{ gateway_install_dir }}/venv"
-
             - name: Install collections
               ansible.builtin.command:
                 argv:
