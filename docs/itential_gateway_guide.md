@@ -134,7 +134,7 @@ all:
         <host1>:
           ansible_host: <addr1>
       vars:
-        gateway_release: 2023.1
+        gateway_release: 4.3
         gateway_whl_file: <wheel-file>
 ```
 
@@ -151,7 +151,7 @@ all:
         <host1>:
           ansible_host: <addr1>
       vars:
-        gateway_release: 2023.1
+        gateway_release: 4.3
         gateway_whl_file: <wheel-file>
         gateway_https: true
 ```
@@ -169,7 +169,7 @@ all:
         <host1>:
           ansible_host: <addr1>
       vars:
-        gateway_release: 2023.1
+        gateway_release: 4.3
         gateway_whl_file: <wheel-file>
         gateway_haproxy_enabled: true
 ```

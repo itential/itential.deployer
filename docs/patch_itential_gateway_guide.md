@@ -33,8 +33,8 @@ all:
         <host1:
           ansible_host: <host1-ip>
       vars:
-        gateway_release: 2023.1
-        gateway_whl_file: automation_gateway-3.227.0+2023.1.9-py3-none-any.whl
+        gateway_release: 4.3
+        gateway_whl_file: <wheel-file>
 ```
 
 #### Example: Patch Upgrade Inventory
@@ -47,8 +47,8 @@ all:
         <host1:
           ansible_host: <host1-ip>
       vars:
-        gateway_release: 2023.1
-        gateway_whl_file: automation_gateway-3.227.0+2023.1.52-py3-none-any.whl
+        gateway_release: 4.3
+        gateway_whl_file: <wheel-file>
 ```
 
 ### Run Patch IAG Playbook
