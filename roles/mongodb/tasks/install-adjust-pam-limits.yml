@@ -1,0 +1,18 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+# Set PAM limits
+
+- name: Set number of procs
+  community.general.pam_limits:
+    domain: mongod
+    limit_type: soft
+    limit_item: nproc
+    value: "{{ mongodb_pam_limit_nproc }}"
+
+- name: Set number of files
+  community.general.pam_limits:
+    domain: mongod
+    limit_type: soft
+    limit_item: nofile
+    value: "{{ mongodb_pam_limit_nofile }}"

@@ -53,7 +53,13 @@
 
 - name: Adjust Kernel parameters
   ansible.builtin.import_tasks:
-    file: install-adjust-kernel-params.yml
+    file: adjust-kernel-params.yml
+  tags: adjust_kernel_params
+
+- name: Adjust PAM limits
+  ansible.builtin.import_tasks:
+    file: adjust-pam-limits.yml
+  tags: adjust_pam_limits
 
 - name: Configure SELinux
   ansible.builtin.include_tasks:
