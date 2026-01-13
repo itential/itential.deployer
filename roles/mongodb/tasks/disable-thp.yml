@@ -50,7 +50,11 @@
         mode: "0644"
       vars:
         description: Disable Transparent Hugepages (THP)
-        command: /bin/sh -c 'echo never | tee /sys/kernel/mm/transparent_hugepage/enabled > /dev/null && echo never | tee /sys/kernel/mm/transparent_hugepage/defrag > /dev/null'
+        command: >-
+          /bin/sh -c '
+          echo never | tee /sys/kernel/mm/transparent_hugepage/enabled > /dev/null &&
+          echo never | tee /sys/kernel/mm/transparent_hugepage/defrag > /dev/null
+          '
 
     - name: Start THP service
       ansible.builtin.systemd:
