@@ -1,0 +1,10 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+# Kernel parameters
+mongodb_sysctl_file: /etc/sysctl.d/98-mongodb.conf
+mongodb_net_ipv4_tcp_keepalive_time: 300
+mongodb_net_core_somaxconn: 65535
+mongodb_vm_zone_reclaim_mode: 0
+mongodb_vm_swappiness: 1
+mongodb_vm_max_map_count: 262144

@@ -53,7 +53,7 @@
 
 - name: Adjust Kernel parameters
   ansible.builtin.import_tasks:
-    file: install-adjust-kernel-params.yml
+    file: adjust-kernel-params.yml
 
 - name: Configure SELinux
   ansible.builtin.include_tasks:
