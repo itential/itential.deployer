@@ -138,6 +138,12 @@ These variables apply to advanced situations.
 | `mongodb_mongod_service_delay` | Integer | The time in seconds between retries when starting the mongod service. | 10 |
 | `mongodb_status_poll` | Integer | The maximum number of times to query for the replicaset status before the set converges or we fail. | 3 |
 | `mongodb_status_interval` | Integer | The number of seconds to wait between polling executions. | 10 |
+| `mongodb_sysctl_file` | String | The name of the MongoDB sysctl file | /etc/sysctl.d/98-mongodb.conf |
+| `mongodb_net_ipv4_tcp_keepalive_time` | Integer | Time (in seconds) that a TCP connection remains idle before the kernel starts sending keepalive probes to verify the connection is still alive. | 300 |
+| `mongodb_net_core_somaxconn` | Integer | Controls the backlog queue size for incoming connections. When the queue is full, new connection attempts are rejected. | 65535 |
+| `mongodb_vm_zone_reclaim_mode` | Integer | Controls whether the kernel reclaims memory from local zones before allocating from remote NUMA nodes. | 0 |
+| `mongodb_vm_swappiness` | Integer | Balances between swapping out anonymous pages (process memory) versus dropping page cache (file system buffers). | 1 |
+| `mongodb_vm_max_map_count` | Integer | Maximum number of memory map areas (virtual memory areas/VMAs) a process can create. | 262144 |
 
 ## Configuring TLS
 
