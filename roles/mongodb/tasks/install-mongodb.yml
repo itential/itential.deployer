@@ -55,10 +55,6 @@
   ansible.builtin.import_tasks:
     file: adjust-kernel-params.yml
 
-- name: Set PAM limits
-  ansible.builtin.import_tasks:
-    file: set-pam-limits.yml
-
 - name: Configure SELinux
   ansible.builtin.include_tasks:
     file: configure-selinux.yml
