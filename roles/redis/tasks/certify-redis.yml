@@ -12,7 +12,7 @@
 
 - name: Gather host information
   itential.deployer.gather_host_information:
-  register: host_info
+  register: host_details
 
 - name: Check if Redis service exists
   ansible.builtin.systemd:
@@ -527,7 +527,11 @@
     mode: "0665"
     owner: "{{ redis_owner }}"
     # src: certify-report.j2
-    src: certify-report-alt.j2
+    src: certify-report-md.j2
+
+- name: debug
+  debug:
+    msg: "{{ host_details }}"
 
 - name: Display report summary
   ansible.builtin.debug:
