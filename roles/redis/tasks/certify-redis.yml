@@ -529,10 +529,6 @@
     # src: certify-report.j2
     src: certify-report-md.j2
 
-- name: debug
-  debug:
-    msg: "{{ host_details }}"
-
 - name: Display report summary
   ansible.builtin.debug:
     msg:
