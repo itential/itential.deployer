@@ -1,0 +1,305 @@
+# Redis Installation Validation Report
+
+**Generated:** {{ ansible_date_time.iso8601 | default('Unknown') }}
+**Hostname:** {{ inventory_hostname | default('Unknown') }}
+**IP Address:** {{ ansible_default_ipv4.address | default('N/A') }}
+**OS:** {{ ansible_distribution | default('Unknown') }} {{ ansible_distribution_version | default('') }}
+
+---
+
+## Service Status
+
+{% if redis_service_status is defined and redis_service_status.status is defined %}
+- **Service Name:** {{ redis_service_status.name | default('Unknown') }}
+- **Service State:** {{ redis_service_status.status.ActiveState | default('Unknown') }}
+- **Service SubState:** {{ redis_service_status.status.SubState | default('Unknown') }}
+- **Service Enabled:** {{ redis_service_status.status.UnitFileState | default('Unknown') }}
+{% else %}
+- **Service Status:** Could not determine (service may not exist)
+{% endif %}
+
+**Process Running:** {{ 'YES' if (redis_process is defined and redis_process.rc == 0) else 'NO' }}
+
+{% if redis_process is defined and redis_process.rc == 0 %}
+**Process Details:**
+```
+{{ redis_process.stdout | default('N/A') }}
+```
+{% endif %}
+
+---
+
+## Connectivity
+
+- **Redis Port:** {{ redis_port | default('6379') }}
+- **Ping Response:** {{ redis_ping.stdout | default('FAILED') if redis_ping is defined else 'FAILED' }}
+- **Connection Status:** {{ 'SUCCESS' if (redis_ping is defined and redis_ping.rc == 0) else 'FAILED' }}
+
+**Listening Ports:**
+```
+{{ redis_ports.stdout | default('Could not determine') if redis_ports is defined else 'Could not determine' }}
+```
+
+---
+
+## Version Information
+
+```
+{{ redis_version.stdout | default('Version information not available') if redis_version is defined else 'Version information not available' }}
+```
+
+---
+
+## Redis Metrics (from INFO)
+
+{% if redis_metrics is defined %}
+- **OS:** {{ redis_metrics.os | default(['N/A'], true) | first }}
+- **Redis Version:** {{ redis_metrics.version | default(['N/A'], true) | first }}
+- **Executable:** {{ redis_metrics.executable | default(['N/A'], true) | first }}
+- **Redis Mode:** {{ redis_metrics.mode | default(['N/A'], true) | first }}
+- **Role:** {{ redis_metrics.role | default(['N/A'], true) | first }}
+- **Connected Clients:** {{ redis_metrics.clients | default(['N/A'], true) | first }}
+- **Connected Slaves:** {{ redis_metrics.slaves | default(['0'], true) | first }}
+- **Master Host:** {{ redis_metrics.master_host | default(['N/A'], true) | first }}
+- **Master Port:** {{ redis_metrics.master_port | default(['N/A'], true) | first }}
+- **Master Connection:** {{ redis_metrics.master_link | default(['N/A'], true) | first }}
+{% else %}
+Redis INFO not available - check connectivity and authentication
+{% endif %}
+
+---
+
+## Configuration File
+
+- **Config File Exists:** {{ redis_conf_file.stat.exists | default('Unknown') if redis_conf_file is defined else 'Unknown' }}
+{% if redis_conf_file is defined and redis_conf_file.stat.exists %}
+- **Config File Path:** `/etc/redis/redis.conf`
+- **Permissions:** {{ redis_conf_permissions.stdout | default('Unknown') if redis_conf_permissions is defined else 'Unknown' }}
+{% endif %}
+
+- **Systemd Unit File:** {{ redis_systemd_file.stat.exists | default('Unknown') if redis_systemd_file is defined else 'Unknown' }}
+{% if redis_systemd_file is defined and redis_systemd_file.stat.exists %}
+- **Unit File Path:** `/etc/systemd/system/redis.service`
+{% endif %}
+
+---
+
+## Redis User Auth Tests
+
+**The following users were found:**
+
+{% if redis_users is defined and redis_users | length > 0 %}
+{% for redis in redis_users %}
+### User: {{ redis.user | default('Unknown') }}
+- **Enabled:** {{ redis.enabled | default(false) }}
+{% endfor %}
+
+### User Connection Test Results:
+- **admin:** {{ 'PASSED ✓' if (redis_ping is defined and redis_ping.rc == 0) else 'FAILED ✗' }}
+- **itential:** {{ 'PASSED ✓' if (redis_itential_user_ping is defined and redis_itential_user_ping.rc == 0) else 'FAILED ✗' }}
+- **repluser:** {{ 'PASSED ✓' if (redis_repl_user_ping is defined and redis_repl_user_ping.rc == 0) else 'FAILED ✗' }}
+- **sentineluser:** {{ 'PASSED ✓' if (redis_sentineluser_user_ping is defined and redis_sentineluser_user_ping.rc == 0) else 'FAILED ✗' }}
+- **prometheus:** {{ 'PASSED ✓' if (redis_prometheus_user_ping is defined and redis_prometheus_user_ping.rc == 0) else 'FAILED ✗' }}
+{% else %}
+No Redis users were found!
+{% endif %}
+
+---
+
+## Recent Log Entries (Last 50 lines)
+
+```
+{{ redis_logs.stdout | default('Log entries not available') if redis_logs is defined else 'Log entries not available' }}
+```
+
+{% if sentinel_service_status is defined and sentinel_service_status.status is defined %}
+---
+
+## Sentinel Service Status
+
+- **Service Name:** {{ sentinel_service_status.name | default('Unknown') }}
+- **Service State:** {{ sentinel_service_status.status.ActiveState | default('Unknown') }}
+- **Service SubState:** {{ sentinel_service_status.status.SubState | default('Unknown') }}
+- **Service Enabled:** {{ sentinel_service_status.status.UnitFileState | default('Unknown') }}
+
+**Process Running:** {{ 'YES' if (sentinel_process is defined and sentinel_process.rc == 0) else 'NO' }}
+
+{% if sentinel_process is defined and sentinel_process.rc == 0 %}
+**Process Details:**
+```
+{{ sentinel_process.stdout | default('N/A') }}
+```
+{% endif %}
+
+---
+
+## Sentinel Connectivity
+
+- **Sentinel Port:** {{ redis_sentinel_port | default('26379') }}
+- **Ping Response:** {{ sentinel_ping.stdout | default('FAILED') if sentinel_ping is defined else 'FAILED' }}
+- **Connection Status:** {{ 'SUCCESS' if (sentinel_ping is defined and sentinel_ping.rc == 0) else 'FAILED' }}
+
+**Listening Ports:**
+```
+{{ sentinel_ports.stdout | default('Could not determine') if sentinel_ports is defined else 'Could not determine' }}
+```
+
+---
+
+## Sentinel Metrics (from INFO)
+
+{% if sentinel_metrics is defined %}
+- **Redis Version:** {{ sentinel_metrics.version | default(['N/A'], true) | first }}
+- **Redis Mode:** {{ sentinel_metrics.mode | default(['N/A'], true) | first }}
+- **Monitored Masters:** {{ sentinel_metrics.masters | default(['N/A'], true) | first }}
+{% else %}
+Sentinel INFO not available
+{% endif %}
+
+---
+
+## Sentinel Master
+
+{% if itential_master is defined and itential_master.name is defined and itential_master.name == "itentialmaster" %}
+**Number of Masters:** 1
+**Master Name:** {{ itential_master.name }}
+
+{% if monitored_master_details is defined %}
+### Master Details:
+- **IP:** {{ monitored_master_details.ip | default('N/A') }}
+- **Connected Slaves:** {{ monitored_master_details["num-slaves"] | default('N/A') }}
+- **Port:** {{ monitored_master_details.port | default('N/A') }}
+- **Quorum:** {{ monitored_master_details.quorum | default('N/A') }}
+- **Down After (ms):** {{ monitored_master_details["down-after-milliseconds"] | default('N/A') }}
+- **Failover Timeout:** {{ monitored_master_details["failover-timeout"] | default('N/A') }}
+- **Parallel Syncs:** {{ monitored_master_details["parallel-syncs"] | default('N/A') }}
+{% endif %}
+{% else %}
+No masters are being monitored
+{% endif %}
+
+---
+
+## Sentinel Quorum Status
+
+{% if quorum_check_details is defined and quorum_check_details %}
+- **Master:** {{ itential_master.name | default('Unknown') if itential_master is defined else 'Unknown' }}
+- **Status:** {{ quorum_check_details }}
+{% else %}
+No quorum was found!
+{% endif %}
+
+---
+
+## Sentinel Known Sentinels
+
+**This Sentinel is aware of the following other Sentinels:**
+
+{% if known_sentinel_details is defined and known_sentinel_details | length > 0 %}
+{% for sentinel in known_sentinel_details %}
+### Sentinel: {{ sentinel.name | default('N/A') }}
+- **IP:** {{ sentinel.ip | default('N/A') }}
+- **Runid:** {{ sentinel.runid | default('N/A') }}
+- **Port:** {{ sentinel.port | default('N/A') }}
+- **Flags:** {{ sentinel.flags | default('N/A') }}
+
+{% endfor %}
+{% else %}
+No other Sentinels were found!
+{% endif %}
+
+---
+
+## Sentinel Known Replicas
+
+**This Sentinel is aware of the following Replicas:**
+
+{% if known_replica_details is defined and known_replica_details | length > 0 %}
+{% for replica in known_replica_details %}
+### Replica: {{ replica.name | default('N/A') }}
+- **Master:** {{ replica["master-host"] | default('N/A') }}:{{ replica["master-port"] | default('N/A') }}
+- **Master Connectivity:** {{ replica["master-link-status"] | default('N/A') }}
+- **Replica Role:** {{ replica["role-reported"] | default('N/A') }}
+- **Flags:** {{ replica.flags | default('N/A') }}
+
+{% endfor %}
+{% else %}
+No other Replicas were found!
+{% endif %}
+
+---
+
+## Sentinel Configuration File
+
+- **Config File Exists:** {{ sentinel_conf_file.stat.exists | default('Unknown') if sentinel_conf_file is defined else 'Unknown' }}
+{% if sentinel_conf_file is defined and sentinel_conf_file.stat.exists | default(false) %}
+- **Config File Path:** `/etc/redis/sentinel.conf`
+- **Permissions:** {{ sentinel_conf_permissions.stdout | default('Unknown') if sentinel_conf_permissions is defined else 'Unknown' }}
+{% endif %}
+
+- **Systemd Unit File:** {{ sentinel_systemd_file.stat.exists | default('Unknown') if sentinel_systemd_file is defined else 'Unknown' }}
+{% if sentinel_systemd_file is defined and sentinel_systemd_file.stat.exists | default(false) %}
+- **Unit File Path:** `/etc/systemd/system/redis-sentinel.service`
+{% endif %}
+
+---
+
+## Sentinel User Auth Tests
+
+**The following users were found:**
+
+{% if sentinel_users is defined and sentinel_users | length > 0 %}
+{% for sentinel in sentinel_users %}
+### User: {{ sentinel.user | default('Unknown') }}
+- **Enabled:** {{ sentinel.enabled | default(false) }}
+{% endfor %}
+
+### Connection Test Results:
+- **admin:** {{ 'PASSED ✓' if (sentinel_ping is defined and sentinel_ping.rc == 0) else 'FAILED ✗' }}
+- **sentineluser:** {{ 'PASSED ✓' if (sentinel_user_ping is defined and sentinel_user_ping.rc == 0) else 'FAILED ✗' }}
+{% else %}
+No Sentinel users were found!
+{% endif %}
+
+---
+
+## Sentinel Recent Log Entries (Last 50 lines)
+
+```
+{{ sentinel_logs.stdout | default('Log entries not available') if sentinel_logs is defined else 'Log entries not available' }}
+```
+
+{% endif %}
+
+---
+
+## Validation Summary
+
+**Overall Status:** {{ 'PASSED' if (redis_ping is defined and redis_ping.rc == 0 and redis_process is defined and redis_process.rc == 0) else 'FAILED' }}
+
+### Checks:
+
+{% if redis_service_status is defined and redis_service_status.status is defined %}
+- **Redis Service Exists:** YES ✓
+- **Redis Service Active:** {{ redis_service_status.status.ActiveState | default('unknown') | upper }} {{ '✓' if redis_service_status.status.ActiveState == 'active' else '✗' }}
+{% else %}
+- **Redis Service Exists:** NO ✗
+{% endif %}
+- **Redis Process Running:** {{ 'YES' if (redis_process is defined and redis_process.rc == 0) else 'NO' }} {{ '✓' if (redis_process is defined and redis_process.rc == 0) else '✗' }}
+- **Redis Responding:** {{ 'YES' if (redis_ping is defined and redis_ping.rc == 0) else 'NO' }} {{ '✓' if (redis_ping is defined and redis_ping.rc == 0) else '✗' }}
+- **Redis Config File Present:** {{ 'YES' if (redis_conf_file is defined and redis_conf_file.stat.exists) else 'NO' }} {{ '✓' if (redis_conf_file is defined and redis_conf_file.stat.exists) else '✗' }}
+{% if sentinel_service_status is defined and sentinel_service_status.status is defined %}
+- **Sentinel Service Exists:** YES ✓
+- **Sentinel Service Active:** {{ sentinel_service_status.status.ActiveState | default('unknown') | upper }} {{ '✓' if sentinel_service_status.status.ActiveState == 'active' else '✗' }}
+- **Sentinel Process Running:** {{ 'YES' if (sentinel_process is defined and sentinel_process.rc == 0) else 'NO' }} {{ '✓' if (sentinel_process is defined and sentinel_process.rc == 0) else '✗' }}
+- **Sentinel Responding:** {{ 'YES' if (sentinel_ping is defined and sentinel_ping.rc == 0) else 'NO' }} {{ '✓' if (sentinel_ping is defined and sentinel_ping.rc == 0) else '✗' }}
+- **Sentinel Config File Present:** {{ 'YES' if (sentinel_conf_file is defined and sentinel_conf_file.stat.exists | default(false)) else 'NO' }} {{ '✓' if (sentinel_conf_file is defined and sentinel_conf_file.stat.exists | default(false)) else '✗' }}
+- **Sentinel Monitoring:** {{ ([itential_master.name] if itential_master is defined and itential_master.name is defined else []) | length }} master(s) {{ '✓' if (itential_master is defined and itential_master.name is defined) else '✗' }}
+- **Sentinel Quorum:** {{ 'OK' if (quorum_check_details is defined and 'OK' in quorum_check_details) else 'FAILED' }} {{ '✓' if (quorum_check_details is defined and 'OK' in quorum_check_details) else '✗' }}
+{% else %}
+- **Sentinel Service:** NOT RUNNING OR NOT DETECTED
+{% endif %}
+
+---
+
+**End of Report**
