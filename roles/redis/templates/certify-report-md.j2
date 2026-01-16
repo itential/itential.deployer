@@ -7,6 +7,56 @@
 
 ---
 
+## Host Details
+
+{% if host_details is defined %}
+### Operating System
+- **Distribution:** {{ host_details.os.distribution | default('Unknown') }} {{ host_details.os.distribution_version | default('') }}
+- **OS Family:** {{ host_details.os.os_family | default('Unknown') }}
+- **Kernel:** {{ host_details.os.kernel | default('Unknown') }}
+- **Architecture:** {{ host_details.os.architecture | default('Unknown') }}
+- **Hostname:** {{ host_details.os.hostname | default('Unknown') }}
+- **FQDN:** {{ host_details.os.fqdn | default('Unknown') }}
+
+### Hardware
+- **CPU Count:** {{ host_details.hardware.cpu.processor_count | default('Unknown') }}
+- **CPU Cores:** {{ host_details.hardware.cpu.processor_cores | default('Unknown') }}
+- **CPU vCPUs:** {{ host_details.hardware.cpu.processor_vcpus | default('Unknown') }}
+- **Threads per Core:** {{ host_details.hardware.cpu.processor_threads_per_core | default('Unknown') }}
+- **Total Memory:** {{ host_details.hardware.memory.memtotal_mb | default('Unknown') }} MB
+- **Free Memory:** {{ host_details.hardware.memory.memfree_mb | default('Unknown') }} MB
+- **Swap Total:** {{ host_details.hardware.memory.swaptotal_mb | default('Unknown') }} MB
+
+### Disk Mounts
+{% if host_details.hardware.disk is defined and host_details.hardware.disk | length > 0 %}
+{% for disk in host_details.hardware.disk %}
+- **{{ disk.mount }}:** {{ disk.size_gb }} GB
+{% endfor %}
+{% else %}
+- No disk information available
+{% endif %}
+
+### Networking
+- **Primary IP:** {{ host_details.networking.default_ipv4.address | default('N/A') }}
+- **Gateway:** {{ host_details.networking.default_ipv4.gateway | default('N/A') }}
+- **Interface:** {{ host_details.networking.default_ipv4.interface | default('N/A') }}
+- **MAC Address:** {{ host_details.networking.default_ipv4.macaddress | default('N/A') }}
+
+### Security
+{% if host_details.security.selinux is defined %}
+- **SELinux Status:** {{ host_details.security.selinux.status | default('Unknown') }}
+- **SELinux Mode:** {{ host_details.security.selinux.mode | default('Unknown') }}
+- **SELinux Type:** {{ host_details.security.selinux.type | default('Unknown') }}
+{% endif %}
+{% if host_details.security.firewalld is defined %}
+- **Firewalld:** {{ host_details.security.firewalld.state | default('Unknown') }}
+{% endif %}
+{% else %}
+Host details not available
+{% endif %}
+
+---
+
 ## Service Status
 
 {% if redis_service_status is defined and redis_service_status.status is defined %}
@@ -18,7 +68,7 @@
 - **Service Status:** Could not determine (service may not exist)
 {% endif %}
 
-**Process Running:** {{ 'YES' if (redis_process is defined and redis_process.rc == 0) else 'NO' }}
+**Process Running:** {{ 'YES ✓' if (redis_process is defined and redis_process.rc == 0) else 'NO' }}
 
 {% if redis_process is defined and redis_process.rc == 0 %}
 **Process Details:**
@@ -33,7 +83,7 @@
 
 - **Redis Port:** {{ redis_port | default('6379') }}
 - **Ping Response:** {{ redis_ping.stdout | default('FAILED') if redis_ping is defined else 'FAILED' }}
-- **Connection Status:** {{ 'SUCCESS' if (redis_ping is defined and redis_ping.rc == 0) else 'FAILED' }}
+- **Connection Status:** {{ 'SUCCESS ✓' if (redis_ping is defined and redis_ping.rc == 0) else 'FAILED' }}
 
 **Listening Ports:**
 ```
@@ -122,7 +172,7 @@ No Redis users were found!
 - **Service SubState:** {{ sentinel_service_status.status.SubState | default('Unknown') }}
 - **Service Enabled:** {{ sentinel_service_status.status.UnitFileState | default('Unknown') }}
 
-**Process Running:** {{ 'YES' if (sentinel_process is defined and sentinel_process.rc == 0) else 'NO' }}
+**Process Running:** {{ 'YES ✓' if (sentinel_process is defined and sentinel_process.rc == 0) else 'NO' }}
 
 {% if sentinel_process is defined and sentinel_process.rc == 0 %}
 **Process Details:**
@@ -137,7 +187,7 @@ No Redis users were found!
 
 - **Sentinel Port:** {{ redis_sentinel_port | default('26379') }}
 - **Ping Response:** {{ sentinel_ping.stdout | default('FAILED') if sentinel_ping is defined else 'FAILED' }}
-- **Connection Status:** {{ 'SUCCESS' if (sentinel_ping is defined and sentinel_ping.rc == 0) else 'FAILED' }}
+- **Connection Status:** {{ 'SUCCESS ✓' if (sentinel_ping is defined and sentinel_ping.rc == 0) else 'FAILED' }}
 
 **Listening Ports:**
 ```
@@ -275,7 +325,7 @@ No Sentinel users were found!
 
 ## Validation Summary
 
-**Overall Status:** {{ 'PASSED' if (redis_ping is defined and redis_ping.rc == 0 and redis_process is defined and redis_process.rc == 0) else 'FAILED' }}
+**Overall Status:** {{ 'PASSED ✓' if (redis_ping is defined and redis_ping.rc == 0 and redis_process is defined and redis_process.rc == 0) else 'FAILED' }}
 
 ### Checks:
 
