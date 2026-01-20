@@ -38,13 +38,25 @@
   changed_when: true
 
 - name: Update release file with Ansible version
-  ansible.builtin.lineinfile:
-    path: "{{ common_itential_release_file }}"
-    line: "ANSIBLE={{ gateway_ansible_version }}"
-    mode: "0666"
-    create: true
   when: gateway_enable_ansible | bool
-  changed_when: true
+  block:
+    - name: Get Ansible version from automation-gateway venv
+      ansible.builtin.command:
+        cmd: "{{ gateway_python_venv }}/bin/ansible --version"
+      register: gateway_ansible_venv_version
+      changed_when: false
+
+    - name: Extract version
+      ansible.builtin.set_fact:
+        gateway_ansible_version: "{{ gateway_ansible_venv_version.stdout_lines[0] | regex_search('\\d+\\.\\d+\\.\\d+') }}"
+
+    - name: Update release file with Ansible version
+      ansible.builtin.lineinfile:
+        path: "{{ common_itential_release_file }}"
+        line: "ANSIBLE={{ gateway_ansible_version }}"
+        mode: "0666"
+        create: true
+      changed_when: true
 
 - name: Update release file with Nornir version
   ansible.builtin.lineinfile:

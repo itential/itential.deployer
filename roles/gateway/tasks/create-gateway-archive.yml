@@ -27,13 +27,6 @@
     state: present
     virtualenv: "{{ gateway_pkgs_temp_dir.path }}/offline_install"
 
-- name: Install Ansible
-  ansible.builtin.pip:
-    name: "{{ gateway_ansible_version }}"
-    state: present
-    virtualenv: "{{ gateway_pkgs_temp_dir.path }}/offline_install"
-  when: gateway_enable_ansible | bool
-
 - name: Copy IAG wheel file to target node
   ansible.builtin.copy:
     src: "{{ gateway_whl_file }}"

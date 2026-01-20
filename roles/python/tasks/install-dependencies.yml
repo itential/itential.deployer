@@ -15,6 +15,7 @@
         virtualenv: "{{ python_venv }}"
       when:
         - python_base_dependencies is defined
+        - python_base_dependencies is iterable
         - python_base_dependencies | length > 0
 
     - name: Install application Python dependencies in virtual env
@@ -23,6 +24,7 @@
         virtualenv: "{{ python_venv }}"
       when:
         - python_app_dependencies is defined
+        - python_app_dependencies is iterable
         - python_app_dependencies | length > 0
 
 - name: Use Python executable
@@ -37,6 +39,7 @@
         umask: "0022"
       when:
         - python_base_dependencies is defined
+        - python_base_dependencies is iterable
         - python_base_dependencies | length > 0
 
     - name: Install application Python dependencies using pip executable
@@ -46,4 +49,5 @@
         umask: "0022"
       when:
         - python_app_dependencies is defined
+        - python_app_dependencies is iterable
         - python_app_dependencies | length > 0
