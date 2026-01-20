@@ -20,32 +20,41 @@
         disk_size: 100
 
   tasks:
+
+    - name: Gather host information
+      itential.deployer.gather_host_information:
+      register: host_info
+
+    - name: Extract OS information
+      ansible.builtin.set_fact:
+        os: "{{ host_info.os }}"
+
     # OS and Architecture validation
     - name: Check OS compatibility
       ansible.builtin.set_fact:
         os_valid: >-
           {{
-            (ansible_distribution == 'RedHat' and ansible_distribution_major_version in ['8', '9']) or
-            (ansible_distribution == 'Rocky' and ansible_distribution_major_version in ['8', '9']) or
-            (ansible_distribution == 'OracleLinux' and ansible_distribution_major_version in ['8', '9']) or
-            (ansible_distribution == 'Amazon' and ansible_distribution_version == '2023')
+            (os.distribution == 'RedHat' and ansible_distribution_major_version in ['8', '9']) or
+            (os.distribution == 'Rocky' and ansible_distribution_major_version in ['8', '9']) or
+            (os.distribution == 'OracleLinux' and ansible_distribution_major_version in ['8', '9']) or
+            (os.distribution == 'Amazon' and ansible_distribution_major_version == '2023')
           }}
 
     - name: Assert that this is a supported OS
       ansible.builtin.assert:
         that: "{{ os_valid }} == true"
-        fail_msg: "{{ ansible_distribution }} {{ ansible_distribution_major_version }} is not a supported OS!"
+        fail_msg: "{{ os.distribution }} {{ os.distribution_version }} is not a supported OS!"
         success_msg: "OS validation passed!"
         quiet: true
 
     - name: Check architecture compatibility
       ansible.builtin.set_fact:
-        arch_valid: "{{ ansible_architecture in ['x86_64', 'aarch64'] }}"
+        arch_valid: "{{ os.architecture in ['x86_64', 'aarch64'] }}"
 
     - name: Assert that this is a supported Architecture
       ansible.builtin.assert:
         that: "{{ arch_valid }} == true"
-        fail_msg: "{{ ansible_architecture }} is not a supported architecture!"
+        fail_msg: "{{ os.architecture }} is not a supported architecture!"
         success_msg: "Architecture validation passed!"
         quiet: true
 
@@ -86,84 +95,45 @@
             disk_valid: "{{ (applicable_spec == 'none') or ((root_disk_size_gb | default(0) | float) >= hardware_specs[applicable_spec].disk_size) }}"
             all_valid: "{{ (applicable_spec == 'none') or ((ansible_processor_vcpus >= hardware_specs[applicable_spec].cpu_count) and ((ansible_memtotal_mb / 1024) >= hardware_specs[applicable_spec].ram_size) and ((root_disk_size_gb | default(0) | float) >= hardware_specs[applicable_spec].disk_size)) }}"
 
+    - name: Validate CPU Count
+      ansible.builtin.assert:
+        that: hardware_validation.validation.cpu_valid | bool
+        fail_msg: "CPU validation failed"
+        quiet: true
+      ignore_errors: true
+      register: cpu_validation
 
-    # Network interface IP version check
-    - name: Check network interface IP support
-      ansible.builtin.set_fact:
-        interface_info: >-
-          {{
-            interface_info | default([]) + [{
-              'interface': item,
-              'ipv4_enabled': hostvars[inventory_hostname]['ansible_' + item].ipv4 is defined,
-              'ipv6_enabled': hostvars[inventory_hostname]['ansible_' + item].ipv6 is defined and
-                              (hostvars[inventory_hostname]['ansible_' + item].ipv6 | length > 0),
-              'ipv4_address': hostvars[inventory_hostname]['ansible_' + item].ipv4.address | default('N/A'),
-              'ipv6_addresses': hostvars[inventory_hostname]['ansible_' + item].ipv6 | map(attribute='address') | list | default([])
-            }]
-          }}
-      loop: "{{ ansible_interfaces }}"
-      when:
-        - item != 'lo'
-        - not item.startswith('docker')
-        - not item.startswith('veth')
+    - name: Validate Memory Amount
+      ansible.builtin.assert:
+        that: hardware_validation.validation.memory_valid | bool
+        fail_msg: "Memory validation failed"
+        quiet: true
+      ignore_errors: true
+      register: memory_validation
 
-    - name: Determine dual stack support
-      ansible.builtin.set_fact:
-        has_dual_stack: "{{ interface_info | selectattr('ipv4_enabled') | selectattr('ipv6_enabled') | list | length > 0 }}"
-        has_ipv4: "{{ interface_info | selectattr('ipv4_enabled') | list | length > 0 }}"
-        has_ipv6: "{{ interface_info | selectattr('ipv6_enabled') | list | length > 0 }}"
+    - name: Validate Disk Size
+      ansible.builtin.assert:
+        that: hardware_validation.validation.disk_valid | bool
+        fail_msg: "Disk validation failed"
+        quiet: true
+      ignore_errors: true
+      register: disk_validation
 
-    - name: Build simplified disk list
-      ansible.builtin.set_fact:
-        disk_list: "{{ disk_list | default([]) + [{'mount': item.mount, 'size_gb': (item.size_total / 1024 / 1024 / 1024) | round(2)}] }}"
-      loop: "{{ ansible_mounts | selectattr('size_total', 'defined') | list }}"
-
-    - name: Build host information dictionary
-      ansible.builtin.set_fact:
-        host_info:
-          hostname: "{{ inventory_hostname }}"
-          groups: "{{ group_names }}"
-          validation:
-            os_valid: "{{ os_valid }}"
-            os_details: "{{ ansible_distribution }} {{ ansible_distribution_version }}"
-            arch_valid: "{{ arch_valid }}"
-            arch_details: "{{ ansible_architecture }}"
-            hardware: "{{ hardware_validation }}"
-            networking:
-              has_ipv4: "{{ has_ipv4 }}"
-              has_ipv6: "{{ has_ipv6 }}"
-              has_dual_stack: "{{ has_dual_stack }}"
-              interfaces: "{{ interface_info }}"
-          cpu:
-            physical_cpus: "{{ ansible_processor_count }}"
-            cores_per_cpu: "{{ ansible_processor_cores }}"
-            total_vcpus: "{{ ansible_processor_vcpus }}"
-            threads_per_core: "{{ ansible_processor_threads_per_core }}"
-            processor_model: "{{ ansible_processor[2] | default('N/A') }}"
-          memory:
-            total_mb: "{{ ansible_memtotal_mb }}"
-            total_gb: "{{ (ansible_memtotal_mb / 1024) | round(2) }}"
-            free_mb: "{{ ansible_memfree_mb }}"
-            swap_total_mb: "{{ ansible_swaptotal_mb }}"
-          disks: "{{ disk_list }}"
-          selinux: "{{ ansible_selinux | default({'status': 'not available'}) }}"
-          firewalld: "{{ ansible_facts.services['firewalld.service'] | default(ansible_facts.services['firewalld'] | default({'state': 'not installed', 'status': 'not installed'})) }}"
-          os:
-            distribution: "{{ ansible_distribution }}"
-            version: "{{ ansible_distribution_version }}"
-            family: "{{ ansible_os_family }}"
-            kernel: "{{ ansible_kernel }}"
-            architecture: "{{ ansible_architecture }}"
-            hostname: "{{ ansible_hostname }}"
-            fqdn: "{{ ansible_fqdn }}"
-
-    - name: Gather host information
-      itential.deployer.gather_host_information:
-      register: host_info
-
-    - name: Debug host info
-      ansible.builtin.debug:
-        msg: "{{ host_info }}"
+    # Fail at the end if any validation failed
+    - name: Check if any validations failed
+      ansible.builtin.fail:
+        msg: |
+          Hardware validation failures detected:
+          {% if cpu_validation is failed %}
+          - CPU: {{ hardware_validation.required.cpu_count }} required, {{ hardware_validation.actual.cpu_count }} found
+          {% endif %}
+          {% if memory_validation is failed %}
+          - Memory: {{ hardware_validation.required.ram_size_gb }}GB required, {{ hardware_validation.actual.ram_size_gb }}GB found
+          {% endif %}
+          {% if disk_validation is failed %}
+          - Disk: {{ hardware_validation.required.disk_size_gb }}GB required, {{ hardware_validation.actual.disk_size_gb }}GB found
+          {% endif %}
+      when: cpu_validation is failed or memory_validation is failed or disk_validation is failed
 
 - name: Aggregate Results
   hosts: localhost
