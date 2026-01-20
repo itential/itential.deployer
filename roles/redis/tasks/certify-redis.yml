@@ -526,8 +526,7 @@
     group: "{{ redis_group }}"
     mode: "0665"
     owner: "{{ redis_owner }}"
-    # src: certify-report.j2
-    src: certify-report-md.j2
+    src: redis-validation-report.md.j2
 
 - name: Display report summary
   ansible.builtin.debug:
