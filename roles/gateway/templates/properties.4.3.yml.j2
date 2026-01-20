@@ -12,6 +12,11 @@
 # System #
 ##########
 
+{% if gateway_license_key is defined and gateway_license_key != "" and gateway_license_key is not none %}
+# License key
+license_key: '{{ gateway_license_key }}'
+
+{% endif %}
 # INVENTORY ENCRYPTION
 # Set the Fernet encryption key to have IAG encrypt device variables['password']
 # ANYONE THAT HAS THIS KEY CAN DECRYPT YOUR PASSWORDS - PROTECT IT!

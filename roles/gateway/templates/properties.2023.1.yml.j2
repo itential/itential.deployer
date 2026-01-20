@@ -11,6 +11,11 @@
 # System #
 ##########
 
+{% if gateway_license_key is defined and gateway_license_key != "" and gateway_license_key is not none %}
+# License key
+license_key: '{{ gateway_license_key }}'
+
+{% endif %}
 # The port on which Automation Gateway server will listen for requests.
 # Mutually exclusive with bind_list
 {% if gateway_https %}

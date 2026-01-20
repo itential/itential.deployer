@@ -52,3 +52,6 @@ platform_app_artifacts_enabled: false
 
 # Flag to determine if the service is started
 platform_start_service: true
+
+# Path to the license key file that will be copied to /opt/pronghorn/current/license.txt
+platform_license_key_file: ""

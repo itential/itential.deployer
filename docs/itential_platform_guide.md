@@ -281,6 +281,7 @@ located in `roles/platform/defaults/main/platform.yml`.
 | platform_npm_ignore_scripts | Boolean | Flag to prevent the NPM scripts from running when running the NPM install. | `true` |
 | platform_app_artifacts_enabled | Boolean | Flag to install app-artifacts. | `false` |
 | platform_start_service | Boolean | Flag to determine if the Itential Platform service is started. | `true` |
+| platform_license_key_file | String | Path to the license key file that will be copied to /opt/pronghorn/current/license.txt after platform installation. Only copies when the variable is defined and not empty. | `""` |
 
 #### Server Variables
 
@@ -404,6 +405,28 @@ all:
         platform_vault_url: http://hashi-vault-example.com:8200
 ```
 
+### Example Inventory - Deploy Platform License
+
+To deploy a platform license file during installation, set the `platform_license_key_file` variable to the path of your license file:
+
+```yaml
+all:
+  vars:
+    platform_release: 6
+
+  children:
+    platform:
+      hosts:
+        <host1>:
+          ansible_host: <addr1>
+      vars:
+        platform_encryption_key: <openssl rand -hex 32> # 64-length hex string, representing a 256-bit AES encryption key.
+        platform_packages:
+          - <rpm1>
+          - <rpmN>
+        platform_license_key_file: /path/to/your/license.txt
+```
+
 ## Running the Playbook
 
 To execute all Platform roles, run the `platform` playbook:
@@ -421,6 +444,7 @@ The Platform playbook and role supports the following tags:
 | install_nodejs | Install NodeJS |
 | install_python | Install Python |
 | install_platform | Install Itential Platform |
+| copy_license | Copy license file to platform directory (only when platform_license_key_file is defined) |
 | install_adapters | Install Itential Platform adapters |
 | install_app_artifacts | Install Itential Platform App Artifacts |
 | configure_selinux | Configure SELinux |

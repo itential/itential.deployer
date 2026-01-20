@@ -74,6 +74,7 @@ The following table lists the default variables located in `roles/gateway/defaul
 | `gateway_ssl_rootca_dest` | String | The SSL root CA destination. | `{{ gateway_ssl_dir }}/{{ gateway_ssl_rootca_src }}` |
 | `gateway_tlsv1_2` | Boolean | Flag to enable TLS 1.2. | `false` |
 | `gateway_http_server_threads` | Integer | The number of http server threads for handling requests. | `{{ ansible_processor_cores * 4 }}` |
+| `gateway_license_key` | String | License key string that will be added to the gateway properties file. Only added when the variable is defined and not empty. | `""` |
 
 ## Gateway HAProxy Role Variables
 
@@ -172,6 +173,23 @@ all:
         gateway_release: 4.3
         gateway_whl_file: <wheel-file>
         gateway_haproxy_enabled: true
+```
+
+## Example Inventory - IAG with License Key
+
+To configure IAG with a license key, add the `gateway_license_key` variable to the `gateway` group:
+
+```yaml
+all:
+  children:
+    gateway:
+      hosts:
+        <host1>:
+          ansible_host: <addr1>
+      vars:
+        gateway_release: 2023.1
+        gateway_whl_file: <wheel-file>
+        gateway_license_key: "your-license-key-string"
 ```
 
 ## Running the Playbook
