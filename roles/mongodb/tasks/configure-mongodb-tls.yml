@@ -1,6 +1,38 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
+- name: Discover MongoDB configuration state
+  tags: create_mongo_users
+  itential.deployer.mongodb_state:
+    host: "{{ ansible_host }}"
+    port: "{{ mongodb_port | default(27017) }}"
+    admin_user: "{{ mongodb_user_admin }}"
+    admin_password: "{{ mongodb_user_admin_password }}"
+    hosts: "{{ groups['mongodb'] }}"
+  register: mongodb_state
+  run_once: true
+  delegate_to: "{{ groups['mongodb'][0] }}"
+  vars:
+    ansible_python_interpreter: "{{ mongodb_python_venv }}/bin/python3"
+
+- name: Display MongoDB state
+  tags: create_mongo_users
+  ansible.builtin.debug:
+    msg:
+      - "MongoDB running: {{ mongodb_state.mongodb_running }}"
+      - "Service running: {{ mongodb_state.service_running | default('N/A') }}"
+      - "Port open: {{ mongodb_state.port_open }}"
+      - "Service state: {{ mongodb_state.service_state | default('N/A') }}"
+      - "Authentication enabled: {{ mongodb_state.auth_enabled }}"
+      - "Credentials valid: {{ mongodb_state.auth_valid | default('N/A') }}"
+      - "Replica set enabled: {{ mongodb_state.replication_enabled }}"
+      - "Replica set name: {{ mongodb_state.replica_set_name | default('N/A') }}"
+      - "Primary host: {{ mongodb_state.primary_host }}"
+      - "TLS enabled: {{ mongodb_state.tls_enabled }}"
+      - "TLS mode: {{ mongodb_state.tls_mode }}"
+      - "MongoDB version: {{ mongodb_state.mongodb_version }}"
+  run_once: true
+
 # Ensure that the directory exists for the certificates and key files
 - name: Ensure that the directory exists for the certificates and key files
   ansible.builtin.file:
@@ -31,6 +63,7 @@
 
 # Execute the template to apply changes to the mongo.conf for TLS support
 - name: Create MongoDB config file (TLS)
+  when: not mongodb_state.tls_enabled
   ansible.builtin.template:
     src: mongod.conf.j2
     dest: "{{ mongodb_conf_file }}"
@@ -41,6 +74,7 @@
     stage: "tls"
 
 - name: Start mongo (TLS)
+  when: not mongodb_state.tls_enabled
   ansible.builtin.service:
     name: mongod
     state: restarted
