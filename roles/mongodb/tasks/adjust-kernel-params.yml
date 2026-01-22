@@ -17,34 +17,39 @@
 - name: Adjust keepalive
   ansible.posix.sysctl:
     name: net.ipv4.tcp_keepalive_time
-    value: 300
-
-- name: Disable zone reclaim mode
-  ansible.posix.sysctl:
-    name: vm.zone_reclaim_mode
-    value: 0
+    value: "{{ mongodb_net_ipv4_tcp_keepalive_time }}"
+    state: present
+    sysctl_file: "{{ mongodb_sysctl_file }}"
+    reload: true
 
 - name: Increase throughput settings
   ansible.posix.sysctl:
     name: net.core.somaxconn
-    value: 65535
+    value: "{{ mongodb_net_core_somaxconn }}"
+    state: present
+    sysctl_file: "{{ mongodb_sysctl_file }}"
+    reload: true
+
+- name: Disable zone reclaim mode
+  ansible.posix.sysctl:
+    name: vm.zone_reclaim_mode
+    value: "{{ mongodb_vm_zone_reclaim_mode }}"
+    state: present
+    sysctl_file: "{{ mongodb_sysctl_file }}"
+    reload: true
 
 - name: Set vm swappiness
   ansible.posix.sysctl:
     name: vm.swappiness
-    value: 1
+    value: "{{ mongodb_vm_swappiness }}"
+    state: present
+    sysctl_file: "{{ mongodb_sysctl_file }}"
+    reload: true
 
-# Set Soft User Limits
-- name: Set number of procs
-  community.general.pam_limits:
-    domain: mongod
-    limit_type: soft
-    limit_item: nproc
-    value: 32000
-
-- name: Set number of files
-  community.general.pam_limits:
-    domain: mongod
-    limit_type: soft
-    limit_item: nofile
-    value: 64000
+- name: Set vm max_map_count
+  ansible.posix.sysctl:
+    name: vm.max_map_count
+    value: "{{ mongodb_vm_max_map_count }}"
+    state: present
+    sysctl_file: "{{ mongodb_sysctl_file }}"
+    reload: true
