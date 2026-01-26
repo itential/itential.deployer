@@ -103,9 +103,7 @@ The following tables lists the default variables located in `roles/redis/default
 | `redis_port` | Integer | The Redis listen port. | `6379` |
 | `redis_owner` | String | The Redis Linux user. | `redis` |
 | `redis_group` | String | The Redis Linux group. | `redis` |
-| `redis_bind_ipv6` | Boolean | Flag to enable IPv6. | `true` |
-| `redis_bind_addr_source` | String | The bind address source. Will default to the Ansible `inventory_hostname` unless explicitly set to `default_ipv4_address`. | `inventory_hostname` |
-| `redis_bind_addrs` | String | A space-separated list of hostnames/IP addresses on which Redis listeners will be created. If `redis_bind_ipv6` is set to `true`, `::1` will be added to the addresses. The `redis_bind_addr_source` will also be added to the addresses. | `127.0.0.1` |
+| `redis_bind` | String | A space-separated list of hostnames/IP addresses on which Redis listeners will be created. | `bind 127.0.0.1 {{ ansible_default_ipv4.address }}` |
 | `redis_tls_enabled` | Boolean | Flag to enable TLS connections. | `false` |
 
 ### Auth Variables

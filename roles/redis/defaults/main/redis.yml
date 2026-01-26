@@ -26,30 +26,13 @@ redis_group: redis
 # Default redis port
 redis_port: "{{ redis_port_default }}"
 
-# The default redis sentinel listen port
-redis_sentinel_port: "{{ redis_sentinel_port_default }}"
-
-# Flag to enable IPv6
-redis_bind_ipv6: true
-
-# The bind address source
-# Will default to inventory_hostname unless set to default_ipv4_address
-redis_bind_addr_source: inventory_hostname
-
-# The hostnames and/or IP addresses on which redis should listen for
-# client connections, separated by spaces.
-#
-# If redis_bind_ipv6 is set to true, '::1' will be added to the
-# redis_bind_addrs.
-#
-# The inventory_hostname or default_ipv4_address will be automatically added
-# to the redis_bind_addrs depending on the redis_bind_addr_source.
-redis_bind_addrs: 127.0.0.1
+# Bind to localhost + private network interface
+redis_bind: 127.0.0.1 {{ ansible_default_ipv4.address }}
 
 # Feature flags that can be overridden in the hosts file
 # Essentially, a default installation will have auth, but not replication or tls
 redis_auth_enabled: true
-redis_replication_enabled: false
+redis_replicaof: false
 redis_tls_enabled: false
 
 # Default redis user passwords
@@ -61,3 +44,7 @@ redis_user_repluser_password: repluser
 redis_user_sentineladmin_password: admin
 redis_user_sentineluser_password: sentineluser
 redis_user_prometheus_password: prometheus
+
+# By default the prometheus user will be enabled. If this is set to false, the prometheus user
+# will not be created.
+redis_prometheus_user_enabled: true

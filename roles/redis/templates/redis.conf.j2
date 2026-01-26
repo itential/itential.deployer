@@ -1,3 +1,9 @@
+{% set is_master_node = 'redis_master' in group_names %}
+{% set is_replica_node = 'redis_replica' in group_names %}
+{% set is_data_node = is_master_node or is_replica_node %}
+{% set has_replicas = groups['redis_replica'] is defined and groups['redis_replica'] | length > 0 %}
+{% set has_sentinels = groups['redis_sentinel'] is defined and groups['redis_sentinel'] | length > 0 %}
+
 # Redis configuration file example.
 #
 # Note that in order to read the configuration file, Redis must be
@@ -72,16 +78,7 @@
 # IF YOU ARE SURE YOU WANT YOUR INSTANCE TO LISTEN TO ALL THE INTERFACES
 # JUST COMMENT OUT THE FOLLOWING LINE.
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-{% set bind_addrs = redis_bind_addrs.split(' ') %}
-{% if redis_bind_ipv6 | bool %}
-  {{ bind_addrs.insert(0, '::1') }}
-{% endif %}
-{% if redis_bind_addr is defined and redis_bind_addr == "default_ipv4_address" %}
-  {{ bind_addrs.insert(0, hostvars[inventory_hostname]['ansible_default_ipv4']['address']) }}
-{% else %}
-  {{ bind_addrs.insert(0, inventory_hostname) }}
-{% endif %}
-bind {{ bind_addrs | join(' ') }}
+bind {{ redis_bind }}
 
 # Protected mode is a layer of security protection, in order to avoid that
 # Redis instances left open on the internet are accessed and exploited.
@@ -489,12 +486,8 @@ dir {{ redis_data_dir }}
 #    and resynchronize with them.
 #
 # replicaof <masterip> <masterport>
-{% if redis_replication_enabled %}
-{%   if groups['redis'] is defined and inventory_hostname in groups['redis'] and inventory_hostname not in groups['redis'][0] %}
-replicaof {{ hostvars[groups['redis'][0]].inventory_hostname }} {{ redis_port }}
-{%   elif groups['redis_secondary'] is defined and inventory_hostname in groups['redis_secondary'] and inventory_hostname not in groups['redis_secondary'][0] %}
-replicaof {{ hostvars[groups['redis_secondary'][0]].inventory_hostname }} {{ redis_port }}
-{%   endif %}
+{% if is_replica_node %}
+replicaof {{ redis_replicaof }} {{ redis_port }}
 {% endif %}
 
 # If the master is password protected (using the "requirepass" configuration
@@ -514,7 +507,7 @@ replicaof {{ hostvars[groups['redis_secondary'][0]].inventory_hostname }} {{ red
 #
 # When masteruser is specified, the replica will authenticate against its
 # master using the new AUTH form: AUTH <username> <password>.
-{% if redis_auth_enabled and redis_replication_enabled %}
+{% if is_data_node and redis_auth_enabled %}
 masterauth {{ redis_user_repluser_password }}
 masteruser repluser
 {% endif %}
@@ -728,7 +721,7 @@ replica-priority 100
 #
 # By default min-replicas-to-write is set to 0 (feature disabled) and
 # min-replicas-max-lag is set to 10.
-{% if redis_replication_enabled | bool %}
+{% if is_master_node %}
 min-replicas-to-write 1
 min-replicas-max-lag 10
 {% endif %}
@@ -759,12 +752,12 @@ min-replicas-max-lag 10
 # There is no need to use both the options if you need to override just
 # the port or the IP address.
 #
-{% if redis_replication_enabled | bool %}
+{% if is_data_node %}
 replica-announce-ip {{ inventory_hostname }}
 replica-announce-port {{ redis_port }}
 {% endif %}
 # replica-announce-ip 5.5.5.5
-#replica-announce-port 1234
+# replica-announce-port 1234
 
 ############################### KEYS TRACKING #################################
 
@@ -908,11 +901,15 @@ replica-announce-port {{ redis_port }}
 user default off
 user admin on allkeys allchannels allcommands >{{ redis_user_admin_password }}
 user itential on ~* &* -@all +@read +@write +@stream +@transaction +@sortedset +@list +@hash +@string +@fast +@scripting +@connection +@pubsub +script|load +script|exists -script|flush -flushall -flushdb -save -bgsave -bgrewriteaof -replicaof -psync -replconf -shutdown -failover -cluster -asking -sync -readonly -readwrite +info +role >{{ redis_user_itential_password }}
+{% if redis_prometheus_user_enabled %}
 user prometheus on -@all +@connection +memory -readonly +strlen +config|get +xinfo +pfcount +zcard +type +xlen -readwrite -command +client -wait +scard +llen +hlen +get +eval +slowlog +cluster|info -hello -echo +info +latency +scan -reset -auth -asking >{{ redis_user_prometheus_password }}
-{%  if redis_replication_enabled %}
+{% endif %}
+{% if is_data_node and has_replicas %}
 user repluser on allchannels +psync +replconf +ping >{{ redis_user_repluser_password }}
+{% endif %}
+{% if is_data_node and has_sentinels %}
 user sentineluser on &* -@all +slaveof +ping +info +role +publish +subscribe +psubscribe +punsubscribe +client|setname +client|kill +multi +exec +replicaof +script|kill +config|rewrite >{{ redis_user_sentineluser_password }}
-{%  endif %}
+{% endif %}
 {% endif %}
 
 # ACL LOG

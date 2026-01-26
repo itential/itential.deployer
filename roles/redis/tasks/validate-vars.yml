@@ -118,3 +118,10 @@
       ansible.builtin.debug:
         msg: "Redis offline install using files from {{ redis_offline_control_node_root }}"
       when: offline_install_enabled | bool
+
+    - name: Set Redis node type facts
+      ansible.builtin.set_fact:
+        redis_is_master_node: "{{ 'redis_master' in group_names }}"
+        redis_is_replica_node: "{{ 'redis_replica' in group_names }}"
+        redis_is_sentinel_node: "{{ 'redis_sentinel' in group_names }}"
+        redis_is_data_node: "{{ 'redis_master' in group_names or 'redis_replica' in group_names }}"
