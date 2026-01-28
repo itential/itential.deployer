@@ -58,12 +58,19 @@
     msg: "Using sentinel quorum: {{ redis_sentinel_quorum_final }} out of {{ groups['redis_sentinel'] | default([]) | length }} sentinels"
   run_once: true
 
-- name: Check if sentinel.conf exists
-  ansible.builtin.stat:
-    path: /etc/redis/sentinel.conf
-  register: redis_sentinel_conf_stat
+- name: Check if sentinel is running
+  ansible.builtin.systemd:
+    name: redis-sentinel
+  register: redis_sentinel_service
+  failed_when: false
 
-- name: Use template to generate sentinel.conf
+- name: Stop sentinel for config update
+  ansible.builtin.systemd:
+    name: redis-sentinel
+    state: stopped
+  when: redis_sentinel_service.status.ActiveState == 'active'
+
+- name: Deploy sentinel.conf
   ansible.builtin.template:
     src: sentinel.conf.j2
     dest: "{{ redis_sentinel_conf_file }}"
@@ -72,7 +79,7 @@
     mode: "0640"
     setype: redis_conf_t
     backup: true
-  when: not redis_sentinel_conf_stat.stat.exists or redis_sentinel_force_redeploy | default(false)
+  notify: Enable and Start Redis Sentinel
 
 - name: Deploy logrotate config for Redis Sentinel
   ansible.builtin.template:
