@@ -1,9 +1,3 @@
-{% set is_master_node = 'redis_master' in group_names %}
-{% set is_replica_node = 'redis_replica' in group_names %}
-{% set is_data_node = is_master_node or is_replica_node %}
-{% set has_replicas = groups['redis_replica'] is defined and groups['redis_replica'] | length > 0 %}
-{% set has_sentinels = groups['redis_sentinel'] is defined and groups['redis_sentinel'] | length > 0 %}
-
 # Redis configuration file example.
 #
 # Note that in order to read the configuration file, Redis must be
@@ -486,7 +480,7 @@ dir {{ redis_data_dir }}
 #    and resynchronize with them.
 #
 # replicaof <masterip> <masterport>
-{% if is_replica_node %}
+{% if redis_is_replica_node %}
 replicaof {{ redis_replicaof }}
 {% endif %}
 
@@ -507,7 +501,7 @@ replicaof {{ redis_replicaof }}
 #
 # When masteruser is specified, the replica will authenticate against its
 # master using the new AUTH form: AUTH <username> <password>.
-{% if is_data_node and redis_auth_enabled %}
+{% if redis_is_data_node and redis_auth_enabled %}
 masterauth {{ redis_user_repluser_password }}
 masteruser repluser
 {% endif %}
@@ -721,7 +715,7 @@ replica-priority 100
 #
 # By default min-replicas-to-write is set to 0 (feature disabled) and
 # min-replicas-max-lag is set to 10.
-{% if is_master_node %}
+{% if redis_is_master_node %}
 min-replicas-to-write 1
 min-replicas-max-lag 10
 {% endif %}
@@ -752,7 +746,7 @@ min-replicas-max-lag 10
 # There is no need to use both the options if you need to override just
 # the port or the IP address.
 #
-{% if is_data_node %}
+{% if redis_is_data_node %}
 replica-announce-ip {{ inventory_hostname }}
 replica-announce-port {{ redis_port }}
 {% endif %}
@@ -904,11 +898,13 @@ user itential on ~* &* -@all +@read +@write +@stream +@transaction +@sortedset +
 {% if redis_prometheus_user_enabled %}
 user prometheus on -@all +@connection +memory -readonly +strlen +config|get +xinfo +pfcount +zcard +type +xlen -readwrite -command +client -wait +scard +llen +hlen +get +eval +slowlog +cluster|info -hello -echo +info +latency +scan -reset -auth -asking >{{ redis_user_prometheus_password }}
 {% endif %}
-{% if is_data_node and has_replicas %}
+{% if redis_is_data_node %}
+{% if redis_has_replicas %}
 user repluser on allchannels +psync +replconf +ping >{{ redis_user_repluser_password }}
 {% endif %}
-{% if is_data_node and has_sentinels %}
+{% if redis_has_sentinels %}
 user sentineluser on &* -@all +slaveof +ping +info +role +publish +subscribe +psubscribe +punsubscribe +client|setname +client|kill +multi +exec +replicaof +script|kill +config|rewrite >{{ redis_user_sentineluser_password }}
+{% endif %}
 {% endif %}
 {% endif %}
 
