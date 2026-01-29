@@ -24,7 +24,3 @@ mongodb_mongod_service_delay: 10
 # MongoDB status settings
 mongodb_status_poll: 3
 mongodb_status_interval: 10
-
-# The name and location of the certification report
-mongodb_report_dir: "/tmp/itential-reports"
-mongodb_report_file: "{{ mongodb_report_dir }}/mongodb_report_{{ inventory_hostname }}.md"

@@ -2,13 +2,24 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
 
+- name: Load variables from the Redis role
+  ansible.builtin.include_vars:
+    dir: "{{ item }}"
+  loop:
+    - "{{ role_path }}/../redis/defaults"
+    - "{{ role_path }}/../redis/vars"
+
 - name: Ensure report directory exists
   ansible.builtin.file:
-    path: "{{ redis_report_dir }}"
+    path: "{{ certify_report_dir }}"
     state: directory
     owner: "{{ redis_owner }}"
     group: "{{ redis_group }}"
     mode: "0755"
+
+- name: Set report filename
+  ansible.builtin.set_fact:
+    certify_report_file: "{{ certify_report_dir }}/redis-report-{{ inventory_hostname }}.md"
 
 - name: Gather host information
   itential.deployer.gather_host_information:
@@ -299,6 +310,7 @@
 - name: Capture itentialmaster
   ansible.builtin.set_fact:
     itential_master: "{{ (sentinel_masters.stdout | from_json)[0] }}"
+  when: sentinel_is_running | bool
 
 - name: Get details for each monitored master
   ansible.builtin.shell: |
@@ -312,13 +324,13 @@
       --no-auth-warning \
       SENTINEL MASTER {{ itential_master.name }}
   register: monitored_master
-  # loop: "{{ master_names.stdout_lines | default([]) }}"
   when: sentinel_is_running | bool
   changed_when: false
 
 - name: Capture monitored master details
   ansible.builtin.set_fact:
     monitored_master_details: "{{ (monitored_master.stdout | from_json) }}"
+  when: sentinel_is_running | bool
 
 - name: Get known sentinels for each master
   ansible.builtin.shell: |
@@ -339,6 +351,7 @@
 - name: Capture known sentinel details
   ansible.builtin.set_fact:
     known_sentinel_details: "{{ (known_sentinels.stdout | from_json) }}"
+  when: sentinel_is_running | bool
 
 - name: Get known replicas for each master
   ansible.builtin.shell: |
@@ -359,6 +372,7 @@
 - name: Capture known replica details
   ansible.builtin.set_fact:
     known_replica_details: "{{ (known_replicas.stdout | from_json) }}"
+  when: sentinel_is_running | bool
 
 - name: Check master status
   ansible.builtin.shell: |
@@ -379,6 +393,7 @@
 - name: Capture known replica details
   ansible.builtin.set_fact:
     quorum_check_details: "{{ (quorum_check.stdout | from_json) }}"
+  when: sentinel_is_running | bool
 
 - name: Get Sentinel configuration
   ansible.builtin.shell: |
@@ -522,7 +537,7 @@
 - name: Generate validation report
   ansible.builtin.template:
     backup: true
-    dest: "{{ redis_report_file }}"
+    dest: "{{ certify_report_file }}"
     group: "{{ redis_group }}"
     mode: "0665"
     owner: "{{ redis_owner }}"
@@ -533,9 +548,9 @@
     msg:
       - "Redis validation complete for {{ inventory_hostname }}"
       - "Overall Status: {{ 'PASSED ✓' if (redis_ping.rc == 0 and redis_process.rc == 0) else 'FAILED ✗' }}"
-      - "Report saved to: {{ redis_report_file }}"
+      - "Report saved to: {{ certify_report_file }}"
 
 - name: Display report location
   ansible.builtin.debug:
-    msg: "Full report available at: {{ redis_report_file }}"
+    msg: "Full report available at: {{ certify_report_file }}"
   # run_once: no

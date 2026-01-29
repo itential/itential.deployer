@@ -1,6 +1,25 @@
+# Copyright (c) 2026, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-# MongoDB Validation Tasks
-# This playbook gathers information to validate MongoDB installation
+
+- name: Load variables from the MongoDB role
+  ansible.builtin.include_vars:
+    dir: "{{ item }}"
+  loop:
+    - "{{ role_path }}/../mongodb/defaults"
+    - "{{ role_path }}/../mongodb/vars"
+
+- name: Ensure report directory exists
+  ansible.builtin.file:
+    path: "{{ certify_report_dir }}"
+    state: directory
+    owner: "{{ mongodb_owner }}"
+    group: "{{ mongodb_group }}"
+    mode: "0755"
+
+- name: Set report filename
+  ansible.builtin.set_fact:
+    certify_report_file: "{{ certify_report_dir }}/mongodb-report-{{ inventory_hostname }}.md"
 
 - name: Check if MongoDB service exists
   ansible.builtin.systemd:
@@ -361,22 +380,14 @@
 # ============================================================================
 # GENERATE REPORT
 # ============================================================================
-- name: Ensure report directory exists
-  ansible.builtin.file:
-    path: "/tmp/itential-reports"
-    state: directory
-    owner: "{{ mongodb_owner }}"
-    group: "{{ mongodb_group }}"
-    mode: "0755"
-
 - name: Generate MongoDB validation report
   ansible.builtin.template:
     src: mongodb-validation-report.md.j2
-    dest: "{{ mongodb_report_file }}"
+    dest: "{{ certify_report_file }}"
     mode: '0644'
     owner: "{{ mongodb_owner }}"
     group: "{{ mongodb_group }}"
 
 - name: Display report location
   ansible.builtin.debug:
-    msg: "MongoDB validation report generated at: {{ mongodb_report_file }}"
+    msg: "MongoDB validation report generated at: {{ certify_report_file }}"
