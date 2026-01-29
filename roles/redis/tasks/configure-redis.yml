@@ -1,6 +1,21 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
+- name: Gather service facts
+  ansible.builtin.service_facts:
+
+- name: Open Redis port on FirewallD Public Zone
+  ansible.posix.firewalld:
+    port: "{{ redis_port }}/tcp"
+    permanent: true
+    state: enabled
+    zone: public
+    immediate: true
+  when:
+    - ansible_facts.services["firewalld.service"] is defined
+    - ansible_facts.services["firewalld.service"].state == "running"
+    - ansible_facts.services["firewalld.service"].status == "enabled"
+
 - name: Create Redis systemd file
   ansible.builtin.template:
     src: redis.service.j2

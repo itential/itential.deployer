@@ -45,14 +45,16 @@
         - name: Include tasks to configure Redis
           ansible.builtin.include_tasks:
             file: configure-redis.yml
+          when: redis_is_data_node
 
         - name: Include tasks to configure Sentinel
           ansible.builtin.include_tasks:
             file: configure-sentinel.yml
-          when: redis_replication_enabled | bool
+          when: redis_is_sentinel_node
 
 - name: Ensure Redis is running
   tags: always
+  when: redis_is_data_node
   block:
     - name: Flush all handlers
       ansible.builtin.meta: flush_handlers
@@ -70,7 +72,7 @@
 
 - name: Ensure Redis Sentinel is running
   tags: always
-  when: redis_replication_enabled | bool
+  when: redis_is_sentinel_node
   block:
     - name: Flush all handlers
       ansible.builtin.meta: flush_handlers

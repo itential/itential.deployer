@@ -1,6 +1,32 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
+- name: Gather service facts
+  ansible.builtin.service_facts:
+
+- name: Open Sentinel port on FirewallD Public Zone
+  ansible.posix.firewalld:
+    port: "{{ redis_sentinel_port }}/tcp"
+    permanent: true
+    state: enabled
+    zone: public
+    immediate: true
+  when:
+    - ansible_facts.services["firewalld.service"] is defined
+    - ansible_facts.services["firewalld.service"].state == "running"
+    - ansible_facts.services["firewalld.service"].status == "enabled"
+
+- name: Create Redis Sentinel data directory
+  ansible.builtin.file:
+    state: directory
+    path: "{{ redis_data_dir }}/sentinel"
+    owner: "{{ redis_owner }}"
+    group: "{{ redis_group }}"
+    mode: "0755"
+    seuser: system_u
+    serole: object_r
+    setype: redis_var_lib_t
+
 - name: Create Redis Sentinel systemd file
   ansible.builtin.template:
     src: redis-sentinel.service.j2
@@ -9,20 +35,48 @@
     group: root
     mode: "0644"
 
-- name: Use template to generate sentinel.conf
-  ansible.builtin.template:
-    src: sentinel.conf.j2
-    dest: "{{ redis_sentinel_conf_file }}"
-    owner: "{{ redis_owner }}"
-    group: "{{ redis_group }}"
-    mode: "0640"
-    setype: redis_conf_t
-    backup: true
-  when:
-    - groups['redis'] is defined
-    - inventory_hostname in groups['redis']
+# Sentinel quorum configuration
+# - If redis_sentinel_quorum is not 'auto', use the explicit value
+# - Otherwise, calculate majority quorum: ceil(sentinel_count / 2)
+#   This ensures quorum is "more than half" of sentinels
+#   Examples: 1→1, 2→1, 3→2, 4→2, 5→3, 6→3, 7→4
+# - Defaults to 1 if redis_sentinel group is undefined or empty
+- name: Set sentinel quorum
+  ansible.builtin.set_fact:
+    redis_sentinel_quorum_final: >-
+      {{
+        redis_sentinel_quorum if redis_sentinel_quorum != 'auto'
+        else ((groups['redis_sentinel'] | default([]) | length / 2) | round(0, 'ceil') | int) | default(1)
+      }}
 
-- name: Use template to generate sentinel.conf for secondary DR
+- name: Validate sentinel quorum
+  ansible.builtin.assert:
+    that:
+      - redis_sentinel_quorum_final | int >= 1
+      - redis_sentinel_quorum_final | int <= (groups['redis_sentinel'] | default([]) | length)
+      - groups['redis_sentinel'] | default([]) | length >= 3 or redis_sentinel_quorum != 'auto'
+    fail_msg: "Invalid quorum {{ redis_sentinel_quorum_final }} for {{ groups['redis_sentinel'] | default([]) | length }} sentinels (min 3 recommended)"
+    success_msg: "Sentinel quorum: {{ redis_sentinel_quorum_final }}/{{ groups['redis_sentinel'] | default([]) | length }}"
+  run_once: true
+
+- name: Display sentinel quorum configuration
+  ansible.builtin.debug:
+    msg: "Using sentinel quorum: {{ redis_sentinel_quorum_final }} out of {{ groups['redis_sentinel'] | default([]) | length }} sentinels"
+  run_once: true
+
+- name: Check if sentinel is running
+  ansible.builtin.systemd:
+    name: redis-sentinel
+  register: redis_sentinel_service
+  failed_when: false
+
+- name: Stop sentinel for config update
+  ansible.builtin.systemd:
+    name: redis-sentinel
+    state: stopped
+  when: redis_sentinel_service.status.ActiveState == 'active'
+
+- name: Deploy sentinel.conf
   ansible.builtin.template:
     src: sentinel.conf.j2
     dest: "{{ redis_sentinel_conf_file }}"
@@ -31,9 +85,7 @@
     mode: "0640"
     setype: redis_conf_t
     backup: true
-  when:
-    - groups['redis_secondary'] is defined
-    - inventory_hostname in groups['redis_secondary']
+  notify: Enable and Start Redis Sentinel
 
 - name: Deploy logrotate config for Redis Sentinel
   ansible.builtin.template:
