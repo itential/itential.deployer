@@ -1,25 +1,30 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Gather System Facts
+- name: Run Environment Verification Tasks
   hosts: all
   gather_facts: true
-
-  vars:
-    # These are production specs for Itential P6
-    hardware_specs:
-      mongodb:
-        cpu_count: 16
-        ram_size: 128
-        disk_size: 1000
-      platform:
-        cpu_count: 16
-        ram_size: 64
-        disk_size: 250
-      redis:
-        cpu_count: 16
-        ram_size: 32
-        disk_size: 100
+  become: true
+  roles:
+    - role: itential.deployer.common_vars
+      tags: always
 
   tasks:
+
+    - name: Import role vars
+      ansible.builtin.include_vars:
+        file: "{{ item }}"
+      loop:
+        - "../roles/redis/vars/platform-release-{{ platform_release }}.yml"
+        - "../roles/mongodb/vars/platform-release-{{ platform_release }}.yml"
+        - "../roles/platform/vars/platform-release-{{ platform_release }}.yml"
+
+    - name: Gather hardware specs
+      ansible.builtin.set_fact:
+        hardware_specs:
+          "mongodb": "{{ mongodb_hw_specs[env] }}"
+          "platform": "{{ platform_hw_specs[env] }}"
+          "redis": "{{ redis_hw_specs[env] }}"
 
     - name: Gather host information
       itential.deployer.gather_host_information:
@@ -59,7 +64,7 @@
         quiet: true
 
     # Hardware spec validation
-    - name: Determine which hardware spec applies to this host
+    - name: Determine the applicable specs based on host group
       ansible.builtin.set_fact:
         applicable_spec: >-
           {%- if 'mongodb' in group_names -%}
@@ -80,7 +85,6 @@
     - name: Validate hardware specs against requirements
       ansible.builtin.set_fact:
         hardware_validation:
-          applicable_spec: "{{ applicable_spec }}"
           required:
             cpu_count: "{{ hardware_specs[applicable_spec].cpu_count if applicable_spec != 'none' else 'N/A' }}"
             ram_size_gb: "{{ hardware_specs[applicable_spec].ram_size if applicable_spec != 'none' else 'N/A' }}"
@@ -119,6 +123,10 @@
       ignore_errors: true
       register: disk_validation
 
+    - name: Print host information
+      ansible.builtin.debug:
+        msg: "{{ host_info }}"
+
     # Fail at the end if any validation failed
     - name: Check if any validations failed
       ansible.builtin.fail:
@@ -134,17 +142,3 @@
           - Disk: {{ hardware_validation.required.disk_size_gb }}GB required, {{ hardware_validation.actual.disk_size_gb }}GB found
           {% endif %}
       when: cpu_validation is failed or memory_validation is failed or disk_validation is failed
-
-- name: Aggregate Results
-  hosts: localhost
-  gather_facts: false
-
-  tasks:
-    - name: Collect all host information
-      ansible.builtin.set_fact:
-        all_systems_info: "{{ all_systems_info | default([]) + [hostvars[item].host_info] }}"
-      loop: "{{ groups['all'] }}"
-
-    - name: Display aggregated information
-      ansible.builtin.debug:
-        var: all_systems_info

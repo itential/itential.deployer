@@ -1,0 +1,187 @@
+# Itential Platform Installation Validation Report
+
+- **Generated:** {{ ansible_date_time.iso8601 | default('Unknown') }}
+- **Hostname:** {{ inventory_hostname | default('Unknown') }}
+- **IP Address:** {{ ansible_default_ipv4.address | default('N/A') }}
+- **OS:** {{ ansible_distribution | default('Unknown') }} {{ ansible_distribution_version | default('') }}
+
+---
+
+## Host Details
+
+{% if host_details is defined %}
+### Operating System
+- **Distribution:** {{ host_details.os.distribution | default('Unknown') }} {{ host_details.os.distribution_version | default('') }}
+- **OS Family:** {{ host_details.os.os_family | default('Unknown') }}
+- **Kernel:** {{ host_details.os.kernel | default('Unknown') }}
+- **Architecture:** {{ host_details.os.architecture | default('Unknown') }}
+- **Hostname:** {{ host_details.os.hostname | default('Unknown') }}
+- **FQDN:** {{ host_details.os.fqdn | default('Unknown') }}
+
+### Hardware
+- **CPU Count:** {{ host_details.hardware.cpu.processor_count | default('Unknown') }}
+- **CPU Cores:** {{ host_details.hardware.cpu.processor_cores | default('Unknown') }}
+- **CPU vCPUs:** {{ host_details.hardware.cpu.processor_vcpus | default('Unknown') }}
+- **Threads per Core:** {{ host_details.hardware.cpu.processor_threads_per_core | default('Unknown') }}
+- **Total Memory:** {{ host_details.hardware.memory.memtotal_mb | default('Unknown') }} MB
+- **Free Memory:** {{ host_details.hardware.memory.memfree_mb | default('Unknown') }} MB
+- **Swap Total:** {{ host_details.hardware.memory.swaptotal_mb | default('Unknown') }} MB
+
+### Disk Mounts
+{% if host_details.hardware.disk is defined and host_details.hardware.disk | length > 0 %}
+{% for disk in host_details.hardware.disk %}
+- **{{ disk.mount }}:** {{ disk.size_gb }} GB
+{% endfor %}
+{% else %}
+- No disk information available
+{% endif %}
+
+### Networking
+- **Primary IP:** {{ host_details.networking.default_ipv4.address | default('N/A') }}
+- **Gateway:** {{ host_details.networking.default_ipv4.gateway | default('N/A') }}
+- **Interface:** {{ host_details.networking.default_ipv4.interface | default('N/A') }}
+- **MAC Address:** {{ host_details.networking.default_ipv4.macaddress | default('N/A') }}
+
+### Security
+{% if host_details.security.selinux is defined %}
+- **SELinux Status:** {{ host_details.security.selinux.status | default('Unknown') }}
+- **SELinux Mode:** {{ host_details.security.selinux.mode | default('Unknown') }}
+- **SELinux Type:** {{ host_details.security.selinux.type | default('Unknown') }}
+{% endif %}
+{% if host_details.security.firewalld is defined %}
+- **Firewalld:** {{ host_details.security.firewalld.state | default('Unknown') }}
+{% endif %}
+{% else %}
+Host details not available
+{% endif %}
+
+---
+
+## Service Status
+
+{% if iap_service_status is defined and iap_service_status.status is defined %}
+- **Service Name:** {{ iap_service_status.name | default('Unknown') }}
+- **Service State:** {{ iap_service_status.status.ActiveState | default('Unknown') }}
+- **Service SubState:** {{ iap_service_status.status.SubState | default('Unknown') }}
+- **Service Enabled:** {{ iap_service_status.status.UnitFileState | default('Unknown') }}
+{% else %}
+- **Service Status:** Could not determine (service may not exist)
+{% endif %}
+
+**Process Running:** {{ 'YES ✓' if (iap_process is defined and iap_process.rc == 0) else 'NO ✗' }}
+
+{% if iap_process is defined and iap_process.rc == 0 %}
+**Process Details:**
+```
+{{ iap_process.stdout | default('N/A') }}
+```
+{% endif %}
+
+---
+
+## Configuration Files
+- **Config File Exists:** {{ 'YES ✓' if (iap_conf_file is defined and iap_conf_file.stat.exists) else 'NO ✗' }}
+{% if iap_conf_file is defined and iap_conf_file.stat.exists %}
+- **Config File Path:** `/etc/itential/platform.properties`
+- **Permissions:** {{ iap_conf_permissions.stdout | default('Unknown') if iap_conf_permissions is defined else 'Unknown' }}
+{% endif %}
+
+- **Systemd Unit File:** {{ 'YES ✓' if (iap_systemd_file is defined and iap_systemd_file.stat.exists) else 'NO ✗' }}
+{% if iap_systemd_file is defined and iap_systemd_file.stat.exists %}
+- **Unit File Path:** `/etc/systemd/system/itential-platform.service`
+{% endif %}
+
+---
+
+## Critical Configuration Properties
+
+- **server_id:** {{ iap_server_id.stdout | default('Unknown') }}
+- **mongo_auth_enabled:** {{ iap_mongo_auth_enabled.stdout | default('Unknown') }}
+- **mongo_user:** {{ (iap_mongo_user.stdout | default('')) or 'Default value' }}
+- **mongo_auth_db:** {{ (iap_mongo_auth_db.stdout | default('')) or 'Default value' }}
+- **mongo_db_name:** {{ iap_mongo_db_name.stdout | default('Unknown') }}
+- **mongo_url:** {{ mongo_url_masked | default('Unknown') }}
+- **mongo_tls_enabled:** {{ iap_mongo_tls_enabled.stdout | default('Unknown') }}
+- **redis_db:** {{ (iap_mongo_auth_db.stdout | default('')) or 'Default value' }}
+- **redis_user:** {{ (iap_mongo_auth_db.stdout | default('')) or 'Default value' }}
+- **redis_host:** {{ (iap_redis_host.stdout | default('')) or 'Unknown' }}
+- **redis_sentinel_username:** {{ iap_redis_sentinel_username.stdout | default('Unknown') }}
+- **redis_sentinels:** {{ iap_redis_sentinels.stdout | default('Unknown') }}
+- **redis_name:** {{ iap_redis_name.stdout | default('Unknown') }}
+- **redis_tls:** {{ (iap_redis_tls.stdout | default('')) or 'Unknown' }}
+- **task_worker_enabled:** {{ iap_task_worker_enabled.stdout | default('Unknown') }}
+- **job_worker_enabled:** {{ iap_job_worker_enabled.stdout | default('Unknown') }}
+- **default_user_username:** {{ iap_default_user_username.stdout | default('Unknown') }}
+- **webserver_http_enabled:** {{ iap_webserver_http_enabled.stdout | default('Unknown') }}
+- **webserver_https_enabled:** {{ iap_webserver_https_enabled.stdout | default('Unknown') }}
+- **webserver_http_port:** {{ iap_webserver_http_port.stdout | default('Unknown') }}
+- **webserver_https_port:** {{ iap_webserver_https_port.stdout | default('Unknown') }}
+- **webserver_https_key:** {{ iap_webserver_https_key.stdout | default('Unknown') }}
+- **webserver_https_cert:** {{ iap_webserver_https_cert.stdout | default('Unknown') }}
+- **log_file:** {{ iap_log_directory.stdout + "/" + iap_log_file.stdout | default('Unknown') }}
+- **log_level:** {{ iap_log_level.stdout | default('Unknown') }}
+- **webserver_log_file:** {{ iap_webserver_log_directory.stdout + "/" + iap_webserver_log_filename.stdout | default('Unknown') }}
+
+---
+
+## Custom Services
+
+- **Custom Service Directory:** {{ service_directory | default('Unknown') }}
+
+## TLS Files
+
+{% if iap_webserver_https_cert is defined and iap_webserver_https_cert_stat.stat.exists %}
+- **TLS certificate files exist:** YES ✓
+- **TLS certificate files permissions:** {{ iap_webserver_https_cert_stat.stat.mode }}
+{% else %}
+- **TLS certificate files exist:** NO ✗
+{% endif %}
+{% if iap_webserver_https_key is defined and iap_webserver_https_key_stat.stat.exists %}
+- **TLS key files exist:** YES ✓
+- **TLS key files permissions:** {{ iap_webserver_https_key_stat.stat.mode }}
+{% else %}
+- **TLS key files exist:** NO ✗
+{% endif %}
+
+## Log Files
+
+{% if iap_log_file is defined and iap_log_file_stat.stat.exists %}
+- **Log files exist:** YES ✓
+- **Log files permissions:** {{ iap_log_file_stat.stat.mode }}
+{% else %}
+- **Log files exist:** NO ✗
+{% endif %}
+{% if iap_web_log_file is defined and iap_web_log_file_stat.stat.exists %}
+- **Web log files exist:** YES ✓
+- **Web log files permissions:** {{ iap_web_log_file_stat.stat.mode }}
+{% else %}
+- **Web log files exist:** NO ✗
+{% endif %}
+
+---
+
+## NodeJs
+- **Node Version:** {{ nodejs_version.stdout | default('Unknown') }}
+- **Node Executable:** {{ nodejs_path.stdout | default('Unknown') }}
+
+---
+
+## Python
+- **Python Version:** {{ python_version.stdout | default('Unknown') }}
+- **Python Executable:** {{ python_path.stdout | default('Unknown') }}
+- **Pip Version:** {{ pip_version.stdout | default('Unknown') }}
+- **Python Modules:**
+```
+{{ python_modules.stdout | default('Unknown') }}
+```
+
+---
+
+## Connectivity
+
+- **HTTP health check:** {{ 'YES ✓' if (http_health_check.status | default(0) == 200) else 'NO ✗' }}
+- **HTTPS health check:** {{ 'YES ✓' if (https_health_check.status | default(0) == 200) else 'NO ✗' }}
+- **MongoDB connectivity:** {{ 'YES ✓' if mongodb_connection else 'NO ✗' }}
+- **Redis connectivity:** {{ 'YES ✓' if redis_connection else 'NO ✗' }}
+
+
