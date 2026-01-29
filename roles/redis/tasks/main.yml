@@ -1,10 +1,21 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Include tasks to validate variables
-  ansible.builtin.include_tasks:
-    file: validate-vars.yml
+- name: Validate variables and set node type facts
   tags: always
+  block:
+    - name: Include tasks to validate variables
+      ansible.builtin.include_tasks:
+        file: validate-vars.yml
+
+    - name: Set Redis node type facts
+      ansible.builtin.set_fact:
+        redis_is_master_node: "{{ 'redis_master' in group_names }}"
+        redis_is_replica_node: "{{ 'redis_replica' in group_names }}"
+        redis_is_sentinel_node: "{{ 'redis_sentinel' in group_names }}"
+        redis_is_data_node: "{{ 'redis_master' in group_names or 'redis_replica' in group_names }}"
+        redis_has_replicas: "{{ groups['redis_replica'] is defined and groups['redis_replica'] | length > 0 }}"
+        redis_has_sentinels: "{{ groups['redis_sentinel'] is defined and groups['redis_sentinel'] | length > 0 }}"
 
 - name: Install and configure Redis
   notify:
@@ -45,14 +56,16 @@
         - name: Include tasks to configure Redis
           ansible.builtin.include_tasks:
             file: configure-redis.yml
+          when: redis_is_data_node
 
         - name: Include tasks to configure Sentinel
           ansible.builtin.include_tasks:
             file: configure-sentinel.yml
-          when: redis_replication_enabled | bool
+          when: redis_is_sentinel_node
 
 - name: Ensure Redis is running
   tags: always
+  when: redis_is_data_node
   block:
     - name: Flush all handlers
       ansible.builtin.meta: flush_handlers
@@ -70,7 +83,7 @@
 
 - name: Ensure Redis Sentinel is running
   tags: always
-  when: redis_replication_enabled | bool
+  when: redis_is_sentinel_node
   block:
     - name: Flush all handlers
       ansible.builtin.meta: flush_handlers
