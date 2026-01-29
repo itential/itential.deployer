@@ -1,0 +1,144 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Run Environment Verification Tasks
+  hosts: all
+  gather_facts: true
+  become: true
+  roles:
+    - role: itential.deployer.common_vars
+      tags: always
+
+  tasks:
+
+    - name: Import role vars
+      ansible.builtin.include_vars:
+        file: "{{ item }}"
+      loop:
+        - "../roles/redis/vars/platform-release-{{ platform_release }}.yml"
+        - "../roles/mongodb/vars/platform-release-{{ platform_release }}.yml"
+        - "../roles/platform/vars/platform-release-{{ platform_release }}.yml"
+
+    - name: Gather hardware specs
+      ansible.builtin.set_fact:
+        hardware_specs:
+          "mongodb": "{{ mongodb_hw_specs[env] }}"
+          "platform": "{{ platform_hw_specs[env] }}"
+          "redis": "{{ redis_hw_specs[env] }}"
+
+    - name: Gather host information
+      itential.deployer.gather_host_information:
+      register: host_info
+
+    - name: Extract OS information
+      ansible.builtin.set_fact:
+        os: "{{ host_info.os }}"
+
+    # OS and Architecture validation
+    - name: Check OS compatibility
+      ansible.builtin.set_fact:
+        os_valid: >-
+          {{
+            (os.distribution == 'RedHat' and ansible_distribution_major_version in ['8', '9']) or
+            (os.distribution == 'Rocky' and ansible_distribution_major_version in ['8', '9']) or
+            (os.distribution == 'OracleLinux' and ansible_distribution_major_version in ['8', '9']) or
+            (os.distribution == 'Amazon' and ansible_distribution_major_version == '2023')
+          }}
+
+    - name: Assert that this is a supported OS
+      ansible.builtin.assert:
+        that: "{{ os_valid }} == true"
+        fail_msg: "{{ os.distribution }} {{ os.distribution_version }} is not a supported OS!"
+        success_msg: "OS validation passed!"
+        quiet: true
+
+    - name: Check architecture compatibility
+      ansible.builtin.set_fact:
+        arch_valid: "{{ os.architecture in ['x86_64', 'aarch64'] }}"
+
+    - name: Assert that this is a supported Architecture
+      ansible.builtin.assert:
+        that: "{{ arch_valid }} == true"
+        fail_msg: "{{ os.architecture }} is not a supported architecture!"
+        success_msg: "Architecture validation passed!"
+        quiet: true
+
+    # Hardware spec validation
+    - name: Determine the applicable specs based on host group
+      ansible.builtin.set_fact:
+        applicable_spec: >-
+          {%- if 'mongodb' in group_names -%}
+            mongodb
+          {%- elif 'platform' in group_names -%}
+            platform
+          {%- elif 'redis' in group_names -%}
+            redis
+          {%- else -%}
+            none
+          {%- endif -%}
+
+    - name: Get root partition size
+      ansible.builtin.set_fact:
+        root_disk_size_gb: "{{ (ansible_mounts | selectattr('mount', 'equalto', '/') | map(attribute='size_total') | first / 1024 / 1024 / 1024) | round(2) }}"
+      when: ansible_mounts | selectattr('mount', 'equalto', '/') | list | length > 0
+
+    - name: Validate hardware specs against requirements
+      ansible.builtin.set_fact:
+        hardware_validation:
+          required:
+            cpu_count: "{{ hardware_specs[applicable_spec].cpu_count if applicable_spec != 'none' else 'N/A' }}"
+            ram_size_gb: "{{ hardware_specs[applicable_spec].ram_size if applicable_spec != 'none' else 'N/A' }}"
+            disk_size_gb: "{{ hardware_specs[applicable_spec].disk_size if applicable_spec != 'none' else 'N/A' }}"
+          actual:
+            cpu_count: "{{ ansible_processor_vcpus }}"
+            ram_size_gb: "{{ (ansible_memtotal_mb / 1024) | round(2) }}"
+            disk_size_gb: "{{ root_disk_size_gb | default('N/A') }}"
+          validation:
+            cpu_valid: "{{ (applicable_spec == 'none') or (ansible_processor_vcpus >= hardware_specs[applicable_spec].cpu_count) }}"
+            ram_valid: "{{ (applicable_spec == 'none') or ((ansible_memtotal_mb / 1024) >= hardware_specs[applicable_spec].ram_size) }}"
+            disk_valid: "{{ (applicable_spec == 'none') or ((root_disk_size_gb | default(0) | float) >= hardware_specs[applicable_spec].disk_size) }}"
+            all_valid: "{{ (applicable_spec == 'none') or ((ansible_processor_vcpus >= hardware_specs[applicable_spec].cpu_count) and ((ansible_memtotal_mb / 1024) >= hardware_specs[applicable_spec].ram_size) and ((root_disk_size_gb | default(0) | float) >= hardware_specs[applicable_spec].disk_size)) }}"
+
+    - name: Validate CPU Count
+      ansible.builtin.assert:
+        that: hardware_validation.validation.cpu_valid | bool
+        fail_msg: "CPU validation failed"
+        quiet: true
+      ignore_errors: true
+      register: cpu_validation
+
+    - name: Validate Memory Amount
+      ansible.builtin.assert:
+        that: hardware_validation.validation.memory_valid | bool
+        fail_msg: "Memory validation failed"
+        quiet: true
+      ignore_errors: true
+      register: memory_validation
+
+    - name: Validate Disk Size
+      ansible.builtin.assert:
+        that: hardware_validation.validation.disk_valid | bool
+        fail_msg: "Disk validation failed"
+        quiet: true
+      ignore_errors: true
+      register: disk_validation
+
+    - name: Print host information
+      ansible.builtin.debug:
+        msg: "{{ host_info }}"
+
+    # Fail at the end if any validation failed
+    - name: Check if any validations failed
+      ansible.builtin.fail:
+        msg: |
+          Hardware validation failures detected:
+          {% if cpu_validation is failed %}
+          - CPU: {{ hardware_validation.required.cpu_count }} required, {{ hardware_validation.actual.cpu_count }} found
+          {% endif %}
+          {% if memory_validation is failed %}
+          - Memory: {{ hardware_validation.required.ram_size_gb }}GB required, {{ hardware_validation.actual.ram_size_gb }}GB found
+          {% endif %}
+          {% if disk_validation is failed %}
+          - Disk: {{ hardware_validation.required.disk_size_gb }}GB required, {{ hardware_validation.actual.disk_size_gb }}GB found
+          {% endif %}
+      when: cpu_validation is failed or memory_validation is failed or disk_validation is failed

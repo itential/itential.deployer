@@ -1,0 +1,393 @@
+# Copyright (c) 2026, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+
+- name: Load variables from the MongoDB role
+  ansible.builtin.include_vars:
+    dir: "{{ item }}"
+  loop:
+    - "{{ role_path }}/../mongodb/defaults"
+    - "{{ role_path }}/../mongodb/vars"
+
+- name: Ensure report directory exists
+  ansible.builtin.file:
+    path: "{{ certify_report_dir }}"
+    state: directory
+    owner: "{{ mongodb_owner }}"
+    group: "{{ mongodb_group }}"
+    mode: "0755"
+
+- name: Set report filename
+  ansible.builtin.set_fact:
+    certify_report_file: "{{ certify_report_dir }}/mongodb-report-{{ inventory_hostname }}.md"
+
+- name: Check if MongoDB service exists
+  ansible.builtin.systemd:
+    name: mongod
+  register: mongodb_service_status
+  ignore_errors: true
+
+- name: Check if MongoDB process is running
+  ansible.builtin.shell: ps aux | grep -v grep | grep mongod
+  register: mongodb_process
+  ignore_errors: true
+  changed_when: false
+
+- name: Check MongoDB listening ports
+  ansible.builtin.shell: ss -tulpn | grep mongod
+  register: mongodb_ports
+  ignore_errors: true
+  changed_when: false
+
+- name: Get MongoDB version
+  ansible.builtin.shell: mongod --version | head -n 1
+  register: mongodb_version
+  ignore_errors: true
+  changed_when: false
+
+- name: Check MongoDB config file exists
+  ansible.builtin.stat:
+    path: /etc/mongod.conf
+  register: mongodb_conf_file
+
+- name: Get MongoDB config file permissions
+  ansible.builtin.command: ls -la /etc/mongod.conf
+  register: mongodb_conf_permissions
+  ignore_errors: true
+  changed_when: false
+  when: mongodb_conf_file.stat.exists
+
+- name: Read MongoDB configuration file
+  ansible.builtin.slurp:
+    src: /etc/mongod.conf
+  register: mongodb_config_content
+  when: mongodb_conf_file.stat.exists
+  ignore_errors: true
+
+- name: Parse MongoDB config for data directory
+  ansible.builtin.shell: grep -E '^\s*dbPath:' /etc/mongod.conf | awk '{print $2}'
+  register: mongodb_data_dir
+  ignore_errors: true
+  changed_when: false
+  when: mongodb_conf_file.stat.exists
+
+- name: Parse MongoDB config for log path
+  ansible.builtin.shell: grep -E '^\s*path:' /etc/mongod.conf | awk '{print $2}'
+  register: mongodb_log_path
+  ignore_errors: true
+  changed_when: false
+  when: mongodb_conf_file.stat.exists
+
+- name: Check MongoDB systemd unit file
+  ansible.builtin.stat:
+    path: /usr/lib/systemd/system/mongod.service
+  register: mongodb_systemd_file
+
+- name: Check data directory exists and permissions
+  ansible.builtin.stat:
+    path: "{{ mongodb_data_dir.stdout }}"
+  register: mongodb_data_dir_stat
+  when: mongodb_data_dir.stdout is defined and mongodb_data_dir.stdout != ""
+  ignore_errors: true
+
+- name: Get data directory size
+  ansible.builtin.command: du -sh {{ mongodb_data_dir.stdout }}
+  register: mongodb_data_size
+  ignore_errors: true
+  changed_when: false
+  when: mongodb_data_dir.stdout is defined and mongodb_data_dir.stdout != ""
+
+# ============================================================================
+# CONNECTIVITY TESTS
+# ============================================================================
+
+- name: Test basic MongoDB connection (no auth)
+  ansible.builtin.shell: |
+    mongosh --quiet --eval "db.adminCommand('ping')" 2>&1
+  register: mongodb_ping_noauth
+  ignore_errors: true
+  changed_when: false
+
+- name: Test MongoDB connection with admin user
+  ansible.builtin.shell: |
+    mongosh --quiet -u {{ mongodb_user_admin }} -p {{ mongodb_user_admin_password }} \
+    --authenticationDatabase admin --eval "db.adminCommand('ping')"
+  register: mongodb_ping_admin
+  ignore_errors: true
+  changed_when: false
+  no_log: true
+  when: mongodb_user_admin is defined and mongodb_user_admin_password is defined
+
+# ============================================================================
+# TLS/SSL CHECKS
+# ============================================================================
+
+- name: Check if TLS is enabled in config
+  ansible.builtin.shell: |
+    grep -E '^\s*mode:\s*requireTLS|^\s*mode:\s*preferTLS|^\s*mode:\s*allowTLS' /etc/mongod.conf
+  register: mongodb_tls_mode
+  ignore_errors: true
+  changed_when: false
+  when: mongodb_conf_file.stat.exists
+
+- name: Get TLS certificate path from config
+  ansible.builtin.shell: |
+    grep -E '^\s*certificateKeyFile:' /etc/mongod.conf | awk '{print $2}'
+  register: mongodb_tls_cert_path
+  ignore_errors: true
+  changed_when: false
+  when: mongodb_conf_file.stat.exists
+
+- name: Check TLS certificate file exists
+  ansible.builtin.stat:
+    path: "{{ mongodb_tls_cert_path.stdout }}"
+  register: mongodb_tls_cert_file
+  when: mongodb_tls_cert_path.stdout is defined and mongodb_tls_cert_path.stdout != ""
+  ignore_errors: true
+
+- name: Get TLS certificate expiration
+  ansible.builtin.shell: |
+    openssl x509 -in {{ mongodb_tls_cert_path.stdout }} -noout -enddate
+  register: mongodb_tls_cert_expiry
+  ignore_errors: true
+  changed_when: false
+  when:
+    - mongodb_tls_cert_path.stdout is defined
+    - mongodb_tls_cert_path.stdout != ""
+    - mongodb_tls_cert_file.stat.exists | default(false)
+
+- name: Test MongoDB connection with TLS
+  ansible.builtin.shell: |
+    mongosh --tls --quiet -u {{ mongodb_user_admin }} -p {{ mongodb_user_admin_password }} \
+    --authenticationDatabase admin --eval "db.adminCommand('ping')"
+  register: mongodb_ping_tls
+  ignore_errors: true
+  changed_when: false
+  no_log: true
+  when:
+    - mongodb_user_admin is defined
+    - mongodb_user_admin_password is defined
+    - mongodb_tls_mode.rc == 0
+
+# ============================================================================
+# SERVER STATUS AND METRICS
+# ============================================================================
+
+- name: Get MongoDB server status
+  ansible.builtin.shell: |
+    mongosh --quiet -u {{ mongodb_user_admin }} -p {{ mongodb_user_admin_password }} \
+    --authenticationDatabase admin --eval "JSON.stringify(db.serverStatus())"
+  register: mongodb_server_status
+  ignore_errors: true
+  changed_when: false
+  no_log: true
+  when: mongodb_user_admin is defined and mongodb_user_admin_password is defined
+
+- name: Get MongoDB build info
+  ansible.builtin.shell: |
+    mongosh --quiet -u {{ mongodb_user_admin }} -p {{ mongodb_user_admin_password }} \
+    --authenticationDatabase admin --eval "JSON.stringify(db.serverBuildInfo())"
+  register: mongodb_build_info
+  ignore_errors: true
+  changed_when: false
+  no_log: true
+  when: mongodb_user_admin is defined and mongodb_user_admin_password is defined
+
+# ============================================================================
+# REPLICA SET STATUS
+# ============================================================================
+
+- name: Check if replica set is configured
+  ansible.builtin.shell: |
+    grep -E '^\s*replSetName:' /etc/mongod.conf | awk '{print $2}'
+  register: mongodb_replset_name
+  ignore_errors: true
+  changed_when: false
+  when: mongodb_conf_file.stat.exists
+
+- name: Get replica set status
+  ansible.builtin.shell: |
+    mongosh --quiet -u {{ mongodb_user_admin }} -p {{ mongodb_user_admin_password }} \
+    --authenticationDatabase admin --eval "JSON.stringify(rs.status())"
+  register: mongodb_replset_status
+  ignore_errors: true
+  changed_when: false
+  no_log: true
+  when:
+    - mongodb_user_admin is defined
+    - mongodb_user_admin_password is defined
+    - mongodb_replset_name.stdout is defined
+    - mongodb_replset_name.stdout != ""
+
+- name: Get replica set configuration
+  ansible.builtin.shell: |
+    mongosh --quiet -u {{ mongodb_user_admin }} -p {{ mongodb_user_admin_password }} \
+    --authenticationDatabase admin --eval "JSON.stringify(rs.conf())"
+  register: mongodb_replset_config
+  ignore_errors: true
+  changed_when: false
+  no_log: true
+  when:
+    - mongodb_user_admin is defined
+    - mongodb_user_admin_password is defined
+    - mongodb_replset_name.stdout is defined
+    - mongodb_replset_name.stdout != ""
+
+- name: Get replica set member details
+  ansible.builtin.shell: |
+    mongosh --quiet -u {{ mongodb_user_admin }} -p {{ mongodb_user_admin_password }} \
+    --authenticationDatabase admin --eval "JSON.stringify(rs.isMaster())"
+  register: mongodb_replset_ismaster
+  ignore_errors: true
+  changed_when: false
+  no_log: true
+  when:
+    - mongodb_user_admin is defined
+    - mongodb_user_admin_password is defined
+    - mongodb_replset_name.stdout is defined
+    - mongodb_replset_name.stdout != ""
+
+# ============================================================================
+# USER AUTHENTICATION TESTS
+# ============================================================================
+
+- name: Get list of MongoDB users
+  ansible.builtin.shell: |
+    mongosh --quiet -u {{ mongodb_user_admin }} -p {{ mongodb_user_admin_password }} \
+    --authenticationDatabase admin admin --eval "JSON.stringify(db.getUsers())"
+  register: mongodb_users_list
+  ignore_errors: true
+  changed_when: false
+  no_log: true
+  when: mongodb_user_admin is defined and mongodb_user_admin_password is defined
+
+- name: Parse MongoDB users
+  ansible.builtin.set_fact:
+    mongodb_users: "{{ (mongodb_users_list.stdout | from_json).users | default([]) }}"
+  when:
+    - mongodb_users_list is defined
+    - mongodb_users_list.rc == 0
+    - mongodb_users_list.stdout is defined
+  failed_when: false
+
+# Test individual users
+- name: Test connection with itential user
+  ansible.builtin.shell: |
+    mongosh --quiet -u {{ mongodb_user_itential }} -p {{ mongodb_user_itential_password }} \
+    --authenticationDatabase "itential" --eval "db.adminCommand('ping')"
+  register: mongodb_user_itential_ping
+  ignore_errors: true
+  changed_when: false
+  # no_log: true
+  when:
+    - mongodb_user_itential is defined
+    - mongodb_user_itential_password is defined
+
+# ============================================================================
+# DATABASE INFORMATION
+# ============================================================================
+
+- name: List all databases
+  ansible.builtin.shell: |
+    mongosh --quiet -u {{ mongodb_user_admin }} -p {{ mongodb_user_admin_password }} \
+    --authenticationDatabase admin --eval "JSON.stringify(db.adminCommand('listDatabases'))"
+  register: mongodb_databases
+  ignore_errors: true
+  changed_when: false
+  no_log: true
+  when: mongodb_user_admin is defined and mongodb_user_admin_password is defined
+
+- name: Get database stats
+  ansible.builtin.shell: |
+    mongosh --quiet -u {{ mongodb_user_admin }} -p {{ mongodb_user_admin_password }} \
+    --authenticationDatabase admin --eval "JSON.stringify(db.stats())"
+  register: mongodb_db_stats
+  ignore_errors: true
+  changed_when: false
+  no_log: true
+  when: mongodb_user_admin is defined and mongodb_user_admin_password is defined
+
+# ============================================================================
+# LOGS
+# ============================================================================
+
+- name: Get recent MongoDB log entries
+  ansible.builtin.shell: |
+    if [ -f "{{ mongodb_log_path.stdout }}" ]; then
+      tail -n 100 {{ mongodb_log_path.stdout }}
+    else
+      journalctl -u mongod -n 100 --no-pager
+    fi
+  register: mongodb_logs
+  ignore_errors: true
+  changed_when: false
+  when: mongodb_log_path.stdout is defined or mongodb_service_status.status is defined
+
+# ============================================================================
+# SECURITY CHECKS
+# ============================================================================
+
+- name: Check if authentication is enabled
+  ansible.builtin.shell: |
+    grep -E '^\s*authorization:\s*enabled' /etc/mongod.conf
+  register: mongodb_auth_enabled
+  ignore_errors: true
+  changed_when: false
+  when: mongodb_conf_file.stat.exists
+
+- name: Check security settings
+  ansible.builtin.shell: |
+    mongosh --quiet -u {{ mongodb_user_admin }} -p {{ mongodb_user_admin_password }} \
+    --authenticationDatabase admin --eval "JSON.stringify(db.adminCommand({getCmdLineOpts: 1}))"
+  register: mongodb_security_settings
+  ignore_errors: true
+  changed_when: false
+  no_log: true
+  when: mongodb_user_admin is defined and mongodb_user_admin_password is defined
+
+# ============================================================================
+# PERFORMANCE METRICS
+# ============================================================================
+
+- name: Get current operations
+  ansible.builtin.shell: |
+    mongosh --quiet -u {{ mongodb_user_admin }} -p {{ mongodb_user_admin_password }} \
+    --authenticationDatabase admin --eval "JSON.stringify(db.currentOp())"
+  register: mongodb_current_ops
+  ignore_errors: true
+  changed_when: false
+  no_log: true
+  when: mongodb_user_admin is defined and mongodb_user_admin_password is defined
+
+- name: Get connection count
+  ansible.builtin.shell: |
+    mongosh --quiet -u {{ mongodb_user_admin }} -p {{ mongodb_user_admin_password }} \
+    --authenticationDatabase admin --eval "db.serverStatus().connections"
+  register: mongodb_connections
+  ignore_errors: true
+  changed_when: false
+  no_log: true
+  when: mongodb_user_admin is defined and mongodb_user_admin_password is defined
+
+# ============================================================================
+# GATHER HOST INFORMATION
+# ============================================================================
+
+- name: Gather host information
+  itential.deployer.gather_host_information:
+  register: host_details
+
+# ============================================================================
+# GENERATE REPORT
+# ============================================================================
+- name: Generate MongoDB validation report
+  ansible.builtin.template:
+    src: mongodb-validation-report.md.j2
+    dest: "{{ certify_report_file }}"
+    mode: '0644'
+    owner: "{{ mongodb_owner }}"
+    group: "{{ mongodb_group }}"
+
+- name: Display report location
+  ansible.builtin.debug:
+    msg: "MongoDB validation report generated at: {{ certify_report_file }}"
