@@ -17,3 +17,17 @@ redis_source_url_default:
   "8": "https://github.com/redis/redis/archive/7.4.6.tar.gz"
   "9": "https://github.com/redis/redis/archive/7.4.6.tar.gz"
   "2023": "https://github.com/redis/redis/archive/7.4.6.tar.gz"
+
+redis_hw_specs:
+  "dev":
+    "cpu_count": 8
+    "ram_size": 16
+    "disk_size": 100
+  "test":
+    "cpu_count": 8
+    "ram_size": 32
+    "disk_size": 100
+  "production":
+    "cpu_count": 8
+    "ram_size": 32
+    "disk_size": 100

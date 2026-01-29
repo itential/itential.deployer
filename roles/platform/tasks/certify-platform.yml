@@ -1,0 +1,565 @@
+# Copyright (c) 2026, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+
+- name: Load variables from the Platform role
+  ansible.builtin.include_vars:
+    dir: "{{ item }}"
+  loop:
+    - "{{ role_path }}/../platform/defaults"
+    - "{{ role_path }}/../platform/vars"
+
+- name: Ensure report directory exists
+  ansible.builtin.file:
+    path: "{{ certify_report_dir }}"
+    state: directory
+    owner: "{{ platform_user }}"
+    group: "{{ platform_group }}"
+    mode: "0755"
+
+- name: Set report filename
+  ansible.builtin.set_fact:
+    certify_report_file: "{{ certify_report_dir }}/platform-report-{{ inventory_hostname }}.md"
+
+- name: Check if Itential service exists
+  ansible.builtin.systemd:
+    name: itential-platform
+  register: iap_service_status
+  ignore_errors: true
+
+- name: Check if Itential process is running
+  ansible.builtin.shell: ps aux | grep -v grep | grep -i pronghorn
+  register: iap_process
+  ignore_errors: true
+  changed_when: false
+
+- name: Check Itential listening ports
+  ansible.builtin.shell: ss -tulpn | grep itential-platform
+  register: iap_ports
+  ignore_errors: true
+  changed_when: false
+
+- name: Check Itential systemd unit file
+  ansible.builtin.stat:
+    path: /usr/lib/systemd/system/itential-platform.service
+  register: iap_systemd_file
+
+- name: Check Itential config file exists
+  ansible.builtin.stat:
+    path: /etc/itential/platform.properties
+  register: iap_conf_file
+
+- name: Get Itential config file permissions
+  ansible.builtin.command: ls -la /etc/itential/platform.properties
+  register: iap_conf_permissions
+  ignore_errors: true
+  changed_when: false
+  when: iap_conf_file.stat.exists
+
+# ============================================================================
+# CONFIRM CONFIGURATION SETTINGS
+# ============================================================================
+
+- name: Parse Itential config for server_id
+  ansible.builtin.shell:
+    cmd: >
+      grep '^server_id' /etc/itential/platform.properties |
+      awk -F'=' '{print $2}' |
+      xargs
+  register: iap_server_id
+  ignore_errors: true
+  changed_when: false
+  when: iap_conf_file.stat.exists
+
+- name: Parse Itential config for mongo_auth_enabled
+  ansible.builtin.shell:
+    cmd: >
+      grep '^mongo_auth_enabled' /etc/itential/platform.properties
+      | awk -F'=' '{print $2}' |
+      xargs
+  register: iap_mongo_auth_enabled
+  ignore_errors: true
+  changed_when: false
+  when: iap_conf_file.stat.exists
+
+- name: Parse Itential config for mongo_user
+  ansible.builtin.shell:
+    cmd: >
+      grep '^mongo_user' /etc/itential/platform.properties
+      | awk -F'=' '{print $2}' |
+      xargs
+  register: iap_mongo_user
+  ignore_errors: true
+  changed_when: false
+  when: iap_conf_file.stat.exists
+
+- name: Parse Itential config for mongo_auth_db
+  ansible.builtin.shell:
+    cmd: >
+      grep '^mongo_auth_db' /etc/itential/platform.properties |
+      awk -F'=' '{print $2}' |
+      xargs
+  register: iap_mongo_auth_db
+  ignore_errors: true
+  changed_when: false
+  when: iap_conf_file.stat.exists
+
+- name: Parse Itential config for mongo_db_name
+  ansible.builtin.shell:
+    cmd: >
+      grep '^mongo_db_name' /etc/itential/platform.properties |
+      awk -F'=' '{print $2}' |
+      xargs
+  register: iap_mongo_db_name
+  ignore_errors: true
+  changed_when: false
+  when: iap_conf_file.stat.exists
+
+- name: Parse Itential config for mongo_url
+  ansible.builtin.shell:
+    cmd: >
+      grep '^mongo_url' /etc/itential/platform.properties |
+      sed 's/^mongo_url[[:space:]]*=[[:space:]]*//' |
+      xargs
+  register: iap_mongo_url
+  ignore_errors: true
+  changed_when: false
+  no_log: true
+  when: iap_conf_file.stat.exists
+
+- name: Mask password in MongoDB URL
+  ansible.builtin.set_fact:
+    mongo_url_masked: "{{ iap_mongo_url.stdout | regex_replace('(mongodb[^:]*://[^:]+:)([^@]+)(@.*)', '\\1****\\3') }}"
+  no_log: true
+  when: iap_mongo_url.stdout is defined and iap_mongo_url.stdout != ""
+
+- name: Parse Itential config for mongo_tls_enabled
+  ansible.builtin.shell:
+    cmd: >
+      grep '^mongo_tls_enabled' /etc/itential/platform.properties |
+      awk -F'=' '{print $2}' |
+      xargs
+  register: iap_mongo_tls_enabled
+  ignore_errors: true
+  changed_when: false
+  when: iap_conf_file.stat.exists
+
+- name: Parse Itential config for redis_username
+  ansible.builtin.shell:
+    cmd: >
+      grep '^redis_username' /etc/itential/platform.properties |
+      awk -F'=' '{print $2}' |
+      xargs
+  register: iap_redis_username
+  ignore_errors: true
+  changed_when: false
+  when: iap_conf_file.stat.exists
+
+- name: Parse Itential config for redis_host
+  ansible.builtin.shell:
+    cmd: >
+      grep '^redis_host' /etc/itential/platform.properties |
+      awk -F'=' '{print $2}' |
+      xargs
+  register: iap_redis_host
+  ignore_errors: true
+  changed_when: false
+  when: iap_conf_file.stat.exists
+
+- name: Parse Itential config for redis_sentinel_username
+  ansible.builtin.shell:
+    cmd: >
+      grep '^redis_sentinel_username' /etc/itential/platform.properties |
+      awk -F'=' '{print $2}' |
+      xargs
+  register: iap_redis_sentinel_username
+  ignore_errors: true
+  changed_when: false
+  when: iap_conf_file.stat.exists
+
+- name: Parse Itential config for redis_sentinels
+  ansible.builtin.shell:
+    cmd: >
+      grep '^redis_sentinels' /etc/itential/platform.properties |
+      awk -F'=' '{print $2}' |
+      xargs
+  register: iap_redis_sentinels
+  ignore_errors: true
+  changed_when: false
+  when: iap_conf_file.stat.exists
+
+- name: Parse Itential config for redis_name
+  ansible.builtin.shell:
+    cmd: >
+      grep '^redis_name' /etc/itential/platform.properties |
+      awk -F'=' '{print $2}' |
+      xargs
+  register: iap_redis_name
+  ignore_errors: true
+  changed_when: false
+  when: iap_conf_file.stat.exists
+
+- name: Parse Itential config for redis_tls
+  ansible.builtin.shell:
+    cmd: >
+      grep '^redis_tls' /etc/itential/platform.properties
+      | awk -F'=' '{print $2}' |
+      xargs
+  register: iap_redis_tls
+  ignore_errors: true
+  changed_when: false
+  when: iap_conf_file.stat.exists
+
+- name: Parse Itential config for task_worker_enabled
+  ansible.builtin.shell:
+    cmd: >
+      grep '^task_worker_enabled' /etc/itential/platform.properties |
+      awk -F'=' '{print $2}' |
+      xargs
+  register: iap_task_worker_enabled
+  ignore_errors: true
+  changed_when: false
+  when: iap_conf_file.stat.exists
+
+- name: Parse Itential config for job_worker_enabled
+  ansible.builtin.shell:
+    cmd: >
+      grep '^job_worker_enabled' /etc/itential/platform.properties |
+      awk -F'=' '{print $2}' |
+      xargs
+  register: iap_job_worker_enabled
+  ignore_errors: true
+  changed_when: false
+  when: iap_conf_file.stat.exists
+
+- name: Parse Itential config for default_user_username
+  ansible.builtin.shell:
+    cmd: >
+      grep '^default_user_username' /etc/itential/platform.properties |
+      awk -F'=' '{print $2}' |
+      xargs
+  register: iap_default_user_username
+  ignore_errors: true
+  changed_when: false
+  when: iap_conf_file.stat.exists
+
+- name: Parse Itential config for webserver_http_enabled
+  ansible.builtin.shell:
+    cmd: >
+      grep '^webserver_http_enabled' /etc/itential/platform.properties |
+      awk -F'=' '{print $2}' |
+      xargs
+  register: iap_webserver_http_enabled
+  ignore_errors: true
+  changed_when: false
+  when: iap_conf_file.stat.exists
+
+- name: Parse Itential config for webserver_https_enabled
+  ansible.builtin.shell:
+    cmd: >
+      grep '^webserver_https_enabled' /etc/itential/platform.properties |
+      awk -F'=' '{print $2}' |
+      xargs
+  register: iap_webserver_https_enabled
+  ignore_errors: true
+  changed_when: false
+  when: iap_conf_file.stat.exists
+
+- name: Parse Itential config for webserver_http_port
+  ansible.builtin.shell:
+    cmd: >
+      grep '^webserver_http_port' /etc/itential/platform.properties |
+      awk -F'=' '{print $2}' |
+      xargs
+  register: iap_webserver_http_port
+  ignore_errors: true
+  changed_when: false
+  when: iap_conf_file.stat.exists
+
+- name: Parse Itential config for webserver_https_port
+  ansible.builtin.shell:
+    cmd: >
+      grep '^webserver_https_port' /etc/itential/platform.properties |
+      awk -F'=' '{print $2}' |
+      xargs
+  register: iap_webserver_https_port
+  ignore_errors: true
+  changed_when: false
+  when: iap_conf_file.stat.exists
+
+- name: Parse Itential config for webserver_https_key
+  ansible.builtin.shell:
+    cmd: >
+      grep '^webserver_https_key' /etc/itential/platform.properties |
+      awk -F'=' '{print $2}' |
+      xargs
+  register: iap_webserver_https_key
+  ignore_errors: true
+  changed_when: false
+  when: iap_conf_file.stat.exists
+
+- name: Parse Itential config for webserver_https_cert
+  ansible.builtin.shell:
+    cmd: >
+      grep '^webserver_https_cert' /etc/itential/platform.properties |
+      awk -F'=' '{print $2}' |
+      xargs
+  register: iap_webserver_https_cert
+  ignore_errors: true
+  changed_when: false
+  when: iap_conf_file.stat.exists
+
+- name: Parse Itential config for log_directory
+  ansible.builtin.shell:
+    cmd: >
+      grep '^log_directory' /etc/itential/platform.properties |
+      awk -F'=' '{print $2}' |
+      xargs
+  register: iap_log_directory
+  ignore_errors: true
+  changed_when: false
+  when: iap_conf_file.stat.exists
+
+- name: Parse Itential config for log_file
+  ansible.builtin.shell:
+    cmd: >
+      grep '^log_file' /etc/itential/platform.properties |
+      awk -F'=' '{print $2}' |
+      xargs
+  register: iap_log_file
+  ignore_errors: true
+  changed_when: false
+  when: iap_conf_file.stat.exists
+
+- name: Parse Itential config for log_level
+  ansible.builtin.shell:
+    cmd: >
+      grep '^log_level' /etc/itential/platform.properties |
+      awk -F'=' '{print $2}' |
+      xargs
+  register: iap_log_level
+  ignore_errors: true
+  changed_when: false
+  when: iap_conf_file.stat.exists
+
+- name: Parse Itential config for webserver_log_directory
+  ansible.builtin.shell:
+    cmd: >
+      grep '^webserver_log_directory' /etc/itential/platform.properties |
+      awk -F'=' '{print $2}' |
+      xargs
+  register: iap_webserver_log_directory
+  ignore_errors: true
+  changed_when: false
+  when: iap_conf_file.stat.exists
+
+- name: Parse Itential config for webserver_log_filename
+  ansible.builtin.shell:
+    cmd: >
+      grep '^webserver_log_filename' /etc/itential/platform.properties |
+      awk -F'=' '{print $2}' |
+      xargs
+  register: iap_webserver_log_filename
+  ignore_errors: true
+  changed_when: false
+  when: iap_conf_file.stat.exists
+
+- name: Parse Itential config for services_directory
+  ansible.builtin.shell:
+    cmd: >
+      grep '^service_directory' /etc/itential/platform.properties |
+      awk -F'=' '{print $2}' |
+      xargs
+  register: iap_service_directory
+  ignore_errors: true
+  changed_when: false
+  when: iap_conf_file.stat.exists
+
+- name: List all installed custom services
+  ansible.builtin.command: "ls -la {{ iap_service_directory.stdout }}"
+  register: iap_service_directory_contents
+  ignore_errors: true
+  changed_when: false
+
+# ============================================================================
+# CONFIRM TLS FILES
+# ============================================================================
+
+- name: Check TLS certificate file exists
+  ansible.builtin.stat:
+    path: "{{ iap_webserver_https_cert.stdout }}"
+  register: iap_webserver_https_cert_stat
+  ignore_errors: true
+  changed_when: false
+  when: iap_webserver_https_cert.stdout
+
+- name: Check TLS key file exists
+  ansible.builtin.stat:
+    path: "{{ iap_webserver_https_key.stdout }}"
+  register: iap_webserver_https_key_stat
+  ignore_errors: true
+  changed_when: false
+  when: iap_webserver_https_key.stdout
+
+# ============================================================================
+# CONFIRM NODEJS
+# ============================================================================
+
+- name: Get Node.js version
+  ansible.builtin.command: node --version
+  register: nodejs_version
+  ignore_errors: true
+  changed_when: false
+  failed_when: false
+
+- name: Get Node.js executable path
+  ansible.builtin.command: which node
+  register: nodejs_path
+  ignore_errors: true
+  changed_when: false
+  failed_when: false
+
+# ============================================================================
+# CONFIRM PYTHON
+# ============================================================================
+
+- name: Get Python version
+  ansible.builtin.command: python3 --version
+  register: python_version
+  ignore_errors: true
+  changed_when: false
+  failed_when: false
+  become: true
+  become_user: "itential"
+  become_flags: '-i'
+  # become_method: ansible.builtin.su
+
+- name: Get Python executable path
+  ansible.builtin.command: which python3
+  register: python_path
+  ignore_errors: true
+  changed_when: false
+  failed_when: false
+  become: true
+  become_user: "itential"
+  become_flags: '-i'
+
+- name: Get list of installed Python modules
+  ansible.builtin.command: python3 -m pip list
+  register: python_modules
+  ignore_errors: true
+  changed_when: false
+  failed_when: false
+  become: true
+  become_user: "itential"
+  become_flags: '-i'
+
+- name: Get pip version
+  ansible.builtin.command: python3 -m pip --version
+  register: pip_version
+  ignore_errors: true
+  changed_when: false
+  failed_when: false
+  become: true
+  become_user: "itential"
+  become_flags: '-i'
+
+# ============================================================================
+# CONFIRM CONNECTIVITY
+# ============================================================================
+
+- name: Initialize MongoDB and Redis connectivity flags
+  ansible.builtin.set_fact:
+    mongodb_connection: false
+    redis_connection: false
+
+- name: Check health status endpoint using HTTP
+  ansible.builtin.uri:
+    url: "http://{{ inventory_hostname }}:{{ iap_webserver_http_port.stdout }}/health/status"
+    method: GET
+    return_content: true
+    status_code: 200
+    validate_certs: false  # Set to 'no' for self-signed certs
+    force: true
+  register: http_health_check
+  ignore_errors: true
+  changed_when: false
+  failed_when: false
+  when: iap_webserver_http_enabled.stdout | bool
+
+- name: Check MongoDB connection (HTTP)
+  ansible.builtin.set_fact:
+    mongodb_connection: "{{ (http_health_check.json.services | selectattr('service', 'equalto', 'mongo') | selectattr('status', 'equalto', 'running') | list | length) > 0 }}"
+  when: iap_webserver_http_enabled.stdout | bool
+
+- name: Check Redis connection (HTTP)
+  ansible.builtin.set_fact:
+    redis_connection: "{{ (http_health_check.json.services | selectattr('service', 'equalto', 'redis') | selectattr('status', 'equalto', 'running') | list | length) > 0 }}"
+  when: iap_webserver_http_enabled.stdout | bool
+
+- name: Check health status endpoint using HTTPS
+  ansible.builtin.uri:
+    url: "http://{{ inventory_hostname }}:{{ iap_webserver_https_port.stdout }}/health/status"
+    method: GET
+    return_content: true
+    status_code: 200
+    validate_certs: false  # Set to 'no' for self-signed certs
+    force: true
+  register: https_health_check
+  ignore_errors: true
+  changed_when: false
+  failed_when: false
+  when: iap_webserver_https_enabled.stdout | bool
+
+- name: Check MongoDB connection (HTTPS)
+  ansible.builtin.set_fact:
+    mongodb_connection: "{{ (https_health_check.json | selectattr('service', 'equalto', 'mongo') | selectattr('status', 'equalto', 'running') | list | length) > 0 }}"
+  when: iap_webserver_https_enabled.stdout | bool
+
+- name: Check Redis connection (HTTPS)
+  ansible.builtin.set_fact:
+    redis_connection: "{{ (https_health_check.json | selectattr('service', 'equalto', 'redis') | selectattr('status', 'equalto', 'running') | list | length) > 0 }}"
+  when: iap_webserver_https_enabled.stdout | bool
+
+# ============================================================================
+# CONFIRM LOG FILES
+# ============================================================================
+
+- name: Check Itential log file exists
+  ansible.builtin.stat:
+    path: "{{ iap_log_directory.stdout }}/{{ iap_log_file.stdout }}"
+  register: iap_log_file_stat
+  ignore_errors: true
+  changed_when: false
+  when: iap_log_file.stdout
+
+- name: Check Itential web server log file exists
+  ansible.builtin.stat:
+    path: "{{ iap_webserver_log_directory.stdout }}/{{ iap_webserver_log_filename.stdout }}"
+  register: iap_web_log_file_stat
+  ignore_errors: true
+  changed_when: false
+  when: iap_webserver_log_filename.stdout
+
+# ============================================================================
+# GATHER HOST INFORMATION
+# ============================================================================
+
+- name: Gather host information
+  itential.deployer.gather_host_information:
+  register: host_details
+
+# ============================================================================
+# GENERATE REPORT
+# ============================================================================
+- name: Generate Itential platform validation report
+  ansible.builtin.template:
+    src: platform-validation-report.md.j2
+    dest: "{{ certify_report_file }}"
+    mode: '0644'
+    owner: "{{ platform_user }}"
+    group: "{{ platform_group }}"
+
+- name: Display report location
+  ansible.builtin.debug:
+    msg: "Itential platform  validation report generated at: {{ certify_report_file }}"
