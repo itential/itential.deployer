@@ -487,7 +487,7 @@ dir {{ redis_data_dir }}
 #
 # replicaof <masterip> <masterport>
 {% if is_replica_node %}
-replicaof {{ redis_replicaof }} {{ redis_port }}
+replicaof {{ redis_replicaof }}
 {% endif %}
 
 # If the master is password protected (using the "requirepass" configuration

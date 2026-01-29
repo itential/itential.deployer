@@ -8,7 +8,7 @@ redis_sentinel_conf_file: "{{ redis_conf_dir }}/sentinel.conf"
 redis_sentinel_log: "{{ redis_log_dir }}/sentinel.log"
 
 # The Redis Sentinel master name
-redis_master_name: itentialmaster
+redis_sentinel_master_name: itentialmaster
 
 # The default redis sentinel listen port
 redis_sentinel_port: "{{ redis_sentinel_port_default }}"

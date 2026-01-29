@@ -30,10 +30,12 @@ redis_port: "{{ redis_port_default }}"
 redis_bind: 127.0.0.1 {{ ansible_default_ipv4.address }}
 
 # Feature flags that can be overridden in the hosts file
-# Essentially, a default installation will have auth, but not replication or tls
+# Essentially, a default installation will have auth, but not tls
 redis_auth_enabled: true
-redis_replicaof: false
 redis_tls_enabled: false
+
+# Replication settings
+redis_replicaof: "{{ groups['redis_master'][0] }} {{ redis_port }}"
 
 # Default redis user passwords
 # These are meant to be changed by the customer. By default they are meant to

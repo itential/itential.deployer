@@ -81,7 +81,7 @@ dir {{ redis_data_dir }}/sentinel
 #
 # Note: master name should not include special characters or spaces.
 # The valid charset is A-z 0-9 and the three characters ".-_".
-sentinel monitor {{ redis_master_name }} {{ groups['redis_master'][0] }} {{ redis_port }} {{ redis_sentinel_quorum_final }}
+sentinel monitor {{ redis_sentinel_master_name }} {{ groups['redis_master'][0] }} {{ redis_port }} {{ redis_sentinel_quorum_final }}
 
 # sentinel auth-pass <master-name> <password>
 #
@@ -102,7 +102,7 @@ sentinel monitor {{ redis_master_name }} {{ groups['redis_master'][0] }} {{ redi
 #
 # sentinel auth-pass mymaster MySUPER--secret-0123passw0rd
 {% if redis_auth_enabled %}
-sentinel auth-pass {{ redis_master_name }} {{ redis_user_sentineluser_password }}
+sentinel auth-pass {{ redis_sentinel_master_name }} {{ redis_user_sentineluser_password }}
 {% endif %}
 
 # sentinel auth-user <master-name> <username>
@@ -117,7 +117,7 @@ sentinel auth-pass {{ redis_master_name }} {{ redis_user_sentineluser_password }
 #     user sentinel-user >somepassword +client +subscribe +publish \
 #                        +ping +info +multi +slaveof +config +client +exec on
 {% if redis_auth_enabled %}
-sentinel auth-user {{ redis_master_name }} sentineluser
+sentinel auth-user {{ redis_sentinel_master_name }} sentineluser
 
 user default off
 user admin on >{{ redis_user_sentineladmin_password }} ~* &* +@all
@@ -132,7 +132,7 @@ user sentineluser on >{{ redis_user_sentineluser_password }} &* -@all +auth +cli
 # Down).
 #
 # Default is 30 seconds.
-sentinel down-after-milliseconds {{ redis_master_name }} 5000
+sentinel down-after-milliseconds {{ redis_sentinel_master_name }} 5000
 
 # IMPORTANT NOTE: starting with Redis 6.2 ACL capability is supported for
 # Sentinel mode, please refer to the Redis website https://redis.io/topics/acl
@@ -211,7 +211,7 @@ sentinel sentinel-pass {{ redis_user_sentineluser_password }}
 # during the failover. Use a low number if you use the replicas to serve query
 # to avoid that all the replicas will be unreachable at about the same
 # time while performing the synchronization with the master.
-sentinel parallel-syncs {{ redis_master_name }} 1
+sentinel parallel-syncs {{ redis_sentinel_master_name }} 1
 
 # sentinel failover-timeout <master-name> <milliseconds>
 #
@@ -236,7 +236,7 @@ sentinel parallel-syncs {{ redis_master_name }} 1
 #   the exact parallel-syncs progression as specified.
 #
 # Default is 3 minutes.
-sentinel failover-timeout {{ redis_master_name }} 60000
+sentinel failover-timeout {{ redis_sentinel_master_name }} 60000
 
 # SCRIPTS EXECUTION
 #

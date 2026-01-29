@@ -122,11 +122,18 @@ The following tables lists the default variables located in `roles/redis/default
 
 | Variable | Type | Description | Default Value |
 | :------- | :--- | :---------- | :------------ |
-| `redis_replication_enabled` | Boolean | Flag to enable Redis replication. When set to `true`, Redis replication will be configured and the Redis Sentinel service started. | `false` |
-| `redis_sentinel_port` | Integer | The Redis Sentinel listen port | `26379` |
+| `redis_replicaof` | String | The Redis replicaof setting.<br>Use replicaof to make a Redis instance a copy of another Redis server. | "{{ groups['redis_master'][0] }} {{ redis_port}}" |
+
+### Sentinel Variables
+
+| Variable | Type | Description | Default Value |
+| :------- | :--- | :---------- | :------------ |
 | `redis_sentinel_conf_file` | String | The location of the Redis Sentinel configuration file. | `/etc/redis/sentinel.conf` |
 | `redis_sentinel_log` | String | The location of the Redis Sentinel log file. | `/var/log/redis/sentinel.log` |
-| `redis_master_name` | String | The Redis master name | `itentialmaster` |
+| `redis_sentinel_port` | Integer | The Redis Sentinel listen port | `26379` |
+| `redis_sentinel_bind` | String | A space-separated list of hostnames/IP addresses on which Redis listeners will be created. | `bind 127.0.0.1 {{ ansible_default_ipv4.address }}` |
+| `redis_sentinel_master_name` | String | The Redis master name | `itentialmaster` |
+| `redis_sentinel_quorum` | String | The Sentinel quorum setting.<br>Auto-calculate quorum based on sentinel count (recommended).<br>Set to explicit number to override (must be <= number of sentinels). | `auto` |
 
 ### Offline Variables
 
@@ -166,15 +173,15 @@ be found in `roles/redis/vars/platform-release-<platform_release>.yml`.
 
 ## Building Your Inventory
 
-To install and configure Redis, add a `redis` group and host(s) to your inventory.  The following
-inventory shows a basic Redis configuration with a single Redis node with no authentication.
+To install and configure Redis, add a `redis_master` group and host(s) to your inventory.  The following
+inventory shows a basic Redis configuration with a single Redis node with authentication.
 
 ### Example Inventory - Single Redis Node
 
 ```yaml
 all:
   children:
-    redis:
+    redis_master:
       hosts:
         <host1>:
           ansible_host: <addr1>
@@ -187,11 +194,12 @@ all:
 ```yaml
 all:
   children:
-    redis:
+    redis_master:
       hosts:
         <host1>:
           ansible_host: <addr1>
       vars:
+        platform_release: 6
         redis_source_url: https://github.com/redis/redis/archive/7.2.7.tar.gz
 ```
 
@@ -200,7 +208,7 @@ all:
 ```yaml
 all:
   children:
-    redis:
+    redis_master:
       hosts:
         <host1>:
           ansible_host: <addr1>
@@ -209,41 +217,60 @@ all:
         redis_install_from_source: false
 ```
 
-To enable authentication, add the `redis_auth_enabled` flag to the `redis` group and set it to `true`.
-
-### Example Inventory - Configure Redis Authentication
-
-```yaml
-all:
-  children:
-    redis:
-      hosts:
-        <host1>:
-          ansible_host: <addr1>
-      vars:
-        platform_release: 6
-        redis_auth_enabled: true
-```
-
-To configure a Redis replica set, add the `redis_replication_enabled` flag to the `redis` group and set it to `true` and add the additional hosts.
+To configure a Redis replica set, add the replica hosts to the `redis_replica` group and configure the `redis_replicaof` variable.
 
 ### Example Inventory - Configure Redis Replication
 
 ```yaml
 all:
+  vars:
+    platform_release: 6
   children:
-    redis:
+    redis_master:
       hosts:
         <host1>:
           ansible_host: <addr1>
+
+    redis_replica:
+      hosts:
         <host2>:
           ansible_host: <addr2>
         <host3>:
           ansible_host: <addr3>
       vars:
-        platform_release: 6
-        redis_auth_enabled: true
-        redis_replication_enabled: true
+        redis_replicaof: <master-hostname-or-ip> <redis-port> # defaults to "{{ groups['redis_master'][0] }} {{ redis_port}}"
+```
+
+To configure Sentinels, add the sentinel hosts to the `redis_sentinel` group.
+
+```yaml
+all:
+  vars:
+    platform_release: 6
+  children:
+    redis_master:
+      hosts:
+        <host1>:
+          ansible_host: <addr1>
+
+    redis_replica:
+      hosts:
+        <host2>:
+          ansible_host: <addr2>
+        <host3>:
+          ansible_host: <addr3>
+      vars:
+        redis_replicaof: <master-hostname-or-ip> <redis-port> # defaults to "{{ groups['redis_master'][0] }} {{ redis_port}}"
+
+    redis_sentinel:
+      hosts:
+      hosts:
+        <host4>:
+          ansible_host: <addr4>
+        <host5>:
+          ansible_host: <addr5>
+        <host6>:
+          ansible_host: <addr6>
 ```
 
 ## Running the Playbook
