@@ -4,7 +4,11 @@
 
 - name: Ensure report directory exists
   ansible.builtin.file:
+<<<<<<< HEAD
     path: "{{ platform_certify_report_dir_remote }}"
+=======
+    path: "{{ platform_certify_report_dir }}"
+>>>>>>> 9d2c108 (modified certify playbook to limit execution to groups)
     state: directory
     owner: "{{ platform_user }}"
     group: "{{ platform_group }}"
@@ -12,7 +16,11 @@
 
 - name: Set report filename
   ansible.builtin.set_fact:
+<<<<<<< HEAD
     platform_certify_report_file: "{{ platform_certify_report_dir_remote }}/platform-report-{{ inventory_hostname }}.md"
+=======
+    platform_certify_report_file: "{{ platform_certify_report_dir }}/platform-report-{{ inventory_hostname }}.md"
+>>>>>>> 9d2c108 (modified certify playbook to limit execution to groups)
 
 - name: Check if Itential service exists
   ansible.builtin.systemd:
@@ -556,11 +564,17 @@
     group: "{{ platform_group }}"
 
 - name: Copy validation report to the control node
+<<<<<<< HEAD
   ansible.builtin.fetch:
     dest: "{{ platform_certify_report_dir_local }}/"
     fail_on_missing: false
     flat: true
     src: "{{ platform_certify_report_file }}"
+=======
+  itential.deployer.fetch_to_control:
+    src: "{{ platform_certify_report_file }}"
+    dest: "{{ platform_certify_report_file }}"
+>>>>>>> 9d2c108 (modified certify playbook to limit execution to groups)
 
 - name: Display report summary
   ansible.builtin.debug:
