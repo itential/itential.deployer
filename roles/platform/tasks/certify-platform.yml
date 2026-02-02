@@ -2,16 +2,9 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
 
-- name: Load variables from the Platform role
-  ansible.builtin.include_vars:
-    dir: "{{ item }}"
-  loop:
-    - "{{ role_path }}/../platform/defaults"
-    - "{{ role_path }}/../platform/vars"
-
 - name: Ensure report directory exists
   ansible.builtin.file:
-    path: "{{ certify_report_dir }}"
+    path: "{{ platform_certify_report_dir }}"
     state: directory
     owner: "{{ platform_user }}"
     group: "{{ platform_group }}"
@@ -19,7 +12,7 @@
 
 - name: Set report filename
   ansible.builtin.set_fact:
-    certify_report_file: "{{ certify_report_dir }}/platform-report-{{ inventory_hostname }}.md"
+    platform_certify_report_file: "{{ platform_certify_report_dir }}/platform-report-{{ inventory_hostname }}.md"
 
 - name: Check if Itential service exists
   ansible.builtin.systemd:
@@ -555,11 +548,19 @@
 - name: Generate Itential platform validation report
   ansible.builtin.template:
     src: platform-validation-report.md.j2
-    dest: "{{ certify_report_file }}"
+    dest: "{{ platform_certify_report_file }}"
     mode: '0644'
     owner: "{{ platform_user }}"
     group: "{{ platform_group }}"
 
-- name: Display report location
+- name: Copy validation report to the control node
+  itential.deployer.fetch_to_control:
+    src: "{{ platform_certify_report_file }}"
+    dest: "{{ platform_certify_report_file }}"
+
+- name: Display report summary
   ansible.builtin.debug:
-    msg: "Itential platform  validation report generated at: {{ certify_report_file }}"
+    msg:
+      - "Platform validation complete for {{ inventory_hostname }}"
+      - "Overall Status: {{ 'PASSED ✓' if (iap_process is defined and iap_process.rc == 0) else 'FAILED ✗' }}"
+      - "Report saved to: {{ platform_certify_report_file }} on both the remote and control nodes."

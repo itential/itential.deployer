@@ -61,3 +61,6 @@ redis_user_repluser_password: repluser
 redis_user_sentineladmin_password: admin
 redis_user_sentineluser_password: sentineluser
 redis_user_prometheus_password: prometheus
+
+# Default location for the certification report files
+redis_certify_report_dir: /tmp/itential-reports/redis

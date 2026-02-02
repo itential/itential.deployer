@@ -52,3 +52,6 @@ platform_app_artifacts_enabled: false
 
 # Flag to determine if the service is started
 platform_start_service: true
+
+# Default location for the certification report files
+platform_certify_report_dir: /tmp/itential-reports/platform
