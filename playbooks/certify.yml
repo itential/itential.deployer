@@ -1,69 +1,12 @@
 # Copyright (c) 2026, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Run Environment Certification Tasks
-  hosts: all
-  gather_facts: true
-  become: true
-  vars:
-    certify_report_dir: "/tmp/itential-reports"
-    # certify_report_file: "{{ certify_report_dir }}/{{ group_names[0] }}_report_{{ inventory_hostname }}"
-  roles:
-    - role: itential.deployer.common_vars
-      tags: always
-  tasks:
-    - name: Certify Redis Installation  # noqa run-once
-      ansible.builtin.import_role:
-        name: itential.deployer.redis
-        tasks_from: certify-redis
-      when: inventory_hostname in groups['redis']
-      tags: certify-redis
 
-    - name: Certify MongoDB Installation  # noqa run-once
-      ansible.builtin.import_role:
-        name: itential.deployer.mongodb
-        tasks_from: certify-mongodb
-      when: inventory_hostname in groups['mongodb']
-      tags: certify-mongodb
+- name: Certify Redis Installation
+  import_playbook: itential.deployer.certify_redis
 
-    - name: Certify Itential Platform Installation  # noqa run-once
-      ansible.builtin.import_role:
-        name: itential.deployer.platform
-        tasks_from: certify-platform
-      when: inventory_hostname in groups['platform']
-      tags: certify-platform
+- name: Certify MongoDB Installation
+  import_playbook: itential.deployer.certify_mongodb
 
-    - name: Remove old reports on the control node
-      ansible.builtin.file:
-        path: "{{ certify_report_dir }}"
-        state: absent
-      delegate_to: localhost
-      become: false
-      run_once: true
-      tags: always
-
-    - name: Ensure the report directory exists on the control node
-      ansible.builtin.file:
-        path: "{{ certify_report_dir }}"
-        state: directory
-        mode: '0755'
-      delegate_to: localhost
-      become: false
-      run_once: true
-      tags: always
-
-    - name: Find report files on remote host
-      ansible.builtin.find:
-        paths: "{{ certify_report_dir }}"
-        patterns: "*.md"
-      register: report_files_found
-      tags: always
-
-    - name: Fetch all the report files to the control node
-      ansible.builtin.fetch:
-        fail_on_missing: false
-        src: "{{ item.path }}"
-        dest: "{{ certify_report_dir }}/{{ item.path | basename }}"
-        flat: true
-      loop: "{{ report_files_found.files }}"
-      tags: always
+- name: Certify Platform Installation
+  import_playbook: itential.deployer.certify_platform

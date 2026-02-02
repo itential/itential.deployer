@@ -1,0 +1,17 @@
+# Copyright (c) 2026, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+
+- name: Run MongoDB Certification Tasks
+  hosts: mongodb*
+  gather_facts: true
+  become: true
+  roles:
+    - role: itential.deployer.common_vars
+      tags: always
+  tasks:
+    - name: Certify MongoDB Installation  # noqa run-once
+      ansible.builtin.import_role:
+        name: itential.deployer.mongodb
+        tasks_from: certify-mongodb
+      tags: certify-mongodb

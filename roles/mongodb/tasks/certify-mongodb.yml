@@ -2,16 +2,9 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
 
-- name: Load variables from the MongoDB role
-  ansible.builtin.include_vars:
-    dir: "{{ item }}"
-  loop:
-    - "{{ role_path }}/../mongodb/defaults"
-    - "{{ role_path }}/../mongodb/vars"
-
 - name: Ensure report directory exists
   ansible.builtin.file:
-    path: "{{ certify_report_dir }}"
+    path: "{{ mongodb_certify_report_dir }}"
     state: directory
     owner: "{{ mongodb_owner }}"
     group: "{{ mongodb_group }}"
@@ -19,7 +12,7 @@
 
 - name: Set report filename
   ansible.builtin.set_fact:
-    certify_report_file: "{{ certify_report_dir }}/mongodb-report-{{ inventory_hostname }}.md"
+    mongodb_certify_report_file: "{{ mongodb_certify_report_dir }}/mongodb-report-{{ inventory_hostname }}.md"
 
 - name: Check if MongoDB service exists
   ansible.builtin.systemd:
@@ -383,11 +376,19 @@
 - name: Generate MongoDB validation report
   ansible.builtin.template:
     src: mongodb-validation-report.md.j2
-    dest: "{{ certify_report_file }}"
+    dest: "{{ mongodb_certify_report_file }}"
     mode: '0644'
     owner: "{{ mongodb_owner }}"
     group: "{{ mongodb_group }}"
 
-- name: Display report location
+- name: Copy validation report to the control node
+  itential.deployer.fetch_to_control:
+    src: "{{ mongodb_certify_report_file }}"
+    dest: "{{ mongodb_certify_report_file }}"
+
+- name: Display report summary
   ansible.builtin.debug:
-    msg: "MongoDB validation report generated at: {{ certify_report_file }}"
+    msg:
+      - "MongoDB validation complete for {{ inventory_hostname }}"
+      - "Overall Status: {{ 'PASSED ✓' if (mongodb_process is defined and mongodb_process.rc == 0) else 'FAILED ✗' }}"
+      - "Report saved to: {{ mongodb_certify_report_file }} on both the remote and control nodes."
