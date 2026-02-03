@@ -1,0 +1,137 @@
+# Copyright (c) 2026, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+
+- name: Announce Intention
+  ansible.builtin.debug:
+    msg: "Validating {{ env }} host {{ inventory_hostname }} for Platform installation..."
+
+- name: Load Itential Platform release default variables
+  ansible.builtin.include_vars:
+    file: "{{ item }}"
+  with_first_found:
+    - "platform-release-{{ platform_release }}.yml"
+    - "platform-release-{{ platform_release | string | split('.') | first }}.yml"
+    - "platform-release-undefined.yml"
+
+- name: Gather host information
+  itential.deployer.gather_host_information:
+  register: host_info
+
+- name: Extract OS information
+  ansible.builtin.set_fact:
+    os: "{{ host_info.os }}"
+
+# OS and Architecture validation
+- name: Check OS compatibility
+  ansible.builtin.set_fact:
+    os_valid: >-
+      {{
+        (os.distribution == 'RedHat' and ansible_distribution_major_version in ['8', '9']) or
+        (os.distribution == 'Rocky' and ansible_distribution_major_version in ['8', '9']) or
+        (os.distribution == 'OracleLinux' and ansible_distribution_major_version in ['8', '9']) or
+        (os.distribution == 'Amazon' and ansible_distribution_major_version == '2023')
+      }}
+
+- name: Assert that this is a supported OS
+  ansible.builtin.assert:
+    that: "{{ os_valid }} == true"
+    fail_msg: "{{ os.distribution }} {{ os.distribution_version }} is not a supported OS!"
+    success_msg: "OS validation passed!"
+    quiet: true
+
+- name: Check architecture compatibility
+  ansible.builtin.set_fact:
+    arch_valid: "{{ os.architecture in ['x86_64', 'aarch64'] }}"
+
+- name: Assert that this is a supported Architecture
+  ansible.builtin.assert:
+    that: "{{ arch_valid }} == true"
+    fail_msg: "{{ os.architecture }} is not a supported architecture!"
+    success_msg: "Architecture validation passed!"
+    quiet: true
+
+- name: Initialize validation errors list
+  ansible.builtin.set_fact:
+    validation_errors: []
+
+- name: Get root partition size
+  ansible.builtin.set_fact:
+    root_disk_size_gb: "{{ (ansible_mounts | selectattr('mount', 'equalto', '/') | map(attribute='size_total') | first / 1024 / 1024 / 1024) | round(2) }}"
+  when: ansible_mounts | selectattr('mount', 'equalto', '/') | list | length > 0
+
+- name: Validate hardware specs against requirements
+  ansible.builtin.set_fact:
+    hardware_validation:
+      required:
+        cpu_count: "{{ platform_hw_specs[env].cpu_count if platform_hw_specs != 'none' else 'N/A' }}"
+        ram_size_gb: "{{ platform_hw_specs[env].ram_size if platform_hw_specs != 'none' else 'N/A' }}"
+        disk_size_gb: "{{ platform_hw_specs[env].disk_size if platform_hw_specs != 'none' else 'N/A' }}"
+      actual:
+        cpu_count: "{{ ansible_processor_vcpus }}"
+        ram_size_gb: "{{ (ansible_memtotal_mb / 1024) | round(2) }}"
+        disk_size_gb: "{{ root_disk_size_gb | default('N/A') }}"
+      validation:
+        cpu_valid: "{{ (env == 'none') or (ansible_processor_vcpus >= platform_hw_specs[env].cpu_count) }}"
+        ram_valid: "{{ (env == 'none') or ((ansible_memtotal_mb / 1024) >= platform_hw_specs[env].ram_size) }}"
+        disk_valid: "{{ (env == 'none') or ((root_disk_size_gb | default(0) | float) >= platform_hw_specs[env].disk_size) }}"
+        all_valid: "{{ (env == 'none') or ((ansible_processor_vcpus >= platform_hw_specs[env].cpu_count) and ((ansible_memtotal_mb / 1024) >= platform_hw_specs[env].ram_size) and ((root_disk_size_gb | default(0) | float) >= platform_hw_specs[env].disk_size)) }}"
+
+- name: Validate CPU Count
+  ansible.builtin.assert:
+    that: hardware_validation.validation.cpu_valid | bool
+    fail_msg: "CPU validation failed!"
+    quiet: true
+  ignore_errors: true
+  register: cpu_validation
+
+- name: Add CPU error to list
+  ansible.builtin.set_fact:
+    validation_errors: "{{ validation_errors + ['CPU: ' ~ hardware_validation.required.cpu_count ~ ' required, ' ~ hardware_validation.actual.cpu_count ~ ' found'] }}"
+  when: cpu_validation is failed
+
+- name: Validate memory amount
+  ansible.builtin.assert:
+    that: hardware_validation.validation.ram_valid | bool
+    fail_msg: "Memory validation failed!"
+    quiet: true
+  ignore_errors: true
+  register: memory_validation
+
+- name: Add memory error to list
+  ansible.builtin.set_fact:
+    validation_errors: "{{ validation_errors + ['RAM: ' ~ hardware_validation.required.ram_size_gb ~ 'GB required, ' ~ hardware_validation.actual.ram_size_gb ~ 'GB found'] }}"
+  when: memory_validation is failed
+
+- name: Validate disk size
+  ansible.builtin.assert:
+    that: hardware_validation.validation.disk_valid | bool
+    fail_msg: "Disk validation failed!"
+    quiet: true
+  ignore_errors: true
+  register: disk_validation
+
+- name: Add disk error to list
+  ansible.builtin.set_fact:
+    validation_errors: "{{ validation_errors + ['Disk: ' ~ hardware_validation.required.disk_size_gb ~ 'GB required, ' ~ hardware_validation.actual.disk_size_gb ~ 'GB found'] }}"
+  when: disk_validation is failed
+
+- name: Print host information
+  ansible.builtin.debug:
+    msg: "{{ host_info }}"
+
+# Display results
+- name: Display failed validation results
+  ansible.builtin.debug:
+    msg: "{{ validation_errors }}"
+  when: cpu_validation is failed or memory_validation is failed or disk_validation is failed
+
+# Assert that none of the tests failed
+- name: Verify that all tests passed
+  ansible.builtin.assert:
+    that:
+      - "cpu_validation is not failed"
+      - "memory_validation is not failed"
+      - "disk_validation is no failed"
+    fail_msg: "See above, assertions not passed! ✗"
+    success_msg: "All assertions passed! ✓"
