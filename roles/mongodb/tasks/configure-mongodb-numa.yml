@@ -91,8 +91,10 @@
     - mongodb_numa_enabled
     - mongodb_numactl_present
 
-- name: Reload systemd if NUMA drop-in changed
+- name: Reload systemd and restart mongod to apply NUMA settings
   ansible.builtin.systemd:
+    name: mongod
+    state: restarted
     daemon_reload: true
   when:
     - mongodb_numa_enabled
@@ -100,13 +102,3 @@
     - mongodb_numa_dropin is defined
     - mongodb_numa_dropin.changed
 
-- name: Restart mongod to apply NUMA settings
-  ansible.builtin.systemd:
-    name: mongod
-    state: restarted
-  when:
-    - mongodb_numa_enabled
-    - mongodb_numactl_present
-    - mongodb_numa_dropin is defined
-    - mongodb_numa_dropin.changed
-    
