@@ -715,7 +715,7 @@ replica-priority 100
 #
 # By default min-replicas-to-write is set to 0 (feature disabled) and
 # min-replicas-max-lag is set to 10.
-{% if redis_is_master_node %}
+{% if redis_is_master_node and redis_has_replicas %}
 min-replicas-to-write 1
 min-replicas-max-lag 10
 {% endif %}
