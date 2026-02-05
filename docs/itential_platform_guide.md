@@ -191,7 +191,7 @@ default variables located in `roles/platform/defaults/main/vault.yml`.
 | Variable | Type | Description | Default Value |
 | :------- | :--- | :---------- | :------------ |
 | platform_configure_vault | Boolean | Flag to enable/disable configuring Vault in Itential Platform | `false` |
-| platform_vault_token_dir | String | The directory to store the vault root key in | `{{ platform_server_dir_default }}/keys` |
+| platform_vault_token_dir | String | The directory to store the vault root key in | `{{ platform_server_dir }}/keys` |
 | platform_vault_url | String | The URL to the Hashicorp Vault server. | `http://localhost:8200` |
 | platform_vault_auth_method | String | The authorization method to connect to Hashicorp Vault. Either token or approle. | `token` |
 | platform_vault_token | String | Hashicorp Vault token used for token-based authentication |  |

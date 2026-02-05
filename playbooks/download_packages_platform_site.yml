@@ -7,8 +7,5 @@
 - name: Download MongoDB packages
   import_playbook: itential.deployer.download_packages_mongodb
 
-- name: Download Vault packages
-  import_playbook: itential.deployer.download_packages_vault
-
 - name: Download Itential Platform packages
   import_playbook: itential.deployer.download_packages_platform
