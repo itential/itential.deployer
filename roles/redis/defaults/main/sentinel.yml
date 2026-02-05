@@ -8,7 +8,14 @@ redis_sentinel_conf_file: "{{ redis_conf_dir }}/sentinel.conf"
 redis_sentinel_log: "{{ redis_log_dir }}/sentinel.log"
 
 # The Redis Sentinel master name
-redis_master_name: itentialmaster
+redis_sentinel_master_name: itentialmaster
 
-# The Redis Sentinel master host. Defaults to the first server in the redis group.
-redis_master_host: "{{ hostvars[groups['redis'][0]].inventory_hostname }}"
+# The default redis sentinel listen port
+redis_sentinel_port: "{{ redis_sentinel_port_default }}"
+
+# Bind to localhost + private network interface
+redis_sentinel_bind: 127.0.0.1 {{ ansible_default_ipv4.address }}
+
+# Auto-calculate quorum based on sentinel count (recommended)
+# Set to explicit number to override (must be <= number of sentinels)
+redis_sentinel_quorum: auto

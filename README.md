@@ -546,7 +546,7 @@ all:
     platform_release: 6
 
   children:
-    redis:
+    redis_master:
       hosts:
         example1.host.com:
 
@@ -715,7 +715,7 @@ all:
     platform_release: 6
 
   children:
-    redis:
+    redis_master:
       hosts:
         example1.host.com:
 
@@ -751,7 +751,7 @@ all:
     platform_release: 6
 
   children:
-    redis:
+    redis_master:
       hosts:
         redis.host.com:
 
@@ -791,13 +791,22 @@ all:
     platform_release: 6
 
   children:
-    redis:
+    redis_master:
       hosts:
         redis1.host.com:
+
+    redis_replica:
+      hosts:
         redis2.host.com:
         redis3.host.com:
       vars:
-        redis_replication_enabled: true
+        redis_replicaof: <master-hostname-or-ip> <redis-port> # defaults to "{{ groups['redis_master'][0] }} {{ redis_port}}"
+
+    redis_sentinel:
+      hosts:
+        sentinel1.host.com:
+        sentinel2.host.com:
+        sentinel3.host.com:
 
     mongodb:
       hosts:
@@ -818,11 +827,11 @@ all:
         platform_mongo_url: mongodb://itential:itential@mongodb1.host.com:27017,mongodb2.host.com:27017,mongodb3.host.com:27017/itential?replicaSet=rs0
         # Redis config
         platform_redis_sentinels:
-          - host: redis1.host.com
+          - host: sentinel1.host.com
             port: 26379
-          - host: redis2.host.com
+          - host: sentinel2.host.com
             port: 26379
-          - host: redis3.host.com
+          - host: rsentinel3.host.com
             port: 26379
 
     gateway:
@@ -885,21 +894,23 @@ all:
     platform_release: 6
 
   children:
-    redis:
+    redis_master:
       hosts:
         datacenter1.redis1.host.com:
-        datacenter1.redis2.host.com:
-        datacenter1.redis3.host.com:
-      vars:
-        redis_replication_enabled: true
 
-    redis_secondary:
+    redis_replica:
       hosts:
+        datacenter1.redis2.host.com:
         datacenter2.redis1.host.com:
         datacenter2.redis2.host.com:
-        datacenter2.redis3.host.com:
       vars:
-        redis_replication_enabled: true
+        redis_replicaof: <master-hostname-or-ip> <redis-port> # defaults to "{{ groups['redis_master'][0] }} {{ redis_port}}"
+
+    redis_sentinel:
+      hosts:
+        datacenter1.sentinel1.host.com:
+        datacenter2.sentinel1.host.com:
+        datacenter3.sentinel1.host.com:
 
     mongodb:
       hosts:
@@ -930,11 +941,11 @@ all:
         platform_redis_sentinel_username: itential
         platform_redis_sentinel_password: <super-secret-password>
         platform_redis_sentinels:
-          - host: datacenter1.redis1.host.com
+          - host: datacenter1.sentinel1.host.com
             port: 26379
-          - host: datacenter1.redis2.host.com
+          - host: datacenter2.sentinel1.host.com
             port: 26379
-          - host: datacenter1.redis3.host.com
+          - host: datacenter3.sentinel1.host.com
             port: 26379
 
     platform_secondary:
@@ -953,11 +964,11 @@ all:
         platform_redis_sentinel_username: itential
         platform_redis_sentinel_password: <super-secret-password>
         platform_redis_sentinels:
-          - host: datacenter2.redis1.host.com
+          - host: datacenter1.sentinel1.host.com
             port: 26379
-          - host: datacenter2.redis2.host.com
+          - host: datacenter2.sentinel1.host.com
             port: 26379
-          - host: datacenter2.redis3.host.com
+          - host: datacenter3.sentinel1.host.com
             port: 26379
 
     gateway:

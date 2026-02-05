@@ -2,8 +2,18 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
 ### Redis
-- name: Install Redis
-  hosts: redis, redis_secondary
+- name: Configure Redis data nodes
+  hosts: redis_master, redis_replica
+  become: true
+  roles:
+    # Pull in the common vars
+    - role: itential.deployer.common
+
+    # Perform a base installation of Redis and optionally configure authorization and replication
+    - role: itential.deployer.redis
+
+- name: Configure Redis sentinel nodes
+  hosts: redis_sentinel
   become: true
   roles:
     # Pull in the common vars
