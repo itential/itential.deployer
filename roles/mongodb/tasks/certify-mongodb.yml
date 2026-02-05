@@ -4,7 +4,7 @@
 
 - name: Ensure report directory exists
   ansible.builtin.file:
-    path: "{{ mongodb_certify_report_dir }}"
+    path: "{{ mongodb_certify_report_dir_remote }}"
     state: directory
     owner: "{{ mongodb_owner }}"
     group: "{{ mongodb_group }}"
@@ -12,7 +12,7 @@
 
 - name: Set report filename
   ansible.builtin.set_fact:
-    mongodb_certify_report_file: "{{ mongodb_certify_report_dir }}/mongodb-report-{{ inventory_hostname }}.md"
+    mongodb_certify_report_file: "{{ mongodb_certify_report_dir_remote }}/mongodb-report-{{ inventory_hostname }}.md"
 
 - name: Check if MongoDB service exists
   ansible.builtin.systemd:
@@ -80,7 +80,9 @@
   ansible.builtin.stat:
     path: "{{ mongodb_data_dir.stdout }}"
   register: mongodb_data_dir_stat
-  when: mongodb_data_dir.stdout is defined and mongodb_data_dir.stdout != ""
+  when:
+    - mongodb_data_dir.stdout is defined
+    - mongodb_data_dir.stdout != ""
   ignore_errors: true
 
 - name: Get data directory size
@@ -88,7 +90,9 @@
   register: mongodb_data_size
   ignore_errors: true
   changed_when: false
-  when: mongodb_data_dir.stdout is defined and mongodb_data_dir.stdout != ""
+  when:
+    - mongodb_data_dir.stdout is defined
+    - mongodb_data_dir.stdout != ""
 
 # ============================================================================
 # CONNECTIVITY TESTS
@@ -109,7 +113,9 @@
   ignore_errors: true
   changed_when: false
   no_log: true
-  when: mongodb_user_admin is defined and mongodb_user_admin_password is defined
+  when:
+    - mongodb_user_admin is defined
+    - mongodb_user_admin_password is defined
 
 # ============================================================================
 # TLS/SSL CHECKS
@@ -135,7 +141,9 @@
   ansible.builtin.stat:
     path: "{{ mongodb_tls_cert_path.stdout }}"
   register: mongodb_tls_cert_file
-  when: mongodb_tls_cert_path.stdout is defined and mongodb_tls_cert_path.stdout != ""
+  when:
+    - mongodb_tls_cert_path.stdout is defined
+    - mongodb_tls_cert_path.stdout != ""
   ignore_errors: true
 
 - name: Get TLS certificate expiration
@@ -174,7 +182,9 @@
   ignore_errors: true
   changed_when: false
   no_log: true
-  when: mongodb_user_admin is defined and mongodb_user_admin_password is defined
+  when:
+    - mongodb_user_admin is defined
+    - mongodb_user_admin_password is defined
 
 - name: Get MongoDB build info
   ansible.builtin.shell: |
@@ -184,7 +194,9 @@
   ignore_errors: true
   changed_when: false
   no_log: true
-  when: mongodb_user_admin is defined and mongodb_user_admin_password is defined
+  when:
+    - mongodb_user_admin is defined
+    - mongodb_user_admin_password is defined
 
 # ============================================================================
 # REPLICA SET STATUS
@@ -252,7 +264,9 @@
   ignore_errors: true
   changed_when: false
   no_log: true
-  when: mongodb_user_admin is defined and mongodb_user_admin_password is defined
+  when:
+    - mongodb_user_admin is defined
+    - mongodb_user_admin_password is defined
 
 - name: Parse MongoDB users
   ansible.builtin.set_fact:
@@ -298,7 +312,9 @@
   ignore_errors: true
   changed_when: false
   no_log: true
-  when: mongodb_user_admin is defined and mongodb_user_admin_password is defined
+  when:
+    - mongodb_user_admin is defined
+    - mongodb_user_admin_password is defined
 
 # ============================================================================
 # LOGS
@@ -350,7 +366,9 @@
   ignore_errors: true
   changed_when: false
   no_log: true
-  when: mongodb_user_admin is defined and mongodb_user_admin_password is defined
+  when:
+    - mongodb_user_admin is defined
+    - mongodb_user_admin_password is defined
 
 - name: Get connection count
   ansible.builtin.shell: |
@@ -360,7 +378,9 @@
   ignore_errors: true
   changed_when: false
   no_log: true
-  when: mongodb_user_admin is defined and mongodb_user_admin_password is defined
+  when:
+    - mongodb_user_admin is defined
+    - mongodb_user_admin_password is defined
 
 # ============================================================================
 # GATHER HOST INFORMATION
@@ -375,16 +395,19 @@
 # ============================================================================
 - name: Generate MongoDB validation report
   ansible.builtin.template:
-    src: mongodb-validation-report.md.j2
+    backup: true
     dest: "{{ mongodb_certify_report_file }}"
-    mode: '0644'
-    owner: "{{ mongodb_owner }}"
+    src: mongodb-validation-report.md.j2
     group: "{{ mongodb_group }}"
+    owner: "{{ mongodb_owner }}"
+    mode: '0644'
 
 - name: Copy validation report to the control node
-  itential.deployer.fetch_to_control:
+  ansible.builtin.fetch:
+    dest: "{{ mongodb_certify_report_dir_local }}/"
+    fail_on_missing: false
+    flat: true
     src: "{{ mongodb_certify_report_file }}"
-    dest: "{{ mongodb_certify_report_file }}"
 
 - name: Display report summary
   ansible.builtin.debug:
