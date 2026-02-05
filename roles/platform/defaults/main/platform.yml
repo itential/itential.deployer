@@ -54,4 +54,5 @@ platform_app_artifacts_enabled: false
 platform_start_service: true
 
 # Default location for the certification report files
-platform_certify_report_dir: /tmp/itential-reports/platform
+platform_certify_report_dir_remote: /var/tmp/itential-reports/platform
+platform_certify_report_dir_local: /tmp/itential-reports/platform

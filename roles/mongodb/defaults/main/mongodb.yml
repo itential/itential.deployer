@@ -73,4 +73,5 @@ mongodb_user_itential_password: itential
 mongodb_replset_name: "{{ mongodb_replset_name_default }}"
 
 # Default location for the certification report files
-mongodb_certify_report_dir: /tmp/itential-reports/mongodb
+mongodb_certify_report_dir_remote: /var/tmp/itential-reports/mongodb
+mongodb_certify_report_dir_local: /tmp/itential-reports/mongodb

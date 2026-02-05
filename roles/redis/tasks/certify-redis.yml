@@ -4,7 +4,7 @@
 
 - name: Ensure report directory exists
   ansible.builtin.file:
-    path: "{{ redis_certify_report_dir }}"
+    path: "{{ redis_certify_report_dir_remote }}"
     state: directory
     owner: "{{ redis_owner }}"
     group: "{{ redis_group }}"
@@ -12,7 +12,7 @@
 
 - name: Set report filename
   ansible.builtin.set_fact:
-    redis_certify_report_file: "{{ redis_certify_report_dir }}/redis-report-{{ inventory_hostname }}.md"
+    redis_certify_report_file: "{{ redis_certify_report_dir_remote }}/redis-report-{{ inventory_hostname }}.md"
 
 - name: Gather host information
   itential.deployer.gather_host_information:
@@ -134,7 +134,9 @@
       clients: "{{ redis_info.stdout | regex_search('connected_clients:([^\\r\\n]+)', '\\1') }}"
       bind_address: "{{ redis_config.results[2].stdout_lines[1] | default(['0.0.0.0'], true) }}"
       users: "{{ redis_config.results[0].stdout_lines | default(['N/A'], true) }}"
-  when: redis_info.rc is defined and redis_info.rc == 0
+  when:
+    - redis_info.rc is defined
+    - redis_info.rc == 0
 
 - name: Get list of configured Redis users
   ansible.builtin.shell: |
@@ -146,7 +148,9 @@
       -a "{{ redis_user_admin_password }}" \
       --no-auth-warning \
       ACL LIST
-  when: redis_info.rc is defined and redis_info.rc == 0
+  when:
+    - redis_info.rc is defined
+    - redis_info.rc == 0
   register: redis_acl_list
   no_log: false
   failed_when: false
@@ -537,9 +541,11 @@
     src: redis-validation-report.md.j2
 
 - name: Copy validation report to the control node
-  itential.deployer.fetch_to_control:
+  ansible.builtin.fetch:
+    dest: "{{ redis_certify_report_dir_local }}/"
+    fail_on_missing: false
+    flat: true
     src: "{{ redis_certify_report_file }}"
-    dest: "{{ redis_certify_report_file }}"
 
 - name: Display report summary
   ansible.builtin.debug:
