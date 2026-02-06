@@ -2,12 +2,26 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
 
+# run this only for redis_master and redis_replica device group
 - name: Run Redis Certification Tasks
-  hosts: redis*
+  hosts: redis_master:redis_replica
   gather_facts: true
   become: true
+  # environment:
+  #   PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
   tasks:
     - name: Certify Redis Installation  # noqa run-once
       ansible.builtin.import_role:
         name: itential.deployer.redis
         tasks_from: certify-redis
+
+# run this only for redis_sentinel device group
+- name: Run Sentinel Certification Tasks
+  hosts: redis_sentinel
+  gather_facts: true
+  become: true
+  tasks:
+    - name: Certify Sentinel Installation  # noqa run-once
+      ansible.builtin.import_role:
+        name: itential.deployer.redis
+        tasks_from: certify-sentinel
