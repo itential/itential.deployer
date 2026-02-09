@@ -11,4 +11,3 @@
       ansible.builtin.import_role:
         name: itential.deployer.platform
         tasks_from: certify-platform
-      tags: certify-platform

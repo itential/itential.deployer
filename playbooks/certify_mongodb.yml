@@ -11,4 +11,3 @@
       ansible.builtin.import_role:
         name: itential.deployer.mongodb
         tasks_from: certify-mongodb
-      tags: certify-mongodb
