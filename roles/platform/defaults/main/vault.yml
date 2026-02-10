@@ -5,7 +5,7 @@
 platform_configure_vault: false
 
 # The directory to store the vault root key in
-platform_vault_token_dir: "{{ platform_server_dir_default }}/keys"
+platform_vault_token_dir: "{{ platform_server_dir }}/keys"
 
 # The URL to the Hashicorp Vault server.
 platform_vault_url: http://localhost:8200
@@ -13,14 +13,17 @@ platform_vault_url: http://localhost:8200
 # The authorization method to connect to Hashicorp Vault. Either token or approle.
 platform_vault_auth_method: token
 
-# Hashicorp Vault token (optional - if not provided, fetched from Vault server)
-platform_vault_token: ""
+# Hashicorp Vault token
+# Must be configured in inventory when platform_vault_auth_method is set to 'token'
+platform_vault_token:
 
-# Hashicorp Vault Role ID - actual credential value (fetched from server or user-provided)
-platform_vault_role_id: ""
+# Hashicorp Vault Role ID
+# Must be configured in inventory when platform_vault_auth_method is set to 'approle'
+platform_vault_role_id:
 
-# Hashicorp Vault Secret ID - actual credential value (fetched from server or user-provided)
-platform_vault_secret_id: ""
+# Hashicorp Vault Secret ID
+# Must be configured in inventory when platform_vault_auth_method is set to 'approle'
+platform_vault_secret_id:
 
 # The path where the AppRole was enabled.
 platform_vault_approle_path: approle

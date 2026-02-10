@@ -70,6 +70,23 @@
         fail_msg: platform_encryption_key must be a 64 character hexadecimal string
       when: validate_platform_encryption_key | default(true)
 
+    - name: Validate Hashicorp Vault variables
+      when: platform_configure_vault | bool
+      block:
+        - name: Validate Hashicorp token is set when using token authentication
+          ansible.builtin.assert:
+            that: platform_vault_token is truthy
+            fail_msg: platform_vault_token must be defined when using token authentication
+          when: platform_vault_auth_method == 'token'
+
+        - name: Validate Hashicorp approle id and secret id are set when using approle authentication
+          ansible.builtin.assert:
+            that:
+              - platform_vault_role_id is truthy
+              - platform_vault_secret_id is truthy
+            fail_msg: platform_vault_role_id and platform_vault_secret_id must be defined when using approle authentication
+          when: platform_vault_auth_method == 'approle'
+
     - name: Set installation variables when using Itential Platform release defaults
       when: platform_release is defined
       block:

@@ -7,8 +7,5 @@
 - name: Install and configure MongoDB
   import_playbook: itential.deployer.mongodb
 
-- name: Install and configure Vault
-  import_playbook: itential.deployer.vault
-
 - name: Install and configure Itential Platform
   import_playbook: itential.deployer.platform
