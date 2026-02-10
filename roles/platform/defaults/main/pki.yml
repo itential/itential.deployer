@@ -1,0 +1,143 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+# ============================================================================
+# Platform PKI Configuration - All components customizable
+# ============================================================================
+
+# Base PKI directory - override to use different root location
+platform_pki_base_dir: /etc/pki/itential-platform
+
+# Subdirectory names - customize the layout
+platform_pki_private_subdir: private
+platform_pki_https_subdir: https
+platform_pki_mongodb_subdir: mongodb
+
+# Derived subdirectory paths - built from base + subdir name
+platform_pki_private_dir: "{{ platform_pki_base_dir }}/{{ platform_pki_private_subdir }}"
+platform_pki_https_dir: "{{ platform_pki_base_dir }}/{{ platform_pki_https_subdir }}"
+platform_pki_mongodb_dir: "{{ platform_pki_base_dir }}/{{ platform_pki_mongodb_subdir }}"
+
+# ============================================================================
+# HTTPS Certificate Filenames - Customize naming
+# ============================================================================
+
+# HTTPS server certificate filename
+platform_https_cert_filename: "{{ inventory_hostname }}.crt"
+
+# HTTPS private key filename
+platform_https_key_filename: "{{ inventory_hostname }}.key"
+
+# HTTPS CA bundle filename
+platform_https_ca_filename: ca-bundle.crt
+
+# ============================================================================
+# HTTPS Full Certificate Paths - Built from components
+# ============================================================================
+
+# HTTPS server certificate path
+platform_webserver_https_cert: "{{ platform_pki_https_dir }}/{{ platform_https_cert_filename }}"
+
+# HTTPS private key path
+platform_webserver_https_key: "{{ platform_pki_private_dir }}/{{ platform_https_key_filename }}"
+
+# HTTPS CA bundle path
+platform_webserver_https_ca: "{{ platform_pki_https_dir }}/{{ platform_https_ca_filename }}"
+
+# ============================================================================
+# MongoDB Client Certificate Filenames - Customize naming
+# ============================================================================
+
+# MongoDB CA certificate filename
+platform_mongodb_ca_filename: ca-bundle.crt
+
+# ============================================================================
+# MongoDB Client Full Certificate Paths - Built from components
+# ============================================================================
+
+# MongoDB CA certificate path (used to validate MongoDB server)
+platform_mongodb_root_ca_file_destination: "{{ platform_pki_mongodb_dir }}/{{ platform_mongodb_ca_filename }}"
+
+# ============================================================================
+# Application Configuration Mappings
+# These map to the paths expected by Platform's properties.json
+# ============================================================================
+
+# MongoDB CA file for application properties.json
+# This variable is used in templates and needs to point to the destination path
+platform_mongo_tls_ca_file: "{{ platform_mongodb_root_ca_file_destination }}"
+
+# ============================================================================
+# Source Directories - Define in inventory
+# ============================================================================
+
+# Source directory for HTTPS certificates (on Ansible controller)
+platform_https_pki_src_dir: "/Users/ananth.munagala/deployer_checkins/PE-1386/certificates/platform"
+
+# Source directory for MongoDB certificates (on Ansible controller)
+platform_mongodb_pki_src_dir: "/Users/ananth.munagala/deployer_checkins/PE-1386/certificates/platform"
+
+# ============================================================================
+# Source File Paths - Built from source directory + filename
+# ============================================================================
+
+# HTTPS source paths - auto-build from source dir + filename
+platform_certfile_source: "{{ platform_https_pki_src_dir }}/{{ platform_https_cert_filename }}"
+platform_keyfile_source: "{{ platform_https_pki_src_dir }}/{{ platform_https_key_filename }}"
+platform_https_ca_source: "{{ platform_https_pki_src_dir }}/{{ platform_https_ca_filename }}"
+
+# MongoDB client source paths - auto-build from source dir + filename
+platform_mongodb_root_ca_file_source: "{{ platform_mongodb_pki_src_dir }}/{{ platform_mongodb_ca_filename }}"
+
+# ============================================================================
+# File Ownership - Customize per environment
+# ============================================================================
+
+# Owner for PKI base directory
+platform_pki_base_owner: root
+
+# Group for PKI base directory
+platform_pki_base_group: itential
+
+# Owner for private key files
+platform_pki_private_owner: root
+
+# Group for private key files
+platform_pki_private_group: itential
+
+# Owner for certificate files
+platform_pki_cert_owner: "{{ platform_user }}"
+
+# Group for certificate files
+platform_pki_cert_group: "{{ platform_group }}"
+
+# ============================================================================
+# File Permissions - Customize per security requirements
+# ============================================================================
+
+# Base PKI directory permissions
+platform_pki_base_dir_mode: "0750"
+
+# Subdirectory permissions
+platform_pki_subdir_mode: "0750"
+
+# Private directory permissions
+platform_pki_private_dir_mode: "0750"
+
+# HTTPS certificate permissions
+platform_https_cert_mode: "0644"
+
+# HTTPS private key permissions
+platform_https_key_mode: "0640"
+
+# HTTPS CA bundle permissions
+platform_https_ca_mode: "0644"
+
+# MongoDB CA certificate permissions
+platform_mongodb_ca_mode: "0644"
+
+# MongoDB client certificate permissions
+platform_mongodb_client_cert_mode: "0640"
+
+# MongoDB client private key permissions
+platform_mongodb_client_key_mode: "0600"

@@ -13,19 +13,6 @@ mongodb_log_dir: /var/log/mongodb
 # Directory that stores the mongodb pid file
 mongodb_pid_dir: /var/run/mongodb
 
-# The base directory for SSL certs and key files
-mongodb_ssl_root_dir: /etc/ssl/certs
-
-# Key file destination location
-# The key file is used to authenticate members of a replica set
-mongodb_auth_keyfile_destination: "{{ mongodb_ssl_root_dir }}/mongodb/mongo-replicaset-key.pem"
-
-# Destination location of the certificate key file used for TLS connections
-mongodb_cert_keyfile_destination: "{{ mongodb_ssl_root_dir }}/mongodb/mongo-certificate.pem"
-
-# Destination location of the CA root file used for TLS connections
-mongodb_root_ca_file_destination: "{{ mongodb_ssl_root_dir }}/mongodb/mongo-rootCA.pem"
-
 # The Mongo user and group
 mongodb_owner: mongod
 mongodb_group: mongod
@@ -57,7 +44,7 @@ mongodb_itential_db_name: itential
 # or TLS settings applied.
 mongodb_replication_enabled: false
 mongodb_auth_enabled: true
-mongodb_tls_enabled: false
+mongodb_tls_enabled: true
 
 # Default mongo user names
 mongodb_user_admin: admin

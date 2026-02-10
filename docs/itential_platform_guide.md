@@ -219,9 +219,9 @@ located in `roles/platform/defaults/main/webserver.yml`.
 | platform_webserver_http_port | Integer | The port on which the webserver listens for HTTP requests. | 3000 |
 | platform_webserver_https_enabled | Boolean | If true, allows the webserver to respond to secure HTTPS requests. | `false` |
 | platform_webserver_https_port | Integer | The port on which the webserver listens for HTTPS requests. | 3443 |
-| platform_webserver_https_key | String | The path to the public key file used for HTTPS connections. | `/opt/itential/platform/keys/key.pem` |
+| platform_webserver_https_key | String | The path to the private key file used for HTTPS connections. | `/etc/pki/itential-platform/private/{{ inventory_hostname }}.key` |
 | platform_webserver_https_passphrase | String | The passphrase for the private key used to enable TLS sessions. |  |
-| platform_webserver_https_cert | String | The path to the certificate file used for HTTPS connections. | `/opt/itential/platform/keys/cert.pem` |
+| platform_webserver_https_cert | String | The path to the certificate file used for HTTPS connections. | `/etc/pki/itential-platform/https/{{ inventory_hostname }}.crt` |
 | platform_webserver_https_secure_protocol | String | The set of allowed SSL/TLS protocol versions. | `TLS_method` |
 | platform_webserver_https_ciphers | String |  The allowed SSL/TLS cipher suite. | `ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA384:DHE-RSA-AES256-SHA384:ECDHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA256:HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA` |
 | platform_webserver_https_client_reneg_limit | Integer | Specifies the number of renegotiations that are allowed in a single HTTPS connection. | 3 |
@@ -266,7 +266,13 @@ located in `roles/platform/defaults/main/platform.yml`.
 | :------- | :--- | :---------- | :------------ |
 | platform_server_dir | String | The Itential Platform installation directory. | `/opt/itential/platform/server` |
 | platform_config_dir | String | The Itential Platform configuration directory. | `/etc/itential` |
-| platform_tls_dir | String | The Itential Platform TLS directory. | `/etc/ssl/itential-platform` |
+| platform_pki_base_dir | String | The base PKI directory for Platform certificates. | `/etc/pki/itential-platform` |
+| platform_https_cert_filename | String | HTTPS certificate filename. | `{{ inventory_hostname }}.crt` |
+| platform_https_key_filename | String | HTTPS private key filename. | `{{ inventory_hostname }}.key` |
+| platform_https_ca_filename | String | HTTPS CA bundle filename. | `ca-bundle.crt` |
+| platform_mongodb_ca_filename | String | MongoDB client CA bundle filename. | `ca-bundle.crt` |
+| platform_https_pki_src_dir | String | Source directory for HTTPS certificates. | (set in inventory) |
+| platform_mongodb_pki_src_dir | String | Source directory for MongoDB client certificates. | (set in inventory) |
 | platform_itential_home_dir | String | The Itential Platform itential user home directory. | `/home/itential` |
 | platform_mongodb_root_ca_file_destination | String | Destination as referenced by itential user when connecting from itential host. This is ultimately stored in the mongo database to be read by Itential Platform, therefore this is the location as seen from the Itential Platform host. | `/opt/itential/keys/mongo-rootCA.pem` |
 | platform_package_dependencies | List(String) | Required OS packages for install. | `glibc-common, openldap, openldap-clients, openssl, git` |
@@ -444,7 +450,7 @@ By default the Platform will install files into the following directories:
 | /opt/itential/platform/server | platform_server_dir | No |
 | /opt/itential/platform/services | platform_services_dir | No |
 | /etc/itential | platform_config_dir | Yes |
-| /etc/ssl/itential-platform | platform_tls_dir | Yes |
+| /etc/pki/itential-platform | platform_pki_base_dir | Yes |
 | /var/log/itential | platform_log_dir | Yes |
 | /home/itential | platform_itential_home_dir | Yes |
 
@@ -463,7 +469,39 @@ Example overrides:
 ```yaml
 platform_root_dir: /app/itential/platform
 platform_config_dir: /app/itential/conf
-platform_tls_dir: /app/itential/ssl
+platform_pki_base_dir: /app/itential/pki
 platform_log_dir: /app/itential/log
 platform_itential_home_dir: /export/home/itential
 ```
+### PKI Certificate Configuration
+
+Platform requires HTTPS certificates for the web server and optionally MongoDB client certificates for mutual TLS.
+
+#### Certificate Requirements
+
+**HTTPS Certificates** (required):
+- Server certificate: `{{ inventory_hostname }}.crt`
+- Private key: `{{ inventory_hostname }}.key`
+- CA bundle: `ca-bundle.crt`
+
+**MongoDB Client Certificates** (optional for mutual TLS):
+- Client certificate: `client.pem`
+- Client private key: `mongodb-client.key`
+- CA bundle: `ca-bundle.crt`
+
+#### Certificate Organization
+
+Organize certificates per server on the Ansible controller:
+certificates/
+├── platform
+│   ├── ca-bundle.crt
+│   ├── ip-10-222-1-169.ec2.internal.crt
+│   ├── ip-10-222-1-64.ec2.internal.crt
+│   ├── ip-10-222-1-64.ec2.internal.key
+
+#### Deployed Locations
+
+- Base directory: `/etc/pki/itential-platform/`
+- HTTPS cert: `/etc/pki/itential-platform/https/{{ inventory_hostname }}.crt`
+- HTTPS key: `/etc/pki/itential-platform/private/{{ inventory_hostname }}.key`
+- MongoDB CA: `/etc/pki/itential-platform/mongodb/ca-bundle.crt`

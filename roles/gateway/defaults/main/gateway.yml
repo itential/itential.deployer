@@ -38,16 +38,12 @@ gateway_user_home_dir: "/home/{{ gateway_user }}"
 gateway_user_shell_rc_file: "{{ gateway_user_home_dir }}/.bashrc"
 
 # Default HTTPS/SSL settings
-gateway_https: false
+gateway_https: true
 gateway_https_port: 8443
+
+# Flag to enable copying the Gateway SSL certificates
 gateway_ssl_copy_certs: true
-gateway_ssl_dir: "{{ gateway_install_dir }}/conf/certs"
-gateway_ssl_cert_src: server.crt
-gateway_ssl_cert_dest: "{{ gateway_ssl_dir }}/{{ gateway_ssl_cert_src }}"
-gateway_ssl_key_src: server.key
-gateway_ssl_key_dest: "{{ gateway_ssl_dir }}/{{ gateway_ssl_key_src }}"
-gateway_ssl_rootca_src: rootCA.crt
-gateway_ssl_rootca_dest: "{{ gateway_ssl_dir }}/{{ gateway_ssl_rootca_src }}"
+
 gateway_tlsv1_2: false
 
 # The number of http server threads for handling requests

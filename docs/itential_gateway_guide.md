@@ -65,13 +65,14 @@ The following table lists the default variables located in `roles/gateway/defaul
 | `gateway_https` | Boolean | Flag to enable HTTPS. | `false` |
 | `gateway_https_port` | Integer | The IAG or HAProxy HTTPS listen port. | `8443` |
 | `gateway_ssl_copy_certs` | Boolean | Flag to enable copying the IAG SSL certificate. | `true` |
-| `gateway_ssl_dir` | String | The IAG SSL directory. | `{{ gateway_install_dir }}/conf/certs` |
-| `gateway_ssl_cert_src` | String | The SSL cert file. | `server.crt` |
-| `gateway_ssl_cert_dest` | String | The SSL cert destination. | `{{ gateway_ssl_dir }}/{{ gateway_ssl_cert_src }}` |
-| `gateway_ssl_key_src` | String | The SSL key file. | `server.key` |
-| `gateway_ssl_key_dest` | String | The SSL key file destination. | `{{ gateway_ssl_dir }}/{{ gateway_ssl_key_src }}` |
-| `gateway_ssl_rootca_src` | String | The SSL root CA file. | `rootCA.crt` |
-| `gateway_ssl_rootca_dest` | String | The SSL root CA destination. | `{{ gateway_ssl_dir }}/{{ gateway_ssl_rootca_src }}` |
+| `gateway_pki_base_dir` | String | The base PKI directory for Gateway certificates. | `/etc/pki/automation-gateway` |
+| `gateway_https_cert_filename` | String | HTTPS certificate filename. | `{{ inventory_hostname }}.crt` |
+| `gateway_https_key_filename` | String | HTTPS private key filename. | `{{ inventory_hostname }}.key` |
+| `gateway_https_ca_filename` | String | HTTPS CA bundle filename. | `ca-bundle.crt` |
+| `gateway_pki_src_dir` | String | Source directory for Gateway certificates (on Ansible controller). | (set in inventory) |
+| `gateway_https_cert_file` | String | Deployed HTTPS certificate path. | `{{ gateway_pki_https_dir }}/{{ gateway_https_cert_filename }}` |
+| `gateway_https_key_file` | String | Deployed HTTPS private key path. | `{{ gateway_pki_private_dir }}/{{ gateway_https_key_filename }}` |
+| `gateway_https_ca_file` | String | Deployed HTTPS CA bundle path. | `{{ gateway_pki_https_dir }}/{{ gateway_https_ca_filename }}` |
 | `gateway_tlsv1_2` | Boolean | Flag to enable TLS 1.2. | `false` |
 | `gateway_http_server_threads` | Integer | The number of http server threads for handling requests. | `{{ ansible_processor_cores * 4 }}` |
 
@@ -88,6 +89,25 @@ The following table lists the default variables located in `roles/gateway_haprox
 | `gateway_haproxy_ssl_cert_src` | String | The HAProxy SSL certificate file. | `server.pem` |
 | `gateway_haproxy_ssl_cert_dest` | String | The HAProxy SSL certificate destination. | `"/etc/ssl/certs{{ gateway_haproxy_ssl_cert_src }}"` |
 
+## PKI Certificate Configuration
+
+Gateway requires HTTPS certificates for the API server and optionally MongoDB client certificates.
+
+### Certificate Requirements
+
+Each Gateway server requires:
+- **HTTPS certificate**: `{{ inventory_hostname }}.crt`
+- **HTTPS private key**: `{{ inventory_hostname }}.key`
+- **CA bundle**: `ca-bundle.crt`
+
+### Certificate Organization
+
+Organize certificates per server on the Ansible controller:
+certificates/
+├── gateway
+│   ├── ca-bundle.crt
+│   ├── ip-10-222-1-183.ec2.internal.crt
+│   ├── ip-10-222-1-183.ec2.internal.key
 ## Configuring HTTPS
 
 The Gateway roles support two methods for configuring HTTPS - IAG Native HTTPS and HTTPS via

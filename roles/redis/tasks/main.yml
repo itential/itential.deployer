@@ -50,6 +50,14 @@
             - ansible_selinux.status == "enabled"
             - redis_install_from_source | bool
 
+    - name: Configure Redis TLS
+      ansible.builtin.include_tasks: configure-redis-tls.yml
+      when: redis_tls_enabled | bool
+      tags:
+        - redis
+        - redis_certificates
+        - certificates
+
     - name: Configure Redis/Sentinel
       tags: configure_redis
       block:

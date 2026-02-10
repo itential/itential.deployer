@@ -97,10 +97,13 @@
         state: directory
       when: gateway_enable_python_venv | bool
 
-    - name: Copy certs
-      ansible.builtin.include_tasks:
-        file: copy-certs.yml
-      when: gateway_https and gateway_ssl_copy_certs
+    - name: Configure Gateway HTTPS
+      ansible.builtin.include_tasks: configure-gateway-https.yml
+      when: gateway_https | bool
+      tags:
+        - gateway
+        - gateway_certificates
+        - certificates
 
     - name: Install Python
       tags: install_python

@@ -50,3 +50,8 @@ redis_user_prometheus_password: prometheus
 # By default the prometheus user will be enabled. If this is set to false, the prometheus user
 # will not be created.
 redis_prometheus_user_enabled: true
+
+# Redis TLS configuration options
+redis_tls_port: "{{ redis_tls_port_default }}"
+redis_tls_auth_clients: "no"
+redis_tls_protocols: "TLSv1.2 TLSv1.3"
