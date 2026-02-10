@@ -1,0 +1,65 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Validate offline_src_adapters_path is set
+  ansible.builtin.assert:
+    that: offline_src_adapters_path is defined
+    msg: "offline_src_adapters_path must be set"
+
+- name: Validate offline_dest_adapters_path is set
+  ansible.builtin.assert:
+    that: offline_dest_adapters_path is defined
+    msg: "offline_dest_adapters_path must be set"
+
+- name: Validate adapter_name is set
+  ansible.builtin.assert:
+    that: adapter_name is defined
+    msg: "adapter_name must be set"
+
+- name: Create temporary working directory
+  ansible.builtin.tempfile:
+    state: directory
+  register: install_adapters_temp_dir
+
+- name: Copy adapter to target node
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ install_adapters_temp_dir.path }}"
+    mode: '0644'
+  with_fileglob: "{{ offline_src_adapters_path }}/*{{ adapter_name }}-*.tgz"
+
+- name: Find adapter on target node
+  ansible.builtin.find:
+    paths: "{{ install_adapters_temp_dir.path }}"
+    patterns: "*{{ adapter_name }}-*.tgz"
+  register: adapter_list
+
+- name: Validate adapter exists
+  ansible.builtin.fail:
+    msg: "{{ adapter_name }} does not exist in {{ offline_src_adapters_path }}, re-run download"
+  when: adapter_list.files | length == 0
+
+- name: Create adapter destination
+  ansible.builtin.file:
+    name: "{{ offline_dest_adapters_path }}/{{ adapter_name }}"
+    owner: "{{ platform_user }}"
+    group: "{{ platform_group }}"
+    mode: '0775'
+    state: directory
+
+# The --transform option will transform (rename) files and directories.
+# In our case, we need to rename the root directory of the adapter from
+# 'package' to the name of the adapter name.
+- name: Extract adapter
+  ansible.builtin.unarchive:
+    src: "{{ adapter_list.files[0].path }}"
+    dest: "{{ offline_dest_adapters_path }}/"
+    remote_src: true
+    extra_opts:
+      - --transform
+      - "s/^package/{{ adapter_name }}/"
+
+- name: Remove temporary working directory
+  ansible.builtin.file:
+    path: "{{ install_adapters_temp_dir.path }}"
+    state: absent

@@ -1,0 +1,55 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+# Tune Kernel parameters
+
+# If you experience network timeouts or socket errors in communication between clients and
+# servers, or between members of a sharded cluster or replica set, check the TCP keepalive
+# value for the affected systems.
+#
+# Many operating systems set this value to 7200 seconds (two hours) by default. For MongoDB,
+# you will generally experience better results with a shorter keepalive value, on the order
+# of 120 seconds (two minutes).
+#
+# If your MongoDB deployment experiences keepalive-related issues, you must alter the
+# keepalive value on all affected systems. This includes all machines running mongod or
+# mongos processes and all machines hosting client processes that connect to MongoDB.
+- name: Adjust keepalive
+  ansible.posix.sysctl:
+    name: net.ipv4.tcp_keepalive_time
+    value: "{{ mongodb_net_ipv4_tcp_keepalive_time }}"
+    state: present
+    sysctl_file: "{{ mongodb_sysctl_file }}"
+    reload: true
+
+- name: Increase throughput settings
+  ansible.posix.sysctl:
+    name: net.core.somaxconn
+    value: "{{ mongodb_net_core_somaxconn }}"
+    state: present
+    sysctl_file: "{{ mongodb_sysctl_file }}"
+    reload: true
+
+- name: Disable zone reclaim mode
+  ansible.posix.sysctl:
+    name: vm.zone_reclaim_mode
+    value: "{{ mongodb_vm_zone_reclaim_mode }}"
+    state: present
+    sysctl_file: "{{ mongodb_sysctl_file }}"
+    reload: true
+
+- name: Set vm swappiness
+  ansible.posix.sysctl:
+    name: vm.swappiness
+    value: "{{ mongodb_vm_swappiness }}"
+    state: present
+    sysctl_file: "{{ mongodb_sysctl_file }}"
+    reload: true
+
+- name: Set vm max_map_count
+  ansible.posix.sysctl:
+    name: vm.max_map_count
+    value: "{{ mongodb_vm_max_map_count }}"
+    state: present
+    sysctl_file: "{{ mongodb_sysctl_file }}"
+    reload: true

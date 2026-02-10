@@ -1,0 +1,10 @@
+module itential_mongodb_var_lib_nfs 1.0;
+
+require {
+    type var_lib_nfs_t;
+	type mongod_t;
+	class dir search;
+}
+
+#============= mongod_t ==============
+allow mongod_t var_lib_nfs_t:dir search;

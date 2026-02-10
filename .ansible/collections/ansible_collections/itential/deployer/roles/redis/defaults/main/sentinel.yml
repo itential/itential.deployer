@@ -1,0 +1,21 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+# The location of the Redis Sentinel config file
+redis_sentinel_conf_file: "{{ redis_conf_dir }}/sentinel.conf"
+
+# The location of the Redis Sentinel log file
+redis_sentinel_log: "{{ redis_log_dir }}/sentinel.log"
+
+# The Redis Sentinel master name
+redis_sentinel_master_name: itentialmaster
+
+# The default redis sentinel listen port
+redis_sentinel_port: "{{ redis_sentinel_port_default }}"
+
+# Bind to localhost + private network interface
+redis_sentinel_bind: 127.0.0.1 {{ ansible_default_ipv4.address }}
+
+# Auto-calculate quorum based on sentinel count (recommended)
+# Set to explicit number to override (must be <= number of sentinels)
+redis_sentinel_quorum: auto

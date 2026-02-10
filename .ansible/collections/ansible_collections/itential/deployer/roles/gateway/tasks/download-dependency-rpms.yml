@@ -1,0 +1,30 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Download Gateway dependency RPMs
+  ansible.builtin.import_role:
+    name: offline
+    tasks_from: download-rpms
+  vars:
+    offline_download_method: yum_module
+    offline_download_packages: "{{ gateway_packages }}"
+    offline_download_dir: "{{ gateway_offline_target_node_rpms_dir }}/dependencies"
+
+- name: Copy Gateway dependency RPMs to control node
+  ansible.builtin.import_role:
+    name: offline
+    tasks_from: fetch-packages
+  vars:
+    offline_src_dir: "{{ gateway_offline_target_node_rpms_dir }}/dependencies"
+    offline_dest_dir: "{{ gateway_offline_control_node_rpms_dir }}/dependencies"
+
+- name: Install Gateway dependency packages
+  ansible.builtin.dnf:
+    name: "{{ item }}"
+    state: present
+  with_items: "{{ gateway_packages }}"
+  register: gateway_packages_installed
+  when:
+    - gateway_packages is defined
+    - gateway_packages is iterable
+    - gateway_packages | length > 0

@@ -1,0 +1,42 @@
+{
+ "collection_info": {
+  "namespace": "itential",
+  "name": "deployer",
+  "version": "3.7.1",
+  "authors": [
+   "Steven Schattenberg <steven.schattenberg@itential.com>",
+   "Travis Nicks <travis.nicks@itential.com>",
+   "Kevin Velarde <kevin.velarde@itential.com>",
+   "Peter Sprygada <peter.sprygada@itential.com>",
+   "Nick Andreano <nick.andreano@itential.com>",
+   "Marcos Dias <marcos.dias@itential.com>",
+   "Hamza Qadri <hamza.qadri@itential.com>"
+  ],
+  "readme": "README.md",
+  "tags": [
+   "tools",
+   "itential",
+   "deployer"
+  ],
+  "description": "Ansible collection that handles deploying Itential Platform and Automation Gateway",
+  "license": [],
+  "license_file": "LICENSE",
+  "dependencies": {
+   "ansible.posix": ">=0.0.1",
+   "community.general": "<12.0.0",
+   "community.mongodb": ">=0.0.1"
+  },
+  "repository": "https://github.com/itential/deployer",
+  "documentation": "https://github.com/itential/deployer/blob/main/README.md",
+  "homepage": "https://galaxy.ansible.com/ui/repo/published/itential/deployer/",
+  "issues": "https://github.com/itential/deployer/issues"
+ },
+ "file_manifest_file": {
+  "name": "FILES.json",
+  "ftype": "file",
+  "chksum_type": "sha256",
+  "chksum_sha256": "5c399892a4cb469ca66309270cf4d89e58b6cbacd82aeaaa5b72f7bba35dac97",
+  "format": 1
+ },
+ "format": 1
+}

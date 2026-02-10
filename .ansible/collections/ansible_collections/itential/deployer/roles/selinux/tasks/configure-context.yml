@@ -1,0 +1,42 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: SELinux - Validate selinux_target, selinux_setype, selinux_path are set
+  ansible.builtin.assert:
+    that:
+      - selinux_target is defined
+      - selinux_setype is defined
+      - selinux_path is defined
+    fail_msg: selinux_target, selinux_setype, selinux_path must be set
+
+- name: SELinux - Set fcontext on target
+  community.general.sefcontext:
+    target: "{{ selinux_target }}"
+    setype: "{{ selinux_setype }}"
+    ftype: "{{ selinux_ftype is defined | ternary(selinux_ftype, omit) }}"
+
+# To ensure idempotency, a restorecon with the passive check option (-n) is run first
+- name: SELinux - Check security context on target directory
+  ansible.builtin.command:
+    argv:
+      - restorecon
+      - -irvFn
+      - "{{ selinux_path }}"
+  register: restorecon_check_result
+  changed_when: false
+  failed_when:
+    - restorecon_check_result.rc is defined
+    - restorecon_check_result.rc > 0
+
+- name: SELinux - Apply new file context to target directory
+  ansible.builtin.command:
+    argv:
+      - restorecon
+      - -irvF
+      - "{{ selinux_path }}"
+  register: restorecon_result
+  changed_when: restorecon_result.rc == 0
+  failed_when:
+    - restorecon_result.rc is defined
+    - restorecon_result.rc > 0
+  when: restorecon_check_result.stdout_lines | length > 0

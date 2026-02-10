@@ -1,0 +1,18 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Download Itential Platform packages
+  hosts: platform
+  become: true
+  vars:
+    offline_install_enabled: false
+    validate_platform_encryption_key: false
+  roles:
+    - role: itential.deployer.common
+    - role: itential.deployer.offline
+  tasks:
+    - name: Download Itential Platform packages  # noqa run-once
+      ansible.builtin.import_role:
+        name: itential.deployer.platform
+        tasks_from: download-packages
+      run_once: true

@@ -1,0 +1,45 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Run Redis Preflight checks
+  hosts: redis, redis_secondary
+  become: true
+  roles:
+    # Pull in the common vars
+    - role: itential.deployer.common_vars
+      tags:
+        - always
+  tasks:
+    - name: Preflight
+      ansible.builtin.import_role:
+        name: itential.deployer.redis
+        tasks_from: preflight
+
+- name: Read all data and combines and displays results
+  hosts: localhost
+  become: false
+  tags: always
+  roles:
+    - role: itential.deployer.common_vars
+  tasks:
+    - name: Set results_file
+      delegate_to: localhost
+      ansible.builtin.set_fact:
+        results_file: "{{ preflight_directory }}/Results_Redis.txt"
+
+    - name: Ensure the destination file exists and is empty
+      ansible.builtin.file:
+        path: "{{ results_file }}"
+        state: absent
+
+    - name: Combine files into the output file
+      ansible.builtin.shell: |
+        echo "Redis RESULTS" >> {{ results_file }}
+        for file in {{ preflight_directory }}/*.txt; do
+          if [[ $(basename "$file") == redis*.txt ]]; then
+            echo ---------------- >> {{ results_file }}
+            cat "$file" >> {{ results_file }}
+            echo "" >> {{ results_file }}
+          fi
+        done
+      changed_when: true

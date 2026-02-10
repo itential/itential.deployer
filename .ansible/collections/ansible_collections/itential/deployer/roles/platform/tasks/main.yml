@@ -1,0 +1,127 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Validate vars
+  ansible.builtin.include_tasks:
+    file: validate-vars.yml
+  tags: always
+
+- name: Install and configure Itential Platform
+  notify: Enable and Start Platform
+  block:
+    - name: Configure OS
+      tags: configure_os
+      block:
+        # TODO: Remove once the Itential RPM is creating the directories correctly
+        - name: Create itential user
+          ansible.builtin.include_tasks:
+            file: create-itential-user.yml
+
+        # TODO: Remove once the Itential RPM is creating the directories correctly
+        - name: Create itential directories
+          ansible.builtin.file:
+            name: "{{ item }}"
+            state: directory
+            owner: "{{ platform_user }}"
+            group: "{{ platform_group }}"
+            mode: "0775"
+          with_items:
+            - "{{ platform_server_dir }}"
+            - "{{ platform_config_dir }}"
+            - "{{ platform_log_dir }}"
+
+        - name: Ensure secure mode for TemplateBuilder
+          ansible.builtin.lineinfile:
+            path: /etc/sudoers
+            insertafter: EOF
+            state: present
+            line: "{{ platform_user }} ALL=(ALL) NOPASSWD: /usr/sbin/chroot, /sbin/chroot"
+
+        - name: Configure firewalld
+          ansible.builtin.include_tasks:
+            file: configure-firewalld.yml
+
+    - name: Install Dependencies, Platform, Adapters and App Artifacts
+      notify: Update Itential release file
+      block:
+        - name: Install Dependencies
+          tags: install_dependencies
+          block:
+            - name: Install Platform package dependencies
+              ansible.builtin.include_tasks:
+                file: install-platform-dependency-packages.yml
+
+            - name: Install NodeJS
+              tags: install_nodejs
+              block:
+                - name: Install NodeJS
+                  ansible.builtin.include_tasks:
+                    file: install-nodejs.yml
+
+            - name: Install Python
+              tags: install_python
+              block:
+                - name: Install Python
+                  ansible.builtin.include_tasks:
+                    file: install-python.yml
+
+        - name: Install Platform
+          tags: install_platform
+          block:
+            - name: Install Platform
+              ansible.builtin.include_tasks:
+                file: install-platform.yml
+
+        - name: Install Adapters
+          tags: install_adapters
+          block:
+            - name: Install Adapters
+              ansible.builtin.include_tasks:
+                file: install-adapters.yml
+
+        - name: Install App Artifacts
+          tags: install_app_artifacts
+          when: platform_app_artifacts_enabled | bool
+          block:
+            - name: Install App Artifacts
+              ansible.builtin.include_tasks:
+                file: install-app-artifacts.yml
+
+    - name: Configure SELinux
+      tags: configure_selinux
+      block:
+        - name: Configure SELinux
+          ansible.builtin.include_tasks:
+            file: configure-selinux.yml
+
+    - name: Configure Vault
+      when: platform_configure_vault | bool
+      tags: configure_vault
+      block:
+        - name: Configure Vault
+          ansible.builtin.include_tasks:
+            file: configure-vault.yml
+
+    - name: Copy certs
+      tags: copy_certs
+      block:
+        - name: Copy certs
+          ansible.builtin.include_tasks:
+            file: copy-certs.yml
+
+    - name: Configure Platform
+      tags: configure_platform
+      block:
+        - name: Configure Platform
+          ansible.builtin.include_tasks:
+            file: configure-platform.yml
+
+- name: Start Itential Platform service
+  tags:
+    - always
+    - start_service
+    - start_platform_service
+  block:
+    - name: Start Itential Platform service
+      ansible.builtin.include_tasks:
+        file: start-service.yml

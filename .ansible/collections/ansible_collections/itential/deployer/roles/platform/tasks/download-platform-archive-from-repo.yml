@@ -1,0 +1,28 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Download the Itential Platform artifact from URL
+  ansible.builtin.get_url:
+    url: "{{ artifact }}"
+    dest: "{{ platform_package_temp_download_dir.path }}/"
+    mode: '0755'
+    # Sets the appropriate header based on the repository type:
+    # - For JFrog: Uses the "X-JFrog-Art-Api" header with the API key if "repository_api_key"
+    #   is defined and "jfrog" is part of the download URL.
+    # - For Gitlab: Uses the "PRIVATE-TOKEN" header with the API key if "repository_api_key"
+    #   is defined and "gitlab" is part of the download URL.
+    # - For Nexus: Uses a default header ("Accept: application/octet-stream") since Nexus doesn't
+    #   support API key authentication.
+    headers: >-
+      {%- if repository_api_key is defined and artifact is search("jfrog") -%}
+        {"X-JFrog-Art-Api": "{{ repository_api_key }}", "Accept": "application/octet-stream"}
+      {%- elif repository_api_key is defined and artifact is search("gitlab") -%}
+        {"PRIVATE-TOKEN": "{{ repository_api_key }}", "Accept": "application/octet-stream"}
+      {%- else -%}
+        {"Accept": "application/octet-stream"}
+      {%- endif -%}
+    url_username: "{{ repository_username | default(omit) }}"
+    url_password: "{{ repository_password | default(omit) }}"
+    validate_certs: true
+  register: platform_package_download_result
+  changed_when: false

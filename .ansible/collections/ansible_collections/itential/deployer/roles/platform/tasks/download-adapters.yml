@@ -1,0 +1,64 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Install packages required for download
+  ansible.builtin.dnf:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - git
+    - jq
+  register: install_result
+
+- name: Disable safe repository checks
+  community.general.git_config:
+    name: safe.directory
+    scope: global
+    value: '*'
+  when: platform_disable_git_safe_repo_checks
+
+- name: Install NodeJS
+  ansible.builtin.include_tasks:
+    file: install-nodejs.yml
+
+- name: Download and fetch adapters
+  when:
+    - platform_adapters is defined
+    - platform_adapters is iterable
+    - platform_adapters | length > 0
+  block:
+    - name: Download  adapters
+      ansible.builtin.include_role:
+        name: offline
+        tasks_from: download-adapters
+      vars:
+        offline_adapters: "{{ platform_adapters }}"
+        offline_download_dir: "{{ platform_offline_target_node_adapters_dir }}"
+
+    - name: Find all downloaded adapters
+      ansible.builtin.find:
+        paths: "{{ platform_offline_target_node_adapters_dir }}"
+        patterns: "*.tgz"
+      register: found_adapters
+
+    - name: Copy adapters to control node
+      ansible.builtin.fetch:
+        src: "{{ item.path }}"
+        dest: "{{ platform_offline_control_node_adapters_dir }}/"
+        flat: true
+      with_items: "{{ found_adapters.files }}"
+
+- name: Uninstall packages required for download
+  ansible.builtin.dnf:
+    name: "{{ item }}"
+    state: absent
+    autoremove: true
+  with_items: "{{ install_result.results | selectattr('changed', 'equalto', true)
+              | map(attribute='item') }}"
+
+- name: Uninstall NodeJS packages # noqa no-handler
+  ansible.builtin.dnf:
+    name: "{{ platform_nodejs_package }}"
+    state: absent
+    autoremove: true
+  when: nodejs_install_result.changed

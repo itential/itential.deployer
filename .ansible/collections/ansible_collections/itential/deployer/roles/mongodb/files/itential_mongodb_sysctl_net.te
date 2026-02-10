@@ -1,0 +1,12 @@
+module itential_mongodb_sysctl_net 1.0;
+
+require {
+    type sysctl_net_t;
+	type mongod_t;
+	class dir search;
+	class file { getattr read open };
+}
+
+#============= mongod_t ==============
+allow mongod_t sysctl_net_t:dir search;
+allow mongod_t sysctl_net_t:file { getattr read open };

@@ -1,0 +1,54 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Validate offline_pip_executable or offline_python_venv is set
+  ansible.builtin.assert:
+    that: offline_pip_executable is defined or offline_python_venv is defined
+    msg: "offline_pip_executable or offline_python_venv must be set"
+
+- name: Validate offline_wheels_dir is set
+  ansible.builtin.assert:
+    that: offline_wheels_dir is defined
+    msg: "offline_wheels_dir must be set"
+
+- name: Create temporary working directory
+  ansible.builtin.tempfile:
+    state: directory
+  register: install_wheels_temp_dir
+
+- name: Copy wheel files to target node
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ install_wheels_temp_dir.path }}/{{ item | basename }}"
+    mode: '0644'
+  with_fileglob:
+    - "{{ offline_wheels_dir }}/*.whl"
+    - "{{ offline_wheels_dir }}/*.tar.gz"
+
+- name: Find wheel files on target node
+  ansible.builtin.find:
+    paths: "{{ install_wheels_temp_dir.path }}"
+    patterns:
+      - "*.whl"
+      - "*.tar.gz"
+  register: wheel_list
+
+- name: Install wheel files in virtual env
+  ansible.builtin.pip:
+    name: "{{ wheel_list.files | map(attribute='path') | list | sort }}"
+    virtualenv: "{{ offline_python_venv }}"
+    extra_args: --no-index
+  when: offline_python_venv is defined
+
+- name: Install wheel files using pip executable
+  ansible.builtin.pip:
+    name: "{{ wheel_list.files | map(attribute='path') | list | sort }}"
+    executable: "{{ offline_pip_executable }}"
+    umask: "0022"
+    extra_args: --no-index
+  when: offline_python_venv is not defined
+
+- name: Remove temporary working directory
+  ansible.builtin.file:
+    path: "{{ install_wheels_temp_dir.path }}"
+    state: absent

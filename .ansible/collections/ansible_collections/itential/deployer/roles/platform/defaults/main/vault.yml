@@ -1,0 +1,51 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+# Flag to enable/disable configuring Vault in Itential Platform
+platform_configure_vault: false
+
+# The directory to store the vault root key in
+platform_vault_token_dir: "{{ platform_server_dir }}/keys"
+
+# The URL to the Hashicorp Vault server.
+platform_vault_url: http://localhost:8200
+
+# The authorization method to connect to Hashicorp Vault. Either token or approle.
+platform_vault_auth_method: token
+
+# Hashicorp Vault token
+# Must be configured in inventory when platform_vault_auth_method is set to 'token'
+platform_vault_token:
+
+# Hashicorp Vault Role ID
+# Must be configured in inventory when platform_vault_auth_method is set to 'approle'
+platform_vault_role_id:
+
+# Hashicorp Vault Secret ID
+# Must be configured in inventory when platform_vault_auth_method is set to 'approle'
+platform_vault_secret_id:
+
+# The path where the AppRole was enabled.
+platform_vault_approle_path: approle
+
+# The file path to a token file. The token is used for authentication to access Vault secrets.
+platform_vault_token_file: "{{ platform_vault_token_dir }}/vault.token"
+
+# Reference for the path to secret and name of key in Hashicorp Vault
+# Syntax is $SECRET_{path to secret in Vault} $KEY_{name of key in secretPath}
+# For example, in perf lab Hashi Vault
+# secrets are at Secrets/itential/iap. Hence "$SECRET_iap"
+# Key is "redisPassword" for the password value. Hence "$KEY_redisPassword"
+platform_redis_password_vault: "$SECRET_iap $KEY_redisPassword"
+
+platform_mongo_password_vault: "$SECRET_iap $KEY_mongoDb"
+
+# The file path to the .env file containing Role ID and Secret ID for AppRole authentication.
+platform_vault_role_secrets_env_file: "{{ platform_vault_token_dir }}/vault-role-secrets.env"
+
+# The endpoint for the Secrets Engine that is used.
+platform_vault_secrets_endpoint: itential/data
+
+# If true, only reads secrets from Hashicorp Vault. Otherwise, the platform can write secrets
+# to Vault for storage.
+platform_vault_read_only: true

@@ -1,0 +1,81 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Validate offline_download_dir is set
+  ansible.builtin.assert:
+    that: offline_download_dir is defined
+    msg: "offline_download_dir must be set"
+
+- name: Validate offline_adapter is set
+  ansible.builtin.assert:
+    that: offline_adapter is defined
+    msg: "offline_adapter must be set"
+
+- name: Parse adapter name
+  ansible.builtin.set_fact:
+    adapter_name: "{{ offline_adapter | basename | split('.') | first }}"
+
+- name: Git clone adapter # noqa: latest (always clone the latest)
+  ansible.builtin.git:
+    repo: "{{ offline_adapter }}"
+    dest: "{{ offline_download_dir }}/{{ adapter_name }}"
+    force: true
+  when: (offline_adapter | basename | split('.') | last) == "git"
+
+- name: Unzip {{ offline_adapter }}
+  ansible.builtin.unarchive:
+    src: "{{ offline_adapter }}"
+    dest: "{{ offline_download_dir }}"
+  when: (offline_adapter | basename | split('.') | last) == "zip"
+
+- name: Delete package-lock.json file
+  ansible.builtin.file:
+    path: "{{ offline_download_dir }}/{{ adapter_name }}/package-lock.json"
+    state: absent
+  when: platform_delete_package_lock_file
+
+- name: Install {{ adapter_name }}
+  ansible.builtin.command:
+    cmd: npm install
+  args:
+    chdir: "{{ offline_download_dir }}/{{ adapter_name }}"
+  changed_when: true
+
+# The bundleDependencies defines an array of package names that will be bundled
+# when publishing the package.  This really should be defined in the package.json
+# when it's downloaded.  If it is not already defined, set it to true.  A value of true
+# will bundle all dependencies.
+- name: Check if dependencies is already defined in package.json
+  ansible.builtin.lineinfile:
+    state: absent
+    path: "{{ offline_download_dir }}/{{ adapter_name }}/package.json"
+    regexp: '"dependencies":'
+  check_mode: true
+  changed_when: false
+  register: dependencies_check
+
+- name: Check if bundleDependencies is already defined in package.json
+  ansible.builtin.lineinfile:
+    state: absent
+    path: "{{ offline_download_dir }}/{{ adapter_name }}/package.json"
+    regexp: '"bundleDependencies":'
+  check_mode: true
+  changed_when: false
+  register: bundle_dependencies_check
+
+- name: Define bundleDependencies if undefined
+  ansible.builtin.lineinfile:
+    state: present
+    path: "{{ offline_download_dir }}/{{ adapter_name }}/package.json"
+    line: '  "bundleDependencies": true,'
+    insertbefore: '^\s*"dependencies"\s*:\s*{'
+  when:
+    - dependencies_check.found == 1
+    - bundle_dependencies_check.found == 0
+
+- name: Re-pack {{ adapter_name }}
+  ansible.builtin.command:
+    cmd: npm pack "{{ adapter_name }}/"
+  args:
+    chdir: "{{ offline_download_dir }}"
+  changed_when: true

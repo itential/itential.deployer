@@ -1,0 +1,27 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+
+- name: Copy the cert file
+  ansible.builtin.copy:
+    src: "{{ gateway_ssl_cert_src }}"
+    dest: "{{ gateway_ssl_cert_dest }}"
+    mode: "0400"
+    owner: "{{ gateway_user }}"
+    group: "{{ gateway_group }}"
+
+- name: Copy the key file
+  ansible.builtin.copy:
+    src: "{{ gateway_ssl_key_src }}"
+    dest: "{{ gateway_ssl_key_dest }}"
+    mode: "0400"
+    owner: "{{ gateway_user }}"
+    group: "{{ gateway_group }}"
+
+- name: Copy the root CA file
+  ansible.builtin.copy:
+    src: "{{ gateway_ssl_rootca_src }}"
+    dest: "{{ gateway_ssl_rootca_dest }}"
+    mode: "0400"
+    group: "{{ gateway_group }}"
+    owner: "{{ gateway_user }}"

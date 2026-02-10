@@ -1,0 +1,53 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+# Itential Platform directories
+platform_root_dir: "{{ platform_root_dir_default }}"
+platform_config_dir: "{{ platform_config_dir_default }}"
+# platform_tls_dir: "{{ platform_tls_dir_default }}"
+platform_itential_home_dir: "{{ platform_itential_home_dir_default }}"
+
+# Destination as referenced by itential user when connecting from itential host.
+# This is ultimately stored in the mongo database to be read by Itential Platform, therefore
+# this is the location as seen from the Itential Platform host.
+
+platform_package_dependencies:
+  - glibc-common
+  - openldap
+  - openldap-clients
+  - openssl
+  - git
+
+platform_python_base_dependencies:
+  - pip
+  - setuptools
+  - wheel
+
+# The python and pip executable locations.
+# These will be symlinks to the appropriate executables in /usr/bin.
+platform_python_executable: "/usr/bin/python{{ platform_python_version }}"
+platform_pip_executable: "/usr/bin/pip{{ platform_python_version }}"
+
+# The default user that runs the server process
+platform_user: itential
+
+# The default group that runs the server process
+platform_group: itential
+
+# Flag to determine whether to use rsync when uploading artifacts
+platform_upload_using_rsync: false
+
+# Flag to remove the package-lock.json file before running the NPM install
+platform_delete_package_lock_file: true
+
+# Flag to disable Git safe repo check
+platform_disable_git_safe_repo_checks: true
+
+# Flag to prevent the NPM scripts from running when running the NPM install
+platform_npm_ignore_scripts: true
+
+# Flag to install app-artifacts
+platform_app_artifacts_enabled: false
+
+# Flag to determine if the service is started
+platform_start_service: true

@@ -1,0 +1,55 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+#
+# The ansible dnf module does not support passing the relocate flag. So the command module must
+# be used if the standard install directories are overridden.
+#
+
+# The Platform server package (itential-platform) must be installed first
+# The server package supports the following prefixes that can be relocated:
+#     Prefix:           /opt/itential/platform
+#     Prefix:           /var/log/itential
+#     Prefix:           /etc/itential
+#     Prefix:           /home/itential
+- name: Install Platform server package  # noqa command-instead-of-module
+  ansible.builtin.command: >
+    rpm -Uvh
+    {% for reloc in relocations %}
+    {% if reloc.old != reloc.new %}--relocate {{ reloc.old }}={{ reloc.new }} {% endif %}
+    {% endfor %}
+    {{ item }}
+  register: platform_package_install_result
+  changed_when: platform_package_install_result.rc == 0
+  failed_when:
+    - platform_package_install_result.rc != 0
+    - platform_package_install_result.stderr is not search("already installed")
+  vars:
+    relocations:
+      - { old: "{{ platform_root_dir_default }}", new: "{{ platform_root_dir }}" }
+      - { old: "{{ platform_log_dir_default }}", new: "{{ platform_log_dir }}" }
+      - { old: "{{ platform_config_dir_default }}", new: "{{ platform_config_dir }}" }
+      - { old: "{{ platform_itential_home_dir_default }}", new: "{{ platform_itential_home_dir }}" }
+  loop: "{{ platform_packages_find_result.files | map(attribute='path') }}"
+  when: item is search("itential-platform")
+
+# The Itential Platform service packages
+# The service packages support the following prefix that can be relocated:
+#     Prefix:         /opt/itential/platform/services
+- name: Install the Itential Platform service packages  # noqa command-instead-of-module
+  ansible.builtin.command: >
+    rpm -Uvh
+    {% for reloc in relocations %}
+    {% if reloc.old != reloc.new %}--relocate {{ reloc.old }}={{ reloc.new }} {% endif %}
+    {% endfor %}
+    {{ item }}
+  register: platform_package_install_result
+  changed_when: platform_package_install_result.rc == 0
+  failed_when:
+    - platform_package_install_result.rc != 0
+    - platform_package_install_result.stderr is not search("already installed")
+  vars:
+    relocations:
+      - { old: "{{ platform_services_dir_default }}", new: "{{ platform_services_dir }}" }
+  loop: "{{ platform_packages_find_result.files | map(attribute='path') }}"
+  when: item is not search("itential-platform")

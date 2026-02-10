@@ -1,0 +1,150 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Validate and set installation variables
+  tags: always
+  block:
+    - name: Validate Itential Platform packages array is populated
+      ansible.builtin.assert:
+        that:
+          - platform_packages is defined
+          - platform_packages is iterable
+          - platform_packages | length > 0
+        fail_msg: platform_packages must be defined and contain as least one artifact
+      when: not offline_install_enabled | bool
+
+    - name: Validate Itential Platform packages array contains only RPMs
+      ansible.builtin.assert:
+        that: "{{ item.endswith('.rpm') }}"
+        fail_msg: platform_packages can only contain RPM packages ending in .rpm"
+      loop: "{{ platform_packages }}"
+      when: not offline_install_enabled | bool
+
+    - name: Validate download auth method is defined when downloading Itential Platform packages
+      ansible.builtin.assert:
+        that: (repository_username is defined and repository_password is defined) or
+              repository_api_key is defined
+        fail_msg: >-
+          repository_api_key or repository_username/repository_password
+          must be defined when downloading platform_packages
+      when:
+        - not offline_install_enabled | bool
+        - platform_packages is search('http')
+
+    - name: Validate installation variables are defined
+      ansible.builtin.assert:
+        that: |
+          (platform_release is defined) or
+          (platform_nodejs_package is defined and
+           platform_python_version is defined and
+           platform_python_packages is defined and
+           platform_python_app_dependencies is defined)
+        fail_msg: >-
+          platform_release OR
+          platform_nodejs_package, platform_python_version, platform_python_packages, and
+          platform_python_app_dependencies must be defined
+
+    - name: Validate installation variables when not using platform_release
+      ansible.builtin.assert:
+        that:
+          - platform_nodejs_package is defined
+          - platform_python_version is defined
+          - platform_python_packages is defined
+          - platform_python_app_dependencies is defined
+        fail_msg: >-
+          platform_nodejs_package, platform_python_version, platform_python_packages, and
+          platform_python_app_dependencies must be defined when platform_release is not defined
+      when: platform_release is not defined
+
+    - name: Validate that the platform_encryption_key variable exists
+      ansible.builtin.assert:
+        that: platform_encryption_key is defined
+        fail_msg: platform_encryption_key variable must be defined
+      when: validate_platform_encryption_key | default(true)
+
+    - name: Validate that the platform_encryption_key variable is correctly formatted
+      ansible.builtin.assert:
+        that:
+          - platform_encryption_key is match('^[0-9a-fA-F]+$')
+          - platform_encryption_key | length == 64
+        fail_msg: platform_encryption_key must be a 64 character hexadecimal string
+      when: validate_platform_encryption_key | default(true)
+
+    - name: Validate Hashicorp Vault variables
+      when: platform_configure_vault | bool
+      block:
+        - name: Validate Hashicorp token is set when using token authentication
+          ansible.builtin.assert:
+            that: platform_vault_token is truthy
+            fail_msg: platform_vault_token must be defined when using token authentication
+          when: platform_vault_auth_method == 'token'
+
+        - name: Validate Hashicorp approle id and secret id are set when using approle authentication
+          ansible.builtin.assert:
+            that:
+              - platform_vault_role_id is truthy
+              - platform_vault_secret_id is truthy
+            fail_msg: platform_vault_role_id and platform_vault_secret_id must be defined when using approle authentication
+          when: platform_vault_auth_method == 'approle'
+
+    - name: Set installation variables when using Itential Platform release defaults
+      when: platform_release is defined
+      block:
+        - name: Load Itential Platform release default variables
+          ansible.builtin.include_vars:
+            file: "{{ item }}"
+          with_first_found:
+            - "platform-release-{{ platform_release }}.yml"
+            - "platform-release-{{ platform_release | string | split('.') | first }}.yml"
+            - "platform-release-undefined.yml"
+
+        - name: Check for valid Itential Platform release
+          ansible.builtin.assert:
+            that: platform_invalid_release is not defined
+            fail_msg: >-
+              Deployer does not support installing Itential Platform release {{ platform_release }}"
+
+        - name: Set platform_nodejs_package to the default value
+                when not defined in inventory
+          ansible.builtin.set_fact:
+            platform_nodejs_package:
+              "{{ platform_nodejs_package_default[ansible_distribution_major_version] }}"
+          when: platform_nodejs_package is not defined
+
+        - name: Set platform_python_version to the default value
+                when not defined in inventory
+          ansible.builtin.set_fact:
+            platform_python_version:
+              "{{ platform_python_version_default[ansible_distribution_major_version] }}"
+          when: platform_python_version is not defined
+
+        - name: Set platform_python_packages to the default value
+                when not defined in inventory
+          ansible.builtin.set_fact:
+            platform_python_packages:
+              "{{ platform_python_packages_default[ansible_distribution_major_version] }}"
+          when: platform_python_packages is not defined
+
+        - name: Set platform_python_app_dependencies to the default value
+                when not defined in inventory
+          ansible.builtin.set_fact:
+            platform_python_app_dependencies:
+              "{{ platform_python_app_dependencies_default[ansible_distribution_major_version] }}"
+          when: platform_python_app_dependencies is not defined
+
+    - name: Print Itential Platform installation details
+      ansible.builtin.debug:
+        msg:
+          - "Platform packages: {{ platform_packages }}"
+          - "Platform dependency packages: {{ platform_package_dependencies }}"
+          - "NodeJS package: {{ platform_nodejs_package }}"
+          - "Python version: {{ platform_python_version }}"
+          - "Python packages: {{ platform_python_packages }}"
+          - "Python base dependencies: {{ platform_python_base_dependencies }}"
+          - "Python Platform dependencies: {{ platform_python_app_dependencies }}"
+      when: not offline_install_enabled | bool
+
+    - name: Print Itential Platform installation details (offline)
+      ansible.builtin.debug:
+        msg: "Offline install using packages from {{ platform_offline_control_node_root }}"
+      when: offline_install_enabled | bool

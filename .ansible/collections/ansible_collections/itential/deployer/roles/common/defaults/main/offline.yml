@@ -1,0 +1,11 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+# By default offline mode is off
+offline_install_enabled: false
+
+# Offline directories
+offline_target_node_root: /var/tmp
+offline_control_node_root: "{{ playbook_dir }}/files"
+offline_itential_packages_path:
+  "itential_packages/{{ ansible_distribution | lower }}_{{ ansible_distribution_major_version }}"

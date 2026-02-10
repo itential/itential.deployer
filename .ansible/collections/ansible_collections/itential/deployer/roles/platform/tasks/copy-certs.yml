@@ -1,0 +1,112 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+# ============================================================================
+# Create Platform PKI Directory Structure
+# ============================================================================
+
+- name: Create Platform PKI base directory
+  ansible.builtin.file:
+    path: "{{ platform_pki_base_dir }}"
+    state: directory
+    owner: "{{ platform_pki_base_owner }}"
+    group: "{{ platform_pki_base_group }}"
+    mode: "{{ platform_pki_base_dir_mode }}"
+  tags:
+    - platform
+    - platform_certificates
+    - certificates
+
+- name: Create Platform PKI subdirectories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ platform_pki_base_owner }}"
+    group: "{{ platform_pki_base_group }}"
+    mode: "{{ platform_pki_subdir_mode }}"
+  loop:
+    - "{{ platform_pki_https_dir }}"
+    - "{{ platform_pki_mongodb_dir }}"
+  tags:
+    - platform
+    - platform_certificates
+    - certificates
+
+- name: Create Platform private key directory
+  ansible.builtin.file:
+    path: "{{ platform_pki_private_dir }}"
+    state: directory
+    owner: "{{ platform_pki_private_owner }}"
+    group: "{{ platform_pki_private_group }}"
+    mode: "{{ platform_pki_private_dir_mode }}"
+  tags:
+    - platform
+    - platform_certificates
+    - certificates
+
+# ============================================================================
+# HTTPS Certificates
+# ============================================================================
+
+- name: Copy HTTPS key and cert files
+  when: platform_webserver_https_enabled | bool
+  tags:
+    - platform
+    - platform_certificates
+    - platform_https
+    - certificates
+  block:
+    - name: Ensure the HTTPS private key directory exists
+      ansible.builtin.file:
+        path: "{{ platform_webserver_https_key | dirname }}"
+        state: directory
+        owner: "{{ platform_pki_private_owner }}"
+        group: "{{ platform_pki_private_group }}"
+        mode: "{{ platform_pki_private_dir_mode }}"
+
+    - name: Ensure the HTTPS cert directory exists
+      ansible.builtin.file:
+        path: "{{ platform_webserver_https_cert | dirname }}"
+        state: directory
+        owner: "{{ platform_pki_base_owner }}"
+        group: "{{ platform_pki_base_group }}"
+        mode: "{{ platform_pki_subdir_mode }}"
+
+    - name: Put the HTTPS key file in the correct location
+      ansible.builtin.copy:
+        src: "{{ platform_keyfile_source }}"
+        dest: "{{ platform_webserver_https_key }}"
+        mode: "{{ platform_https_key_mode }}"
+        owner: "{{ platform_pki_private_owner }}"
+        group: "{{ platform_pki_private_group }}"
+      notify: restart itential-platform
+
+    - name: Put the HTTPS cert file in the correct location
+      ansible.builtin.copy:
+        src: "{{ platform_certfile_source }}"
+        dest: "{{ platform_webserver_https_cert }}"
+        mode: "{{ platform_https_cert_mode }}"
+        owner: "{{ platform_pki_cert_owner }}"
+        group: "{{ platform_pki_cert_group }}"
+      notify: restart itential-platform
+
+# ============================================================================
+# MongoDB Client Certificates
+# ============================================================================
+
+- name: Copy MongoDB root CA file to the appropriate location
+  ansible.builtin.copy:
+    src: "{{ platform_mongodb_root_ca_file_source }}"
+    dest: "{{ platform_mongodb_root_ca_file_destination }}"
+    mode: "{{ platform_mongodb_ca_mode }}"
+    owner: "{{ platform_pki_cert_owner }}"
+    group: "{{ platform_pki_cert_group }}"
+  when:
+    - platform_mongo_tls_enabled | bool
+    - platform_mongodb_root_ca_file_source is defined
+  notify: restart itential-platform
+  tags:
+    - platform
+    - platform_certificates
+    - platform_mongodb
+    - certificates

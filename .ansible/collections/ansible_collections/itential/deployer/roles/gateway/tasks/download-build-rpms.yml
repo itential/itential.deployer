@@ -1,0 +1,13 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Install Gateway build packages
+  ansible.builtin.dnf:
+    name: "{{ item }}"
+    state: present
+  with_items: "{{ gateway_build_packages }}"
+  register: gateway_build_packages_installed
+  when:
+    - gateway_build_packages is defined
+    - gateway_build_packages is iterable
+    - gateway_build_packages | length > 0

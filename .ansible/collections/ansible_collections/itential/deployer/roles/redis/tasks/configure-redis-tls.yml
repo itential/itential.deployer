@@ -1,0 +1,82 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Create Redis PKI base directory
+  ansible.builtin.file:
+    path: "{{ redis_pki_base_dir }}"
+    state: directory
+    owner: "{{ redis_pki_owner }}"
+    group: "{{ redis_pki_group }}"
+    mode: "{{ redis_pki_base_dir_mode }}"
+  tags:
+    - redis
+    - redis_certificates
+    - certificates
+
+- name: Create Redis private directory
+  ansible.builtin.file:
+    path: "{{ redis_pki_private_dir }}"
+    state: directory
+    owner: "{{ redis_pki_owner }}"
+    group: "{{ redis_pki_group }}"
+    mode: "{{ redis_pki_private_dir_mode }}"
+  tags:
+    - redis
+    - redis_certificates
+    - certificates
+
+- name: Copy Redis TLS certificate
+  ansible.builtin.copy:
+    src: "{{ redis_tls_cert_source }}"
+    dest: "{{ redis_tls_cert_file }}"
+    owner: "{{ redis_pki_owner }}"
+    group: "{{ redis_pki_group }}"
+    mode: "{{ redis_tls_cert_mode }}"
+  when: redis_tls_cert_source | length > 0
+  notify: restart redis
+  tags:
+    - redis
+    - redis_certificates
+    - certificates
+
+- name: Copy Redis TLS private key
+  ansible.builtin.copy:
+    src: "{{ redis_tls_key_source }}"
+    dest: "{{ redis_tls_key_file }}"
+    owner: "{{ redis_pki_owner }}"
+    group: "{{ redis_pki_group }}"
+    mode: "{{ redis_tls_key_mode }}"
+  when: redis_tls_key_source | length > 0
+  notify: restart redis
+  tags:
+    - redis
+    - redis_certificates
+    - certificates
+
+- name: Copy Redis CA bundle
+  ansible.builtin.copy:
+    src: "{{ redis_tls_ca_source }}"
+    dest: "{{ redis_tls_ca_file }}"
+    owner: "{{ redis_pki_owner }}"
+    group: "{{ redis_pki_group }}"
+    mode: "{{ redis_tls_ca_mode }}"
+  when: redis_tls_ca_source | length > 0
+  notify: restart redis
+  tags:
+    - redis
+    - redis_certificates
+    - certificates
+
+- name: Copy Redis DH params
+  ansible.builtin.copy:
+    src: "{{ redis_tls_dh_params_source }}"
+    dest: "{{ redis_tls_dh_params_file }}"
+    owner: "{{ redis_pki_owner }}"
+    group: "{{ redis_pki_group }}"
+    mode: "{{ redis_tls_dh_params_mode }}"
+  when: redis_tls_dh_params_source | length > 0
+  notify: restart redis
+  tags:
+    - redis
+    - redis_certificates
+    - certificates

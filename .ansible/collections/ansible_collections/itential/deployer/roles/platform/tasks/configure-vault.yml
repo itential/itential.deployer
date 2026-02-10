@@ -1,0 +1,56 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Make the directory to store vault credentials
+  ansible.builtin.file:
+    path: "{{ platform_vault_token_dir }}"
+    state: directory
+    owner: "{{ platform_user }}"
+    group: "{{ platform_group }}"
+    mode: "0770"
+
+- name: Configure Vault with Token authentication
+  when: platform_vault_auth_method == "token"
+  block:
+    - name: Validate vault token
+      ansible.builtin.assert:
+        that:
+          - platform_vault_token is defined
+          - platform_vault_token | length > 0
+        fail_msg: "platform_vault_token must be provided"
+
+    - name: Create the token file
+      ansible.builtin.copy:
+        dest: "{{ platform_vault_token_file }}"
+        content: "{{ platform_vault_token }}"
+        owner: "{{ platform_user }}"
+        group: "{{ platform_group }}"
+        mode: "0400"
+      no_log: true
+
+- name: Configure Vault with AppRole authentication
+  when: platform_vault_auth_method == "approle"
+  block:
+    - name: Validate user-provided credentials
+      ansible.builtin.assert:
+        that:
+          - platform_vault_role_id is defined
+          - platform_vault_role_id | length > 0
+          - platform_vault_secret_id is defined
+          - platform_vault_secret_id | length > 0
+        fail_msg: "platform_vault_role_id and platform_vault_secret_id must be provided"
+
+    # Store credentials in .env file instead of directly in systemd service.
+    # This approach prevents secrets from being visible when running
+    # 'systemctl show itential-platform | grep -i vault' command.
+    # The .env file is loaded via EnvironmentFile directive, keeping credentials secure.
+    - name: Create vault-role-secrets.env file with credentials
+      ansible.builtin.copy:
+        dest: "{{ platform_vault_token_dir }}/vault-role-secrets.env"
+        content: |
+          ITENTIAL_VAULT_ROLE_ID={{ platform_vault_role_id }}
+          ITENTIAL_VAULT_SECRET_ID={{ platform_vault_secret_id }}
+        owner: "{{ platform_user }}"
+        group: "{{ platform_group }}"
+        mode: "0400"
+      no_log: true

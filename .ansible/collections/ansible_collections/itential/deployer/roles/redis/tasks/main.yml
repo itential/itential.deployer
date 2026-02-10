@@ -1,0 +1,108 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Validate variables and set node type facts
+  tags: always
+  block:
+    - name: Include tasks to validate variables
+      ansible.builtin.include_tasks:
+        file: validate-vars.yml
+
+    - name: Set Redis node type facts
+      ansible.builtin.set_fact:
+        redis_is_master_node: "{{ 'redis_master' in group_names }}"
+        redis_is_replica_node: "{{ 'redis_replica' in group_names }}"
+        redis_is_sentinel_node: "{{ 'redis_sentinel' in group_names }}"
+        redis_is_data_node: "{{ 'redis_master' in group_names or 'redis_replica' in group_names }}"
+        redis_has_replicas: "{{ groups['redis_replica'] is defined and groups['redis_replica'] | length > 0 }}"
+        redis_has_sentinels: "{{ groups['redis_sentinel'] is defined and groups['redis_sentinel'] | length > 0 }}"
+
+- name: Install and configure Redis
+  notify:
+    - Enable and Start Redis
+    - Enable and Start Redis Sentinel
+  block:
+    - name: Install Redis
+      tags: install_redis
+      notify: Update Itential release file
+      block:
+        - name: Include common installation tasks
+          ansible.builtin.include_tasks:
+            file: install-common.yml
+
+        - name: Include tasks to install Redis from source
+          ansible.builtin.include_tasks:
+            file: install-from-source.yml
+          when: redis_install_from_source | bool
+
+        - name: Include tasks to install Redis using repo
+          ansible.builtin.include_tasks:
+            file: install-from-repo.yml
+          when: not redis_install_from_source | bool
+
+    - name: Configure SELinux
+      tags: configure_selinux
+      block:
+        - name: Include tasks to configure SELinux
+          ansible.builtin.include_tasks:
+            file: configure-selinux.yml
+          when:
+            - ansible_selinux.status == "enabled"
+            - redis_install_from_source | bool
+
+    - name: Configure Redis TLS
+      ansible.builtin.include_tasks: configure-redis-tls.yml
+      when: redis_tls_enabled | bool
+      tags:
+        - redis
+        - redis_certificates
+        - certificates
+
+    - name: Configure Redis/Sentinel
+      tags: configure_redis
+      block:
+        - name: Include tasks to configure Redis
+          ansible.builtin.include_tasks:
+            file: configure-redis.yml
+          when: redis_is_data_node
+
+        - name: Include tasks to configure Sentinel
+          ansible.builtin.include_tasks:
+            file: configure-sentinel.yml
+          when: redis_is_sentinel_node
+
+- name: Ensure Redis is running
+  tags: always
+  when: redis_is_data_node
+  block:
+    - name: Flush all handlers
+      ansible.builtin.meta: flush_handlers
+
+    - name: Start Redis
+      ansible.builtin.systemd:
+        name: redis
+        state: started
+
+    - name: Assert that Redis is running
+      ansible.builtin.systemd:
+        name: redis
+      register: redis_status
+      failed_when: redis_status.status.ActiveState != "active"
+
+- name: Ensure Redis Sentinel is running
+  tags: always
+  when: redis_is_sentinel_node
+  block:
+    - name: Flush all handlers
+      ansible.builtin.meta: flush_handlers
+
+    - name: Start Redis Sentinel
+      ansible.builtin.systemd:
+        name: redis-sentinel
+        state: started
+
+    - name: Assert that Redis Sentinel is running
+      ansible.builtin.systemd:
+        name: redis-sentinel
+      register: redis_sentinel_status
+      failed_when: redis_sentinel_status.status.ActiveState != "active"

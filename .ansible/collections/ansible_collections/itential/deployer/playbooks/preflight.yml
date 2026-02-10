@@ -1,0 +1,25 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Run Redis Preflight checks
+  hosts: redis, redis_secondary, mongodb, mongodb_secondary, gateway, platform, platform_secondary
+  become: true
+  roles:
+    - role: itential.deployer.common_vars
+      tags: always
+
+- name: Include Preflight Redis
+  import_playbook: itential.deployer.preflight_redis
+  tags: preflight_redis
+
+- name: Include Preflight MongoDB
+  import_playbook: itential.deployer.preflight_mongodb
+  tags: preflight_mongodb
+
+- name: Include Preflight Platform
+  import_playbook: itential.deployer.preflight_platform
+  tags: preflight_platform
+
+- name: Include Preflight Gateway
+  import_playbook: itential.deployer.preflight_gateway
+  tags: preflight_gateway

@@ -1,0 +1,19 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Ensure Itential Platform is running
+  when: platform_start_service | bool
+  block:
+    - name: Flush all handlers
+      ansible.builtin.meta: flush_handlers
+
+    - name: Start Itential Platform
+      ansible.builtin.systemd:
+        name: itential-platform
+        state: started
+
+    - name: Assert that Itential Platform is running
+      ansible.builtin.systemd:
+        name: itential-platform
+      register: platform_status
+      failed_when: platform_status.status.ActiveState != "active"

@@ -1,0 +1,16 @@
+[Unit]
+Description=Itential Automation Gateway
+After=network.target
+
+[Service]
+User=itential
+Restart=always
+Type=simple
+ExecStart={{ gateway_python_venv }}/bin/automation-gateway --properties-file={{ gateway_properties_location }}/properties.yml
+WorkingDirectory=/tmp
+Environment=MAX_EVENT_RES=15000000
+Environment=PATH={{ gateway_python_venv }}/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+Environment=ANSIBLE_PYTHON_INTERPRETER={{ gateway_python_venv }}/bin/python
+
+[Install]
+WantedBy=multi-user.target

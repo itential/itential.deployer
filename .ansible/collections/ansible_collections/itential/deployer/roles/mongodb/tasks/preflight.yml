@@ -1,0 +1,73 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Include release vars
+  ansible.builtin.include_vars:
+    file: "{{ item }}"
+  with_first_found:
+    - "{{ iap_release }}-{{ ansible_distribution | lower }}-{{ ansible_distribution_major_version }}.yml"
+    - "release-undefined.yml"
+  tags: always
+
+
+- name: Run common checks
+  ansible.builtin.include_role:
+    name: preflight
+  vars:
+    preflight_url_checks:
+      - "{{ mongodb_release_url }}"
+      - "{{ mongodb_gpgkey_url }}"
+
+- name: Get avx cpu info
+  ansible.builtin.command: grep avx /proc/cpuinfo
+  register: avx_cpuinfo
+  changed_when: true
+
+- name: Set avx variable
+  ansible.builtin.set_fact:
+    avx: "{{ 'supported' if ('avx' in avx_cpuinfo['stdout']) else 'not supported' }}"
+
+- name: Set avx
+  ansible.builtin.set_fact:
+    results: '{{ results | combine({"avx": avx}) }}'
+
+- name: Create temporary working directory
+  ansible.builtin.tempfile:
+    state: directory
+  register: workingdir
+
+- name: Set pass to true if all conditions pass
+  ansible.builtin.set_fact:
+    results: '{{ results | combine({"pass": true}) }}'
+  when:
+    - results.cpuCores >= mongodb_cpu_cores
+    - results.get(mountvarname, 0) >= mongodb_free_disk_space
+    - results.memory >= mongodb_ram
+    - results.url_status.values() | unique | length == 1 and results.url_status.values() | unique | first == 200
+    - results.avx == 'supported'
+
+- name: Create MongoDB preflight results
+  ansible.builtin.template:
+    src: "mongodb.preflight.j2"
+    dest: "{{ workingdir.path }}/mongodbPreflightResults.txt"
+    mode: '0777'
+
+- name: Fetch MongoDB results
+  ansible.builtin.fetch:
+    src: "{{ workingdir.path }}/mongodbPreflightResults.txt"
+    dest: "{{ preflight_directory }}/mongodb_{{ inventory_hostname }}_results.txt"
+    flat: true
+
+- name: Remove temporary working directory
+  ansible.builtin.file:
+    path: "{{ workingdir.path }}"
+    state: absent
+
+- name: Check if host passed preflight checks.
+  ansible.builtin.assert:
+    that: results["pass"] == true
+    fail_msg: "MongoDB host did not pass the preflight checks"
+    success_msg: "MongoDB host passed the preflight checks"
+  when:
+    - preflight_enforce_checks is defined
+    - preflight_enforce_checks
