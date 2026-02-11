@@ -274,7 +274,7 @@ located in `roles/platform/defaults/main/platform.yml`.
 | platform_https_pki_src_dir | String | Source directory for HTTPS certificates. | (set in inventory) |
 | platform_mongodb_pki_src_dir | String | Source directory for MongoDB client certificates. | (set in inventory) |
 | platform_itential_home_dir | String | The Itential Platform itential user home directory. | `/home/itential` |
-| platform_mongodb_root_ca_file_destination | String | Destination as referenced by itential user when connecting from itential host. This is ultimately stored in the mongo database to be read by Itential Platform, therefore this is the location as seen from the Itential Platform host. | `/opt/itential/keys/mongo-rootCA.pem` |
+| platform_mongodb_root_ca_file_destination | String | Destination as referenced by itential user when connecting from itential host. This is ultimately stored in the mongo database to be read by Itential Platform, therefore this is the location as seen from the Itential Platform host. | ` /etc/pki/itential-platform/mongodb/ca-bundle.crt` |
 | platform_package_dependencies | List(String) | Required OS packages for install. | `glibc-common, openldap, openldap-clients, openssl, git` |
 | platform_python_base_dependencies | List(String) | Required python packages for install. | `pip, setuptools, wheel` |
 | platform_python_executable | String | The python executable locations. These will be symlinks to the appropriate executables in /usr/bin. | `/usr/bin/python{{ platform_python_version }}` |
