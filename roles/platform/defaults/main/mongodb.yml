@@ -24,7 +24,7 @@ platform_mongo_db_name: itential
 platform_mongo_url: mongodb://localhost:27017
 
 # Instruct the MongoDB driver to use TLS protocols when connecting to the database.
-platform_mongo_tls_enabled: true
+platform_mongo_tls_enabled: false
 
 # If true, disables the validation checks for TLS certificates on other servers in the cluster
 # and allows the use of invalid or self-signed certificates to connect.
