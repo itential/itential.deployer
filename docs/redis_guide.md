@@ -264,7 +264,6 @@ all:
 
     redis_sentinel:
       hosts:
-      hosts:
         <host4>:
           ansible_host: <addr4>
         <host5>:
