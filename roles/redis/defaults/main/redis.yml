@@ -47,6 +47,6 @@ redis_user_sentineladmin_password: admin
 redis_user_sentineluser_password: sentineluser
 redis_user_prometheus_password: prometheus
 
-# By default the prometheus user will be enabled. If this is set to false, the prometheus user
-# will not be created.
-redis_prometheus_user_enabled: true
+# By default the prometheus user will not exist. If set to true, the prometheus user will be created
+# with the appropriate ACL to allow the Redis exporter to work.
+redis_prometheus_user_enabled: false
