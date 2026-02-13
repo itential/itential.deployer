@@ -1,10 +1,6 @@
 # Gateway Roles
 
-The playbook and roles in this section install and configure the Itential Automation Gateway (IAG).
-There are currently two IAG-related roles:
-
-* `gateway` – Installs IAG and performs a base configuration.
-* `gateway_haproxy` – Installs and configures HAProxy.
+The playbook and role in this section install and configure the Itential Automation Gateway (IAG).
 
 ## Roles
 
@@ -14,10 +10,6 @@ The `gateway` role performs a base install of IAG including any OS packages requ
 the appropriate versions of Python, Pip, and Ansible. It creates the appropriate Linux users,
 directories, log files, and systemd services. It will start the automation-gateway service when
 complete.
-
-### Gateway HAProxy Role
-
-The `gateway_haproxy` role will install and configure an HAProxy instance as an HTTPS proxy for IAG.
 
 ## Variables
 
@@ -63,7 +55,7 @@ The following table lists the default variables located in `roles/gateway/defaul
 | `gateway_user` | String | The IAG Linux user. | `itential` |
 | `gateway_group` | String | The IAG Linux group. | `itential` |
 | `gateway_https` | Boolean | Flag to enable HTTPS. | `false` |
-| `gateway_https_port` | Integer | The IAG or HAProxy HTTPS listen port. | `8443` |
+| `gateway_https_port` | Integer | The IAG HTTPS listen port. | `8443` |
 | `gateway_ssl_copy_certs` | Boolean | Flag to enable copying the IAG SSL certificate. | `true` |
 | `gateway_ssl_dir` | String | The IAG SSL directory. | `{{ gateway_install_dir }}/conf/certs` |
 | `gateway_ssl_cert_src` | String | The SSL cert file. | `server.crt` |
@@ -75,49 +67,17 @@ The following table lists the default variables located in `roles/gateway/defaul
 | `gateway_tlsv1_2` | Boolean | Flag to enable TLS 1.2. | `false` |
 | `gateway_http_server_threads` | Integer | The number of http server threads for handling requests. | `{{ ansible_processor_cores * 4 }}` |
 
-## Gateway HAProxy Role Variables
-
-The variables in this section may be overridden in the inventory in the `gateway` group vars.
-
-The following table lists the default variables located in `roles/gateway_haproxy/defaults/main.yml`.
-
-| Variable | Type | Description | Default Value |
-| :------- | :--- | :---------- | :------------ |
-| `gateway_haproxy_enabled` | Boolean | Flag to enable HAProxy. | `false` |
-| `gateway_haproxy_conf_file` | String | The location of the HAProxy configuration file. | `/etc/haproxy/haproxy.cfg` |
-| `gateway_haproxy_ssl_cert_src` | String | The HAProxy SSL certificate file. | `server.pem` |
-| `gateway_haproxy_ssl_cert_dest` | String | The HAProxy SSL certificate destination. | `"/etc/ssl/certs{{ gateway_haproxy_ssl_cert_src }}"` |
-
 ## Configuring HTTPS
 
-The Gateway roles support two methods for configuring HTTPS - IAG Native HTTPS and HTTPS via
-HAProxy.  The Gateway roles do not generate SSL certificates.
-
-### IAG Native HTTPS
+The Gateway role supports configuring Native HTTPS. The Gateway role does not generate SSL certificates.
 
 To configure IAG Native HTTPS:
 
 * Required
   * Set `gateway_https` to `true` in the inventory.
   * Place the SSL certs and keys in either the playbook or role `files` directory.
-  * Do not configure `gateway_haproxy_enabled` in the inventory so HTTPS via HAProxy does not get installed.
 * Optional
   * Set SSL-related variables from `roles/gateway/defaults/main.yml` in the inventory.
-
-### HTTPS Via HAProxy
-
-To configure HTTPS via HAProxy:
-
-* Required
-  * Set `gateway_haproxy_enabled` to `true` in the inventory.
-  * Place the SSL certificate (PEM file) in either the playbook or role `files` directory.
-  * Do not configure `gateway_https` in the inventory so IAG Native HTTPS does not get configured.
-* Optional
-  * Set the `gateway_haproxy_ssl_cert_src` and `gateway_haproxy_ssl_cert_dest` variables in the inventory.
-
- Itential does not attempt to create any HTTPS certificates. These must be
- created independently. When they are included in the appropriate location
- the installer will ensure that they get uploaded to the correct location.
 
 ## Building the Inventory
 
@@ -156,45 +116,10 @@ all:
         gateway_https: true
 ```
 
-To configure HTTPS via HAProxy, add the `gateway_haproxy_enabled` flag to the `gateway` group and
-set it to `true`.
-
-## Example Inventory - IAG SSL Via HAProxy
-
-```yaml
-all:
-  children:
-    gateway:
-      hosts:
-        <host1>:
-          ansible_host: <addr1>
-      vars:
-        gateway_release: 4.3
-        gateway_whl_file: <wheel-file>
-        gateway_haproxy_enabled: true
-```
-
 ## Running the Playbook
 
-To execute all Gateway roles, run the `gateway` playbook:
+To execute the Gateway role, run the `gateway` playbook:
 
 ```bash
 ansible-playbook itential.deployer.gateway -i <inventory>
-```
-
-You can also run select IAG roles by using the following tags:
-
-* `gateway_install`
-* `gateway_haproxy`
-
-To execute only the `gateway` role, run the `itential.deployer.gateway` playbook with the `gateway_install` tag:
-
-```bash
-ansible-playbook itential.deployer.gateway -i <inventory> --tags gateway_install
-```
-
-To execute only the `gateway_haproxy` role, run the `itential.deployer.gateway` playbook with the `gateway_haproxy` tag:
-
-```bash
-ansible-playbook itential.deployer.gateway -i <inventory> --tags gateway_haproxy
 ```

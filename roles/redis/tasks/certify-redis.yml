@@ -1,0 +1,251 @@
+# Copyright (c) 2026, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+
+- name: Ensure report directory exists
+  ansible.builtin.file:
+    path: "{{ redis_certify_report_dir_remote }}"
+    state: directory
+    owner: "{{ redis_owner }}"
+    group: "{{ redis_group }}"
+    mode: "0755"
+
+- name: Set report filename
+  ansible.builtin.set_fact:
+    redis_certify_report_file: "{{ redis_certify_report_dir_remote }}/redis-report-{{ inventory_hostname }}.md"
+
+- name: Gather host information
+  itential.deployer.gather_host_information:
+  register: host_details
+
+- name: Check if Redis service exists
+  ansible.builtin.systemd:
+    name: redis
+  register: redis_service_check
+  failed_when: false
+  changed_when: false
+
+- name: Get Redis service status
+  ansible.builtin.systemd:
+    name: redis
+  register: redis_service_status
+  when: redis_service_check.status is defined
+
+- name: Check Redis process
+  ansible.builtin.shell: set -o pipefail && ps aux | grep redis-server | grep -v grep
+  register: redis_process
+  failed_when: false
+  changed_when: false
+
+- name: Test Redis connectivity
+  ansible.builtin.shell: |
+    set -o pipefail &&
+    {{ redis_bin_dir }}/redis-cli \
+      --user admin \
+      -p {{ redis_port }} \
+      -a "{{ redis_user_admin_password }}" \
+      --no-auth-warning \
+      PING
+  register: redis_ping
+  failed_when: false
+  changed_when: false
+
+- name: Get Redis version
+  ansible.builtin.shell: |
+    set -o pipefail && \
+    {{ redis_bin_dir }}/redis-server --version
+  register: redis_version
+  changed_when: false
+
+- name: Get Redis INFO
+  ansible.builtin.shell: |
+    set -o pipefail &&
+    {{ redis_bin_dir }}/redis-cli \
+      --user admin \
+      -p {{ redis_port }} \
+      -a "{{ redis_user_admin_password }}" \
+      --no-auth-warning \
+      INFO
+  register: redis_info
+  when: redis_ping.rc == 0
+  failed_when: false
+  changed_when: false
+
+- name: Get Redis configuration
+  ansible.builtin.shell: |
+    set -o pipefail &&
+    {{ redis_bin_dir }}/redis-cli \
+      --json \
+      --user admin \
+      -p {{ redis_port }} \
+      -a "{{ redis_user_admin_password }}" \
+      --no-auth-warning \
+      CONFIG GET '*'
+  register: redis_config
+  when: redis_ping.rc == 0
+  failed_when: false
+  changed_when: false
+
+- name: Check Redis configuration file
+  ansible.builtin.stat:
+    path: /etc/redis/redis.conf
+  register: redis_conf_file
+
+- name: Get Redis configuration file permissions
+  ansible.builtin.shell: set -o pipefail && ls -lh /etc/redis/redis.conf
+  register: redis_conf_permissions
+  when: redis_conf_file.stat.exists
+  changed_when: false
+
+- name: Check if Redis is using systemd
+  ansible.builtin.stat:
+    path: /usr/lib/systemd/system/redis.service
+  register: redis_systemd_file
+
+- name: Get listening ports
+  ansible.builtin.shell: set -o pipefail && netstat -tlnp | grep redis | ss -tlnp | grep redis
+  register: redis_ports
+  failed_when: false
+  changed_when: false
+
+- name: Check Redis log file
+  ansible.builtin.shell: |
+    set -o pipefail &&
+    if [ -f /var/log/redis/redis.log ]; then
+      tail -50 /var/log/redis/redis.log
+    else
+      echo "Log file not found in standard location"
+    fi
+  register: redis_logs
+  changed_when: false
+
+- name: Parse Redis INFO for key metrics
+  ansible.builtin.set_fact:
+    redis_metrics:
+      version: "{{ redis_info.stdout | regex_search('redis_version:([^\\r\\n]+)', '\\1') }}"
+      os: "{{ redis_info.stdout | regex_search('os:([^\\r\\n]+)', '\\1') }}"
+      executable: "{{ redis_info.stdout | regex_search('executable:([^\\r\\n]+)', '\\1') }}"
+      config_file: "{{ redis_info.stdout | regex_search('config_file:([^\\r\\n]+)', '\\1') }}"
+      port: "{{ redis_info.stdout | regex_search('tcp_port:([^\\r\\n]+)', '\\1') }}"
+      role: "{{ redis_info.stdout | regex_search('role:([^\\r\\n]+)', '\\1') }}"
+      mode: "{{ redis_info.stdout | regex_search('redis_mode:([^\\r\\n]+)', '\\1') }}"
+      slaves: "{{ redis_info.stdout | regex_search('connected_slaves:([^\\r\\n]+)', '\\1') }}"
+      master_host: "{{ redis_info.stdout | regex_search('master_host:([^\\r\\n]+)', '\\1') }}"
+      master_port: "{{ redis_info.stdout | regex_search('master_port:([^\\r\\n]+)', '\\1') }}"
+      master_link: "{{ redis_info.stdout | regex_search('master_link_status:([^\\r\\n]+)', '\\1') }}"
+      clients: "{{ redis_info.stdout | regex_search('connected_clients:([^\\r\\n]+)', '\\1') }}"
+      bind_address: "{{ redis_config.results[2].stdout_lines[1] | default(['0.0.0.0'], true) }}"
+      users: "{{ redis_config.results[0].stdout_lines | default(['N/A'], true) }}"
+  when:
+    - redis_info.rc is defined
+    - redis_info.rc == 0
+
+- name: Get list of configured Redis users
+  ansible.builtin.shell: |
+    set -o pipefail &&
+    {{ redis_bin_dir }}/redis-cli \
+      --json \
+      --user admin \
+      -p {{ redis_port }} \
+      -a "{{ redis_user_admin_password }}" \
+      --no-auth-warning \
+      ACL LIST
+  when:
+    - redis_info.rc is defined
+    - redis_info.rc == 0
+  register: redis_acl_list
+  no_log: false
+  failed_when: false
+  changed_when: false
+
+- name: Parse Redis ACL list into structured format
+  ansible.builtin.set_fact:
+    redis_users: >-
+      {%- set result = [] -%}
+      {%- for acl_entry in (redis_acl_list.stdout | from_json) -%}
+        {%- set parts = acl_entry.split() -%}
+        {%- if parts | length >= 3 and parts[0] == 'user' -%}
+          {%- set user_obj = {'user': parts[1], 'enabled': (parts[2] == 'on')} -%}
+          {%- set _ = result.append(user_obj) -%}
+        {%- endif -%}
+      {%- endfor -%}
+      {{ result }}
+  when: redis_info.rc is defined and redis_info.rc == 0
+
+- name: Confirm "itential" user login
+  ansible.builtin.shell: |
+    set -o pipefail &&
+    {{ redis_bin_dir }}/redis-cli \
+      --user itential \
+      -p {{ redis_port }} \
+      -a "{{ redis_user_itential_password }}" \
+      --no-auth-warning \
+      PING
+  register: redis_itential_user_ping
+  failed_when: false
+  changed_when: false
+
+- name: Confirm "repluser" user login
+  ansible.builtin.shell: |
+    set -o pipefail &&
+    {{ redis_bin_dir }}/redis-cli \
+      --user repluser \
+      -p {{ redis_port }} \
+      -a "{{ redis_user_repluser_password }}" \
+      --no-auth-warning \
+      PING
+  register: redis_repl_user_ping
+  failed_when: false
+  changed_when: false
+
+- name: Confirm "sentineluser" user login
+  ansible.builtin.shell: |
+    set -o pipefail &&
+    {{ redis_bin_dir }}/redis-cli \
+      --user sentineluser \
+      -p {{ redis_port }} \
+      -a "{{ redis_user_sentineluser_password }}" \
+      --no-auth-warning \
+      PING
+  register: redis_sentineluser_user_ping
+  failed_when: false
+  changed_when: false
+
+- name: Confirm "prometheus" user login
+  ansible.builtin.shell: |
+    set -o pipefail &&
+    {{ redis_bin_dir }}/redis-cli \
+      --user prometheus \
+      -p {{ redis_port }} \
+      -a "{{ redis_user_prometheus_password }}" \
+      --no-auth-warning \
+      PING
+  register: redis_prometheus_user_ping
+  failed_when: false
+  changed_when: false
+
+# =========================================================================
+# Generate the report and copy to control node
+# =========================================================================
+- name: Generate validation report
+  ansible.builtin.template:
+    backup: true
+    dest: "{{ redis_certify_report_file }}"
+    group: "{{ redis_group }}"
+    mode: "0665"
+    owner: "{{ redis_owner }}"
+    src: redis-validation-report.md.j2
+
+- name: Copy validation report to the control node
+  ansible.builtin.fetch:
+    dest: "{{ redis_certify_report_dir_local }}/"
+    fail_on_missing: false
+    flat: true
+    src: "{{ redis_certify_report_file }}"
+
+- name: Display report summary
+  ansible.builtin.debug:
+    msg:
+      - "Redis validation complete for {{ inventory_hostname }}"
+      - "Overall Status: {{ 'PASSED ✓' if (redis_ping.rc == 0 and redis_process.rc == 0) else 'FAILED ✗' }}"
+      - "Report saved to: {{ redis_certify_report_file }} on both the remote and control nodes."

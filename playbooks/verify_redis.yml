@@ -1,0 +1,27 @@
+# Copyright (c) 2026, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+
+# run this only for redis_master and redis_replica device group
+- name: Run Redis Verification Tasks
+  hosts: redis_master:redis_replica
+  gather_facts: true
+  become: true
+  tasks:
+    - name: Verify Redis Installation  # noqa run-once
+      ansible.builtin.import_role:
+        name: itential.deployer.redis
+        tasks_from: verify-redis
+      tags: verify_redis
+
+# run this only for redis_sentinel device group
+- name: Run Sentinel Verification Tasks
+  hosts: redis_sentinel
+  gather_facts: true
+  become: true
+  tasks:
+    - name: Verify Sentinel Installation  # noqa run-once
+      ansible.builtin.import_role:
+        name: itential.deployer.redis
+        tasks_from: verify-sentinel
+      tags: verify_sentinel

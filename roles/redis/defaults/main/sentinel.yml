@@ -19,3 +19,7 @@ redis_sentinel_bind: 127.0.0.1 {{ ansible_default_ipv4.address }}
 # Auto-calculate quorum based on sentinel count (recommended)
 # Set to explicit number to override (must be <= number of sentinels)
 redis_sentinel_quorum: auto
+
+# Default location for the certification report files
+redis_sentinel_certify_report_dir_remote: /var/tmp/itential-reports/sentinel
+redis_sentinel_certify_report_dir_local: /tmp/itential-reports/sentinel

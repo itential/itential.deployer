@@ -1,0 +1,12 @@
+# Copyright (c) 2026, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+
+- name: Verify Redis Installation
+  import_playbook: itential.deployer.verify_redis
+
+- name: Verify MongoDB Installation
+  import_playbook: itential.deployer.verify_mongodb
+
+- name: Verify Platform Installation
+  import_playbook: itential.deployer.verify_platform
