@@ -69,6 +69,17 @@
             mongodb_package_dependencies: "{{ mongodb_package_dependencies_default[ansible_distribution_major_version] }}"
           when: mongodb_package_dependencies is not defined
 
+    - name: Validate mongodb_pki_src_dir is defined
+      ansible.builtin.assert:
+        that:
+          - mongodb_pki_src_dir is defined
+          - mongodb_pki_src_dir | length > 0
+        fail_msg: |
+          mongodb_pki_src_dir is not defined or is empty.
+          Set mongodb_pki_src_dir in your inventory when mongodb_tls_copy_certs is enabled.
+        success_msg: "mongodb_pki_src_dir is properly configured: {{ mongodb_pki_src_dir }}"
+      when: mongodb_tls_copy_certs | bool
+
     - name: Print MongoDB installation details
       ansible.builtin.debug:
         msg:

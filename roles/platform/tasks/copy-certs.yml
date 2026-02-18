@@ -76,7 +76,7 @@
       ansible.builtin.copy:
         src: "{{ platform_keyfile_source }}"
         dest: "{{ platform_webserver_https_key }}"
-        mode: "{{ platform_https_key_mode }}"
+        mode: "0640"
         owner: "{{ platform_pki_private_owner }}"
         group: "{{ platform_pki_private_group }}"
       notify: restart itential-platform
@@ -85,9 +85,9 @@
       ansible.builtin.copy:
         src: "{{ platform_certfile_source }}"
         dest: "{{ platform_webserver_https_cert }}"
-        mode: "{{ platform_https_cert_mode }}"
-        owner: "{{ platform_pki_cert_owner }}"
-        group: "{{ platform_pki_cert_group }}"
+        mode: "0644"
+        owner: "{{ platform_user }}"
+        group: "{{ platform_group }}"
       notify: restart itential-platform
 
 # ============================================================================
@@ -98,9 +98,9 @@
   ansible.builtin.copy:
     src: "{{ platform_mongodb_root_ca_file_source }}"
     dest: "{{ platform_mongodb_root_ca_file_destination }}"
-    mode: "{{ platform_mongodb_ca_mode }}"
-    owner: "{{ platform_pki_cert_owner }}"
-    group: "{{ platform_pki_cert_group }}"
+    mode: "0644"
+    owner: "{{ platform_user }}"
+    group: "{{ platform_group }}"
   when:
     - platform_mongo_tls_enabled | bool
     - platform_mongodb_root_ca_file_source is defined

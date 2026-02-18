@@ -59,16 +59,6 @@ gateway_https_key_source: "{{ gateway_pki_src_dir }}/{{ gateway_https_key_filena
 gateway_https_ca_source: "{{ gateway_pki_src_dir }}/{{ gateway_https_ca_filename }}"
 
 # ============================================================================
-# File Ownership - Customize per environment
-# ============================================================================
-
-# Owner for PKI directories and files
-gateway_pki_owner: "{{ gateway_user }}"
-
-# Group for PKI directories and files
-gateway_pki_group: "{{ gateway_group }}"
-
-# ============================================================================
 # File Permissions - Customize per security requirements
 # ============================================================================
 
@@ -81,21 +71,3 @@ gateway_pki_subdir_mode: "0750"
 # Private directory permissions
 gateway_pki_private_dir_mode: "0700"
 
-# HTTPS certificate permissions
-gateway_https_cert_mode: "0644"
-
-# HTTPS private key permissions
-gateway_https_key_mode: "0600"
-
-# HTTPS CA bundle permissions
-gateway_https_ca_mode: "0644"
-
-# ============================================================================
-# Backward Compatibility - Legacy Variable Names
-# These maintain compatibility with existing templates
-# ============================================================================
-
-# Legacy variables for templates (point to new paths)
-gateway_ssl_cert_dest: "{{ gateway_https_cert_file }}"
-gateway_ssl_key_dest: "{{ gateway_https_key_file }}"
-gateway_ssl_rootca_dest: "{{ gateway_https_ca_file }}"

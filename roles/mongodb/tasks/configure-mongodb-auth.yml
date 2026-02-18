@@ -14,16 +14,16 @@
       ansible.builtin.file:
         state: directory
         path: "{{ mongodb_pki_base_dir }}"
-        owner: "{{ mongodb_pki_owner }}"
-        group: "{{ mongodb_pki_group }}"
+        owner: "{{ mongodb_owner }}"
+        group: "{{ mongodb_group }}"
         mode: "{{ mongodb_pki_base_dir_mode }}"
 
     - name: Ensure PKI private directory exists for keyfile
       ansible.builtin.file:
         state: directory
         path: "{{ mongodb_pki_private_dir }}"
-        owner: "{{ mongodb_pki_owner }}"
-        group: "{{ mongodb_pki_group }}"
+        owner: "{{ mongodb_owner }}"
+        group: "{{ mongodb_group }}"
         mode: "{{ mongodb_pki_private_dir_mode }}"
 
     - name: Check if replica set key exists on the primary node
@@ -56,17 +56,17 @@
       ansible.builtin.copy:
         dest: "{{ mongodb_auth_keyfile_destination }}"
         content: "{{ keyfile.content | b64decode }}"
-        owner: "{{ mongodb_pki_owner }}"
-        group: "{{ mongodb_pki_group }}"
-        mode: "{{ mongodb_replica_keyfile_mode }}"
+        owner: "{{ mongodb_owner }}"
+        group: "{{ mongodb_group }}"
+        mode: "0400"
       when: inventory_hostname != groups['mongodb'][0]
 
     - name: Set the key file ownership and permissions
       ansible.builtin.file:
         path: "{{ mongodb_auth_keyfile_destination }}"
-        owner: "{{ mongodb_pki_owner }}"
-        group: "{{ mongodb_pki_group }}"
-        mode: "{{ mongodb_replica_keyfile_mode }}"
+        owner: "{{ mongodb_owner }}"
+        group: "{{ mongodb_group }}"
+        mode: "0400"
 
 # Execute the template to apply changes to the mongo.conf for auth
 - name: Create MongoDB config file (auth)

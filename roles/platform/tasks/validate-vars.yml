@@ -148,3 +148,25 @@
       ansible.builtin.debug:
         msg: "Offline install using packages from {{ platform_offline_control_node_root }}"
       when: offline_install_enabled | bool
+
+- name: Validate platform_https_pki_src_dir is defined
+  ansible.builtin.assert:
+    that:
+      - platform_https_pki_src_dir is defined
+      - platform_https_pki_src_dir | length > 0
+    fail_msg: |
+        platform_https_pki_src_dir is not defined or is empty.
+        Set platform_https_pki_src_dir in your inventory when platform_webserver_https_enabled is enabled.
+    success_msg: "platform_https_pki_src_dir is properly configured: {{ platform_https_pki_src_dir }}"
+  when: platform_webserver_https_enabled | bool
+
+- name: Validate platform_mongodb_pki_src_dir is defined
+  ansible.builtin.assert:
+    that:
+      - platform_mongodb_pki_src_dir is defined
+      - platform_mongodb_pki_src_dir | length > 0
+    fail_msg: |
+      platform_mongodb_pki_src_dir is not defined or is empty.
+      Set platform_mongodb_pki_src_dir in your inventory when platform_mongo_tls_enabled is enabled.
+    success_msg: "platform_mongodb_pki_src_dir is properly configured: {{ platform_mongodb_pki_src_dir }}"
+  when: platform_mongo_tls_enabled | bool

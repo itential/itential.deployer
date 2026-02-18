@@ -5,8 +5,8 @@
   ansible.builtin.file:
     state: directory
     path: "{{ mongodb_pki_base_dir }}"
-    owner: "{{ mongodb_pki_owner }}"
-    group: "{{ mongodb_pki_group }}"
+    owner: "{{ mongodb_owner }}"
+    group: "{{ mongodb_group }}"
     mode: "{{ mongodb_pki_base_dir_mode }}"
   tags:
     - mongodb
@@ -17,8 +17,8 @@
   ansible.builtin.file:
     state: directory
     path: "{{ mongodb_pki_private_dir }}"
-    owner: "{{ mongodb_pki_owner }}"
-    group: "{{ mongodb_pki_group }}"
+    owner: "{{ mongodb_owner }}"
+    group: "{{ mongodb_group }}"
     mode: "{{ mongodb_pki_private_dir_mode }}"
   tags:
     - mongodb
@@ -29,9 +29,9 @@
   ansible.builtin.copy:
     src: "{{ mongodb_cert_keyfile_source }}"
     dest: "{{ mongodb_cert_keyfile_destination }}"
-    mode: "{{ mongodb_tls_server_cert_mode }}"
-    group: "{{ mongodb_pki_group }}"
-    owner: "{{ mongodb_pki_owner }}"
+    mode: "0640"
+    group: "{{ mongodb_group }}"
+    owner: "{{ mongodb_owner }}"
   notify: restart mongod
   tags:
     - mongodb
@@ -42,9 +42,9 @@
   ansible.builtin.copy:
     src: "{{ mongodb_root_ca_file_source }}"
     dest: "{{ mongodb_root_ca_file_destination }}"
-    mode: "{{ mongodb_tls_ca_cert_mode }}"
-    group: "{{ mongodb_pki_group }}"
-    owner: "{{ mongodb_pki_owner }}"
+    mode: "0644"
+    group: "{{ mongodb_group }}"
+    owner: "{{ mongodb_owner }}"
   notify: restart mongod
   tags:
     - mongodb

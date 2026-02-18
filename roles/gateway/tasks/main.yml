@@ -97,9 +97,9 @@
         state: directory
       when: gateway_enable_python_venv | bool
 
-    - name: Configure Gateway HTTPS
+    - name: Prepare Gateway PKI infrastructure
       ansible.builtin.include_tasks: configure-gateway-https.yml
-      when: gateway_https | bool
+      when: gateway_pki_copy_certs | bool
       tags:
         - gateway
         - gateway_certificates
@@ -310,7 +310,7 @@
         zone: public
         immediate: true
       when:
-        - not (gateway_https | bool)
+        - not (gateway_https_enabled | bool)
         - ansible_facts.services["firewalld.service"] is defined
         - ansible_facts.services["firewalld.service"].state == "running"
         - ansible_facts.services["firewalld.service"].status == "enabled"
@@ -323,7 +323,7 @@
         zone: public
         immediate: true
       when:
-        - gateway_https | bool
+        - gateway_https_enabled | bool
         - ansible_facts.services["firewalld.service"] is defined
         - ansible_facts.services["firewalld.service"].state == "running"
         - ansible_facts.services["firewalld.service"].status == "enabled"

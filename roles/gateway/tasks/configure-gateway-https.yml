@@ -1,88 +1,38 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Create Gateway PKI base directory
-  ansible.builtin.file:
-    path: "{{ gateway_pki_base_dir }}"
-    state: directory
-    owner: "{{ gateway_pki_owner }}"
-    group: "{{ gateway_pki_group }}"
-    mode: "{{ gateway_pki_base_dir_mode }}"
+# This task file prepares Gateway PKI infrastructure
+# It is independent of whether HTTPS is enabled in Gateway configuration
+- name: Prepare Gateway PKI infrastructure
   tags:
     - gateway
     - gateway_certificates
     - certificates
+  block:
+    - name: Create Gateway PKI base directory
+      ansible.builtin.file:
+        path: "{{ gateway_pki_base_dir }}"
+        state: directory
+        owner: "{{ gateway_user }}"
+        group: "{{ gateway_group }}"
+        mode: "{{ gateway_pki_base_dir_mode }}"
 
-- name: Create Gateway PKI subdirectories
-  ansible.builtin.file:
-    path: "{{ item }}"
-    state: directory
-    owner: "{{ gateway_pki_owner }}"
-    group: "{{ gateway_pki_group }}"
-    mode: "{{ gateway_pki_subdir_mode }}"
-  loop:
-    - "{{ gateway_pki_https_dir }}"
-  tags:
-    - gateway
-    - gateway_certificates
-    - certificates
+    - name: Create Gateway PKI https directory
+      ansible.builtin.file:
+        path: "{{ gateway_pki_https_dir }}"
+        state: directory
+        owner: "{{ gateway_user }}"
+        group: "{{ gateway_group }}"
+        mode: "{{ gateway_pki_subdir_mode }}"
 
-- name: Create Gateway private directory
-  ansible.builtin.file:
-    path: "{{ gateway_pki_private_dir }}"
-    state: directory
-    owner: "{{ gateway_pki_owner }}"
-    group: "{{ gateway_pki_group }}"
-    mode: "{{ gateway_pki_private_dir_mode }}"
-  tags:
-    - gateway
-    - gateway_certificates
-    - certificates
+    - name: Create Gateway PKI private directory
+      ansible.builtin.file:
+        path: "{{ gateway_pki_private_dir }}"
+        state: directory
+        owner: "{{ gateway_user }}"
+        group: "{{ gateway_group }}"
+        mode: "{{ gateway_pki_private_dir_mode }}"
 
-- name: Copy Gateway HTTPS certificate
-  ansible.builtin.copy:
-    src: "{{ gateway_https_cert_source }}"
-    dest: "{{ gateway_https_cert_file }}"
-    owner: "{{ gateway_pki_owner }}"
-    group: "{{ gateway_pki_group }}"
-    mode: "{{ gateway_https_cert_mode }}"
-  when:
-    - gateway_ssl_copy_certs | bool
-    - gateway_https_cert_source | length > 0
-  notify: restart automation-gateway
-  tags:
-    - gateway
-    - gateway_certificates
-    - certificates
-
-- name: Copy Gateway HTTPS private key
-  ansible.builtin.copy:
-    src: "{{ gateway_https_key_source }}"
-    dest: "{{ gateway_https_key_file }}"
-    owner: "{{ gateway_pki_owner }}"
-    group: "{{ gateway_pki_group }}"
-    mode: "{{ gateway_https_key_mode }}"
-  when:
-    - gateway_ssl_copy_certs | bool
-    - gateway_https_key_source | length > 0
-  notify: restart automation-gateway
-  tags:
-    - gateway
-    - gateway_certificates
-    - certificates
-
-- name: Copy Gateway CA bundle
-  ansible.builtin.copy:
-    src: "{{ gateway_https_ca_source }}"
-    dest: "{{ gateway_https_ca_file }}"
-    owner: "{{ gateway_pki_owner }}"
-    group: "{{ gateway_pki_group }}"
-    mode: "{{ gateway_https_ca_mode }}"
-  when:
-    - gateway_ssl_copy_certs | bool
-    - gateway_https_ca_source | length > 0
-  notify: restart automation-gateway
-  tags:
-    - gateway
-    - gateway_certificates
-    - certificates
+    - name: Copy Gateway certificates
+      ansible.builtin.include_tasks:
+        file: copy-certs.yml

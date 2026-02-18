@@ -48,22 +48,11 @@ mongodb_auth_keyfile_destination: "{{ mongodb_pki_private_dir }}/{{ mongodb_repl
 # Set this in your inventory to point to your certificate directory
 mongodb_pki_src_dir: ""
 
-mongodb_ssl_root_dir: "{{ mongodb_pki_base_dir }}"
 # Source paths - built from source directory + filename
 # These auto-build from mongodb_pki_src_dir, but can be overridden individually
 mongodb_cert_keyfile_source: "{{ mongodb_pki_src_dir }}/{{ mongodb_tls_server_cert_filename }}"
 mongodb_root_ca_file_source: "{{ mongodb_pki_src_dir }}/{{ mongodb_tls_ca_cert_filename }}"
 mongodb_auth_keyfile_source: "{{ mongodb_pki_src_dir }}/{{ mongodb_replica_keyfile_filename }}"
-
-# ============================================================================
-# File Ownership - Customize per environment
-# ============================================================================
-
-# Owner for PKI directories and files
-mongodb_pki_owner: "{{ mongodb_owner }}"
-
-# Group for PKI directories and files
-mongodb_pki_group: "{{ mongodb_group }}"
 
 # ============================================================================
 # File Permissions - Customize per security requirements
@@ -74,12 +63,3 @@ mongodb_pki_base_dir_mode: "0750"
 
 # Private subdirectory permissions
 mongodb_pki_private_dir_mode: "0700"
-
-# TLS server certificate permissions
-mongodb_tls_server_cert_mode: "0640"
-
-# CA certificate permissions
-mongodb_tls_ca_cert_mode: "0644"
-
-# Replica keyfile permissions
-mongodb_replica_keyfile_mode: "0400"

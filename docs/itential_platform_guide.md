@@ -271,8 +271,8 @@ located in `roles/platform/defaults/main/platform.yml`.
 | platform_https_key_filename | String | HTTPS private key filename. | `{{ inventory_hostname }}.key` |
 | platform_https_ca_filename | String | HTTPS CA bundle filename. | `ca-bundle.crt` |
 | platform_mongodb_ca_filename | String | MongoDB client CA bundle filename. | `ca-bundle.crt` |
-| platform_https_pki_src_dir | String | Source directory for HTTPS certificates. | (set in inventory) |
-| platform_mongodb_pki_src_dir | String | Source directory for MongoDB client certificates. | (set in inventory) |
+| platform_https_pki_src_dir | String | Source directory for HTTPS certificates. | MUST be set in inventory |
+| platform_mongodb_pki_src_dir | String | Source directory for MongoDB client certificates. | MUST be set in inventory |
 | platform_itential_home_dir | String | The Itential Platform itential user home directory. | `/home/itential` |
 | platform_mongodb_root_ca_file_destination | String | Destination as referenced by itential user when connecting from itential host. This is ultimately stored in the mongo database to be read by Itential Platform, therefore this is the location as seen from the Itential Platform host. | ` /etc/pki/itential-platform/mongodb/ca-bundle.crt` |
 | platform_package_dependencies | List(String) | Required OS packages for install. | `glibc-common, openldap, openldap-clients, openssl, git` |
@@ -493,11 +493,11 @@ Platform requires HTTPS certificates for the web server and optionally MongoDB c
 
 Organize certificates per server on the Ansible controller:
 certificates/
-├── platform
-│   ├── ca-bundle.crt
-│   ├── ip-10-222-1-169.ec2.internal.crt
-│   ├── ip-10-222-1-64.ec2.internal.crt
-│   ├── ip-10-222-1-64.ec2.internal.key
+├─ platform
+│   ├─ ca-bundle.crt
+│   ├─ ip-10-222-1-169.ec2.internal.crt
+│   ├─ ip-10-222-1-64.ec2.internal.crt
+│   ├─ ip-10-222-1-64.ec2.internal.key
 
 #### Deployed Locations
 

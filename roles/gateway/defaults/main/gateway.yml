@@ -37,12 +37,16 @@ gateway_group: itential
 gateway_user_home_dir: "/home/{{ gateway_user }}"
 gateway_user_shell_rc_file: "{{ gateway_user_home_dir }}/.bashrc"
 
-# Default HTTPS/SSL settings
-gateway_https: true
+# Flag to enable HTTPS in Gateway configuration
+# When true: Gateway listens on HTTPS port with TLS enabled
+# When false: Gateway listens on HTTP port
+gateway_https_enabled: false
 gateway_https_port: 8443
 
-# Flag to enable copying the Gateway SSL certificates
-gateway_ssl_copy_certs: true
+# Flag to manage Gateway PKI infrastructure
+# When true: Creates PKI directories and copies certificate files
+# When false: Assumes certificates are managed externally
+gateway_pki_copy_certs: true
 
 gateway_tlsv1_2: false
 

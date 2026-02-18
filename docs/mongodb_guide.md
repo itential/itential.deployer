@@ -96,7 +96,7 @@ The following table contains the most commonly overridden variables.
 | `mongodb_tls_server_cert_filename` | String | Server certificate filename (combined cert+key). | `{{ inventory_hostname }}.pem` |
 | `mongodb_tls_ca_cert_filename` | String | CA certificate bundle filename. | `ca-bundle.crt` |
 | `mongodb_replica_keyfile_filename` | String | Replica set authentication keyfile. | `replica.key` |
-| `mongodb_pki_src_dir` | String | Source directory for certificates (on Ansible controller). | (set in inventory) |
+| `mongodb_pki_src_dir` | String | Source directory for certificates (on Ansible controller). | MUST be set in inventory |
 | `mongodb_user_admin_password` | String | The MongoDB admin user password. | `admin` |
 | `mongodb_user_itential_password` | String | The MongoDB itential user password. | `itential` |
 
@@ -164,12 +164,12 @@ Each MongoDB server requires:
 
 Certificates should be organized per server on the Ansible controller:
 certificates/
-├── mongodb
-│   ├── ca-bundle.crt
-│   ├── hostname1.pem
-│   ├── hostname2.pem
-│   ├── hostname3.pem
-│   ├── replica.key
+├─ mongodb
+│   ├─ ca-bundle.crt
+│   ├─ hostname1.pem
+│   ├─ hostname2.pem
+│   ├─ hostname3.pem
+│   ├─ replica.key
 
 ### Deployed Certificate Locations
 

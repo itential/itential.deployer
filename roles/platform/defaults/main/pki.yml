@@ -72,10 +72,10 @@ platform_mongo_tls_ca_file: "{{ platform_mongodb_root_ca_file_destination }}"
 # ============================================================================
 
 # Source directory for HTTPS certificates (on Ansible controller)
-platform_https_pki_src_dir: "/Users/ananth.munagala/deployer_checkins/PE-1386/certificates/platform"
+platform_https_pki_src_dir: ""
 
 # Source directory for MongoDB certificates (on Ansible controller)
-platform_mongodb_pki_src_dir: "/Users/ananth.munagala/deployer_checkins/PE-1386/certificates/platform"
+platform_mongodb_pki_src_dir: ""
 
 # ============================================================================
 # Source File Paths - Built from source directory + filename
@@ -97,19 +97,13 @@ platform_mongodb_root_ca_file_source: "{{ platform_mongodb_pki_src_dir }}/{{ pla
 platform_pki_base_owner: root
 
 # Group for PKI base directory
-platform_pki_base_group: itential
+platform_pki_base_group: "{{ platform_group }}"
 
 # Owner for private key files
 platform_pki_private_owner: root
 
 # Group for private key files
-platform_pki_private_group: itential
-
-# Owner for certificate files
-platform_pki_cert_owner: "{{ platform_user }}"
-
-# Group for certificate files
-platform_pki_cert_group: "{{ platform_group }}"
+platform_pki_private_group: "{{ platform_group }}"
 
 # ============================================================================
 # File Permissions - Customize per security requirements
@@ -123,21 +117,3 @@ platform_pki_subdir_mode: "0750"
 
 # Private directory permissions
 platform_pki_private_dir_mode: "0750"
-
-# HTTPS certificate permissions
-platform_https_cert_mode: "0644"
-
-# HTTPS private key permissions
-platform_https_key_mode: "0640"
-
-# HTTPS CA bundle permissions
-platform_https_ca_mode: "0644"
-
-# MongoDB CA certificate permissions
-platform_mongodb_ca_mode: "0644"
-
-# MongoDB client certificate permissions
-platform_mongodb_client_cert_mode: "0640"
-
-# MongoDB client private key permissions
-platform_mongodb_client_key_mode: "0600"

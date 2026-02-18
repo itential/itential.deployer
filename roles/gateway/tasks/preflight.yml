@@ -56,3 +56,25 @@
   when:
     - preflight_enforce_checks is defined
     - preflight_enforce_checks
+
+- name: Warn if HTTPS enabled without certificate management
+  ansible.builtin.debug:
+    msg: |
+      WARNING: Potential misconfiguration detected
+      
+      gateway_https_enabled: true
+      gateway_pki_copy_certs: false
+      
+      Gateway expects certificates at:
+        - {{ gateway_https_cert_file }}
+        - {{ gateway_https_key_file }}
+        - {{ gateway_https_ca_file }}
+      
+      If these files don't exist, Gateway will fail to start.
+      
+      To fix:
+        - Set gateway_pki_copy_certs: true, OR
+        - Manually ensure certificates exist at above paths
+  when:
+    - gateway_https_enabled | bool
+    - not gateway_pki_copy_certs | bool
