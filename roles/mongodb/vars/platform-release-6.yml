@@ -50,3 +50,17 @@ mongodb_gpgkey_url_default:
     - https://www.mongodb.org/static/pgp/server-{{ mongodb_version }}.asc
   "2023":
     - https://pgp.mongodb.com/server-{{ mongodb_version }}.asc
+
+mongodb_hw_specs:
+  "dev":
+    "cpu_count": 8
+    "ram_size": 64
+    "disk_size": 1000
+  "test":
+    "cpu_count": 16
+    "ram_size": 128
+    "disk_size": 1000
+  "production":
+    "cpu_count": 16
+    "ram_size": 128
+    "disk_size": 1000

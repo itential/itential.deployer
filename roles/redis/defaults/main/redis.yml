@@ -47,6 +47,10 @@ redis_user_sentineladmin_password: admin
 redis_user_sentineluser_password: sentineluser
 redis_user_prometheus_password: prometheus
 
+# Default location for the certification report files
+redis_certify_report_dir_remote: /var/tmp/itential-reports/redis
+redis_certify_report_dir_local: /tmp/itential-reports/redis
+
 # By default the prometheus user will be enabled. If this is set to false, the prometheus user
 # will not be created.
 redis_prometheus_user_enabled: true
