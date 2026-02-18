@@ -680,7 +680,9 @@ repl-backlog-size 536870912
 # Redis Sentinel for promotion.
 #
 # By default the priority is 100.
-replica-priority 100
+{% if redis_is_data_node %}
+replica-priority {{ redis_replica_priority_final | default(100) }}
+{% endif %}
 
 # -----------------------------------------------------------------------------
 # By default, Redis Sentinel includes all replicas in its reports. A replica
