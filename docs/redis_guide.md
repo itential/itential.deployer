@@ -117,6 +117,7 @@ The following tables lists the default variables located in `roles/redis/default
 | `redis_user_sentineladmin_password` | String | The Redis Sentinel admin user's default password | `admin` |
 | `redis_user_sentineluser_password` | String | The Redis Sentinel default user's default password | `sentinel` |
 | `redis_user_prometheus_password` | String | The Redis prometheus user's default password | `prometheus` |
+| `redis_prometheus_user_enabled` | Boolean | Flag to enable the prometheus user | `false` |
 
 ### Replication Variables
 
