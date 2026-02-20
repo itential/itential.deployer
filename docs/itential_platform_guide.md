@@ -492,8 +492,8 @@ Platform requires HTTPS certificates for the web server and optionally MongoDB c
 #### Certificate Organization
 
 Organize certificates per server on the Ansible controller:
-certificates/
-├─ platform
+
+├─ <path/to/local/platform/certs>/
 │   ├─ ca-bundle.crt
 │   ├─ ip-10-222-1-169.ec2.internal.crt
 │   ├─ ip-10-222-1-64.ec2.internal.crt

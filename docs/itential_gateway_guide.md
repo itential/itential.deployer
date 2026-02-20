@@ -102,7 +102,7 @@ Deploy Gateway with HTTPS enabled and automated certificate management.
 ```yaml
 gateway_pki_copy_certs: true        # Prepare infrastructure and copy certificates
 gateway_https_enabled: true         # Enable HTTPS in Gateway
-gateway_pki_src_dir: "<path/to/local/certs>/certificates/gateway"
+gateway_pki_src_dir: "<path/to/local/gateway/certs>"
 ```
 
 **Use Case 2: Prepare Certificates Only (Staged Deployment)**
@@ -112,7 +112,7 @@ Prepare PKI infrastructure and deploy certificates without enabling HTTPS. Usefu
 ```yaml
 gateway_pki_copy_certs: true        # Prepare infrastructure and copy certificates
 gateway_https_enabled: false        # Keep HTTPS disabled for now
-gateway_pki_src_dir: "<path/to/local/certs>/certificates/gateway"
+gateway_pki_src_dir: "<path/to/local/gateway/certs>"
 ```
 
 Gateway will run on HTTP. Enable HTTPS later by setting `gateway_https_enabled: true` and re-running the playbook.
@@ -140,13 +140,14 @@ gateway_https_enabled: true         # Enable HTTPS
 * `/etc/pki/automation-gateway/private/{{ inventory_hostname }}.key`
 * `/etc/pki/automation-gateway/https/ca-bundle.crt`
 
+**Note:** All these paths are configurable in `roles/gateway/defaults/main/pki.yml` file or in inventory file
+
 ### Certificate Organization
 
 The deployer expects certificates organized in a flat directory structure:
 
 ```
-certificates/
-└─ gateway/
+<path/to/local/gateway/certs>/
     ├─ gateway-server1.example.com.crt
     ├─ gateway-server1.example.com.key
     ├─ gateway-server2.example.com.crt
@@ -208,13 +209,12 @@ all:
         gateway_whl_file: automation_gateway-4.3.0-py3-none-any.whl
         gateway_https_enabled: true
         gateway_pki_copy_certs: true
-        gateway_pki_src_dir: "<path/to/local/certs>/certificates/gateway"
+        gateway_pki_src_dir: "<path/to/local/gateway/certs>"
 ```
 
 Certificate directory structure:
 ```
-certificates/
-└─ gateway/
+<path/to/local/gateway/certs>/
     ├─ gateway-server1.example.com.crt
     ├─ gateway-server1.example.com.key
     └─ ca-bundle.crt
@@ -238,13 +238,12 @@ all:
         gateway_whl_file: automation_gateway-4.3.0-py3-none-any.whl
         gateway_https_enabled: true
         gateway_pki_copy_certs: true
-        gateway_pki_src_dir: "<path/to/local/certs>/certificates/gateway"
+        gateway_pki_src_dir: "<path/to/local/gateway/certs>"
 ```
 
 Certificate directory structure:
 ```
-certificates/
-└─ gateway/
+<path/to/local/gateway/certs>/
     ├─ gateway-server1.example.com.crt
     ├─ gateway-server1.example.com.key
     ├─ gateway-server2.example.com.crt
@@ -270,7 +269,7 @@ all:
         gateway_whl_file: automation_gateway-4.3.0-py3-none-any.whl
         gateway_https_enabled: false        # Deploy without HTTPS initially
         gateway_pki_copy_certs: true        # But prepare certificates
-        gateway_pki_src_dir: "<path/to/local/certs>/certificates/gateway"
+        gateway_pki_src_dir: "<path/to/local/gateway/certs>"
 ```
 
 Later, enable HTTPS by changing `gateway_https_enabled: true` and re-running the playbook.

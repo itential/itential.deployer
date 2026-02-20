@@ -14,7 +14,7 @@ The deployer supports 3 certificate deployment scenarios by configuring filename
 
 ## Scenario 1: Per-Host Certificates (Current - Most Secure)
 
-**Certificate Structure:**
+**Sample Certificate Structure:**
 ```
 certificates/
   mongodb/
@@ -36,14 +36,14 @@ certificates/
 # MongoDB
 mongodb:
   vars:
-    mongodb_pki_src_dir: "<path/to/local/certs>/certificates/mongodb"
+    mongodb_pki_src_dir: "<path/to/local/mongodb/certs>"
     # Default: mongodb_tls_server_cert_filename: "{{ inventory_hostname }}.pem"
     # No override needed - this is the default
 
 # Platform
 platform:
   vars:
-    platform_https_pki_src_dir: "<path/to/local/certs>/certificates/platform"
+    platform_https_pki_src_dir: "<path/to/local/platform/certs>"
     # Default: platform_https_cert_filename: "{{ inventory_hostname }}.crt"
     # Default: platform_https_key_filename: "{{ inventory_hostname }}.key"
     # No override needed
@@ -51,7 +51,7 @@ platform:
 # Redis
 redis:
   vars:
-    redis_pki_src_dir: "<path/to/local/certs>/certificates/redis"
+    redis_pki_src_dir: "<path/to/local/redis/certs>"
     # Default: redis_tls_cert_filename: "{{ inventory_hostname }}.crt"
     # Default: redis_tls_key_filename: "{{ inventory_hostname }}.key"
     # No override needed
@@ -59,7 +59,7 @@ redis:
 # Gateway
 gateway:
   vars:
-    gateway_pki_src_dir: "<path/to/local/certs>/certificates/gateway"
+    gateway_pki_src_dir: "<path/to/local/gateway/certs>"
     # Default: gateway_https_cert_filename: "{{ inventory_hostname }}.crt"
     # Default: gateway_https_key_filename: "{{ inventory_hostname }}.key"
     # No override needed
@@ -78,7 +78,7 @@ gateway:
 
 ## Scenario 2: Per-Role Certificates (Simplified Management)
 
-**Certificate Structure:**
+**Sample Certificate Structure:**
 ```
 certificates/
   mongodb/
@@ -106,27 +106,27 @@ certificates/
 # MongoDB - All servers use mongodb.pem
 mongodb:
   vars:
-    mongodb_pki_src_dir: "<path/to/local/certs>/certificates/mongodb"
+    mongodb_pki_src_dir: "<path/to/local/mongodb/certs>"
     mongodb_tls_server_cert_filename: "mongodb.pem"
 
 # Platform - All servers use platform.crt/key
 platform:
   vars:
-    platform_https_pki_src_dir: "<path/to/local/certs>/certificates/platform"
+    platform_https_pki_src_dir: "<path/to/local/platform/certs>"
     platform_https_cert_filename: "platform.crt"
     platform_https_key_filename: "platform.key"
 
 # Redis - All servers use redis.crt/key
 redis:
   vars:
-    redis_pki_src_dir: "<path/to/local/certs>/certificates/redis"
+    redis_pki_src_dir: "<path/to/local/redis/certs>"
     redis_tls_cert_filename: "redis.crt"
     redis_tls_key_filename: "redis.key"
 
 # Gateway - All servers use gateway.crt/key
 gateway:
   vars:
-    gateway_pki_src_dir: "<path/to/local/certs>/certificates/gateway"
+    gateway_pki_src_dir: "<path/to/local/gateway/certs>"
     gateway_https_cert_filename: "gateway.crt"
     gateway_https_key_filename: "gateway.key"
 ```
@@ -162,28 +162,28 @@ certificates/
 # MongoDB
 mongodb:
   vars:
-    mongodb_pki_src_dir: "<path/to/local/certs>/certificates"
+    mongodb_pki_src_dir: "<path/to/local/certs>"
     mongodb_tls_server_cert_filename: "shared.pem"
 
 # Platform
 platform:
   vars:
-    platform_https_pki_src_dir: "<path/to/local/certs>/certificates"
-    platform_mongodb_pki_src_dir: "<path/to/local/certs>/certificates"
+    platform_https_pki_src_dir: "<path/to/local/certs>"
+    platform_mongodb_pki_src_dir: "<path/to/local/certs>"
     platform_https_cert_filename: "shared.crt"
     platform_https_key_filename: "shared.key"
 
 # Redis
 redis:
   vars:
-    redis_pki_src_dir: "<path/to/local/certs>/certificates"
+    redis_pki_src_dir: "<path/to/local/certs>"
     redis_tls_cert_filename: "shared.crt"
     redis_tls_key_filename: "shared.key"
 
 # Gateway
 gateway:
   vars:
-    gateway_pki_src_dir: "<path/to/local/certs>/certificates"
+    gateway_pki_src_dir: "<path/to/local/certs>"
     gateway_https_cert_filename: "shared.crt"
     gateway_https_key_filename: "shared.key"
 ```
@@ -287,24 +287,24 @@ cat shared.crt shared.key > shared.pem
 ```yaml
 mongodb:
   vars:
-    mongodb_pki_src_dir: "<path/to/local/certs>/certificates"  # Single directory
+    mongodb_pki_src_dir: "<path/to/local/certs>"  # Single directory
     mongodb_tls_server_cert_filename: "shared.pem"
 
 platform:
   vars:
-    platform_https_pki_src_dir: "<path/to/local/certs>/certificates"
+    platform_https_pki_src_dir: "<path/to/local/certs>"
     platform_https_cert_filename: "shared.crt"
     platform_https_key_filename: "shared.key"
 
 redis:
   vars:
-    redis_pki_src_dir: "<path/to/local/certs>/certificates"
+    redis_pki_src_dir: "<path/to/local/certs>"
     redis_tls_cert_filename: "shared.crt"
     redis_tls_key_filename: "shared.key"
 
 gateway:
   vars:
-    gateway_pki_src_dir: "<path/to/local/certs>/certificates"
+    gateway_pki_src_dir: "<path/to/local/certs>"
     gateway_https_cert_filename: "shared.crt"
     gateway_https_key_filename: "shared.key"
 ```

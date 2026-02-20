@@ -163,8 +163,8 @@ Each MongoDB server requires:
 ### Certificate Organization
 
 Certificates should be organized per server on the Ansible controller:
-certificates/
-├─ mongodb
+
+├─ <path/to/local/mongodb/certs>
 │   ├─ ca-bundle.crt
 │   ├─ hostname1.pem
 │   ├─ hostname2.pem

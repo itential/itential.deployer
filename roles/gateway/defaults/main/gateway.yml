@@ -46,7 +46,7 @@ gateway_https_port: 8443
 # Flag to manage Gateway PKI infrastructure
 # When true: Creates PKI directories and copies certificate files
 # When false: Assumes certificates are managed externally
-gateway_pki_copy_certs: true
+gateway_pki_copy_certs: false
 
 gateway_tlsv1_2: false
 
