@@ -102,7 +102,7 @@
       when: gateway_pki_copy_certs | bool
       tags:
         - gateway
-        - gateway_certificates
+        - upload_gateway_certificates
         - certificates
 
     - name: Install Python

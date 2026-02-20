@@ -284,7 +284,7 @@ ansible-playbook itential.deployer.gateway -i <inventory>
 
 You can also use the following tags:
 
-* `gateway_certificates` - Only manage certificate infrastructure
+* `upload_gateway_certificates` - Only manage certificate infrastructure
 * `install_python` - Only install Python
 * `install_python_dependencies` - Only install Python dependencies
 * `install_gateway_build_packages` - Only install Gateway build packages
@@ -293,11 +293,11 @@ You can also use the following tags:
 To execute only certificate management tasks:
 
 ```bash
-ansible-playbook itential.deployer.gateway -i <inventory> --tags gateway_certificates
+ansible-playbook itential.deployer.gateway -i <inventory> --tags upload_gateway_certificates
 ```
 
 To skip certificate management:
 
 ```bash
-ansible-playbook itential.deployer.gateway -i <inventory> --skip-tags gateway_certificates
+ansible-playbook itential.deployer.gateway -i <inventory> --skip-tags upload_gateway_certificates
 ```

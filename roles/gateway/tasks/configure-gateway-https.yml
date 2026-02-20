@@ -6,7 +6,7 @@
 - name: Prepare Gateway PKI infrastructure
   tags:
     - gateway
-    - gateway_certificates
+    - upload_gateway_certificates
     - certificates
   block:
     - name: Create Gateway PKI base directory
