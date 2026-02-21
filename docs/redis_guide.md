@@ -159,6 +159,7 @@ The following tables lists the default variables located in `roles/redis/default
 | Variable | Type | Description | Default Value |
 | :------- | :--- | :---------- | :------------ |
 | `redis_replicaof` | String | The Redis replicaof setting.<br>Use replicaof to make a Redis instance a copy of another Redis server. | "{{ groups['redis_master'][0] }} {{ redis_port}}" |
+| `redis_replica_priority` | String/Integer | Controls which replica Sentinel prefers to promote during failover.<br>Refer to Replica Priority section above for details. | `auto` |
 
 ### Sentinel Variables
 
