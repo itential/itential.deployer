@@ -24,6 +24,7 @@
     group: root
     mode: "0644"
 
+# Refer to the redis defaults and Redis Guide for an explanation of the replica priority
 - name: Calculate replica priority
   ansible.builtin.set_fact:
     redis_replica_priority_final: >-
@@ -36,7 +37,6 @@
       {%- else -%}
         100
       {%- endif -%}
-  when: redis_is_data_node
 
 - name: Validate replica priority
   ansible.builtin.assert:
@@ -44,7 +44,6 @@
       - redis_replica_priority_final | int >= 0
       - redis_replica_priority_final | int <= 255
     fail_msg: "redis_replica_priority must be between 0-255, got {{ redis_replica_priority_final }}"
-  when: redis_is_data_node
 
 - name: Use template to generate redis.conf
   ansible.builtin.template:
