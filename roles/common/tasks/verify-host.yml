@@ -9,12 +9,14 @@
 - name: Assert that required platform_release variable is defined
   ansible.builtin.assert:
     that: platform_release is defined
-    fail_msg: "platform_release must be defined in the inventory"
+    fail_msg: "platform_release must be defined in the inventory!"
 
-- name: Assert that required env variable is defined
+- name: Assert that required env variable is defined and is an acceptable value
   ansible.builtin.assert:
-    that: env is defined
-    fail_msg: "platform_release must be defined in the inventory"
+    that:
+      - env is defined
+      - env in ['dev', 'test', 'prod']
+    fail_msg: "env must be defined in the inventory and should be one of 'dev', 'test', 'prod'!"
 
 - name: Announce Intention
   ansible.builtin.debug:

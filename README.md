@@ -31,10 +31,8 @@
 6. [Component Guides](#component-guides)
     1. [MongoDB](#mongodb)
     2. [Redis](#redis)
-    3. [Hashicorp Vault](#hashicorp-vault)
-    4. [Itential Platform](#itential-platform)
-    5. [Itential Gateway](#itential-gateway)
-    6. [Prometheus and Grafana](#prometheus-and-grafana)
+    3. [Itential Platform](#itential-platform)
+    4. [Itential Gateway](#itential-gateway)
 7. [Patching Itential Platform and IAG](#patching-itential-platform-and-iag)
 8. [Using Internal YUM Repositories](#using-internal-yum-repositories)
 9. [Running the Deployer in Offline Mode](#running-the-deployer-in-offline-mode)
@@ -65,7 +63,6 @@ The Itential deployer can deploy supported Itential architectures.
 - Minimal Architecture
 - Highly Available Architecture
 - Active/Standby Architecture
-- Blue Green Architecture
 
 ### All-in-one Architecture
 
@@ -120,17 +117,26 @@ SSL when communicating with components on other VMs and across clusters.
 
 An Active/Standby Architecture (ASA) is an architecture (that is normally used for making HA2
 architectures redundant) reserved for production environments where Disaster Recovery is required.
-It is not required that they be geographically redundant but they could be. The intent is to
-provide a standby environment that can be used in the event of a disaster on the active stack. The
-standby stack should be preconfigured to be quickly made into the active stack. Care needs to be
-taken that the same level of access to 3rd party systems existing in the standby stack matches
-those in the active stack. Security must be taken into account if this is used as a production
-environment.
+The intent is to provide a secondary environment that can be used in the event of a disaster in the
+active datacenter. The secondary stack should be preconfigured to be quickly made into the primary
+stack. Care needs to be taken that the same level of access to 3rd party systems existing in the
+secondary stack matches those in the primary stack. Security must be taken into account if this is
+used as a production environment.
 
-The ideal ASA architecture will appear as two HA2 stacks except for MongoDB. One or more of the
-MongoDB instances must be hosted in the standby location as a replica of the primary. Ideally, the
-MongoDB cluster will consist of 5 members: 4 data-bearing members and a MongoDB arbiter. This will
-allow for a cluster of three mongos in the worst-case disaster scenario.
+The ASA architecture MUST utilize 3 data centers in order to be fully geographically redundant. This
+is due to the way that MongoDB and Redis handle data replication and the promotion of a new primary
+in disaster scenarios.
+
+The MongoDB cluster will consist of 5 members: 4 data-bearing members and a MongoDB arbiter, 2
+data-bearing members in the primary data center, 2 data-bearing members in the secondary data
+center, and the arbiter in a third data center. This will preserve a majority of voting members (3)
+in the event of a data center loss.
+
+Redis must also consider the preservation of voting members in this architecture but it works
+slightly different than MongoDB. Redis will consist of 4 data-bearing members, 2 data-bearing
+members in the primary data center, 2 data-bearing members in the secondary data center. Unlike
+MongoDB, Redis HA requires Redis Sentinel. These must be distributed in 3 data centers to preserve
+a majority of voting members (3) in the event of a data center loss.
 
 Itential recommends applying sound security principles to ALL environments. In the ASA, this would
 include configuring all components to use authentication and use SSL when communicating with
@@ -382,6 +388,22 @@ applicable, IAG). For more information, refer to the [Itential Dependencies] pag
 nodes.
 - **SSH Access**: The control node must have SSH connectivity to all managed nodes.
 
+The deployer includes a playbook that can be used to confirm the environment is suitable and ready for installation.
+
+```bash
+# Verify everything
+ansible-playbook -i <path-to-inventory> itential.deployer.verify
+
+# Verify Redis
+ansible-playbook -i <path-to-inventory> itential.deployer.verify_redis
+
+# Verify MongoDB
+ansible-playbook -i <path-to-inventory> itential.deployer.verify_mongodb
+
+# Verify Platform
+ansible-playbook -i <path-to-inventory> itential.deployer.verify_platform
+```
+
 **&#9432; Note:**
 Although the Itential Deployer can be used to configure nodes that use any supported operating
 system, it is optimized for RHEL 8 and 9.
@@ -537,6 +559,9 @@ vi inventories/dev/hosts
 all:
   vars:
     platform_release: 6
+    # Declare the purpose of the environment to help the verification stage check resources.
+    # Possible values: "dev", "test", "prod"
+    env: dev
 
   children:
     redis_master:
@@ -598,8 +623,29 @@ ansible-playbook itential.deployer.site -i inventories/dev -v
 
 ### Confirm Successful Installation
 
-After the Itential Deployer is finished running, perform the following checks on each component to
-confirm successful installation.
+Deployer includes a playbook that can certify an installation and provide valuable information for
+documentation purposes. Run this playbook after installation to certify an installation:
+
+```bash
+# Certify everything
+ansible-playbook -i <path-to-inventory> itential.deployer.certify
+
+# Certify Redis
+ansible-playbook -i <path-to-inventory> itential.deployer.certify_redis
+
+# Certify MongoDB
+ansible-playbook -i <path-to-inventory> itential.deployer.certify_mongodb
+
+# Certify Platform
+ansible-playbook -i <path-to-inventory> itential.deployer.certify_platform
+```
+
+This will generate markdown files one per host that contain rich detail about what was done during
+the installation and also several assertions that can highlight areas of concern. These markdown
+files will be copied to the control node and should be preserved as a "receipt" of installation. By
+default, these files will be copied to `/tmp/itential-reports/` on the control node.
+
+Additionally, perform the following checks on each component to confirm successful installation.
 
 #### Itential Platform and IAG
 
@@ -722,10 +768,6 @@ corresponding variables are detailed in the following guides.
 
 [Redis Guide](docs/redis_guide.md)
 
-### Hashicorp Vault
-
-[Hashicorp Vault Guide](docs/vault_guide.md)
-
 ### Itential Platform
 
 [Itential Platform Guide](docs/itential_platform_guide.md)
@@ -733,10 +775,6 @@ corresponding variables are detailed in the following guides.
 ### Itential Gateway
 
 [Itential Gatway Guide](docs/itential_gateway_guide.md)
-
-### Prometheus and Grafana
-
-[Prometheus and Grafana Guide](docs/prometheus_guide.md)
 
 ## Patching Itential Platform and IAG
 
