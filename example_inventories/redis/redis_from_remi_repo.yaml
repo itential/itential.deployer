@@ -1,0 +1,12 @@
+---
+all:
+  vars:
+    platform_release: 6
+
+  children:
+    redis_master:
+      hosts:
+        redis01.example.com:
+      vars:
+        # When installing from YUM, the default is to use the Remi repo
+        redis_install_from_source: false

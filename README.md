@@ -28,22 +28,17 @@
     7. [Create the Inventory File](#create-the-inventory-file)
     8. [Run the Itential Deployer](#run-the-itential-deployer)
     9. [Confirm Successful Installation](#confirm-successful-installation)
-6. [Sample Inventories](#sample-inventories)
-    1. [All-in-one Architecture Inventory](#all-in-one-architecture-inventory)
-    2. [Minimal Architecture Inventory](#minimal-architecture-inventory)
-    3. [Highly Available Architecture Inventory](#highly-available-architecture-inventory)
-    4. [Active/Standby Architecture Inventory](#activestandby-architecture-inventory)
-7. [Component Guides](#component-guides)
+6. [Component Guides](#component-guides)
     1. [MongoDB](#mongodb)
     2. [Redis](#redis)
     3. [Hashicorp Vault](#hashicorp-vault)
     4. [Itential Platform](#itential-platform)
     5. [Itential Gateway](#itential-gateway)
     6. [Prometheus and Grafana](#prometheus-and-grafana)
-8. [Patching Itential Platform and IAG](#patching-itential-platform-and-iag)
-9. [Using Internal YUM Repositories](#using-internal-yum-repositories)
-10. [Running the Deployer in Offline Mode](#running-the-deployer-in-offline-mode)
-11. [Appendix A: Definition of "Highly Available" Dependencies](#appendix-a-definition-of-highly-available-dependencies)
+7. [Patching Itential Platform and IAG](#patching-itential-platform-and-iag)
+8. [Using Internal YUM Repositories](#using-internal-yum-repositories)
+9. [Running the Deployer in Offline Mode](#running-the-deployer-in-offline-mode)
+10. [Appendix A: Definition of "Highly Available" Dependencies](#appendix-a-definition-of-highly-available-dependencies)
 
 ## Overview
 
@@ -536,8 +531,6 @@ mkdir -p inventories/dev
 vi inventories/dev/hosts
 ```
 
-</br>
-
 #### Example: Inventory File (YAML Format)
 
 ```yaml
@@ -548,20 +541,26 @@ all:
   children:
     redis_master:
       hosts:
-        example1.host.com:
+        host01.example.com:
 
     mongodb:
       hosts:
-        example1.host.com:
+        host01.example.com:
 
     platform:
       hosts:
-        example1.host.com:
+        host01.example.com:
       vars:
-        platform_encryption_key: <openssl rand -hex 32> # 64-length hex string, representing a 256-bit AES  encryption key.
+        # open64-length hex string, representing a 256-bit AES encryption key
+        # example command to generate key: 'openssl rand -hex 32'
+        platform_encryption_key: <key>
+
+        # NOTE: the platform packages list varies depending on entitlement
         platform_packages:
-          - https://registry.aws.itential.com/repository/PLATFORM/Platform%206.0.0/itential-platform-6.0.0-1.noarch.rpm
-        repository_username: user.name
+          - https://registry.aws.itential.com/repository/PLATFORM/Platform%206.0.0/itential-platform-<version>.noarch.rpm
+
+        # Credentials for downloading from the Itential repository
+        repository_username: <username>
         repository_password: !vault |
           $ANSIBLE_VAULT;1.1;AES123
           12341234123412341234123412341234123412341234123412341234123412341234123412341234
@@ -569,13 +568,22 @@ all:
           12341234123412341234123412341241234123412341234123412341234123412341234123412341
           1234123412341324
 
+        # MongoDB connection
+        platform_mongo_url: mongodb://host01.example.com:27017/itential
+
+        # Redis connection
+        platform_redis_host: host01.example.com
+
     gateway:
       hosts:
-        example2.host.com:
+        host02.example.com:
       vars:
         gateway_release: 4.3
-        gateway_whl_file: automation_gateway-4.3.56-py3-none-any.whl
+        gateway_whl_file: automation_gateway-<version>-py3-none-any.whl
 ```
+
+**&#9432; Note:**
+Additional example inventories can be found in the `example_inventories` directory.
 
 ### Run the Itential Deployer
 
@@ -696,287 +704,6 @@ $ sudo systemctl status redis
         CPU: 13.409s
      CGroup: /system.slice/redis.service
              └─15723 "/usr/bin/redis-server 127.0.0.1:6379"
-```
-
-## Sample Inventories
-
-Below are simplified sample host files that describe the basic configurations to produce the
-supported architectures. These are intended to be starting points only.
-
-### All-in-one Architecture Inventory
-
-Simple environment. Itential Platform and all of its dependencies all on one host.
-
-#### Example: All-in-one Inventory File (YAML Format)
-
-```yaml
-all:
-  vars:
-    platform_release: 6
-
-  children:
-    redis_master:
-      hosts:
-        example1.host.com:
-
-    mongodb:
-      hosts:
-        example1.host.com:
-
-    platform:
-      hosts:
-        example1.host.com:
-      vars:
-        platform_encryption_key: <openssl rand -hex 32> # 64-length hex string, representing a 256-bit AES  encryption key.
-        platform_packages:
-          - itential-platform-6.0.0-1.noarch.rpm
-
-    gateway:
-      hosts:
-        example2.host.com:
-      vars:
-        gateway_release: 4.3
-        gateway_whl_file: automation_gateway-4.3.56-py3-none-any.whl
-```
-
-### Minimal Architecture Inventory
-
-Similar to All-in-one but installs components on separate hosts.
-
-#### Example: Minimal Architecture Inventory File (YAML Format)
-
-```yaml
-all:
-  vars:
-    platform_release: 6
-
-  children:
-    redis_master:
-      hosts:
-        redis.host.com:
-
-    mongodb:
-      hosts:
-        mongodb.host.com:
-
-    platform:
-      hosts:
-        itential-platform.host.com:
-      vars:
-        platform_encryption_key: <openssl rand -hex 32> # 64-length hex string, representing a 256-bit AES  encryption key.
-        platform_packages:
-          - itential-platform-6.0.0-1.noarch.rpm
-        # MongoDB config
-        platform_mongo_url: mongodb://mongodb.host.com:27017/itential
-        # Redis config
-        platform_redis_host: redis.host.com
-
-    gateway:
-      hosts:
-        automation-gateway.host.com:
-      vars:
-        gateway_release: 4.3
-        gateway_whl_file: automation_gateway-4.3.56-py3-none-any.whl
-```
-
-### Highly Available Architecture Inventory
-
-Fault tolerant architecture.
-
-#### Example: Highly Available Architecture Inventory File (YAML Format)
-
-```yaml
-all:
-  vars:
-    platform_release: 6
-
-  children:
-    redis_master:
-      hosts:
-        redis1.host.com:
-
-    redis_replica:
-      hosts:
-        redis2.host.com:
-        redis3.host.com:
-      vars:
-        redis_replicaof: <master-hostname-or-ip> <redis-port> # defaults to "{{ groups['redis_master'][0] }} {{ redis_port}}"
-
-    redis_sentinel:
-      hosts:
-        sentinel1.host.com:
-        sentinel2.host.com:
-        sentinel3.host.com:
-
-    mongodb:
-      hosts:
-        mongodb1.host.com:
-        mongodb2.host.com:
-        mongodb3.host.com:
-      vars:
-        mongodb_replication_enabled: true
-
-    platform:
-      hosts:
-        itential-platform1.host.com:
-        itential-platform2.host.com:
-      vars:
-        platform_packages:
-          - itential-platform-6.0.0-1.noarch.rpm
-        # MongoDB config
-        platform_mongo_url: mongodb://itential:itential@mongodb1.host.com:27017,mongodb2.host.com:27017,mongodb3.host.com:27017/itential?replicaSet=rs0
-        # Redis config
-        platform_redis_sentinels:
-          - host: sentinel1.host.com
-            port: 26379
-          - host: sentinel2.host.com
-            port: 26379
-          - host: rsentinel3.host.com
-            port: 26379
-
-    gateway:
-      hosts:
-        automation-gateway1.host.com:
-      vars:
-        gateway_release: 4.3
-        gateway_whl_file: automation_gateway-4.3.56-py3-none-any.whl
-```
-
-### Highly Available Architecture Inventory leveraging external dependencies
-
-Fault tolerant architecture using external dependencies.
-
-#### Example: Highly Available Architecture Inventory File using external dependencies (YAML Format)
-
-```yaml
-all:
-  vars:
-    platform_release: 6
-  children:
-    platform:
-      hosts:
-        itential-platform1.host.com:
-        itential-platform2.host.com:
-      vars:
-        platform_packages:
-          - itential-platform-6.0.0-1.noarch.rpm
-        # MongoDB config
-        platform_mongo_auth_enabled: true
-        platform_mongo_url: <a-valid-mongo-connection-string>
-        # Redis config
-        platform_redis_host: <The-FQDN-to-the-Redis-service>
-        platform_redis_port: 6379
-        platform_redis_username: itential
-        platform_redis_password: <super-secret-password>
-        # Or if connecting to Redis Sentinel
-        # platform_redis_sentinels:
-        #   - host: redis1.host.com
-        #     port: 26379
-        #   - host: redis2.host.com
-        #     port: 26379
-        #   - host: redis3.host.com
-        #     port: 26379
-    gateway:
-      hosts:
-        automation-gateway1.host.com:
-      vars:
-        gateway_release: 4.3
-        gateway_whl_file: automation_gateway-4.3.56-py3-none-any.whl
-```
-
-### Active/Standby Architecture Inventory
-
-#### Example: Active/Standby Architecture Inventory File (YAML Format)
-
-```yaml
-all:
-  vars:
-    platform_release: 6
-
-  children:
-    redis_master:
-      hosts:
-        datacenter1.redis1.host.com:
-
-    redis_replica:
-      hosts:
-        datacenter1.redis2.host.com:
-        datacenter2.redis1.host.com:
-        datacenter2.redis2.host.com:
-      vars:
-        redis_replicaof: <master-hostname-or-ip> <redis-port> # defaults to "{{ groups['redis_master'][0] }} {{ redis_port}}"
-
-    redis_sentinel:
-      hosts:
-        datacenter1.sentinel1.host.com:
-        datacenter2.sentinel1.host.com:
-        datacenter3.sentinel1.host.com:
-
-    mongodb:
-      hosts:
-        datacenter1.mongodb1.host.com:
-        datacenter1.mongodb2.host.com:
-        datacenter2.mongodb3.host.com:
-        datacenter2.mongodb4.host.com:
-      vars:
-        mongodb_replication_enabled: true
-
-    mongodb_arbiter:
-      hosts:
-        datacenter3.mongodb-arbiter.host.com:
-
-    platform:
-      hosts:
-        datacenter1.itential-platform1.host.com:
-        datacenter1.itential-platform2.host.com:
-      vars:
-        platform_packages:
-          - itential-platform-6.0.0-1.noarch.rpm
-        platform_job_worker_enabled: false
-        platform_task_worker_enabled: false
-        # MongoDB config
-        platform_mongo_auth_enabled: true
-        platform_mongo_url: mongodb://itential:itential@datacenter1.mongodb1.host.com:27017,datacenter1.mongodb2.host.com:27017,datacenter2.mongodb3.host.com:27017,datacenter2.mongodb4.host.com:27017,datacenter3.mongodb-arbiter.host.com:27017/itential?replicaset=rs0
-        # Redis config
-        platform_redis_sentinel_username: itential
-        platform_redis_sentinel_password: <super-secret-password>
-        platform_redis_sentinels:
-          - host: datacenter1.sentinel1.host.com
-            port: 26379
-          - host: datacenter2.sentinel1.host.com
-            port: 26379
-          - host: datacenter3.sentinel1.host.com
-            port: 26379
-
-    platform_secondary:
-      hosts:
-        datacenter2.itential-platform3.host.com:
-        datacenter2.itential-platform4.host.com:
-      vars:
-        platform_packages:
-          - itential-platform-6.0.0-1.noarch.rpm
-        platform_job_worker_enabled: false
-        platform_task_worker_enabled: false
-        # MongoDB config
-        platform_mongo_auth_enabled: true
-        platform_mongo_url: mongodb://itential:itential@datacenter1.mongodb1.host.com:27017,datacenter1.mongodb2.host.com:27017,datacenter2.mongodb3.host.com:27017,datacenter2.mongodb4.host.com:27017,datacenter3.mongodb-arbiter.host.com:27017/itential?replicaset=rs0
-        # Redis config
-        platform_redis_sentinel_username: itential
-        platform_redis_sentinel_password: <super-secret-password>
-        platform_redis_sentinels:
-          - host: datacenter1.sentinel1.host.com
-            port: 26379
-          - host: datacenter2.sentinel1.host.com
-            port: 26379
-          - host: datacenter3.sentinel1.host.com
-            port: 26379
-
-    gateway:
-      hosts:
-        datacenter2.automation-gateway1.host.com:
-      vars:
-        gateway_release: 4.3
-        gateway_whl_file: automation_gateway-4.3.56-py3-none-any.whl
 ```
 
 ## Component Guides
