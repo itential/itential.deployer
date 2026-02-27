@@ -71,4 +71,3 @@ redis_maxmemory_bytes: auto
 # Used only when redis_maxmemory_bytes == "auto"
 redis_maxmemory_ratio: 0.60
 redis_maxmemory_min_mb: 512
-
