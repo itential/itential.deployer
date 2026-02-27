@@ -61,3 +61,15 @@ redis_user_repluser_password: repluser
 redis_user_sentineladmin_password: admin
 redis_user_sentineluser_password: sentineluser
 redis_user_prometheus_password: prometheus
+
+# Redis memory sizing defaults (dedicated node)
+
+# Ratio of total RAM to assign to Redis maxmemory
+redis_maxmemory_ratio: "0.60"
+
+# Minimum maxmemory in MB (safety clamp for small VMs)
+redis_maxmemory_min_mb: 512
+
+# Optional hard override (bytes)
+# If set (>0), this value is used and auto-calculation is skipped
+redis_maxmemory_bytes: 0
