@@ -9,16 +9,21 @@
     group: root
     mode: "0644"
 
-- name: Calculate Redis maxmemory (dedicated node)
-  when: (redis_maxmemory_bytes | default(0) | int) == 0
-  vars:
-    ram_mb: "{{ ansible_facts.memtotal_mb | int }}"
-    ratio: "{{ redis_maxmemory_ratio | default('0.60') | float }}"
-    min_mb: "{{ redis_maxmemory_min_mb | default(512) | int }}"
-    raw_mb: "{{ ((ram_mb | int) * (ratio | float)) | int }}"
-    clamped_mb: "{{ [min_mb | int, raw_mb | int] | max }}"
+- name: Calculate Redis maxmemory automatically
   ansible.builtin.set_fact:
-    redis_maxmemory_bytes: "{{ ((clamped_mb | int) * 1024 * 1024) | int }}"
+    redis_maxmemory_bytes: >-
+      {{
+        (
+          [
+            redis_maxmemory_min_mb | int,
+            (
+              (ansible_facts.memtotal_mb | int)
+              * (redis_maxmemory_ratio | float)
+            ) | int
+          ] | max
+        ) * 1024 * 1024
+      }}
+  when: redis_maxmemory_bytes == "auto"
   tags: configure_redis
 
 - name: Use template to generate redis.conf
