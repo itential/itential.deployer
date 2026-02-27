@@ -21,6 +21,15 @@ all:
 
         # AWS Mongo Atlas connection
         platform_mongo_url: mongodb+srv://<username>:<password>@<host>/<db>?retryWrites=true&w=majority&appName=<appname>
+        mongo_auth_enabled: false
+        mongo_user: <username>
+        # NOTE: using Ansible Vault to encrypt passwords is highly recommended
+        mongo_password: <password>
+        mongo_tls_enabled: true
 
         # AWS Elasticache connection
         redis_host: <cluster-name>.<id>.<region>.cache.amazonaws.com
+        redis_username: <username>
+        # NOTE: using Ansible Vault to encrypt passwords is highly recommended
+        redis_password: <password>
+        redis_tls: "{}"
