@@ -13,7 +13,7 @@
         selinux_target: "{{ gateway_python_venv }}(/.*)?"
         selinux_setype: bin_t
         selinux_path: "{{ gateway_python_venv }}"
-      when: gateway_install_dir != "/opt/automation-gateway"
+      when: not (gateway_python_venv.startswith('/opt/') or gateway_python_venv.startswith('/usr/'))
 
     - name: SELinux - Configure file context when using non-standard data directory
       ansible.builtin.include_role:
@@ -23,17 +23,17 @@
         selinux_target: "{{ gateway_data_dir }}(/.*)?"
         selinux_setype: var_lib_t
         selinux_path: "{{ gateway_data_dir }}"
-      when: gateway_data_dir != "/var/lib/automation-gateway"
+      when: not gateway_data_dir.startswith('/var/lib/')
 
     - name: SELinux - Configure file context when using non-standard log directory
       ansible.builtin.include_role:
         name: selinux
         tasks_from: configure-context
       vars:
-        selinux_target: "{{ gateway_log_dir }}.*"
+        selinux_target: "{{ gateway_log_dir }}(/.*)?"
         selinux_setype: var_log_t
         selinux_path: "{{ gateway_log_dir }}"
-      when: gateway_log_dir != "/var/log/automation-gateway"
+      when: not gateway_log_dir.startswith('/var/log/')
 
     - name: Allow IAG to listen on tcp port {{ gateway_port }}
       community.general.seport:
@@ -41,4 +41,3 @@
         proto: tcp
         setype: http_port_t
         state: present
-      when: ansible_selinux.status == "enabled"
