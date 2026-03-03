@@ -37,6 +37,12 @@ redis_tls_enabled: false
 # Replication settings
 redis_replicaof: "{{ groups['redis_master'][0] }} {{ redis_port }}"
 
+# Redis replica priority for Sentinel failover
+# Lower values = higher priority (more likely to be promoted)
+# Set to 'auto' to calculate based on position, or specify explicit value (0-100)
+# 0 = never promote this replica
+redis_replica_priority: auto
+
 # Default redis user passwords
 # These are meant to be changed by the customer. By default they are meant to
 # be predictable and simple.

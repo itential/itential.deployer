@@ -27,7 +27,7 @@ redis_hw_specs:
     "cpu_count": 8
     "ram_size": 32
     "disk_size": 100
-  "production":
+  "prod":
     "cpu_count": 8
     "ram_size": 32
     "disk_size": 100

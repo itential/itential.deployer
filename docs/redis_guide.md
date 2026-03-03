@@ -45,6 +45,42 @@ primary using hostname.  It will start the Redis Sentinel service when complete.
 
 For more information on Redis replication: <https://redis.io/docs/manual/replication/>
 
+### Replica Priority
+
+Controls which replica Sentinel prefers to promote during failover.
+Lower values = higher priority (more likely to be promoted).
+
+**Default:** `auto` (calculates based on position)
+
+**Options:**
+- `auto` - Automatic priority based on inventory order:
+  - Master: 10
+  - First replica: 50
+  - Second replica: 100
+  - Third replica: 150, etc.
+- `0` - Never promote this replica
+- `1-255` - Explicit priority value
+
+**Examples:**
+```yaml
+# Use automatic priorities (recommended)
+redis_replica_priority: auto
+
+# Set explicit priority
+redis_replica_priority: 25
+
+# Prevent promotion (standby only)
+redis_replica_priority: 0
+```
+
+**Per-host override in inventory:**
+```ini
+[redis-replica]
+replica1 redis_replica_priority=10
+replica2 redis_replica_priority=50
+replica3 redis_replica_priority=0  # Never promote
+```
+
 ## Variables
 
 ### Static Variables
@@ -124,6 +160,7 @@ The following tables lists the default variables located in `roles/redis/default
 | Variable | Type | Description | Default Value |
 | :------- | :--- | :---------- | :------------ |
 | `redis_replicaof` | String | The Redis replicaof setting.<br>Use replicaof to make a Redis instance a copy of another Redis server. | "{{ groups['redis_master'][0] }} {{ redis_port}}" |
+| `redis_replica_priority` | String/Integer | Controls which replica Sentinel prefers to promote during failover.<br>Refer to Replica Priority section above for details. | `auto` |
 
 ### Sentinel Variables
 

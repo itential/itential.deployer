@@ -45,7 +45,7 @@ platform_hw_specs:
     "cpu_count": 16
     "ram_size": 64
     "disk_size": 250
-  "production":
+  "prod":
     "cpu_count": 16
     "ram_size": 64
     "disk_size": 250

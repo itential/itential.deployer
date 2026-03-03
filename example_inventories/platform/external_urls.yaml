@@ -1,0 +1,35 @@
+---
+all:
+  vars:
+    platform_release: 6
+    # Declare the purpose of the environment to help the verification stage check resources.
+    # Possible values: "dev", "test", "prod"
+    env: <env>
+
+  children:
+    platform:
+      hosts:
+        host01.example.com:
+      vars:
+        # open64-length hex string, representing a 256-bit AES encryption key
+        # example command to generate key: 'openssl rand -hex 32'
+        platform_encryption_key: <key>
+
+        # NOTE: the platform packages list varies depending on entitlement
+        platform_packages:
+          - itential-platform-<version>.noarch.rpm
+
+        # AWS Mongo Atlas connection
+        platform_mongo_url: mongodb+srv://<username>:<password>@<host>/<db>?retryWrites=true&w=majority&appName=<appname>
+        mongo_auth_enabled: false
+        mongo_user: <username>
+        # NOTE: using Ansible Vault to encrypt passwords is highly recommended
+        mongo_password: <password>
+        mongo_tls_enabled: true
+
+        # AWS Elasticache connection
+        redis_host: <cluster-name>.<id>.<region>.cache.amazonaws.com
+        redis_username: <username>
+        # NOTE: using Ansible Vault to encrypt passwords is highly recommended
+        redis_password: <password>
+        redis_tls: "{}"
