@@ -5,51 +5,46 @@
 # Create Platform PKI Directory Structure
 # ============================================================================
 
-- name: Create Platform PKI base directory
-  ansible.builtin.file:
-    path: "{{ platform_pki_base_dir }}"
-    state: directory
-    owner: "{{ platform_pki_base_owner }}"
-    group: "{{ platform_pki_base_group }}"
-    mode: "{{ platform_pki_base_dir_mode }}"
+- name: Prepare Platform PKI infrastructure
+  when: platform_webserver_https_copy_certs | bool or platform_mongodb_copy_certs | bool
   tags:
     - platform
     - platform_certificates
     - certificates
+  block:
+    - name: Create Platform PKI base directory
+      ansible.builtin.file:
+        path: "{{ platform_pki_base_dir }}"
+        state: directory
+        owner: "{{ platform_pki_base_owner }}"
+        group: "{{ platform_pki_base_group }}"
+        mode: "{{ platform_pki_base_dir_mode }}"
 
-- name: Create Platform PKI subdirectories
-  ansible.builtin.file:
-    path: "{{ item }}"
-    state: directory
-    owner: "{{ platform_pki_base_owner }}"
-    group: "{{ platform_pki_base_group }}"
-    mode: "{{ platform_pki_subdir_mode }}"
-  loop:
-    - "{{ platform_pki_https_dir }}"
-    - "{{ platform_pki_mongodb_dir }}"
-  tags:
-    - platform
-    - platform_certificates
-    - certificates
+    - name: Create Platform PKI subdirectories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        owner: "{{ platform_pki_base_owner }}"
+        group: "{{ platform_pki_base_group }}"
+        mode: "{{ platform_pki_subdir_mode }}"
+      loop:
+        - "{{ platform_pki_https_dir }}"
+        - "{{ platform_pki_mongodb_dir }}"
 
-- name: Create Platform private key directory
-  ansible.builtin.file:
-    path: "{{ platform_pki_private_dir }}"
-    state: directory
-    owner: "{{ platform_pki_private_owner }}"
-    group: "{{ platform_pki_private_group }}"
-    mode: "{{ platform_pki_private_dir_mode }}"
-  tags:
-    - platform
-    - platform_certificates
-    - certificates
+    - name: Create Platform private key directory
+      ansible.builtin.file:
+        path: "{{ platform_pki_private_dir }}"
+        state: directory
+        owner: "{{ platform_pki_private_owner }}"
+        group: "{{ platform_pki_private_group }}"
+        mode: "{{ platform_pki_private_dir_mode }}"
 
 # ============================================================================
 # HTTPS Certificates
 # ============================================================================
 
 - name: Copy HTTPS key and cert files
-  when: platform_webserver_https_enabled | bool
+  when: platform_webserver_https_copy_certs | bool
   tags:
     - platform
     - platform_certificates
@@ -102,7 +97,7 @@
     owner: "{{ platform_user }}"
     group: "{{ platform_group }}"
   when:
-    - platform_mongo_tls_enabled | bool
+    - platform_mongodb_copy_certs | bool
     - platform_mongodb_root_ca_file_source is defined
   notify: restart itential-platform
   tags:

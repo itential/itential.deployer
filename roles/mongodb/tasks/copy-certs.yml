@@ -1,0 +1,22 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Copy TLS certificate to MongoDB host
+  ansible.builtin.copy:
+    src: "{{ mongodb_cert_keyfile_source }}"
+    dest: "{{ mongodb_cert_keyfile_destination }}"
+    mode: "0640"
+    group: "{{ mongodb_group }}"
+    owner: "{{ mongodb_owner }}"
+  when: mongodb_cert_keyfile_source | length > 0
+  notify: restart mongod
+
+- name: Copy CA certificate to MongoDB host
+  ansible.builtin.copy:
+    src: "{{ mongodb_root_ca_file_source }}"
+    dest: "{{ mongodb_root_ca_file_destination }}"
+    mode: "0644"
+    group: "{{ mongodb_group }}"
+    owner: "{{ mongodb_owner }}"
+  when: mongodb_root_ca_file_source | length > 0
+  notify: restart mongod

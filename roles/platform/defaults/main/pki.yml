@@ -19,6 +19,22 @@ platform_pki_https_dir: "{{ platform_pki_base_dir }}/{{ platform_pki_https_subdi
 platform_pki_mongodb_dir: "{{ platform_pki_base_dir }}/{{ platform_pki_mongodb_subdir }}"
 
 # ============================================================================
+# PKI Management Flags - Control certificate deployment
+# ============================================================================
+
+# Flag to manage HTTPS PKI infrastructure
+# Enabling this by default to ensure secure communication, can be disabled if certificates are managed externally
+# When true: Creates PKI directories and copies HTTPS certificate files
+# When false: Assumes HTTPS certificates are managed externally
+platform_webserver_https_copy_certs: true
+
+# Flag to manage MongoDB client PKI infrastructure
+# Enabling this by default to ensure secure communication, can be disabled if certificates are managed externally
+# When true: Creates PKI directories and copies MongoDB client certificate files
+# When false: Assumes MongoDB client certificates are managed externally
+platform_mongodb_copy_certs: true
+
+# ============================================================================
 # HTTPS Certificate Filenames - Customize naming
 # ============================================================================
 
@@ -65,7 +81,7 @@ platform_mongodb_root_ca_file_destination: "{{ platform_pki_mongodb_dir }}/{{ pl
 
 # MongoDB CA file for application properties.json
 # This variable is used in templates and needs to point to the destination path
-platform_mongo_tls_ca_file: "{{ platform_mongodb_root_ca_file_destination }}"
+platform_mongo_tls_ca_file: "{{ platform_mongodb_root_ca_file_destination if platform_mongo_tls_enabled | bool else '' }}"
 
 # ============================================================================
 # Source Directories - Define in inventory

@@ -40,11 +40,16 @@ mongodb_port: "{{ mongodb_port_default }}"
 mongodb_itential_db_name: itential
 
 # Feature flags that can be overridden in the hosts file
-# Essentially, a default installation will not have replication, authorization,
-# or TLS settings applied.
+# Enabling auth and TLS by default to ensure secure communication, can be disabled if not needed
 mongodb_replication_enabled: false
 mongodb_auth_enabled: true
-mongodb_tls_enabled: false
+mongodb_tls_enabled: true
+
+# Flag to manage MongoDB PKI infrastructure
+# Enabling this by default to ensure secure communication, can be disabled if certificates are managed externally
+# When true: Creates PKI directories and copies certificate files
+# When false: Assumes certificates are managed externally
+mongodb_tls_copy_certs: true
 
 # Default mongo user names
 mongodb_user_admin: admin

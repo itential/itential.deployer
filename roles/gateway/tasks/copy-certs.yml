@@ -1,16 +1,6 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Validate gateway_pki_src_dir is defined
-  ansible.builtin.assert:
-    that:
-      - gateway_pki_src_dir is defined
-      - gateway_pki_src_dir | length > 0
-    fail_msg: |
-      gateway_pki_src_dir is not defined or is empty.
-      Set gateway_pki_src_dir in your inventory when gateway_pki_copy_certs is enabled.
-    success_msg: "gateway_pki_src_dir is properly configured: {{ gateway_pki_src_dir }}"
-
 - name: Copy the cert file
   ansible.builtin.copy:
     src: "{{ gateway_https_cert_source }}"

@@ -16,7 +16,7 @@
     file: configure-mongodb-auth.yml
   when: mongodb_auth_enabled | bool
 
-# Configure TLS
+# Configure TLS (includes PKI preparation and certificate copying when mongodb_tls_copy_certs is true)
 - name: Configure MongoDB TLS
   ansible.builtin.include_tasks:
     file: configure-mongodb-tls.yml

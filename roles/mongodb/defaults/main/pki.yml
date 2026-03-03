@@ -52,7 +52,6 @@ mongodb_pki_src_dir: ""
 # These auto-build from mongodb_pki_src_dir, but can be overridden individually
 mongodb_cert_keyfile_source: "{{ mongodb_pki_src_dir }}/{{ mongodb_tls_server_cert_filename }}"
 mongodb_root_ca_file_source: "{{ mongodb_pki_src_dir }}/{{ mongodb_tls_ca_cert_filename }}"
-mongodb_auth_keyfile_source: "{{ mongodb_pki_src_dir }}/{{ mongodb_replica_keyfile_filename }}"
 
 # ============================================================================
 # File Permissions - Customize per security requirements

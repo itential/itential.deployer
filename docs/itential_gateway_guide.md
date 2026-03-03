@@ -54,7 +54,7 @@ The following table lists the default variables located in `roles/gateway/defaul
 | `gateway_properties_location` | String | The location of the IAG configuration file. | `/etc/automation-gateway` |
 | `gateway_user` | String | The IAG Linux user. | `itential` |
 | `gateway_group` | String | The IAG Linux group. | `itential` |
-| `gateway_https_enabled` | Boolean | Flag to enable HTTPS in Gateway configuration. | `false` |
+| `gateway_https_enabled` | Boolean | Flag to enable HTTPS in Gateway configuration. | `true` |
 | `gateway_https_port` | Integer | The IAG HTTPS listen port. | `8443` |
 | `gateway_pki_copy_certs` | Boolean | Flag to manage PKI infrastructure (create directories and copy certificates). | `true` |
 | `gateway_tlsv1_2` | Boolean | Flag to enable TLS 1.2. | `false` |

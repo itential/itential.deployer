@@ -91,7 +91,8 @@ The following table contains the most commonly overridden variables.
 | `mongodb_itential_db_name` | String | The name of the itential database. | `itential` |
 | `mongodb_replication_enabled` | Boolean | Flag to enable MongoDB replication | `false` |
 | `mongodb_replset_name` | String | The MongoDB replica set name. | `rs0` |
-| `mongodb_tls_enabled` | Boolean | Flag to enable MongoDB TLS. | `false` |
+| `mongodb_tls_enabled` | Boolean | Flag to enable MongoDB TLS. | `true` |
+| `mongodb_tls_copy_certs` | Boolean | Flag to manage PKI infrastructure (create directories and copy certificates). | `true` |
 | `mongodb_pki_base_dir` | String | The base directory for PKI certificates and keys. | `/etc/pki/mongodb` |
 | `mongodb_tls_server_cert_filename` | String | Server certificate filename (combined cert+key). | `{{ inventory_hostname }}.pem` |
 | `mongodb_tls_ca_cert_filename` | String | CA certificate bundle filename. | `ca-bundle.crt` |

@@ -1,55 +1,32 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-- name: Create MongoDB PKI base directory
-  ansible.builtin.file:
-    state: directory
-    path: "{{ mongodb_pki_base_dir }}"
-    owner: "{{ mongodb_owner }}"
-    group: "{{ mongodb_group }}"
-    mode: "{{ mongodb_pki_base_dir_mode }}"
+- name: Prepare MongoDB PKI infrastructure
+  when: mongodb_tls_copy_certs | bool
   tags:
     - mongodb
     - mongodb_certificates
     - certificates
+  block:
+    - name: Create MongoDB PKI base directory
+      ansible.builtin.file:
+        state: directory
+        path: "{{ mongodb_pki_base_dir }}"
+        owner: "{{ mongodb_owner }}"
+        group: "{{ mongodb_group }}"
+        mode: "{{ mongodb_pki_base_dir_mode }}"
 
-- name: Create MongoDB private directory
-  ansible.builtin.file:
-    state: directory
-    path: "{{ mongodb_pki_private_dir }}"
-    owner: "{{ mongodb_owner }}"
-    group: "{{ mongodb_group }}"
-    mode: "{{ mongodb_pki_private_dir_mode }}"
-  tags:
-    - mongodb
-    - mongodb_certificates
-    - certificates
+    - name: Create MongoDB private directory
+      ansible.builtin.file:
+        state: directory
+        path: "{{ mongodb_pki_private_dir }}"
+        owner: "{{ mongodb_owner }}"
+        group: "{{ mongodb_group }}"
+        mode: "{{ mongodb_pki_private_dir_mode }}"
 
-- name: Copy certificate to MongoDB host if TLS enabled
-  ansible.builtin.copy:
-    src: "{{ mongodb_cert_keyfile_source }}"
-    dest: "{{ mongodb_cert_keyfile_destination }}"
-    mode: "0640"
-    group: "{{ mongodb_group }}"
-    owner: "{{ mongodb_owner }}"
-  notify: restart mongod
-  tags:
-    - mongodb
-    - mongodb_certificates
-    - certificates
-
-- name: Copy CA certificate to MongoDB host if TLS enabled
-  ansible.builtin.copy:
-    src: "{{ mongodb_root_ca_file_source }}"
-    dest: "{{ mongodb_root_ca_file_destination }}"
-    mode: "0644"
-    group: "{{ mongodb_group }}"
-    owner: "{{ mongodb_owner }}"
-  notify: restart mongod
-  tags:
-    - mongodb
-    - mongodb_certificates
-    - certificates
+    - name: Copy Gateway certificates
+      ansible.builtin.include_tasks:
+        file: copy-certs.yml
 
 - name: Create MongoDB config file (TLS)
   ansible.builtin.template:

@@ -217,9 +217,10 @@ located in `roles/platform/defaults/main/webserver.yml`.
 | platform_webserver_response_header_access_control_allow_origin | String | The value of the HTTP Access-Control-Allow-Origin header returned to clients. | `"*"` |
 | platform_webserver_http_enabled | Boolean | If true, allows the webserver to respond to insecure HTTP requests. | `true` |
 | platform_webserver_http_port | Integer | The port on which the webserver listens for HTTP requests. | 3000 |
-| platform_webserver_https_enabled | Boolean | If true, allows the webserver to respond to secure HTTPS requests. | `false` |
+| platform_webserver_https_enabled | Boolean | If true, allows the webserver to respond to secure HTTPS requests. | `true` |
 | platform_webserver_https_port | Integer | The port on which the webserver listens for HTTPS requests. | 3443 |
 | platform_webserver_https_key | String | The path to the private key file used for HTTPS connections. | `/etc/pki/itential-platform/private/{{ inventory_hostname }}.key` |
+| platform_webserver_https_copy_certs | Boolean | Flag to manage PKI infrastructure (create directories and copy certificates). | `true` |
 | platform_webserver_https_passphrase | String | The passphrase for the private key used to enable TLS sessions. |  |
 | platform_webserver_https_cert | String | The path to the certificate file used for HTTPS connections. | `/etc/pki/itential-platform/https/{{ inventory_hostname }}.crt` |
 | platform_webserver_https_secure_protocol | String | The set of allowed SSL/TLS protocol versions. | `TLS_method` |
@@ -252,7 +253,8 @@ variables located in `roles/platform/defaults/main/mongodb.yml`.
 | platform_mongo_bypass_version_check | Boolean | If true, the server will not check if it is connecting to a compatible MongoDB version. | `false` |
 | platform_mongo_db_name | String | The name of the MongoDB logical database to connect to. | `itential` |
 | platform_mongo_url | String | The MongoDB connection string. For a replica set this will include all members of the replica set. For Mongo Atlas this will be the SRV connection format. | `mongodb://localhost:27017` |
-| platform_mongo_tls_enabled | Boolean | Instruct the MongoDB driver to use TLS protocols when connecting to the database. | `false` |
+| platform_mongo_tls_enabled | Boolean | Instruct the MongoDB driver to use TLS protocols when connecting to the database. | `true` |
+| platform_mongodb_copy_certs | Boolean | Flag to manage PKI infrastructure (create directories and copy certificates). | `true` |
 | platform_mongo_tls_allow_invalid_certificates | Boolean | If true, disables the validation checks for TLS certificates on other servers in the cluster and allows the use of invalid or self-signed certificates to connect. | `false` |
 | platform_mongo_tls_ca_file | String | The .pem file that contains the root certificate chain from the Certificate Authority. Specify the file name of the .pem file using absolute paths. |  |
 | platform_mongo_max_pool_size | Integer | The maximum number of connections in a connection pool. Each application/adapter has its own connection pool. |  |
