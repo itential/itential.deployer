@@ -10,9 +10,9 @@
         name: selinux
         tasks_from: configure-context
       vars:
-        selinux_target: "{{ gateway_python_venv }}(/.*)?"
+        selinux_target: "{{ gateway_python_venv }}/bin(/.*)?"
         selinux_setype: bin_t
-        selinux_path: "{{ gateway_python_venv }}"
+        selinux_path: "{{ gateway_python_venv }}/bin"
       when: not (gateway_python_venv.startswith('/opt/') or gateway_python_venv.startswith('/usr/'))
 
     - name: SELinux - Configure file context when using non-standard data directory
