@@ -1,9 +1,14 @@
 ---
 all:
   vars:
+    # The Platform release must be defined.
+    # Valid values: 6, 6.0
     platform_release: 6
+
     # Declare the purpose of the environment to help the verification stage check resources.
-    # Possible values: "dev", "test", "prod"
+    # The environment is not required for the installation playbooks. It is required for the
+    # certify and verify playbooks.
+    # Valid values: dev, test, prod
     env: <env>
 
   children:
@@ -11,11 +16,13 @@ all:
       hosts:
         host01.example.com:
       vars:
+        # The Platform encryption key must be defined.
         # open64-length hex string, representing a 256-bit AES encryption key
-        # example command to generate key: 'openssl rand -hex 32'
+        # Example command to generate key: 'openssl rand -hex 32'
         platform_encryption_key: <key>
 
-        # NOTE: the platform packages list varies depending on entitlement
+        # The Platform packages to install must be defined.
+        # NOTE: The Platform packages list varies depending on entitlement.
         platform_packages:
           - itential-platform-<version>.noarch.rpm
 

@@ -35,6 +35,7 @@ all:
         dc2-redis01.example.com:
         dc2-redis02.example.com:
       vars:
+        # Override the default Redis passwords.
         # NOTE: Using Ansible Vault to encrypt passwords is highly recommended
         redis_user_admin_password: <admin-password>
         redis_user_itential_password: <itential-password>
@@ -50,7 +51,10 @@ all:
         dc2-mongodb01.example.com:
         dc2-mongodb02.example.com:
       vars:
+        # Enable replication between the MongoDB nodes.
         mongodb_replication_enabled: true
+
+        # Override the default MongoDB passwords.
         # NOTE: using Ansible Vault to encrypt passwords is highly recommended
         mongodb_user_admin_password: <admin-password>
         mongodb_user_itential_password: <itential-password>
@@ -67,10 +71,35 @@ all:
         dc2-mongodb02.example.com:
         dc3-arbiter01.example.com:
       vars:
+        # Enable replication between the MongoDB nodes
         mongodb_replication_enabled: true
+
+        # Override the default MongoDB passwords.
         # NOTE: using Ansible Vault to encrypt passwords is highly recommended
         mongodb_user_admin_password: <admin-password>
         mongodb_user_itential_password: <itential-password>
+
+        # By default, TLS is enabled and the certs/keys will be copied from the control node
+        # to the target nodes.
+        # mongodb_tls_enabled: true
+        # mongodb_tls_copy_certs: true
+
+        # When uploading certs/keys, the source directory on the control node must be defined and
+        # be a valid directory.
+        mongodb_pki_src_dir: /path/to/certs/on/control/node
+
+        # The following TLS-related variables can be overridden.
+        # mongodb_pki_base_dir: /etc/pki/mongodb
+        # mongodb_pki_private_subdir: private
+        # mongodb_pki_private_dir: "{{ mongodb_pki_base_dir }}/{{ mongodb_pki_private_subdir }}"
+        # mongodb_tls_server_cert_file: "{{ inventory_hostname }}.pem"
+        # mongodb_tls_ca_file: ca-bundle.crt
+        # mongodb_auth_key_file: replica.key
+        # mongodb_tls_cert_dest: "{{ mongodb_pki_base_dir }}/{{ mongodb_tls_server_cert_file }}"
+        # mongodb_tls_ca_dest: "{{ mongodb_pki_base_dir }}/{{ mongodb_tls_ca_file }}"
+        # mongodb_auth_key_dest: "{{ mongodb_pki_private_dir }}/{{ mongodb_auth_key_file }}"
+        # mongodb_tls_cert_src: "{{ mongodb_pki_src_dir }}/{{ mongodb_tls_server_cert_file }}"
+        # mongodb_tls_ca_src: "{{ mongodb_pki_src_dir }}/{{ mongodb_tls_ca_file }}"
 
     platform:
       hosts:

@@ -1,7 +1,15 @@
 ---
 all:
   vars:
+    # The Platform release must be defined.
+    # Valid values: 6, 6.0
     platform_release: 6
+
+    # Declare the purpose of the environment to help the verification stage check resources.
+    # The environment is not required for the installation playbooks. It is required for the
+    # certify and verify playbooks.
+    # Valid values: dev, test, prod
+    env: <env>
 
   children:
     redis_master:
