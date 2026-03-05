@@ -80,8 +80,8 @@
           mongodb_pki_src_dir and mongodb_pki_base_dir must be defined and cannot be empty
           when mongodb_tls_copy_certs is enabled.
         success_msg: >-
-          mongodb_pki_src_dir: {{ mongodb_pki_src_dir }} and mongodb_pki_base_dir: {{ mongodb_pki_base_dir }}
-           are properly defined for copying certificates"
+          "mongodb_pki_src_dir is set to: {{ mongodb_pki_src_dir }}" 
+          "mongodb_pki_base_dir is set to: {{ mongodb_pki_base_dir }}"
       when: mongodb_tls_copy_certs | bool
 
     - name: Validate mongodb_pki_base_dir when TLS or replication is enabled
@@ -93,7 +93,7 @@
           mongodb_pki_base_dir must be defined and cannot be empty
           when mongodb_tls_enabled or mongodb_replication_enabled is true.
         success_msg: >-
-          "mongodb_pki_base_dir is properly configured: {{ mongodb_pki_base_dir }}"
+          "mongodb_pki_base_dir is set to: {{ mongodb_pki_base_dir }}"
       when:
         - not (mongodb_tls_copy_certs | bool)
         - mongodb_tls_enabled | bool or mongodb_replication_enabled | bool

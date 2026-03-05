@@ -15,7 +15,7 @@
         state: directory
         owner: "{{ gateway_user }}"
         group: "{{ gateway_group }}"
-        mode: "{{ gateway_pki_base_dir_mode }}"
+        mode: "0750"
 
     - name: Create Gateway PKI https directory
       ansible.builtin.file:
@@ -23,7 +23,7 @@
         state: directory
         owner: "{{ gateway_user }}"
         group: "{{ gateway_group }}"
-        mode: "{{ gateway_pki_subdir_mode }}"
+        mode: "0750"
 
     - name: Create Gateway PKI private directory
       ansible.builtin.file:
@@ -31,7 +31,7 @@
         state: directory
         owner: "{{ gateway_user }}"
         group: "{{ gateway_group }}"
-        mode: "{{ gateway_pki_private_dir_mode }}"
+        mode: "0700"
 
     - name: Copy Gateway certificates
       ansible.builtin.include_tasks:

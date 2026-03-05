@@ -37,31 +37,31 @@ certificates/
 mongodb:
   vars:
     mongodb_pki_src_dir: "<path/to/local/mongodb/certs>"
-    # Default: mongodb_tls_server_cert_filename: "{{ inventory_hostname }}.pem"
+    # Default: mongodb_tls_server_cert_file: "{{ inventory_hostname }}.pem"
     # No override needed - this is the default
 
 # Platform
 platform:
   vars:
     platform_https_pki_src_dir: "<path/to/local/platform/certs>"
-    # Default: platform_https_cert_filename: "{{ inventory_hostname }}.crt"
-    # Default: platform_https_key_filename: "{{ inventory_hostname }}.key"
+    # Default: platform_https_cert_file: "{{ inventory_hostname }}.crt"
+    # Default: platform_https_key_file: "{{ inventory_hostname }}.key"
     # No override needed
 
 # Redis
 redis:
   vars:
     redis_pki_src_dir: "<path/to/local/redis/certs>"
-    # Default: redis_tls_cert_filename: "{{ inventory_hostname }}.crt"
-    # Default: redis_tls_key_filename: "{{ inventory_hostname }}.key"
+    # Default: redis_tls_cert_file: "{{ inventory_hostname }}.crt"
+    # Default: redis_tls_key_file: "{{ inventory_hostname }}.key"
     # No override needed
 
 # Gateway
 gateway:
   vars:
     gateway_pki_src_dir: "<path/to/local/gateway/certs>"
-    # Default: gateway_https_cert_filename: "{{ inventory_hostname }}.crt"
-    # Default: gateway_https_key_filename: "{{ inventory_hostname }}.key"
+    # Default: gateway_https_cert_file: "{{ inventory_hostname }}.crt"
+    # Default: gateway_https_key_file: "{{ inventory_hostname }}.key"
     # No override needed
 ```
 
@@ -88,8 +88,6 @@ certificates/
   platform/
     platform.crt         (shared by all Platform servers)
     platform.key
-    client.pem
-    mongodb-client.key
     ca-bundle.crt
   redis/
     redis.crt            (shared by all Redis servers)
@@ -107,28 +105,28 @@ certificates/
 mongodb:
   vars:
     mongodb_pki_src_dir: "<path/to/local/mongodb/certs>"
-    mongodb_tls_server_cert_filename: "mongodb.pem"
+    mongodb_tls_server_cert_file: "mongodb.pem"
 
 # Platform - All servers use platform.crt/key
 platform:
   vars:
     platform_https_pki_src_dir: "<path/to/local/platform/certs>"
-    platform_https_cert_filename: "platform.crt"
-    platform_https_key_filename: "platform.key"
+    platform_https_cert_file: "platform.crt"
+    platform_https_key_file: "platform.key"
 
 # Redis - All servers use redis.crt/key
 redis:
   vars:
     redis_pki_src_dir: "<path/to/local/redis/certs>"
-    redis_tls_cert_filename: "redis.crt"
-    redis_tls_key_filename: "redis.key"
+    redis_tls_cert_file: "redis.crt"
+    redis_tls_key_file: "redis.key"
 
 # Gateway - All servers use gateway.crt/key
 gateway:
   vars:
     gateway_pki_src_dir: "<path/to/local/gateway/certs>"
-    gateway_https_cert_filename: "gateway.crt"
-    gateway_https_key_filename: "gateway.key"
+    gateway_https_cert_file: "gateway.crt"
+    gateway_https_key_file: "gateway.key"
 ```
 
 **Certificate Requirements:**
@@ -163,29 +161,29 @@ certificates/
 mongodb:
   vars:
     mongodb_pki_src_dir: "<path/to/local/certs>"
-    mongodb_tls_server_cert_filename: "shared.pem"
+    mongodb_tls_server_cert_file: "shared.pem"
 
 # Platform
 platform:
   vars:
     platform_https_pki_src_dir: "<path/to/local/certs>"
     platform_mongodb_pki_src_dir: "<path/to/local/certs>"
-    platform_https_cert_filename: "shared.crt"
-    platform_https_key_filename: "shared.key"
+    platform_https_cert_file: "shared.crt"
+    platform_https_key_file: "shared.key"
 
 # Redis
 redis:
   vars:
     redis_pki_src_dir: "<path/to/local/certs>"
-    redis_tls_cert_filename: "shared.crt"
-    redis_tls_key_filename: "shared.key"
+    redis_tls_cert_file: "shared.crt"
+    redis_tls_key_file: "shared.key"
 
 # Gateway
 gateway:
   vars:
     gateway_pki_src_dir: "<path/to/local/certs>"
-    gateway_https_cert_filename: "shared.crt"
-    gateway_https_key_filename: "shared.key"
+    gateway_https_cert_file: "shared.crt"
+    gateway_https_key_file: "shared.key"
 ```
 
 **Certificate Requirements:**
@@ -263,7 +261,7 @@ cat mongodb.key mongodb.crt > mongodb.pem
 ```yaml
 mongodb:
   vars:
-    mongodb_tls_server_cert_filename: "mongodb.pem"  # Changed
+    mongodb_tls_server_cert_file: "mongodb.pem"  # Changed
 ```
 
 **Step 3:** Update certificates directory structure
@@ -288,25 +286,25 @@ cat shared.crt shared.key > shared.pem
 mongodb:
   vars:
     mongodb_pki_src_dir: "<path/to/local/certs>"  # Single directory
-    mongodb_tls_server_cert_filename: "shared.pem"
+    mongodb_tls_server_cert_file: "shared.pem"
 
 platform:
   vars:
     platform_https_pki_src_dir: "<path/to/local/certs>"
-    platform_https_cert_filename: "shared.crt"
-    platform_https_key_filename: "shared.key"
+    platform_https_cert_file: "shared.crt"
+    platform_https_key_file: "shared.key"
 
 redis:
   vars:
     redis_pki_src_dir: "<path/to/local/certs>"
-    redis_tls_cert_filename: "shared.crt"
-    redis_tls_key_filename: "shared.key"
+    redis_tls_cert_file: "shared.crt"
+    redis_tls_key_file: "shared.key"
 
 gateway:
   vars:
     gateway_pki_src_dir: "<path/to/local/certs>"
-    gateway_https_cert_filename: "shared.crt"
-    gateway_https_key_filename: "shared.key"
+    gateway_https_cert_file: "shared.crt"
+    gateway_https_key_file: "shared.key"
 ```
 
 ---
@@ -316,27 +314,25 @@ gateway:
 All filename variables can be overridden in your inventory:
 
 **MongoDB:**
-- `mongodb_tls_server_cert_filename`
-- `mongodb_tls_ca_cert_filename`
-- `mongodb_replica_keyfile_filename`
+- `mongodb_tls_server_cert_file`
+- `mongodb_tls_ca_file`
+- `mongodb_auth_key_file`
 
 **Platform:**
-- `platform_https_cert_filename`
-- `platform_https_key_filename`
-- `platform_https_ca_filename`
-- `platform_mongodb_ca_filename`
-- `platform_mongodb_client_cert_filename`
-- `platform_mongodb_client_key_filename`
+- `platform_https_cert_file`
+- `platform_https_key_file`
+- `platform_https_ca_file`
+- `platform_mongodb_ca_file`
 
 **Redis:**
-- `redis_tls_cert_filename`
-- `redis_tls_key_filename`
-- `redis_tls_ca_cert_filename`
+- `redis_tls_cert_file`
+- `redis_tls_key_file`
+- `redis_tls_ca_file`
 
 **Gateway:**
-- `gateway_https_cert_filename`
-- `gateway_https_key_filename`
-- `gateway_https_ca_filename`
+- `gateway_https_cert_file`
+- `gateway_https_key_file`
+- `gateway_https_ca_file`
 
 ---
 
@@ -348,25 +344,25 @@ You can even mix scenarios per role:
 # MongoDB: Per-host (most critical)
 mongodb:
   vars:
-    mongodb_tls_server_cert_filename: "{{ inventory_hostname }}.pem"
+    mongodb_tls_server_cert_file: "{{ inventory_hostname }}.pem"
 
 # Platform: Per-host (user-facing)
 platform:
   vars:
-    platform_https_cert_filename: "{{ inventory_hostname }}.crt"
-    platform_https_key_filename: "{{ inventory_hostname }}.key"
+    platform_https_cert_file: "{{ inventory_hostname }}.crt"
+    platform_https_key_file: "{{ inventory_hostname }}.key"
 
 # Redis: Per-role (internal, less critical)
 redis:
   vars:
-    redis_tls_cert_filename: "redis.crt"
-    redis_tls_key_filename: "redis.key"
+    redis_tls_cert_file: "redis.crt"
+    redis_tls_key_file: "redis.key"
 
 # Gateway: Per-role (behind load balancer)
 gateway:
   vars:
-    gateway_https_cert_filename: "gateway.crt"
-    gateway_https_key_filename: "gateway.key"
+    gateway_https_cert_file: "gateway.crt"
+    gateway_https_key_file: "gateway.key"
 ```
 
 ---

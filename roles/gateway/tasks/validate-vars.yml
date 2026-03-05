@@ -17,8 +17,8 @@
           Set gateway_pki_src_dir to the source directory containing certificates
           and gateway_pki_base_dir to the destination directory.
         success_msg: >-
-          "gateway_pki_src_dir is properly configured: {{ gateway_pki_src_dir }}"
-          "gateway_pki_base_dir is properly configured: {{ gateway_pki_base_dir }}"
+          "gateway_pki_src_dir is set to: {{ gateway_pki_src_dir }}"
+          "gateway_pki_base_dir is set to: {{ gateway_pki_base_dir }}"
       when: gateway_pki_copy_certs | bool
 
     - name: Validate gateway_pki_base_dir when HTTPS is enabled
@@ -31,5 +31,5 @@
           when gateway_https_enabled is true.
           The Gateway configuration file needs to know where certificates are located.
         success_msg: >-
-          "gateway_pki_base_dir is properly configured: {{ gateway_pki_base_dir }}"
+          "gateway_pki_base_dir is set to: {{ gateway_pki_base_dir }}"
       when: gateway_https_enabled | bool

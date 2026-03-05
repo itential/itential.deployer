@@ -219,10 +219,10 @@ located in `roles/platform/defaults/main/webserver.yml`.
 | platform_webserver_http_port | Integer | The port on which the webserver listens for HTTP requests. | 3000 |
 | platform_webserver_https_enabled | Boolean | If true, allows the webserver to respond to secure HTTPS requests. | `true` |
 | platform_webserver_https_port | Integer | The port on which the webserver listens for HTTPS requests. | 3443 |
-| platform_webserver_https_key | String | The path to the private key file used for HTTPS connections. | `/etc/pki/itential-platform/private/{{ inventory_hostname }}.key` |
+| platform_https_key_dest | String | The path to the private key file used for HTTPS connections. | `/etc/pki/itential-platform/private/{{ inventory_hostname }}.key` |
 | platform_webserver_https_copy_certs | Boolean | Flag to manage PKI infrastructure (create directories and copy certificates). | `true` |
 | platform_webserver_https_passphrase | String | The passphrase for the private key used to enable TLS sessions. |  |
-| platform_webserver_https_cert | String | The path to the certificate file used for HTTPS connections. | `/etc/pki/itential-platform/https/{{ inventory_hostname }}.crt` |
+| platform_https_cert_dest | String | The path to the certificate file used for HTTPS connections. | `/etc/pki/itential-platform/https/{{ inventory_hostname }}.crt` |
 | platform_webserver_https_secure_protocol | String | The set of allowed SSL/TLS protocol versions. | `TLS_method` |
 | platform_webserver_https_ciphers | String |  The allowed SSL/TLS cipher suite. | `ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA384:DHE-RSA-AES256-SHA384:ECDHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA256:HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA` |
 | platform_webserver_https_client_reneg_limit | Integer | Specifies the number of renegotiations that are allowed in a single HTTPS connection. | 3 |
@@ -269,14 +269,31 @@ located in `roles/platform/defaults/main/platform.yml`.
 | platform_server_dir | String | The Itential Platform installation directory. | `/opt/itential/platform/server` |
 | platform_config_dir | String | The Itential Platform configuration directory. | `/etc/itential` |
 | platform_pki_base_dir | String | The base PKI directory for Platform certificates. | `/etc/pki/itential-platform` |
-| platform_https_cert_filename | String | HTTPS certificate filename. | `{{ inventory_hostname }}.crt` |
-| platform_https_key_filename | String | HTTPS private key filename. | `{{ inventory_hostname }}.key` |
-| platform_https_ca_filename | String | HTTPS CA bundle filename. | `ca-bundle.crt` |
-| platform_mongodb_ca_filename | String | MongoDB client CA bundle filename. | `ca-bundle.crt` |
+| platform_pki_private_subdir | String | Subdirectory name for private keys. | `private` |
+| platform_pki_https_subdir | String | Subdirectory name for HTTPS certificates. | `https` |
+| platform_pki_mongodb_subdir | String | Subdirectory name for MongoDB client certificates. | `mongodb` |
+| platform_pki_private_dir | String | Full path to private keys directory. | `{{ platform_pki_base_dir }}/{{ platform_pki_private_subdir }}` |
+| platform_pki_https_dir | String | Full path to HTTPS certificates directory. | `{{ platform_pki_base_dir }}/{{ platform_pki_https_subdir }}` |
+| platform_mongodb_pki_dir | String | Full path to MongoDB certificates directory. | `{{ platform_pki_base_dir }}/{{ platform_pki_mongodb_subdir }}` |
+| platform_https_cert_file | String | HTTPS certificate filename. | `{{ inventory_hostname }}.crt` |
+| platform_https_key_file | String | HTTPS private key filename. | `{{ inventory_hostname }}.key` |
+| platform_https_ca_file | String | HTTPS CA bundle filename. | `ca-bundle.crt` |
+| platform_mongodb_ca_file | String | MongoDB client CA bundle filename. | `ca-bundle.crt` |
 | platform_https_pki_src_dir | String | Source directory for HTTPS certificates. | MUST be set in inventory |
 | platform_mongodb_pki_src_dir | String | Source directory for MongoDB client certificates. | MUST be set in inventory |
+| platform_https_cert_src | String | Full source path for HTTPS certificate on controller. | `{{ platform_https_pki_src_dir }}/{{ platform_https_cert_file }}` |
+| platform_https_key_src | String | Full source path for HTTPS private key on controller. | `{{ platform_https_pki_src_dir }}/{{ platform_https_key_file }}` |
+| platform_https_ca_src | String | Full source path for HTTPS CA bundle on controller. | `{{ platform_https_pki_src_dir }}/{{ platform_https_ca_file }}` |
+| platform_mongodb_ca_src | String | Full source path for MongoDB CA certificate on controller. | `{{ platform_mongodb_pki_src_dir }}/{{ platform_mongodb_ca_file }}` |
+| platform_https_cert_dest | String | Full destination path for HTTPS certificate. | `{{ platform_pki_https_dir }}/{{ platform_https_cert_file }}` |
+| platform_https_key_dest | String | Full destination path for HTTPS private key. | `{{ platform_pki_private_dir }}/{{ platform_https_key_file }}` |
+| platform_https_ca_dest | String | Full destination path for HTTPS CA bundle. | `{{ platform_pki_https_dir }}/{{ platform_https_ca_file }}` |
 | platform_itential_home_dir | String | The Itential Platform itential user home directory. | `/home/itential` |
-| platform_mongodb_root_ca_file_destination | String | Destination as referenced by itential user when connecting from itential host. This is ultimately stored in the mongo database to be read by Itential Platform, therefore this is the location as seen from the Itential Platform host. | ` /etc/pki/itential-platform/mongodb/ca-bundle.crt` |
+| platform_mongodb_ca_dest | String | Destination as referenced by itential user when connecting from itential host. This is ultimately stored in the mongo database to be read by Itential Platform, therefore this is the location as seen from the Itential Platform host. | ` /etc/pki/itential-platform/mongodb/ca-bundle.crt` |
+| platform_pki_base_owner | String | Owner for PKI base directory. | `root` |
+| platform_pki_base_group | String | Group for PKI base directory. | `{{ platform_group }}` |
+| platform_pki_private_owner | String | Owner for private key files. | `root` |
+| platform_pki_private_group | String | Group for private key files. | `{{ platform_group }}` |
 | platform_package_dependencies | List(String) | Required OS packages for install. | `glibc-common, openldap, openldap-clients, openssl, git` |
 | platform_python_base_dependencies | List(String) | Required python packages for install. | `pip, setuptools, wheel` |
 | platform_python_executable | String | The python executable locations. These will be symlinks to the appropriate executables in /usr/bin. | `/usr/bin/python{{ platform_python_version }}` |
@@ -289,6 +306,8 @@ located in `roles/platform/defaults/main/platform.yml`.
 | platform_npm_ignore_scripts | Boolean | Flag to prevent the NPM scripts from running when running the NPM install. | `true` |
 | platform_app_artifacts_enabled | Boolean | Flag to install app-artifacts. | `false` |
 | platform_start_service | Boolean | Flag to determine if the Itential Platform service is started. | `true` |
+| platform_certify_report_dir_remote | String | Default location for the certification report files on remote host. | `/var/tmp/itential-reports/platform` |
+| platform_certify_report_dir_local | String | Default location for the certification report files on local host. | `/tmp/itential-reports/platform` |
 
 #### Server Variables
 

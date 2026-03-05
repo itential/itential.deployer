@@ -3,20 +3,20 @@
 ---
 - name: Copy TLS certificate to MongoDB host
   ansible.builtin.copy:
-    src: "{{ mongodb_cert_keyfile_source }}"
-    dest: "{{ mongodb_cert_keyfile_destination }}"
+    src: "{{ mongodb_tls_cert_src }}"
+    dest: "{{ mongodb_tls_cert_dest }}"
     mode: "0640"
     group: "{{ mongodb_group }}"
     owner: "{{ mongodb_owner }}"
-  when: mongodb_cert_keyfile_source | length > 0
+  when: mongodb_tls_cert_src | length > 0
   notify: restart mongod
 
 - name: Copy CA certificate to MongoDB host
   ansible.builtin.copy:
-    src: "{{ mongodb_root_ca_file_source }}"
-    dest: "{{ mongodb_root_ca_file_destination }}"
+    src: "{{ mongodb_tls_ca_src }}"
+    dest: "{{ mongodb_tls_ca_dest }}"
     mode: "0644"
     group: "{{ mongodb_group }}"
     owner: "{{ mongodb_owner }}"
-  when: mongodb_root_ca_file_source | length > 0
+  when: mongodb_tls_ca_src | length > 0
   notify: restart mongod

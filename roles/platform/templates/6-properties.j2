@@ -616,8 +616,8 @@ webserver_https_port = {{ platform_webserver_https_port }}
 {% endif %}
 
 # The path to the public key file used for HTTPS connections.
-{% if platform_webserver_https_key %}
-webserver_https_key = {{ platform_webserver_https_key }}
+{% if platform_https_key_dest %}
+webserver_https_key = {{ platform_https_key_dest }}
 {% else %}
 # webserver_https_key =
 {% endif %}
@@ -630,8 +630,8 @@ webserver_https_passphrase = {{ platform_webserver_https_passphrase }}
 {% endif %}
 
 # The path to the certificate file used for HTTPS connections.
-{% if platform_webserver_https_cert %}
-webserver_https_cert = {{ platform_webserver_https_cert }}
+{% if platform_https_cert_dest %}
+webserver_https_cert = {{ platform_https_cert_dest }}
 {% else %}
 # webserver_https_cert =
 {% endif %}

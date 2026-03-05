@@ -14,7 +14,7 @@
         path: "{{ mongodb_pki_base_dir }}"
         owner: "{{ mongodb_owner }}"
         group: "{{ mongodb_group }}"
-        mode: "{{ mongodb_pki_base_dir_mode }}"
+        mode: "0750"
 
     - name: Create MongoDB private directory
       ansible.builtin.file:
@@ -22,7 +22,7 @@
         path: "{{ mongodb_pki_private_dir }}"
         owner: "{{ mongodb_owner }}"
         group: "{{ mongodb_group }}"
-        mode: "{{ mongodb_pki_private_dir_mode }}"
+        mode: "0700"
 
     - name: Copy Gateway certificates
       ansible.builtin.include_tasks:

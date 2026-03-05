@@ -46,7 +46,7 @@ security:
   # The path to a key file that stores the shared secret that MongoDB
   # instances use to authenticate to each other in a sharded cluster
   # or replica set. Not required for standalone instance.
-  keyFile: {{ mongodb_auth_keyfile_destination }}
+  keyFile: {{ mongodb_auth_key_dest }}
 {% endif %}
 
 # Network Interfaces & TLS Settings
@@ -75,12 +75,12 @@ net:
 
 {% if stage == "tls" and mongodb_tls_enabled | bool %}
     # The .pem file that contains both the TLS certificate and key.
-    certificateKeyFile: {{ mongodb_cert_keyfile_destination }}
+    certificateKeyFile: {{ mongodb_tls_cert_dest }}
 
     # The .pem file that contains the root certificate chain from the
     # Certificate Authority. Specify the file name of the .pem file
     # using relative or absolute paths.
-    CAFile: {{ mongodb_root_ca_file_destination }}
+    CAFile: {{ mongodb_tls_ca_dest }}
 
     # For clients that do not present certificates, mongod bypasses
     # TLS/SSL certificate validation when establishing the connection.

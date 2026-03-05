@@ -19,48 +19,48 @@ redis_pki_private_dir: "{{ redis_pki_base_dir }}/{{ redis_pki_private_subdir }}"
 # ============================================================================
 
 # Redis server certificate filename
-redis_tls_cert_filename: "{{ inventory_hostname }}.crt"
+redis_tls_cert_dest: "{{ inventory_hostname }}.crt"
 
 # Redis server private key filename
-redis_tls_key_filename: "{{ inventory_hostname }}.key"
+redis_tls_key_dest: "{{ inventory_hostname }}.key"
 
 # Redis CA certificate filename
-redis_tls_ca_filename: ca-bundle.crt
+redis_tls_ca_dest: ca-bundle.crt
 
 # Redis DH parameters filename
-redis_tls_dh_params_filename: dhparams.pem
+redis_tls_dh_params_dest: dhparams.pem
 
 # Redis Sentinel certificate filename
-redis_sentinel_tls_cert_filename: sentinel.crt
+redis_sentinel_tls_cert_dest: sentinel.crt
 
 # Redis Sentinel private key filename
-redis_sentinel_tls_key_filename: sentinel.key
+redis_sentinel_tls_key_dest: sentinel.key
 
 # ============================================================================
 # Redis Server Full Certificate Paths - Built from components
 # ============================================================================
 
 # Redis server certificate path
-redis_tls_cert_file: "{{ redis_pki_base_dir }}/{{ redis_tls_cert_filename }}"
+redis_tls_cert_dest: "{{ redis_pki_base_dir }}/{{ redis_tls_cert_dest }}"
 
 # Redis server private key path
-redis_tls_key_file: "{{ redis_pki_private_dir }}/{{ redis_tls_key_filename }}"
+redis_tls_key_dest: "{{ redis_pki_private_dir }}/{{ redis_tls_key_dest }}"
 
 # Redis CA certificate path
-redis_tls_ca_file: "{{ redis_pki_base_dir }}/{{ redis_tls_ca_filename }}"
+redis_tls_ca_dest: "{{ redis_pki_base_dir }}/{{ redis_tls_ca_dest }}"
 
 # Redis DH parameters path
-redis_tls_dh_params_file: "{{ redis_pki_base_dir }}/{{ redis_tls_dh_params_filename }}"
+redis_tls_dh_params_dest: "{{ redis_pki_base_dir }}/{{ redis_tls_dh_params_dest }}"
 
 # ============================================================================
 # Redis Sentinel Full Certificate Paths - Built from components
 # ============================================================================
 
 # Sentinel certificate path
-redis_sentinel_tls_cert_file: "{{ redis_pki_base_dir }}/{{ redis_sentinel_tls_cert_filename }}"
+redis_sentinel_tls_cert_dest: "{{ redis_pki_base_dir }}/{{ redis_sentinel_tls_cert_dest }}"
 
 # Sentinel private key path
-redis_sentinel_tls_key_file: "{{ redis_pki_private_dir }}/{{ redis_sentinel_tls_key_filename }}"
+redis_sentinel_tls_key_dest: "{{ redis_pki_private_dir }}/{{ redis_sentinel_tls_key_dest }}"
 
 # ============================================================================
 # Source Directory - Define in inventory
@@ -74,14 +74,14 @@ redis_pki_src_dir: ""
 # ============================================================================
 
 # Redis server source paths - auto-build from source dir + filename
-redis_tls_cert_source: "{{ redis_pki_src_dir }}/{{ redis_tls_cert_filename }}"
-redis_tls_key_source: "{{ redis_pki_src_dir }}/{{ redis_tls_key_filename }}"
-redis_tls_ca_source: "{{ redis_pki_src_dir }}/{{ redis_tls_ca_filename }}"
-redis_tls_dh_params_source: "{{ redis_pki_src_dir }}/{{ redis_tls_dh_params_filename }}"
+redis_tls_cert_src: "{{ redis_pki_src_dir }}/{{ redis_tls_cert_dest }}"
+redis_tls_key_src: "{{ redis_pki_src_dir }}/{{ redis_tls_key_dest }}"
+redis_tls_ca_src: "{{ redis_pki_src_dir }}/{{ redis_tls_ca_dest }}"
+redis_tls_dh_params_src: "{{ redis_pki_src_dir }}/{{ redis_tls_dh_params_dest }}"
 
 # Sentinel source paths - auto-build from source dir + filename
-redis_sentinel_tls_cert_source: "{{ redis_pki_src_dir }}/{{ redis_sentinel_tls_cert_filename }}"
-redis_sentinel_tls_key_source: "{{ redis_pki_src_dir }}/{{ redis_sentinel_tls_key_filename }}"
+redis_sentinel_tls_cert_src: "{{ redis_pki_src_dir }}/{{ redis_sentinel_tls_cert_dest }}"
+redis_sentinel_tls_key_src: "{{ redis_pki_src_dir }}/{{ redis_sentinel_tls_key_dest }}"
 
 # ============================================================================
 # File Ownership - Customize per environment
@@ -96,27 +96,3 @@ redis_pki_group: redis
 # ============================================================================
 # File Permissions - Customize per security requirements
 # ============================================================================
-
-# Base PKI directory permissions
-redis_pki_base_dir_mode: "0750"
-
-# Private subdirectory permissions
-redis_pki_private_dir_mode: "0700"
-
-# Server certificate permissions
-redis_tls_cert_mode: "0644"
-
-# Server private key permissions
-redis_tls_key_mode: "0600"
-
-# CA certificate permissions
-redis_tls_ca_mode: "0644"
-
-# DH parameters permissions
-redis_tls_dh_params_mode: "0644"
-
-# Sentinel certificate permissions
-redis_sentinel_tls_cert_mode: "0644"
-
-# Sentinel private key permissions
-redis_sentinel_tls_key_mode: "0600"

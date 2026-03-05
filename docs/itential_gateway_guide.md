@@ -42,23 +42,28 @@ The following table lists the default variables located in `roles/gateway/defaul
 | `gateway_enable_nornir` | Boolean | Flag to enable Nornir. | `true` |
 | `gateway_enable_netmiko` | Boolean | Flag to enable Netmiko. | `true` |
 | `gateway_enable_scripts` | Boolean | Flag to enable scripts. | `true` |
-| `gateway_enable_httpreq` | Boolean | Flag to enable HTTP requests. | `true` |
 | `gateway_enable_netconf` | Boolean | Flag to enable Netconf requests. | `true` |
+| `gateway_enable_httpreq` | Boolean | Flag to enable HTTP requests. | `true` |
 | `gateway_enable_python_venv` | Boolean | Flag to enable Python virtual environments. | `true` |
 | `gateway_enable_grpc` | Boolean | Flag to enable GRPC requests. | `true` |
 | `gateway_enable_git` | Boolean | Flag to enable Git integration. | `true` |
-| `gateway_install_dir` | String |  The base directory where to install the IAG files. | `/opt/automation-gateway` |
+| `gateway_install_dir` | String | The base directory where to install the IAG files. | `/opt/automation-gateway` |
+| `gateway_ansible_collections_path` | String | The location of IAG Ansible collections. | `{{ gateway_install_dir }}/ansible/collections` |
 | `gateway_data_dir` | String | The IAG data directory. | `/var/lib/automation-gateway` |
 | `gateway_log_dir` | String | The IAG log directory. | `/var/log/automation-gateway` |
 | `gateway_port` | Integer | The IAG HTTP listen port. | `8083` |
 | `gateway_properties_location` | String | The location of the IAG configuration file. | `/etc/automation-gateway` |
 | `gateway_user` | String | The IAG Linux user. | `itential` |
 | `gateway_group` | String | The IAG Linux group. | `itential` |
+| `gateway_user_home_dir` | String | The home directory for the IAG user. | `/home/{{ gateway_user }}` |
+| `gateway_user_shell_rc_file` | String | The shell RC file for the IAG user. | `{{ gateway_user_home_dir }}/.bashrc` |
 | `gateway_https_enabled` | Boolean | Flag to enable HTTPS in Gateway configuration. | `true` |
 | `gateway_https_port` | Integer | The IAG HTTPS listen port. | `8443` |
 | `gateway_pki_copy_certs` | Boolean | Flag to manage PKI infrastructure (create directories and copy certificates). | `true` |
 | `gateway_tlsv1_2` | Boolean | Flag to enable TLS 1.2. | `false` |
 | `gateway_http_server_threads` | Integer | The number of http server threads for handling requests. | `{{ ansible_processor_cores * 4 }}` |
+| `gateway_venv_name` | String | The name of the Python virtual environment. | `venv` |
+| `gateway_python_venv` | String | The full path to the Python virtual environment. | `{{ gateway_install_dir }}/{{ gateway_venv_name }}` |
 
 ### Gateway PKI Variables
 
@@ -71,16 +76,16 @@ The following table lists the PKI-related variables located in `roles/gateway/de
 | `gateway_pki_https_subdir` | String | Subdirectory name for HTTPS certificates. | `https` |
 | `gateway_pki_private_dir` | String | Full path to private keys directory. | `{{ gateway_pki_base_dir }}/{{ gateway_pki_private_subdir }}` |
 | `gateway_pki_https_dir` | String | Full path to HTTPS certificates directory. | `{{ gateway_pki_base_dir }}/{{ gateway_pki_https_subdir }}` |
-| `gateway_pki_src_dir` | String | Source directory on Ansible controller containing certificates. Must be set in inventory. | `""` |
-| `gateway_https_cert_filename` | String | HTTPS certificate filename (supports per-host certificates). | `{{ inventory_hostname }}.crt` |
-| `gateway_https_key_filename` | String | HTTPS private key filename (supports per-host certificates). | `{{ inventory_hostname }}.key` |
-| `gateway_https_ca_filename` | String | CA bundle filename. | `ca-bundle.crt` |
-| `gateway_https_cert_file` | String | Full path to HTTPS certificate. | `{{ gateway_pki_https_dir }}/{{ gateway_https_cert_filename }}` |
-| `gateway_https_key_file` | String | Full path to HTTPS private key. | `{{ gateway_pki_private_dir }}/{{ gateway_https_key_filename }}` |
-| `gateway_https_ca_file` | String | Full path to CA bundle. | `{{ gateway_pki_https_dir }}/{{ gateway_https_ca_filename }}` |
-| `gateway_https_cert_source` | String | Source path for HTTPS certificate on controller. | `{{ gateway_pki_src_dir }}/{{ gateway_https_cert_filename }}` |
-| `gateway_https_key_source` | String | Source path for HTTPS private key on controller. | `{{ gateway_pki_src_dir }}/{{ gateway_https_key_filename }}` |
-| `gateway_https_ca_source` | String | Source path for CA bundle on controller. | `{{ gateway_pki_src_dir }}/{{ gateway_https_ca_filename }}` |
+| `gateway_pki_src_dir` | String | Source directory on Ansible controller containing certificates. Must be set in inventory when copying certificates. | `""` |
+| `gateway_https_cert_file` | String | HTTPS certificate filename (supports per-host certificates). | `{{ inventory_hostname }}.crt` |
+| `gateway_https_key_file` | String | HTTPS private key filename (supports per-host certificates). | `{{ inventory_hostname }}.key` |
+| `gateway_https_ca_file` | String | CA bundle filename. | `ca-bundle.crt` |
+| `gateway_https_cert_dest` | String | Full destination path for HTTPS certificate. | `{{ gateway_pki_https_dir }}/{{ gateway_https_cert_file }}` |
+| `gateway_https_key_dest` | String | Full destination path for HTTPS private key. | `{{ gateway_pki_private_dir }}/{{ gateway_https_key_file }}` |
+| `gateway_https_ca_dest` | String | Full destination path for CA bundle. | `{{ gateway_pki_https_dir }}/{{ gateway_https_ca_file }}` |
+| `gateway_https_cert_src` | String | Full source path for HTTPS certificate on controller. | `{{ gateway_pki_src_dir }}/{{ gateway_https_cert_file }}` |
+| `gateway_https_key_src` | String | Full source path for HTTPS private key on controller. | `{{ gateway_pki_src_dir }}/{{ gateway_https_key_file }}` |
+| `gateway_https_ca_src` | String | Full source path for CA bundle on controller. | `{{ gateway_pki_src_dir }}/{{ gateway_https_ca_file }}` |
 
 ## Configuring HTTPS
 
@@ -168,12 +173,8 @@ To use different naming:
 
 ```yaml
 # Use a shared certificate for all Gateway servers
-gateway_https_cert_filename: "gateway.crt"
-gateway_https_key_filename: "gateway.key"
-
-# Or use a wildcard certificate
-gateway_https_cert_filename: "wildcard.crt"
-gateway_https_key_filename: "wildcard.key"
+gateway_https_cert_file: "gateway.crt"
+gateway_https_key_file: "gateway.key"
 ```
 
 ## Building the Inventory

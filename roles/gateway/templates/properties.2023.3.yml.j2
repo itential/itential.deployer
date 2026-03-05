@@ -96,19 +96,19 @@ strict_args: true
 
 # To start the server using SSL/TLS please fill out the following properties.
 {% if gateway_https_enabled %}
-server_certfile: "{{ gateway_https_cert_file }}"
+server_certfile: "{{ gateway_https_cert_dest }}"
 
 # Note: gunicorn does not currently support encrypted key files.
-server_keyfile: "{{ gateway_https_key_file }}"
+server_keyfile: "{{ gateway_https_key_dest }}"
 
-server_cabundle: "{{ gateway_https_ca_file }}"
+server_cabundle: "{{ gateway_https_ca_dest }}"
 {% else %}
-#server_certfile: "{{ gateway_https_cert_file }}"
+#server_certfile: "{{ gateway_https_cert_dest }}"
 
 # Note: gunicorn does not currently support encrypted key files.
-#server_keyfile: "{{ gateway_https_key_file }}"
+#server_keyfile: "{{ gateway_https_key_dest }}"
 
-# server_cabundle: "{{ gateway_https_ca_file }}"
+# server_cabundle: "{{ gateway_https_ca_dest }}"
 {% endif %}
 
 # TLSv1_2

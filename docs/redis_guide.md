@@ -141,6 +141,11 @@ The following tables lists the default variables located in `roles/redis/default
 | `redis_group` | String | The Redis Linux group. | `redis` |
 | `redis_bind` | String | A space-separated list of hostnames/IP addresses on which Redis listeners will be created. | `bind 127.0.0.1 {{ ansible_default_ipv4.address }}` |
 | `redis_tls_enabled` | Boolean | Flag to enable TLS connections. | `false` |
+| `redis_certify_report_dir_remote` | String | Remote directory for certification reports. | `/var/tmp/itential-reports/redis` |
+| `redis_certify_report_dir_local` | String | Local directory for certification reports. | `/tmp/itential-reports/redis` |
+| `redis_tls_port` | Integer | The Redis TLS listen port. | Varies by platform |
+| `redis_tls_auth_clients` | String | TLS client authentication setting. | `no` |
+| `redis_tls_protocols` | String | Enabled TLS protocol versions. | `TLSv1.2 TLSv1.3` |
 
 ### Auth Variables
 
@@ -172,6 +177,27 @@ The following tables lists the default variables located in `roles/redis/default
 | `redis_sentinel_bind` | String | A space-separated list of hostnames/IP addresses on which Redis listeners will be created. | `bind 127.0.0.1 {{ ansible_default_ipv4.address }}` |
 | `redis_sentinel_master_name` | String | The Redis master name | `itentialmaster` |
 | `redis_sentinel_quorum` | String | The Sentinel quorum setting.<br>Auto-calculate quorum based on sentinel count (recommended).<br>Set to explicit number to override (must be <= number of sentinels). | `auto` |
+| `redis_sentinel_certify_report_dir_remote` | String | Remote directory for Sentinel certification reports. | `/var/tmp/itential-reports/sentinel` |
+| `redis_sentinel_certify_report_dir_local` | String | Local directory for Sentinel certification reports. | `/tmp/itential-reports/sentinel` |
+
+### PKI Variables
+
+The following table lists the PKI-related variables located in `roles/redis/defaults/main/pki.yml`.
+
+| Variable | Type | Description | Default Value |
+| :------- | :--- | :---------- | :------------ |
+| `redis_pki_base_dir` | String | Base directory for Redis PKI files. | `/etc/pki/redis` |
+| `redis_pki_private_subdir` | String | Subdirectory name for private keys. | `private` |
+| `redis_pki_private_dir` | String | Full path to private keys directory. | `{{ redis_pki_base_dir }}/{{ redis_pki_private_subdir }}` |
+| `redis_pki_src_dir` | String | Source directory on Ansible controller containing certificates. | `""` |
+| `redis_pki_owner` | String | Owner for PKI directories and files. | `redis` |
+| `redis_pki_group` | String | Group for PKI directories and files. | `redis` |
+| `redis_tls_cert_src` | String | Full source path for Redis server certificate on controller. | `{{ redis_pki_src_dir }}/{{ redis_tls_cert_dest }}` |
+| `redis_tls_key_src` | String | Full source path for Redis server private key on controller. | `{{ redis_pki_src_dir }}/{{ redis_tls_key_dest }}` |
+| `redis_tls_ca_src` | String | Full source path for CA bundle on controller. | `{{ redis_pki_src_dir }}/{{ redis_tls_ca_dest }}` |
+| `redis_tls_dh_params_src` | String | Full source path for DH parameters on controller. | `{{ redis_pki_src_dir }}/{{ redis_tls_dh_params_dest }}` |
+| `redis_sentinel_tls_cert_src` | String | Full source path for Sentinel certificate on controller. | `{{ redis_pki_src_dir }}/{{ redis_sentinel_tls_cert_dest }}` |
+| `redis_sentinel_tls_key_src` | String | Full source path for Sentinel private key on controller. | `{{ redis_pki_src_dir }}/{{ redis_sentinel_tls_key_dest }}` |
 
 ### Offline Variables
 
