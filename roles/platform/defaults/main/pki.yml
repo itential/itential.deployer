@@ -120,4 +120,3 @@ platform_pki_private_owner: root
 
 # Group for private key files
 platform_pki_private_group: "{{ platform_group }}"
-
