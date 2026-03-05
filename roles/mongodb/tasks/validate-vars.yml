@@ -80,7 +80,7 @@
           mongodb_pki_src_dir and mongodb_pki_base_dir must be defined and cannot be empty
           when mongodb_tls_copy_certs is enabled.
         success_msg: >-
-          "mongodb_pki_src_dir is set to: {{ mongodb_pki_src_dir }}" 
+          "mongodb_pki_src_dir is set to: {{ mongodb_pki_src_dir }}"
           "mongodb_pki_base_dir is set to: {{ mongodb_pki_base_dir }}"
       when: mongodb_tls_copy_certs | bool
 

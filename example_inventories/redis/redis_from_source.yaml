@@ -9,4 +9,4 @@ all:
         redis01.example.com:
       vars:
         # The default is to install Redis from source
-        #redis_install_from_source: true
+        # redis_install_from_source: true
