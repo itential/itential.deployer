@@ -107,6 +107,9 @@ The following tables lists the default variables located in `roles/redis/default
 | `redis_bind_addr_source` | String | The bind address source. Will default to the Ansible `inventory_hostname` unless explicitly set to `default_ipv4_address`. | `inventory_hostname` |
 | `redis_bind_addrs` | String | A space-separated list of hostnames/IP addresses on which Redis listeners will be created. If `redis_bind_ipv6` is set to `true`, `::1` will be added to the addresses. The `redis_bind_addr_source` will also be added to the addresses. | `127.0.0.1` |
 | `redis_tls_enabled` | Boolean | Flag to enable TLS connections. | `false` |
+| `redis_maxmemory_bytes` | Integer | Maximum memory Redis can use (maxmemory). When set to auto, the installer calculates the value from the system RAM using: `maxmemory = max(redis_maxmemory_min_mb, system_ram × redis_maxmemory_ratio)`. If a numeric value is provided, that value (in bytes) is used directly and the automatic calculation is skipped. | `auto` |
+| `redis_maxmemory_ratio` | Float | Define how much memory the system will use. Only work if `redis_maxmemory_bytes` is configured as auto. Default value 0.6 means 60%. | `0.60` |
+| `redis_maxmemory_bytes` | Integer | This parameter defines the minimum amount of memory Redis is allowed to use, even if the automatic calculation would result in a smaller value. It acts as a safety floor for the maxmemory calculation. | `512` |
 
 ### Auth Variables
 

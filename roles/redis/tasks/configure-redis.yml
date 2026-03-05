@@ -9,6 +9,32 @@
     group: root
     mode: "0644"
 
+# Calculate the Redis maxmemory value automatically when the parameter
+# `redis_maxmemory_bytes` is set to "auto".
+#
+# The calculation uses the following formula:
+#
+#   maxmemory = max(redis_maxmemory_min_mb, system_ram × redis_maxmemory_ratio)
+#
+# Where:
+#   system_ram               -> Total system memory detected by Ansible (in MB)
+#   redis_maxmemory_ratio    -> Percentage of system memory Redis is allowed to use
+#   redis_maxmemory_min_mb   -> Minimum memory Redis should be assigned
+#
+# The `max()` function ensures Redis always receives at least the configured
+# minimum memory, even on small systems.
+#
+# The final value is converted from MB to bytes because Redis expects the
+# `maxmemory` configuration parameter to be expressed in bytes.
+#
+# Example (10 GB system):
+#   system_ram = 10240 MB
+#   ratio = 0.60
+#   result = 6144 MB
+#   redis_maxmemory_bytes = 6442450944
+#
+# If `redis_maxmemory_bytes` is set to a numeric value instead of "auto",
+# this calculation is skipped and the provided value is used directly.
 - name: Calculate Redis maxmemory automatically
   ansible.builtin.set_fact:
     redis_maxmemory_bytes: >-
