@@ -2,21 +2,17 @@
 all:
   vars:
     # The Platform release must be defined.
-    # Valid values: 6, 6.0
+    #  - valid values: 6, 6.0
     platform_release: 6
-
-    # Declare the purpose of the environment to help the verification stage check resources.
-    # The environment is not required for the installation playbooks. It is required for the
-    # certify and verify playbooks.
-    # Valid values: dev, test, prod
-    env: <env>
 
   children:
     redis_master:
       hosts:
         redis01.example.com:
       vars:
+        # In this example, Redis is installed using the system YUM repo (not Remi).
+        # The Redis install from source variable must be overridden and the Redis packages
+        # must be defined. The Redis packages list may vary depending on OS.
         redis_install_from_source: false
-        # To use the system YUM repos (and not Remi), override the redis packages list
         redis_packages:
           - redis
