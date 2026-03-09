@@ -1,4 +1,8 @@
 ---
+# In this example, the Deployer will install and configure Redis, MongoDB, Itential Platform
+# and Itential Gateway4 in an High Availability environment.
+# Custom Redis and MongoDB passwords will be used.
+# TLS will be configured ON (default).
 all:
   vars:
     # The Platform release must be defined.
@@ -26,12 +30,8 @@ all:
         redis01.example.com:
         redis02.example.com:
         redis03.example.com:
-      vars:
-        # By default, TLS and cert uploads are enabled.
-        # redis_tls_enabled: true
-        # redis_tls_copy_certs: true
 
-        # In this example, the default Redis passwords are overridden.
+        # The default Redis passwords are overridden.
         # NOTE: Using Ansible Vault or Hashicorp Vault for passwords is highly recommended.
         redis_user_admin_password: <redis-admin-password>
         redis_user_itential_password: <redis-itential-password>
@@ -49,7 +49,7 @@ all:
         # Enable replication between the MongoDB nodes.
         mongodb_replication_enabled: true
 
-        # In this example, the default MongoDB passwords are overridden.
+        # The default MongoDB passwords are overridden.
         # NOTE: Using Ansible Vault or Hashicorp Vault for passwords is highly recommended.
         mongodb_user_admin_password: <mongodb-admin-password>
         mongodb_user_itential_password: <mongodb-itential-password>
@@ -78,6 +78,7 @@ all:
     platform:
       hosts:
         itential-platform01.example.com:
+        itential-platform02.example.com:
       vars:
         # The Platform encryption key must be defined.
         # It is an open64-length hex string, representing a 256-bit AES encryption key.
@@ -89,19 +90,19 @@ all:
         platform_packages:
           - itential-platform-<version>.noarch.rpm
 
-        # In this example, the default MongoDB username, database name and TLS setting are used.
+        # The default MongoDB username, database name and TLS setting are used.
         # platform_mongo_user: itential
         # platform_mongo_db_name: itential
         # platform_mongo_tls_enabled: true
 
-        # The MongoDB password and URL must be overridden.
+        # The MongoDB password and URL are overridden.
         platform_mongo_password: <mongodb-itential-password>
         platform_mongo_url: mongodb://mongodb01.example.com:27017,mongodb02.example.com:27017,mongodb03.example.com:27017/itential?replicaSet=rs0
 
-        # In this example, the default Redis username is used.
+        # The default Redis username is used.
         # platform_redis_username: itential
 
-        # The Redis password and sentinels must be overridden.
+        # The Redis password and sentinels are overridden.
         platform_redis_password: <redis-itential-password>
         platform_redis_sentinels:
           - host: redis01.example.com
@@ -115,7 +116,7 @@ all:
       hosts:
         itential-gateway01.example.com:
       vars:
-        # The Gateway4 release must be defined.
+        # The Gateway release must be defined.
         #  - valid values: 4.2, 4.3
         gateway_release: 4.3
 

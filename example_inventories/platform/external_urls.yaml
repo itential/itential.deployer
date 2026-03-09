@@ -1,4 +1,7 @@
 ---
+# In this example, the Deployer will install and configure Itential Platform.
+# AWS Mongo Atlas will be used for persistence.
+# AWS Elasticache will be used for caching and as a message queue.
 all:
   vars:
     # The Platform release must be defined.
@@ -20,7 +23,7 @@ all:
         platform_packages:
           - itential-platform-<version>.noarch.rpm
 
-        # In this example, Platform is connecting to AWS Mongo Atlas.
+        # Platform will connect to AWS Mongo Atlas.
         # NOTE: Using Ansible Vault or Hashicorp Vault for passwords is highly recommended.
         platform_mongo_auth_enabled: false
         platform_mongo_user: <atlas-username>
@@ -28,7 +31,7 @@ all:
         platform_mongo_tls_enabled: true
         platform_mongo_url: mongodb+srv://<atlas-username>:<atlas-password>@<atlas-host>/<atlas-db>?retryWrites=true&w=majority&appName=<atlas-appname>
 
-        # In this example, Platform is connecting to AWS Elasticache.
+        # Platform will connect to AWS Elasticache.
         # NOTE: Using Ansible Vault or Hashicorp Vault for passwords is highly recommended.
         platform_redis_username: <elasticache-username>
         platform_redis_password: <elasticache-password>
