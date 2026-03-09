@@ -45,6 +45,45 @@ primary using hostname.  It will start the Redis Sentinel service when complete.
 
 For more information on Redis replication: <https://redis.io/docs/manual/replication/>
 
+## Automatic Redis Maxmemory Calculation
+
+When `redis_maxmemory_bytes` is set to `auto`, the installation process automatically calculates the Redis `maxmemory` value based on the system's total available RAM.
+
+The following formula is used:
+`maxmemory = max(redis_maxmemory_min_mb, system_ram × redis_maxmemory_ratio)`
+
+The `max()` function ensures Redis always receives **at least the configured minimum memory**, even on systems with small amounts of RAM.
+
+After the calculation, the value is converted to **bytes**, since Redis expects the `maxmemory` configuration parameter to be specified in bytes.
+
+---
+
+### Example
+
+For a system with **10 GB of RAM**:
+
+system_ram = 10240 MB
+redis_maxmemory_ratio = 0.60
+
+The calculation becomes:
+10240 × 0.60 = 6144 MB
+
+Converted to bytes:
+redis_maxmemory_bytes = 6442450944
+
+This value will be written to the Redis configuration as:
+maxmemory 6442450944
+
+### Manual Override
+
+If `redis_maxmemory_bytes` is set to a numeric value instead of `auto`, the automatic calculation is skipped and the specified value is used directly.
+
+Example:
+redis_maxmemory_bytes: 8589934592
+
+This will configure Redis with:
+maxmemory 8589934592
+
 ## Variables
 
 ### Static Variables
