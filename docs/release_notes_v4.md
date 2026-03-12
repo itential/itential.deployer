@@ -8,6 +8,7 @@ The following documents the new and breaking changes in the v4 release.
 
 | Hash | Description |
 |------|-------------|
+| 3ec62b5 | Add redis maxmemmory calculation and change the parameter in the redis.conf accordingly (#308) |
 | a641765 | Fix ansible-lint errors in TLS changes (#310) |
 | e7dd3e9 | Add TLS standardization for platform, mongo, gateway & redis roles (#300) |
 | 1066487 | Add example inventories (#306) |
@@ -270,6 +271,7 @@ New: `docs/tls_guide.md`
 - New verify/certify playbook documentation added. ASA architecture description updated to clarify 3-datacenter requirement.
 - **`redis_prometheus_user_enabled`**: New var, defaults `false` — no change to existing behavior.
 - **`redis_replica_priority`**: New var, `auto` by default — no change to existing behavior.
+- **`redis_maxmemory_bytes`**: New var, `auto` by default - no change to existing behavior.
 - **`redis_sentinel_quorum`**: New var, `auto` by default — no change to existing behavior.
 - **`redis_sentinel_bind`**: New var mirroring `redis_bind` pattern — no change to existing behavior.
 - **MongoDB `mongodb_certify_report_dir_*`**: New vars with defaults — no change to existing behavior.
