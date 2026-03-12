@@ -57,11 +57,21 @@ redis_user_prometheus_password: prometheus
 # created with the appropriate ACL to allow the Redis exporter to work.
 redis_prometheus_user_enabled: false
 
-# Default location for the certification report files
-redis_certify_report_dir_remote: /var/tmp/itential-reports/redis
-redis_certify_report_dir_local: /tmp/itential-reports/redis
-
 # Redis TLS configuration options
 redis_tls_port: "{{ redis_tls_port_default }}"
 redis_tls_auth_clients: "no"
 redis_tls_protocols: "TLSv1.2 TLSv1.3"
+
+# Redis memory sizing defaults (dedicated Redis node)
+
+# If set to "auto", maxmemory is calculated from system RAM.
+# If set to a number (bytes), that value is used verbatim.
+redis_maxmemory_bytes: auto
+
+# Used only when redis_maxmemory_bytes == "auto"
+redis_maxmemory_ratio: 0.60
+redis_maxmemory_min_mb: 512
+
+# Default location for the certification report files
+redis_certify_report_dir_remote: /var/tmp/itential-reports/redis
+redis_certify_report_dir_local: /tmp/itential-reports/redis
