@@ -9,6 +9,23 @@
     group: root
     mode: "0644"
 
+- name: Calculate Redis maxmemory automatically
+  ansible.builtin.set_fact:
+    redis_maxmemory_bytes: >-
+      {{
+        (
+          [
+            redis_maxmemory_min_mb | int,
+            (
+              (ansible_facts.memtotal_mb | int)
+              * (redis_maxmemory_ratio | float)
+            ) | int
+          ] | max
+        ) * 1024 * 1024
+      }}
+  when: redis_maxmemory_bytes == "auto"
+  tags: configure_redis
+
 - name: Use template to generate redis.conf
   ansible.builtin.template:
     src: redis.conf.j2

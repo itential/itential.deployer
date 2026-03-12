@@ -61,3 +61,13 @@ redis_user_repluser_password: repluser
 redis_user_sentineladmin_password: admin
 redis_user_sentineluser_password: sentineluser
 redis_user_prometheus_password: prometheus
+
+# Redis memory sizing defaults (dedicated Redis node)
+
+# If set to "auto", maxmemory is calculated from system RAM.
+# If set to a number (bytes), that value is used verbatim.
+redis_maxmemory_bytes: auto
+
+# Used only when redis_maxmemory_bytes == "auto"
+redis_maxmemory_ratio: 0.60
+redis_maxmemory_min_mb: 512

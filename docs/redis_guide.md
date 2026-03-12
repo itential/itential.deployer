@@ -45,6 +45,45 @@ primary using hostname.  It will start the Redis Sentinel service when complete.
 
 For more information on Redis replication: <https://redis.io/docs/manual/replication/>
 
+## Automatic Redis Maxmemory Calculation
+
+When `redis_maxmemory_bytes` is set to `auto`, the installation process automatically calculates the Redis `maxmemory` value based on the system's total available RAM.
+
+The following formula is used:
+`maxmemory = max(redis_maxmemory_min_mb, system_ram × redis_maxmemory_ratio)`
+
+The `max()` function ensures Redis always receives **at least the configured minimum memory**, even on systems with small amounts of RAM.
+
+After the calculation, the value is converted to **bytes**, since Redis expects the `maxmemory` configuration parameter to be specified in bytes.
+
+---
+
+### Example
+
+For a system with **10 GB of RAM**:
+
+system_ram = 10240 MB
+redis_maxmemory_ratio = 0.60
+
+The calculation becomes:
+10240 × 0.60 = 6144 MB
+
+Converted to bytes:
+redis_maxmemory_bytes = 6442450944
+
+This value will be written to the Redis configuration as:
+maxmemory 6442450944
+
+### Manual Override
+
+If `redis_maxmemory_bytes` is set to a numeric value instead of `auto`, the automatic calculation is skipped and the specified value is used directly.
+
+Example:
+redis_maxmemory_bytes: 8589934592
+
+This will configure Redis with:
+maxmemory 8589934592
+
 ## Variables
 
 ### Static Variables
@@ -107,6 +146,9 @@ The following tables lists the default variables located in `roles/redis/default
 | `redis_bind_addr_source` | String | The bind address source. Will default to the Ansible `inventory_hostname` unless explicitly set to `default_ipv4_address`. | `inventory_hostname` |
 | `redis_bind_addrs` | String | A space-separated list of hostnames/IP addresses on which Redis listeners will be created. If `redis_bind_ipv6` is set to `true`, `::1` will be added to the addresses. The `redis_bind_addr_source` will also be added to the addresses. | `127.0.0.1` |
 | `redis_tls_enabled` | Boolean | Flag to enable TLS connections. | `false` |
+| `redis_maxmemory_bytes` | String/Integer | Maximum memory Redis can use (maxmemory). When set to auto, the installer calculates the value from the system RAM using: `maxmemory = max(redis_maxmemory_min_mb, system_ram × redis_maxmemory_ratio)`. If a numeric value is provided, that value (in bytes) is used directly and the automatic calculation is skipped. | `auto` |
+| `redis_maxmemory_ratio` | Float | Define how much memory the system will use. Only work if `redis_maxmemory_bytes` is configured as auto. Default value 0.6 means 60%. | `0.60` |
+| `redis_maxmemory_min_mb` | Integer | This parameter defines the minimum amount of memory Redis is allowed to use, even if the automatic calculation would result in a smaller value. It acts as a safety floor for the maxmemory calculation. | `512` |
 
 ### Auth Variables
 
