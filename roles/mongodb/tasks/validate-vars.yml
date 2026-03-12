@@ -98,6 +98,26 @@
         - not (mongodb_tls_copy_certs | bool)
         - mongodb_tls_enabled | bool or mongodb_replication_enabled | bool
 
+    - name: Validate offline install directory for the target OS
+      when: offline_install_enabled | bool
+      block:
+        - name: Stat offline packages directory on the control node
+          ansible.builtin.stat:
+            path: "{{ mongodb_offline_control_node_root }}"
+          register: mongodb_offline_dir_stat
+          delegate_to: localhost
+          become: false
+
+        - name: Assert offline packages directory exists on the control node
+          ansible.builtin.assert:
+            that:
+              - mongodb_offline_dir_stat.stat.exists
+              - mongodb_offline_dir_stat.stat.isdir
+            fail_msg: >-
+              Offline packages directory {{ mongodb_offline_control_node_root }} does not exist.
+              Ensure offline packages have been downloaded for
+              {{ ansible_distribution }} {{ ansible_distribution_major_version }}.
+
     - name: Print MongoDB installation details
       ansible.builtin.debug:
         msg:

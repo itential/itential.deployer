@@ -2,7 +2,7 @@
 # In this example, the Deployer will install and configure Redis, MongoDB, Itential Platform
 # and Itential Gateway4 in an Active/Standby environment.
 # Custom Redis and MongoDB passwords will be used.
-# TLS will be configured OFF.
+# TLS will be configured ON (default).
 all:
   vars:
     # The Platform release must be defined.
@@ -67,14 +67,31 @@ all:
         # Enable replication between the MongoDB nodes.
         mongodb_replication_enabled: true
 
-        # TLS and cert uploads are disabled.
-        mongodb_tls_enabled: false
-        mongodb_tls_copy_certs: false
-
         # The default MongoDB passwords are overridden.
         # NOTE: Using Ansible Vault or Hashicorp Vault for passwords is highly recommended.
         mongodb_user_admin_password: <mongodb-admin-password>
         mongodb_user_itential_password: <mongodb-itential-password>
+
+        # By default, TLS and cert uploads are enabled.
+        # mongodb_tls_enabled: true
+        # mongodb_tls_copy_certs: true
+
+        # When uploading certs/keys, the source directory on the control node must be defined and
+        # be a valid directory.
+        mongodb_pki_src_dir: </path/to/certs/on/control/node>
+
+        # The following TLS-related variables can be overridden.
+        # mongodb_pki_base_dir: /etc/pki/mongodb
+        # mongodb_pki_private_subdir: private
+        # mongodb_pki_private_dir: "{{ mongodb_pki_base_dir }}/{{ mongodb_pki_private_subdir }}"
+        # mongodb_tls_server_cert_file: "{{ inventory_hostname }}.pem"
+        # mongodb_tls_ca_file: ca-bundle.crt
+        # mongodb_auth_key_file: replica.key
+        # mongodb_tls_cert_dest: "{{ mongodb_pki_base_dir }}/{{ mongodb_tls_server_cert_file }}"
+        # mongodb_tls_ca_dest: "{{ mongodb_pki_base_dir }}/{{ mongodb_tls_ca_file }}"
+        # mongodb_auth_key_dest: "{{ mongodb_pki_private_dir }}/{{ mongodb_auth_key_file }}"
+        # mongodb_tls_cert_src: "{{ mongodb_pki_src_dir }}/{{ mongodb_tls_server_cert_file }}"
+        # mongodb_tls_ca_src: "{{ mongodb_pki_src_dir }}/{{ mongodb_tls_ca_file }}"
 
     platform:
       hosts:
@@ -93,14 +110,12 @@ all:
         platform_packages:
           - itential-platform-<version>.noarch.rpm
 
-        # The default MongoDB username and database name are used.
+        # The default MongoDB username, database name are used and TLS is enabled.
         # platform_mongo_user: itential
         # platform_mongo_db_name: itential
+        # platform_mongo_tls_enabled: true
 
-        # MongoDB TLS is disabled.
-        platform_mongo_tls_enabled: false
-
-        # The MongoDB password and URL is overridden.
+        # The MongoDB password and URL are overridden.
         platform_mongo_password: <mongodb-itential-password>
         platform_mongo_url: mongodb://mongodb-data01.dc1.example.com:27017,mongodb-data02.dc1.example.com:27017,mongodb-data01.dc2.example.com:27017,mongodb-data02.dc2.example.com:27017,mongodb-arbiter01.dc3.example.com:27017/itential?replicaSet=rs0
 

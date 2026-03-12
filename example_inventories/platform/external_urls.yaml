@@ -1,35 +1,39 @@
 ---
+# In this example, the Deployer will install and configure Itential Platform.
+# AWS Mongo Atlas will be used for persistence.
+# AWS Elasticache will be used for caching and as a message queue.
 all:
   vars:
+    # The Platform release must be defined.
+    #  - valid values: 6, 6.0
     platform_release: 6
-    # Declare the purpose of the environment to help the verification stage check resources.
-    # Possible values: "dev", "test", "prod"
-    env: <env>
 
   children:
     platform:
       hosts:
-        host01.example.com:
+        itential-platform01.example.com:
       vars:
-        # open64-length hex string, representing a 256-bit AES encryption key
-        # example command to generate key: 'openssl rand -hex 32'
+        # The Platform encryption key must be defined.
+        # It is an open64-length hex string, representing a 256-bit AES encryption key.
+        #  - example command to generate key: 'openssl rand -hex 32'
         platform_encryption_key: <key>
 
-        # NOTE: the platform packages list varies depending on entitlement
+        # The Platform packages to install must be defined.
+        # NOTE: The Platform packages list varies depending on entitlement.
         platform_packages:
           - itential-platform-<version>.noarch.rpm
 
-        # AWS Mongo Atlas connection
-        platform_mongo_url: mongodb+srv://<username>:<password>@<host>/<db>?retryWrites=true&w=majority&appName=<appname>
-        mongo_auth_enabled: false
-        mongo_user: <username>
-        # NOTE: using Ansible Vault to encrypt passwords is highly recommended
-        mongo_password: <password>
-        mongo_tls_enabled: true
+        # Platform will connect to AWS Mongo Atlas.
+        # NOTE: Using Ansible Vault or Hashicorp Vault for passwords is highly recommended.
+        platform_mongo_auth_enabled: false
+        platform_mongo_user: <atlas-username>
+        platform_mongo_password: <atlas-password>
+        platform_mongo_tls_enabled: true
+        platform_mongo_url: mongodb+srv://<atlas-username>:<atlas-password>@<atlas-host>/<atlas-db>?retryWrites=true&w=majority&appName=<atlas-appname>
 
-        # AWS Elasticache connection
-        redis_host: <cluster-name>.<id>.<region>.cache.amazonaws.com
-        redis_username: <username>
-        # NOTE: using Ansible Vault to encrypt passwords is highly recommended
-        redis_password: <password>
-        redis_tls: "{}"
+        # Platform will connect to AWS Elasticache.
+        # NOTE: Using Ansible Vault or Hashicorp Vault for passwords is highly recommended.
+        platform_redis_username: <elasticache-username>
+        platform_redis_password: <elasticache-password>
+        platform_redis_tls: "{}"
+        platform_redis_host: <cluster-name>.<id>.<region>.cache.amazonaws.com

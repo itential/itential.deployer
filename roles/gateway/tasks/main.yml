@@ -333,13 +333,9 @@
         - ansible_facts.services["firewalld.service"].state == "running"
         - ansible_facts.services["firewalld.service"].status == "enabled"
 
-    - name: Allow IAG to listen on tcp port {{ gateway_port }}
-      community.general.seport:
-        ports: "{{ gateway_port }}"
-        proto: tcp
-        setype: http_port_t
-        state: present
-      when: ansible_selinux.status == "enabled"
+    - name: Configure SELinux
+      ansible.builtin.include_tasks:
+        file: configure-selinux.yml
 
     - name: Add test scripts
       ansible.builtin.copy:

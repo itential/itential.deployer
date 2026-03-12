@@ -1,6 +1,9 @@
 ---
+# In this example, Redis is installed and configured using the system YUM repository (not Remi).
 all:
   vars:
+    # The Platform release must be defined.
+    #  - valid values: 6, 6.0
     platform_release: 6
 
   children:
@@ -8,7 +11,9 @@ all:
       hosts:
         redis01.example.com:
       vars:
+        # The Redis install from source variable is overridden.
         redis_install_from_source: false
-        # To use the system YUM repos (and not Remi), override the redis packages list
+        # The Redis packages are overridden.
+        # NOTE: The Redis packages list will vary depending on OS.
         redis_packages:
           - redis
