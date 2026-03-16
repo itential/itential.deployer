@@ -67,6 +67,7 @@ all:
         platform_https_pki_src_dir: </path/to/certs/on/control/node>
         platform_mongodb_pki_src_dir: "{{ platform_https_pki_src_dir }}"
 
+
         # The default MongoDB username, database name and TLS setting are used.
         # platform_mongo_user: itential
         # platform_mongo_db_name: itential
