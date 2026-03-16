@@ -71,7 +71,7 @@ all:
 
         # The MongoDB password and URL are overridden.
         platform_mongo_password: <mongodb-itential-password>
-        platform_mongo_url: mongodb://mongodb01.example.com:27017/itential?replicaSet=rs0
+        platform_mongo_url: mongodb://mongodb01.example.com:27017/itential
 
         # The default Redis username is used.
         # platform_redis_username: itential
