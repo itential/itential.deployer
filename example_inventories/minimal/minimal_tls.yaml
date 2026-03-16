@@ -78,9 +78,6 @@ all:
 
         # The Redis password and sentinels are overridden.
         platform_redis_password: <redis-itential-password>
-        platform_redis_sentinels:
-          - host: redis01.example.com
-            port: 26379
 
     gateway:
       hosts:
