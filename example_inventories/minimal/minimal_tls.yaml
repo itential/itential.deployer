@@ -30,8 +30,8 @@ all:
         mongodb_user_itential_password: <mongodb-itential-password>
 
         # By default, TLS and cert uploads are enabled.
-        mongodb_tls_enabled: true
-        mongodb_tls_copy_certs: true
+        # mongodb_tls_enabled: true
+        # mongodb_tls_copy_certs: true
 
         # When uploading certs/keys, the source directory on the control node must be defined and
         # be a valid directory.
@@ -63,6 +63,9 @@ all:
         # NOTE: The Platform packages list varies depending on entitlement.
         platform_packages:
           - itential-platform-<version>.noarch.rpm
+
+        platform_https_pki_src_dir: </path/to/certs/on/control/node>
+        platform_mongodb_pki_src_dir: "{{ platform_https_pki_src_dir }}"
 
         # The default MongoDB username, database name and TLS setting are used.
         # platform_mongo_user: itential
