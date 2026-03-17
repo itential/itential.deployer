@@ -87,6 +87,62 @@
             fail_msg: platform_vault_role_id and platform_vault_secret_id must be defined when using approle authentication
           when: platform_vault_auth_method == 'approle'
 
+    - name: Validate platform_https_pki_src_dir and platform_pki_base_dir when copying HTTPS certificates
+      ansible.builtin.assert:
+        that:
+          - platform_https_pki_src_dir is defined
+          - platform_https_pki_src_dir | length > 0
+          - platform_pki_base_dir is defined
+          - platform_pki_base_dir | length > 0
+        fail_msg: >-
+          platform_https_pki_src_dir and platform_pki_base_dir must be defined and cannot be empty
+          when platform_webserver_https_copy_certs is enabled.
+        success_msg:
+          - "platform_https_pki_src_dir is set to: {{ platform_https_pki_src_dir }}"
+          - "platform_pki_base_dir is set to: {{ platform_pki_base_dir }}"
+      when: platform_webserver_https_copy_certs | bool
+
+    - name: Validate platform_pki_base_dir when HTTPS is enabled
+      ansible.builtin.assert:
+        that:
+          - platform_pki_base_dir is defined
+          - platform_pki_base_dir | length > 0
+        fail_msg: >-
+          platform_pki_base_dir must be defined and cannot be empty
+          when platform_webserver_https_enabled is true.
+        success_msg: "platform_pki_base_dir is set to: {{ platform_pki_base_dir }}"
+      when:
+        - not (platform_webserver_https_copy_certs | bool)
+        - platform_webserver_https_enabled | bool
+
+    - name: Validate platform_mongodb_pki_src_dir and platform_pki_base_dir when copying MongoDB certificates
+      ansible.builtin.assert:
+        that:
+          - platform_mongodb_pki_src_dir is defined
+          - platform_mongodb_pki_src_dir | length > 0
+          - platform_pki_base_dir is defined
+          - platform_pki_base_dir | length > 0
+        fail_msg: >-
+          platform_mongodb_pki_src_dir and platform_pki_base_dir must be defined and cannot be empty
+          when platform_mongodb_copy_certs is enabled.
+        success_msg:
+          - "platform_mongodb_pki_src_dir is set to: {{ platform_mongodb_pki_src_dir }}"
+          - "platform_pki_base_dir is set to: {{ platform_pki_base_dir }}"
+      when: platform_mongodb_copy_certs | bool
+
+    - name: Validate platform_pki_base_dir when MongoDB TLS is enabled
+      ansible.builtin.assert:
+        that:
+          - platform_pki_base_dir is defined
+          - platform_pki_base_dir | length > 0
+        fail_msg: >-
+          platform_pki_base_dir must be defined and cannot be empty
+          when platform_mongo_tls_enabled is true.
+        success_msg: "platform_pki_base_dir is set to: {{ platform_pki_base_dir }}"
+      when:
+        - not (platform_mongodb_copy_certs | bool)
+        - platform_mongo_tls_enabled | bool
+
     - name: Set installation variables when using Itential Platform release defaults
       when: platform_release is defined
       block:
@@ -132,18 +188,6 @@
               "{{ platform_python_app_dependencies_default[ansible_distribution_major_version] }}"
           when: platform_python_app_dependencies is not defined
 
-    - name: Print Itential Platform installation details
-      ansible.builtin.debug:
-        msg:
-          - "Platform packages: {{ platform_packages }}"
-          - "Platform dependency packages: {{ platform_package_dependencies }}"
-          - "NodeJS package: {{ platform_nodejs_package }}"
-          - "Python version: {{ platform_python_version }}"
-          - "Python packages: {{ platform_python_packages }}"
-          - "Python base dependencies: {{ platform_python_base_dependencies }}"
-          - "Python Platform dependencies: {{ platform_python_app_dependencies }}"
-      when: not offline_install_enabled | bool
-
     - name: Validate offline install directory for the target OS
       when: offline_install_enabled | bool
       block:
@@ -164,65 +208,19 @@
               Ensure offline packages have been downloaded for
               {{ ansible_distribution }} {{ ansible_distribution_major_version }}.
 
+    - name: Print Itential Platform installation details
+      ansible.builtin.debug:
+        msg:
+          - "Platform packages: {{ platform_packages }}"
+          - "Platform dependency packages: {{ platform_package_dependencies }}"
+          - "NodeJS package: {{ platform_nodejs_package }}"
+          - "Python version: {{ platform_python_version }}"
+          - "Python packages: {{ platform_python_packages }}"
+          - "Python base dependencies: {{ platform_python_base_dependencies }}"
+          - "Python Platform dependencies: {{ platform_python_app_dependencies }}"
+      when: not offline_install_enabled | bool
+
     - name: Print Itential Platform installation details (offline)
       ansible.builtin.debug:
         msg: "Offline install using packages from {{ platform_offline_control_node_root }}"
       when: offline_install_enabled | bool
-
-    - name: Validate platform_https_pki_src_dir and platform_pki_base_dir when copying HTTPS certificates
-      ansible.builtin.assert:
-        that:
-          - platform_https_pki_src_dir is defined
-          - platform_https_pki_src_dir | length > 0
-          - platform_pki_base_dir is defined
-          - platform_pki_base_dir | length > 0
-        fail_msg: >-
-          platform_https_pki_src_dir and platform_pki_base_dir must be defined and cannot be empty
-          when platform_webserver_https_copy_certs is enabled.
-        success_msg: >-
-          "platform_https_pki_src_dir is set to: {{ platform_https_pki_src_dir }}"
-          "platform_pki_base_dir is set to: {{ platform_pki_base_dir }}"
-      when: platform_webserver_https_copy_certs | bool
-
-    - name: Validate platform_pki_base_dir when HTTPS is enabled
-      ansible.builtin.assert:
-        that:
-          - platform_pki_base_dir is defined
-          - platform_pki_base_dir | length > 0
-        fail_msg: >-
-          platform_pki_base_dir must be defined and cannot be empty
-          when platform_webserver_https_enabled is true.
-        success_msg: >-
-          "platform_pki_base_dir is set to: {{ platform_pki_base_dir }}"
-      when:
-        - not (platform_webserver_https_copy_certs | bool)
-        - platform_webserver_https_enabled | bool
-
-    - name: Validate platform_mongodb_pki_src_dir and platform_pki_base_dir when copying MongoDB certificates
-      ansible.builtin.assert:
-        that:
-          - platform_mongodb_pki_src_dir is defined
-          - platform_mongodb_pki_src_dir | length > 0
-          - platform_pki_base_dir is defined
-          - platform_pki_base_dir | length > 0
-        fail_msg: >-
-          platform_mongodb_pki_src_dir and platform_pki_base_dir must be defined and cannot be empty
-          when platform_mongodb_copy_certs is enabled.
-        success_msg: >-
-         "platform_mongodb_pki_src_dir is set to: {{ platform_mongodb_pki_src_dir }}"
-         "platform_pki_base_dir is set to: {{ platform_pki_base_dir }}"
-      when: platform_mongodb_copy_certs | bool
-
-    - name: Validate platform_pki_base_dir when MongoDB TLS is enabled
-      ansible.builtin.assert:
-        that:
-          - platform_pki_base_dir is defined
-          - platform_pki_base_dir | length > 0
-        fail_msg: >-
-          platform_pki_base_dir must be defined and cannot be empty
-          when platform_mongo_tls_enabled is true.
-        success_msg: >-
-          "platform_pki_base_dir is set to: {{ platform_pki_base_dir }}"
-      when:
-        - not (platform_mongodb_copy_certs | bool)
-        - platform_mongo_tls_enabled | bool

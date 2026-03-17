@@ -35,7 +35,7 @@ all:
         redis-sentinel01.dc1.example.com:
         redis-sentinel01.dc2.example.com:
         redis-sentinel01.dc3.example.com:
-
+      vars:
         # The default Redis passwords are overridden.
         # NOTE: Using Ansible Vault or Hashicorp Vault for passwords is highly recommended.
         redis_user_admin_password: <redis-admin-password>
@@ -76,8 +76,7 @@ all:
         # mongodb_tls_enabled: true
         # mongodb_tls_copy_certs: true
 
-        # When uploading certs/keys, the source directory on the control node must be defined and
-        # be a valid directory.
+        # When uploading certs/keys, the source directory on the control node must be defined.
         mongodb_pki_src_dir: </path/to/certs/on/control/node>
 
         # The following TLS-related variables can be overridden.
@@ -109,6 +108,10 @@ all:
         # NOTE: The Platform packages list varies depending on entitlement.
         platform_packages:
           - itential-platform-<version>.noarch.rpm
+
+        # When uploading certs/keys, the source directories on the control node must be defined.
+        platform_https_pki_src_dir: </path/to/platform/https/certs/on/control/node>
+        platform_mongodb_pki_src_dir: </path/to/platform/mongodb/certs/on/control/node>
 
         # The default MongoDB username, database name are used and TLS is enabled.
         # platform_mongo_user: itential
