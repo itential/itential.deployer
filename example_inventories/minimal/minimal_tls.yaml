@@ -64,10 +64,9 @@ all:
         platform_packages:
           - itential-platform-<version>.noarch.rpm
 
-        platform_webserver_https_enabled: true
-
         platform_https_pki_src_dir: </path/to/certs/on/control/node>
         platform_mongodb_pki_src_dir: "{{ platform_https_pki_src_dir }}"
+
 
 
 
