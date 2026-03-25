@@ -71,3 +71,11 @@ mongodb_user_itential_password: itential
 
 # The name of the mongo replica set
 mongodb_replset_name: "{{ mongodb_replset_name_default }}"
+
+# Preferred primary member for MongoDB replica sets.
+# Leave empty to use the first host in the mongodb inventory group.
+mongodb_preferred_primary: ""
+
+# Replica set member priorities.
+mongodb_primary_priority: 2
+mongodb_secondary_priority: 1

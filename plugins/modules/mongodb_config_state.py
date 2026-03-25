@@ -117,7 +117,7 @@ def run_module():
 
     uri = build_connection_string(module.params)
 
-    client = MongoClient(uri)
+    client = MongoClient(uri, directConnection=True)
     database = client.get_database("admin")
     hello = database.command("hello")
 
