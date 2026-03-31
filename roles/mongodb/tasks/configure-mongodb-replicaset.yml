@@ -132,7 +132,7 @@
       'priority': ((item == mongodb_preferred_primary_host) |
       ternary(mongodb_primary_priority, mongodb_secondary_priority))}]
       }}
-  with_items: "{{ groups.mongodb }}"
+  loop: "{{ groups.mongodb }}"
   when:
     - inventory_hostname in groups.mongodb
     - groups.mongodb.index(inventory_hostname) == 0
@@ -142,11 +142,8 @@
 - name: Add the arbiter to the list of servers when there is one
   ansible.builtin.set_fact:
     mongodb_servers: >-
-      {{ mongodb_servers + [{
-      'host': item + ':' + (mongodb_port | string),
-      'priority': 0 }]
-      }}
-  with_items: "{{ groups.mongodb_arbiter }}"
+      {{ mongodb_servers + [{'host': item + ':' + (mongodb_port | string), 'priority': 0}] }}
+  loop: "{{ groups.mongodb_arbiter }}"
   when:
     - inventory_hostname in groups.mongodb
     - groups.mongodb.index(inventory_hostname) == 0
