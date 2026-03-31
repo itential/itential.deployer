@@ -25,10 +25,12 @@
   register: mongodb_state
   vars:
     ansible_python_interpreter: "{{ mongodb_python_venv }}/bin/python3"
+  tags: reconfigure_priority
 
 - name: Print MongoDB configuration state
   ansible.builtin.debug:
     msg: "{{ mongodb_state }}"
+  tags: reconfigure_priority
 
 # Execute the template to apply changes to the mongo.conf for replication
 - name: Create MongoDB config file (replicaset)
@@ -59,6 +61,7 @@
   when:
     - inventory_hostname in groups.mongodb
     - groups.mongodb.index(inventory_hostname) == 0
+  tags: reconfigure_priority
 
 - name: Set preferred primary host
   ansible.builtin.set_fact:
@@ -67,6 +70,7 @@
   when:
     - inventory_hostname in groups.mongodb
     - groups.mongodb.index(inventory_hostname) == 0
+  tags: reconfigure_priority
 
 - name: Normalize preferred primary override
   ansible.builtin.set_fact:
@@ -76,6 +80,7 @@
     - inventory_hostname in groups.mongodb
     - groups.mongodb.index(inventory_hostname) == 0
     - mongodb_preferred_primary | default('', true) | length > 0
+  tags: reconfigure_priority
 
 - name: Resolve preferred primary override by inventory hostname
   ansible.builtin.set_fact:
@@ -86,6 +91,7 @@
     - groups.mongodb.index(inventory_hostname) == 0
     - mongodb_preferred_primary | default('', true) | length > 0
     - mongodb_preferred_primary_input in groups.mongodb
+  tags: reconfigure_priority
 
 - name: Resolve preferred primary override by ansible_host or short hostname
   ansible.builtin.set_fact:
@@ -102,6 +108,7 @@
         (item.split('.')[0]),
         (hostvars[item].ansible_host | default(''))
       ]
+  tags: reconfigure_priority
 
 - name: Validate preferred primary override
   ansible.builtin.assert:
@@ -115,20 +122,21 @@
     - inventory_hostname in groups.mongodb
     - groups.mongodb.index(inventory_hostname) == 0
     - mongodb_preferred_primary | default('', true) | length > 0
+  tags: reconfigure_priority
 
 # This task should always run, arbiter or not
 - name: Create the replicaset members list (no arbiter)
   ansible.builtin.set_fact:
     mongodb_servers: >-
-      {{ mongodb_servers + [{
-      'host': item + ':' + (mongodb_port | string),
+      {{ mongodb_servers + [{'host': item + ':' + (mongodb_port | string),
       'priority': ((item == mongodb_preferred_primary_host) |
-      ternary(mongodb_primary_priority, mongodb_secondary_priority)) }]
+      ternary(mongodb_primary_priority, mongodb_secondary_priority))}]
       }}
   with_items: "{{ groups.mongodb }}"
   when:
     - inventory_hostname in groups.mongodb
     - groups.mongodb.index(inventory_hostname) == 0
+  tags: reconfigure_priority
 
 # This task will only run when there is an arbiter defined in the hosts file
 - name: Add the arbiter to the list of servers when there is one
@@ -143,6 +151,7 @@
     - inventory_hostname in groups.mongodb
     - groups.mongodb.index(inventory_hostname) == 0
     - groups.mongodb_arbiter is defined
+  tags: reconfigure_priority
 
 - name: Debug replication state
   ansible.builtin.debug:
@@ -150,6 +159,7 @@
   when:
     - inventory_hostname in groups.mongodb
     - groups.mongodb.index(inventory_hostname) == 0
+  tags: reconfigure_priority
 
 - name: Wait for all MongoDB members to be reachable before creating the replicaset
   ansible.builtin.wait_for:
@@ -213,6 +223,7 @@
     - groups.mongodb.index(inventory_hostname) == 0
   vars:
     ansible_python_interpreter: "{{ mongodb_python_venv }}/bin/python3"
+  tags: reconfigure_priority
 
 - name: Reconfigure the replicaset priorities
   community.mongodb.mongodb_replicaset:
@@ -235,6 +246,7 @@
     - mongodb_state_after_replicaset.primary | length > 0
   vars:
     ansible_python_interpreter: "{{ mongodb_python_venv }}/bin/python3"
+  tags: reconfigure_priority
 
 - name: Print reconfigure result
   ansible.builtin.debug:
@@ -242,6 +254,7 @@
   when:
     - reconfig_result is defined
     - reconfig_result is not skipped
+  tags: reconfigure_priority
 
 - name: Step down non-preferred primary after replicaset changes
   community.mongodb.mongodb_shell:
@@ -262,6 +275,7 @@
     - (mongodb_state_after_replicaset.primary | regex_replace(':.*$', '')) != mongodb_preferred_primary_host
   vars:
     ansible_python_interpreter: "{{ mongodb_python_venv }}/bin/python3"
+  tags: reconfigure_priority
 
 - name: Ensure replicaset is stable after primary stepdown
   community.mongodb.mongodb_status:
@@ -284,6 +298,7 @@
     - stepdown_result is not skipped
   vars:
     ansible_python_interpreter: "{{ mongodb_python_venv }}/bin/python3"
+  tags: reconfigure_priority
 
 # Starting in MongoDB 5.0, the implicit default write concern is w: majority.
 # However, special considerations are made for deployments containing arbiters:

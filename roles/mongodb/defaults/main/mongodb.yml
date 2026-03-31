@@ -77,5 +77,5 @@ mongodb_replset_name: "{{ mongodb_replset_name_default }}"
 mongodb_preferred_primary: ""
 
 # Replica set member priorities.
-mongodb_primary_priority: 2
-mongodb_secondary_priority: 1
+mongodb_primary_priority: 10
+mongodb_secondary_priority: 5

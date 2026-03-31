@@ -95,6 +95,7 @@ The following table contains the most commonly overridden variables.
 | `mongodb_tls_enabled` | Boolean | Flag to enable MongoDB TLS. | `false` |
 | `mongodb_user_admin_password` | String | The MongoDB admin user password. | `admin` |
 | `mongodb_user_itential_password` | String | The MongoDB itential user password. | `itential` |
+| `mongodb_preferred_primary` | String | Node hostname that will be considered primary, empty means the first hostname in the inventory | `` |
 
 > :warning: It is assumed that these default passwords will be changed to meet more rigorous
 security standards. These are intended to be defaults strictly used just for ease of the
@@ -300,4 +301,10 @@ state that the installation tag produced you can run this command:
 
 ```bash
 ansible-playbook itential.deployer.mongodb -i <inventory> --tags initialize_mongo_config
+```
+
+This tag is used to dynamically adjust the **MongoDB replica set member priorities** and influence which node becomes the **primary**:
+
+```bash
+ansible-playbook itential.deployer.mongodb -i <inventory> --tags reconfigure_priority
 ```
