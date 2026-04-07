@@ -189,6 +189,9 @@ The following tables lists the default variables located in `roles/redis/default
 | `redis_maxmemory_min_mb` | Integer | This parameter defines the minimum amount of memory Redis is allowed to use, even if the automatic calculation would result in a smaller value. It acts as a safety floor for the maxmemory calculation. | `512` |
 | `redis_certify_report_dir_remote` | String | Remote directory for certification reports. | `/var/tmp/itential-reports/redis` |
 | `redis_certify_report_dir_local` | String | Local directory for certification reports. | `/tmp/itential-reports/redis` |
+| `redis_maxmemory_bytes` | String/Integer | Maximum memory Redis can use (maxmemory). When set to auto, the installer calculates the value from the system RAM using: `maxmemory = max(redis_maxmemory_min_mb, system_ram × redis_maxmemory_ratio)`. If a numeric value is provided, that value (in bytes) is used directly and the automatic calculation is skipped. | `auto` |
+| `redis_maxmemory_ratio` | Float | Define how much memory the system will use. Only work if `redis_maxmemory_bytes` is configured as auto. Default value 0.6 means 60%. | `0.60` |
+| `redis_maxmemory_min_mb` | Integer | This parameter defines the minimum amount of memory Redis is allowed to use, even if the automatic calculation would result in a smaller value. It acts as a safety floor for the maxmemory calculation. | `512` |
 
 ### Auth Variables
 
@@ -267,8 +270,8 @@ either the `redis_source_url` or `redis_packages` in the inventory.
 
 | `platform_release` defined in inventory? | `redis_install_from_source` | `redis_source_url` | `redis_packages` |
 | :--------------------------------------- | :-------------------------- | :----------------- | :--------------- |
-| Yes | `true` | defaulted to supported value may be overridden | N/A |
-| Yes | `false` | N/A | defaulted to supported value may be overridden |
+| Yes | `true` | defaulted to supported value; may be overridden | N/A |
+| Yes | `false` | N/A | defaulted to supported value; may be overridden |
 | No | `true` | must be defined in inventory | N/A |
 | No | `false` | N/A | must be defined in inventory |
 
