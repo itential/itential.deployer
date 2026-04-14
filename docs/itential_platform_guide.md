@@ -199,8 +199,8 @@ default variables located in `roles/platform/defaults/main/vault.yml`.
 | platform_vault_secret_id | String | Hashicorp Vault Secret ID variable used for AppRole login |  |
 | platform_vault_approle_path | String | The path where the AppRole was enabled. | `approle` |
 | platform_vault_token_file | String | The file path to a token file. The token is used for authentication to access Vault secrets. | `{{ platform_vault_token_dir }}/vault.token` |
-| platform_redis_password_vault | Reference for the path to redis password secret and name of key in Hashicorp Vault | `$SECRET_iap $KEY_redisPassword` |
-| platform_mongo_password_vault | Reference for the path to mongodb password secret and name of key in Hashicorp Vault | `$SECRET_iap $KEY_mongoDb` |
+| platform_redis_password_vault | String | Reference for the path to the Redis password secret and name of key in Hashicorp Vault. Syntax: `$SECRET_{secret path} $KEY_{key name}`. Must be set in inventory when `platform_configure_vault` is `true`. Example: `$SECRET_iap $KEY_redisPassword` | `""` |
+| platform_mongo_password_vault | String | Reference for the path to the MongoDB password secret and name of key in Hashicorp Vault. Syntax: `$SECRET_{secret path} $KEY_{key name}`. Must be set in inventory when `platform_configure_vault` is `true`. Example: `$SECRET_iap $KEY_mongoDb` | `""` |
 | platform_vault_role_secrets_env_file | The file path to the .env file containing Role ID and Secret ID for AppRole authentication | `{{ platform_vault_token_dir }}/vault-role-secrets.env` |
 | platform_vault_secrets_endpoint | String | The endpoint for the Secrets Engine that is used. | `itential/data` |
 | platform_vault_read_only | Boolean | If true, only reads secrets from Hashicorp Vault. Otherwise, the platform can write secrets to Vault for storage. | `true` |
