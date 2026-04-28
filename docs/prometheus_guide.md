@@ -108,20 +108,23 @@ All exporter variables are handled by the exporter roles. Refer to the documenta
 
 ### MongoDB Exporter Recommendations
 
-We recommend setting the `mongodb_exporter_global_conn_pool` variable to `true` in the `mongodb`
-group variables section when MongoDB replication is enabled.  Otherwise the exporter may consume
-all available file descriptors and cause the mongod process to crash.
+We recommend setting the `mongodb_exporter_global_conn_pool` variable to `true` in the
+`mongodb_primary` group variables section when MongoDB replication is enabled.  Otherwise the
+exporter may consume all available file descriptors and cause the mongod process to crash.
 
 ```yaml
 all:
   children:
-    mongodb:
+    mongodb_primary:
       hosts:
         <MONGODB-HOST-1>:
+      vars:
+        mongodb_replication_enabled: true
+        mongodb_exporter_global_conn_pool: true
+
+    mongodb_replica:
+      hosts:
         <MONGODB-HOST-N>:
-    vars:
-      mongodb_replication_enabled: true
-      mongodb_exporter_global_conn_pool: true
 ```
 
 ### Grafana Role Variables
@@ -157,12 +160,15 @@ all:
       vars:
         redis_exporter_password: <REDIS-PROMETHEUS-PASSWORD>
 
-    mongodb:
+    mongodb_primary:
       hosts:
         <MONGODB-HOST-1>:
-        <MONGODB-HOST-N>:
       vars:
         mongodb_exporter_admin_password: <MONGODB-ADMIN-PASSWORD>
+
+    mongodb_replica:
+      hosts:
+        <MONGODB-HOST-N>:
 
     platform:
       hosts:
@@ -232,6 +238,6 @@ You can also selectively execute portions of the role by using the following tag
 | `itential_scrape_config_install` | This will execute the task to create the Itential scrape config file. |
 | `node_exporter_install`  | This will execute the tasks to install the node exporter. The node exporter is installed on all Itential-related hosts and will expose system and sysadmin type metrics. |
 | `process_exporter_install` | This will execute the tasks to install the process exporter. The process exporter is installed on `platform` and `gateway` hosts. |
-| `mongodb_exporter_install` | This will execute the tasks to install the mongo exporter. The mongo exporter is installed on `mongodb` hosts. |
+| `mongodb_exporter_install` | This will execute the tasks to install the mongo exporter. The mongo exporter is installed on `mongodb_primary` and `mongodb_replica` hosts. |
 | `redis_exporter_install` | This will execute the tasks to install the redis exporter. The redis exporter is installed on `redis` hosts. |
 | `grafana_install` | This will execute the tasks to install Grafana. |

@@ -22,5 +22,8 @@ mongodb_mongod_service_retries: 5
 mongodb_mongod_service_delay: 10
 
 # MongoDB status settings
-mongodb_status_poll: 3
-mongodb_status_interval: 10
+# poll * interval = max wait time in seconds for the replicaset to converge.
+# New members start in STARTUP2 (initial sync) before becoming SECONDARY,
+# so this needs to be generous enough for data sync to complete.
+mongodb_status_poll: 10
+mongodb_status_interval: 30

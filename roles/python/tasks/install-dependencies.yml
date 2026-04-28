@@ -13,6 +13,7 @@
       ansible.builtin.pip:
         name: "{{ python_base_dependencies }}"
         virtualenv: "{{ python_venv }}"
+        virtualenv_command: "python3 -m venv"
       when:
         - python_base_dependencies is defined
         - python_base_dependencies is iterable
@@ -22,6 +23,7 @@
       ansible.builtin.pip:
         name: "{{ python_app_dependencies }}"
         virtualenv: "{{ python_venv }}"
+        virtualenv_command: "python3 -m venv"
       when:
         - python_app_dependencies is defined
         - python_app_dependencies is iterable

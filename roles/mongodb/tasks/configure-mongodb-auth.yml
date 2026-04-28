@@ -21,28 +21,28 @@
     - name: Check if replica set key exists on the primary node
       ansible.builtin.stat:
         path: "{{ mongodb_auth_keyfile_destination }}"
-      when: inventory_hostname == groups['mongodb'][0]
+      when: inventory_hostname == groups['mongodb_primary'][0]
       register: keyfile_stat
 
     # Use openssl to generate a key file on primary mongo node. The primary is the
-    # first node defined in the host file. The key file is created here once and then
-    # distributed to each of the other nodes in the replset. They must all have the
-    # same key file.
+    # first node defined in the mongodb_primary group. The key file is created here
+    # once and then distributed to each of the other nodes in the replset. They must
+    # all have the same key file.
     - name: Generate a new replica set key with OpenSSL
       ansible.builtin.shell:
         cmd: openssl rand -base64 756 > "{{ mongodb_auth_keyfile_destination }}"
       args:
         creates: "{{ mongodb_auth_keyfile_destination }}"
       when:
-        - inventory_hostname == groups['mongodb'][0]
+        - inventory_hostname == groups['mongodb_primary'][0]
         - not keyfile_stat.stat.exists
 
     - name: Get the key from the primary node
       ansible.builtin.slurp:
         src: '{{ mongodb_auth_keyfile_destination }}'
       register: keyfile
-      delegate_to: "{{ groups['mongodb'][0] }}"
-      when: inventory_hostname != groups['mongodb'][0]
+      delegate_to: "{{ groups['mongodb_primary'][0] }}"
+      when: inventory_hostname != groups['mongodb_primary'][0]
 
     - name: Copy the key file to the secondary nodes
       ansible.builtin.copy:
@@ -51,7 +51,7 @@
         owner: "{{ mongodb_owner }}"
         group: "{{ mongodb_group }}"
         mode: "0400"
-      when: inventory_hostname != groups['mongodb'][0]
+      when: inventory_hostname != groups['mongodb_primary'][0]
 
     - name: Set the key file ownership and permissions
       ansible.builtin.file:
