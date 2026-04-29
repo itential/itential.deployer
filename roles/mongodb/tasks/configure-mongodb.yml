@@ -8,10 +8,7 @@
 - name: Configure MongoDB replica set
   ansible.builtin.include_tasks:
     file: configure-mongodb-replicaset.yml
-    apply:
-      tags: reconfigure_priority
   when: groups['mongodb_replica'] | default([]) | length > 0
-  tags: reconfigure_priority
 
 # Configure auth
 - name: Configure MongoDB Auth

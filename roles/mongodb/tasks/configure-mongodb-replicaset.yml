@@ -25,12 +25,12 @@
   register: mongodb_state
   vars:
     ansible_python_interpreter: "{{ mongodb_python_venv }}/bin/python3"
-  tags: reconfigure_priority
+
 
 - name: Print MongoDB configuration state
   ansible.builtin.debug:
     msg: "{{ mongodb_state }}"
-  tags: reconfigure_priority
+
 
 # Execute the template to apply changes to the mongo.conf for replication
 - name: Create MongoDB config file (replicaset)
@@ -58,8 +58,8 @@
 - name: Set empty array of mongo servers
   ansible.builtin.set_fact:
     mongodb_servers: []
-  when: 'mongodb_primary' in group_names
-  tags: reconfigure_priority
+  when: "'mongodb_primary' in group_names"
+
 
 # Hosts in the mongodb_primary group are assigned the higher priority, making
 # them preferred candidates for the MongoDB primary role.
@@ -69,8 +69,8 @@
       {{ mongodb_servers + [{'host': item + ':' + (mongodb_port | string),
       'priority': 10}] }}
   loop: "{{ groups['mongodb_primary'] | default([]) }}"
-  when: 'mongodb_primary' in group_names
-  tags: reconfigure_priority
+  when: "'mongodb_primary' in group_names"
+
 
 # Hosts in the mongodb_replica group are assigned the lower priority, making
 # them secondary members of the replica set.
@@ -80,8 +80,8 @@
       {{ mongodb_servers + [{'host': item + ':' + (mongodb_port | string),
       'priority': 5}] }}
   loop: "{{ groups['mongodb_replica'] | default([]) }}"
-  when: 'mongodb_primary' in group_names
-  tags: reconfigure_priority
+  when: "'mongodb_primary' in group_names"
+
 
 # This task will only run when there is an arbiter defined in the hosts file
 - name: Add the arbiter to the list of servers when there is one
@@ -92,13 +92,13 @@
   when:
     - 'mongodb_primary' in group_names
     - groups.mongodb_arbiter is defined
-  tags: reconfigure_priority
+
 
 - name: Print replication state
   ansible.builtin.debug:
     msg: "replication_enabled={{ mongodb_state.replication_enabled }} primary={{ mongodb_state.primary }} members={{ mongodb_state.members }}"
-  when: 'mongodb_primary' in group_names
-  tags: reconfigure_priority
+  when: "'mongodb_primary' in group_names"
+
 
 - name: Wait for all MongoDB members to be reachable before creating the replicaset
   ansible.builtin.wait_for:
@@ -132,10 +132,10 @@
     validate: true
     reconfigure: "{{ mongodb_state.replication_enabled }}"
   register: replicaset_result
-  when: 'mongodb_primary' in group_names
+  when: "'mongodb_primary' in group_names"
   vars:
     ansible_python_interpreter: "{{ mongodb_python_venv }}/bin/python3"
-  tags: reconfigure_priority
+
 
 - name: Ensure replicaset is stable before continuing
   community.mongodb.mongodb_status:
@@ -157,7 +157,7 @@
     - mongodb_state.replication_enabled | bool
   vars:
     ansible_python_interpreter: "{{ mongodb_python_venv }}/bin/python3"
-  tags: reconfigure_priority
+
 
 - name: Refresh MongoDB configuration state after replicaset changes
   itential.deployer.mongodb_config_state:
@@ -173,7 +173,7 @@
     - mongodb_state.replication_enabled | bool
   vars:
     ansible_python_interpreter: "{{ mongodb_python_venv }}/bin/python3"
-  tags: reconfigure_priority
+
 
 # After rs.reconfig() with new priorities, MongoDB automatically triggers a priority
 # takeover — the higher-priority primary steps up without needing a manual
@@ -197,7 +197,7 @@
     - (mongodb_state_after_replicaset.primary | regex_replace(':.*$', '')) != groups['mongodb_primary'][0]
   vars:
     ansible_python_interpreter: "{{ mongodb_python_venv }}/bin/python3"
-  tags: reconfigure_priority
+
 
 # Starting in MongoDB 5.0, the implicit default write concern is w: majority.
 # However, special considerations are made for deployments containing arbiters:

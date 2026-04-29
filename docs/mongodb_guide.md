@@ -326,7 +326,6 @@ You can also run select MongodDB segments by using the following tags:
 * `install_mongodb`
 * `configure_mongodb`
 * `initialize_mongo_config`
-* `reconfigure_priority`
 
 The tag `install_mongodb` will run all of the installation tasks which will install MongoDB and
 start it up in its most basic state. This tag will execute the tasks to configure SELinux. This tag
@@ -351,3 +350,5 @@ repeated executions can put the configuration in a bad state. To "reset" the con
 state that the installation tag produced you can run this command:
 
 ```bash
+ansible-playbook itential.deployer.mongodb -i <inventory> --tags initialize_mongo_config
+```
