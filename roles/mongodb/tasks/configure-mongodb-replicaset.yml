@@ -2,17 +2,6 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
 
-# Set node type facts based on inventory group membership.
-# mongodb_primary group hosts get the primary role with higher priority.
-# mongodb_replica group hosts get the secondary role with lower priority.
-- name: Set MongoDB node type facts
-  ansible.builtin.set_fact:
-    mongodb_is_primary_node: "{{ 'mongodb_primary' in group_names }}"
-    mongodb_is_replica_node: "{{ 'mongodb_replica' in group_names }}"
-    mongodb_data_nodes: "{{ groups['mongodb_primary'] | default([]) + groups['mongodb_replica'] | default([]) }}"
-    mongodb_coordinator: "{{ groups['mongodb_primary'][0] }}"
-  tags: reconfigure_priority
-
 # Check the state of the MongoDB servers. This might or might not be a replicaset.
 # This might or might not have authorization enabled. This module returns an
 # object that looks like this:
@@ -69,7 +58,7 @@
 - name: Set empty array of mongo servers
   ansible.builtin.set_fact:
     mongodb_servers: []
-  when: inventory_hostname == mongodb_coordinator
+  when: 'mongodb_primary' in group_names
   tags: reconfigure_priority
 
 # Hosts in the mongodb_primary group are assigned the higher priority, making
@@ -80,7 +69,7 @@
       {{ mongodb_servers + [{'host': item + ':' + (mongodb_port | string),
       'priority': 10}] }}
   loop: "{{ groups['mongodb_primary'] | default([]) }}"
-  when: inventory_hostname == mongodb_coordinator
+  when: 'mongodb_primary' in group_names
   tags: reconfigure_priority
 
 # Hosts in the mongodb_replica group are assigned the lower priority, making
@@ -91,7 +80,7 @@
       {{ mongodb_servers + [{'host': item + ':' + (mongodb_port | string),
       'priority': 5}] }}
   loop: "{{ groups['mongodb_replica'] | default([]) }}"
-  when: inventory_hostname == mongodb_coordinator
+  when: 'mongodb_primary' in group_names
   tags: reconfigure_priority
 
 # This task will only run when there is an arbiter defined in the hosts file
@@ -101,14 +90,14 @@
       {{ mongodb_servers + [{'host': item + ':' + (mongodb_port | string), 'priority': 0}] }}
   loop: "{{ groups.mongodb_arbiter }}"
   when:
-    - inventory_hostname == mongodb_coordinator
+    - 'mongodb_primary' in group_names
     - groups.mongodb_arbiter is defined
   tags: reconfigure_priority
 
-- name: Debug replication state
+- name: Print replication state
   ansible.builtin.debug:
     msg: "replication_enabled={{ mongodb_state.replication_enabled }} primary={{ mongodb_state.primary }} members={{ mongodb_state.members }}"
-  when: inventory_hostname == mongodb_coordinator
+  when: 'mongodb_primary' in group_names
   tags: reconfigure_priority
 
 - name: Wait for all MongoDB members to be reachable before creating the replicaset
@@ -119,7 +108,7 @@
   loop: "{{ mongodb_data_nodes + (groups.mongodb_arbiter | default([])) }}"
   when:
     - not mongodb_state.replication_enabled
-    - inventory_hostname == mongodb_coordinator
+    - 'mongodb_primary' in group_names
 
 # Create or reconfigure the replicaset.
 # When replication is not yet enabled: initiates a new replicaset from the coordinator.
@@ -143,7 +132,7 @@
     validate: true
     reconfigure: "{{ mongodb_state.replication_enabled }}"
   register: replicaset_result
-  when: inventory_hostname == mongodb_coordinator
+  when: 'mongodb_primary' in group_names
   vars:
     ansible_python_interpreter: "{{ mongodb_python_venv }}/bin/python3"
   tags: reconfigure_priority
@@ -164,7 +153,7 @@
     - "'Unable to determine if auth is enabled' not in rs.msg"
     - "'replicaset is in a converged state' not in rs.msg"
   when:
-    - inventory_hostname == mongodb_coordinator
+    - 'mongodb_primary' in group_names
     - mongodb_state.replication_enabled | bool
   vars:
     ansible_python_interpreter: "{{ mongodb_python_venv }}/bin/python3"
@@ -180,19 +169,19 @@
   delay: "{{ mongodb_status_interval }}"
   until: mongodb_state_after_replicaset is not failed
   when:
-    - inventory_hostname == mongodb_coordinator
+    - 'mongodb_primary' in group_names
     - mongodb_state.replication_enabled | bool
   vars:
     ansible_python_interpreter: "{{ mongodb_python_venv }}/bin/python3"
   tags: reconfigure_priority
 
 # After rs.reconfig() with new priorities, MongoDB automatically triggers a priority
-# takeover — the higher-priority coordinator steps up without needing a manual
-# stepdown. Poll until the coordinator reports itself as primary.
-- name: Wait for mongodb_coordinator to become primary after priority reconfiguration
+# takeover — the higher-priority primary steps up without needing a manual
+# stepdown. Poll until the primary node reports itself as primary.
+- name: Wait for mongodb_primary to become primary after priority reconfiguration
   itential.deployer.mongodb_config_state:
     login_database: admin
-    login_host: "{{ mongodb_coordinator }}"
+    login_host: "{{ groups['mongodb_primary'][0] }}"
     login_port: "{{ mongodb_port }}"
   register: mongodb_state_post_reconfig
   retries: "{{ mongodb_status_poll }}"
@@ -200,12 +189,12 @@
   until:
     - mongodb_state_post_reconfig is not failed
     - mongodb_state_post_reconfig.primary is defined
-    - (mongodb_state_post_reconfig.primary | regex_replace(':.*$', '')) == mongodb_coordinator
+    - (mongodb_state_post_reconfig.primary | regex_replace(':.*$', '')) == groups['mongodb_primary'][0]
   when:
-    - inventory_hostname == mongodb_coordinator
+    - 'mongodb_primary' in group_names
     - replicaset_result is changed
     - mongodb_state_after_replicaset.primary is defined
-    - (mongodb_state_after_replicaset.primary | regex_replace(':.*$', '')) != mongodb_coordinator
+    - (mongodb_state_after_replicaset.primary | regex_replace(':.*$', '')) != groups['mongodb_primary'][0]
   vars:
     ansible_python_interpreter: "{{ mongodb_python_venv }}/bin/python3"
   tags: reconfigure_priority

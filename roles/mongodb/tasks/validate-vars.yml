@@ -2,28 +2,6 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
 
-# When mongodb_replica group is defined and has hosts, replication is automatically
-# enabled on all nodes. Any configuration overrides set in mongodb_primary group vars
-# are propagated to replica nodes so users only need to configure mongodb_primary.
-- name: Auto-detect and propagate replication configuration
-  when:
-    - groups['mongodb_replica'] is defined
-    - groups['mongodb_replica'] | length > 0
-  tags: always
-  block:
-    - name: Enable replication on all nodes when mongodb_replica group is defined
-      ansible.builtin.set_fact:
-        mongodb_replication_enabled: true
-
-    - name: Inherit replication vars from mongodb_primary on replica nodes
-      ansible.builtin.set_fact:
-        mongodb_replset_name: "{{ hostvars[groups['mongodb_primary'][0]]['mongodb_replset_name'] | default(mongodb_replset_name) }}"
-        mongodb_port: "{{ hostvars[groups['mongodb_primary'][0]]['mongodb_port'] | default(mongodb_port) }}"
-        mongodb_auth_enabled: "{{ hostvars[groups['mongodb_primary'][0]]['mongodb_auth_enabled'] | default(mongodb_auth_enabled) }}"
-        mongodb_tls_enabled: "{{ hostvars[groups['mongodb_primary'][0]]['mongodb_tls_enabled'] | default(mongodb_tls_enabled) }}"
-        mongodb_user_admin_password: "{{ hostvars[groups['mongodb_primary'][0]]['mongodb_user_admin_password'] | default(mongodb_user_admin_password) }}"
-        mongodb_user_itential_password: "{{ hostvars[groups['mongodb_primary'][0]]['mongodb_user_itential_password'] | default(mongodb_user_itential_password) }}"
-      when: "'mongodb_replica' in group_names"
 
 - name: Validate and set installation variables
   tags: always

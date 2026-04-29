@@ -799,13 +799,15 @@ all:
       vars:
         redis_replication_enabled: true
 
-    mongodb:
-      hosts:
-        mongodb1.host.com:
-        mongodb2.host.com:
-        mongodb3.host.com:
-      vars:
-        mongodb_replication_enabled: true
+    mongodb_node:
+      children:
+        mongodb_primary:
+          hosts:
+            mongodb1.host.com:
+        mongodb_replica:
+          hosts:
+            mongodb2.host.com:
+            mongodb3.host.com:
 
     platform:
       hosts:
@@ -901,14 +903,16 @@ all:
       vars:
         redis_replication_enabled: true
 
-    mongodb:
-      hosts:
-        datacenter1.mongodb1.host.com:
-        datacenter1.mongodb2.host.com:
-        datacenter2.mongodb3.host.com:
-        datacenter2.mongodb4.host.com:
-      vars:
-        mongodb_replication_enabled: true
+    mongodb_node:
+      children:
+        mongodb_primary:
+          hosts:
+            datacenter1.mongodb1.host.com:
+            datacenter1.mongodb2.host.com:
+        mongodb_replica:
+          hosts:
+            datacenter2.mongodb3.host.com:
+            datacenter2.mongodb4.host.com:
 
     mongodb_arbiter:
       hosts:

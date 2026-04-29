@@ -53,9 +53,9 @@ mongodb_port: "{{ mongodb_port_default }}"
 mongodb_itential_db_name: itential
 
 # Feature flags that can be overridden in the hosts file
-# Essentially, a default installation will not have replication, authorization,
-# or TLS settings applied.
-mongodb_replication_enabled: false
+# Essentially, a default installation will not have authorization or TLS
+# settings applied. Replication is automatically enabled when both the
+# mongodb_primary and mongodb_replica groups are defined in the inventory.
 mongodb_auth_enabled: true
 mongodb_tls_enabled: false
 

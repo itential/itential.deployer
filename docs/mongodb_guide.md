@@ -26,11 +26,14 @@ configurations is based on the variables that are set in the host file. See belo
 When configured to do so, the role is responsible for configuring MongoDB as a replica set. The
 inventory uses two dedicated groups to declare replica set membership and role:
 
+- `mongodb_node` — parent group that contains `mongodb_primary` and `mongodb_replica` as children.
+  Place shared variables (replica set name, auth, TLS, passwords, etc.) here so they apply to all
+  members without duplication.
 - `mongodb_primary` — hosts in this group are configured as preferred primary members with a higher
   election priority. The first host in this group acts as the coordinator that initiates and
   reconfigures the replica set.
 - `mongodb_replica` — hosts in this group are configured as secondary members with a lower election
-  priority.
+  priority. Replication is automatically enabled when this group is defined.
 - `mongodb_arbiter` — (optional) hosts in this group are added to the replica set as arbiters with
   zero priority. Arbiters participate in elections but do not hold data.
 
@@ -90,7 +93,7 @@ override the default MongoDB version.
 
 ### MongoDB Role Variables
 
-The variables in this section may be overridden in the inventory in the `mongodb_primary` group vars.
+The variables in this section may be overridden in the inventory in the `mongodb_node` group vars.
 
 The following table contains the most commonly overridden variables.
 
@@ -99,7 +102,7 @@ The following table contains the most commonly overridden variables.
 | `mongodb_admin_db_name` | String | The name of the admin database. | `admin` |
 | `mongodb_auth_enabled` | Boolean | Flag to enable MongoDB authentication. | `true` |
 | `mongodb_itential_db_name` | String | The name of the itential database. | `itential` |
-| `mongodb_replication_enabled` | Boolean | Flag to enable MongoDB replication | `false` |
+| `mongodb_port` | Integer | The MongoDB listen port. | `27017` |
 | `mongodb_replset_name` | String | The MongoDB replica set name. | `rs0` |
 | `mongodb_ssl_root_dir` | String | The base directory for SSL certs and key files. | `/etc/ssl/certs` |
 | `mongodb_tls_enabled` | Boolean | Flag to enable MongoDB TLS. | `false` |
@@ -222,8 +225,8 @@ all:
 ## Example Inventory - Configuring MongoDB Replica Set accepting all other defaults
 
 To configure replication, place the intended primary node in `mongodb_primary` and the secondary
-nodes in `mongodb_replica`. Set `mongodb_replication_enabled` to `true` in the `mongodb_primary`
-group vars. Optionally override the replica set name.
+nodes in `mongodb_replica`, both as children of `mongodb_node`. Replication is automatically
+enabled when the `mongodb_replica` group is defined. Place shared variables in `mongodb_node` vars.
 
 ```yaml
 all:
@@ -232,21 +235,21 @@ all:
     platform_release: 6
 
   children:
-    mongodb_primary:
-      hosts:
-        <host1>: # This host will be elected as the primary
-          ansible_host: <addr1>
+    mongodb_node:
       vars:
-        mongodb_replication_enabled: true
         # Optionally override the replica set name
         # mongodb_replset_name: <a-meaningful-replica-set-name>
-
-    mongodb_replica:
-      hosts:
-        <host2>:
-          ansible_host: <addr2>
-        <host3>:
-          ansible_host: <addr3>
+      children:
+        mongodb_primary:
+          hosts:
+            <host1>: # This host will be elected as the primary
+              ansible_host: <addr1>
+        mongodb_replica:
+          hosts:
+            <host2>:
+              ansible_host: <addr2>
+            <host3>:
+              ansible_host: <addr3>
 ```
 
 ## Example Inventory - Configuring MongoDB Replica Set with Arbiter
@@ -261,17 +264,16 @@ all:
     platform_release: 6
 
   children:
-    mongodb_primary:
-      hosts:
-        <host1>:
-          ansible_host: <addr1>
-      vars:
-        mongodb_replication_enabled: true
-
-    mongodb_replica:
-      hosts:
-        <host2>:
-          ansible_host: <addr2>
+    mongodb_node:
+      children:
+        mongodb_primary:
+          hosts:
+            <host1>:
+              ansible_host: <addr1>
+        mongodb_replica:
+          hosts:
+            <host2>:
+              ansible_host: <addr2>
 
     mongodb_arbiter:
       hosts:
@@ -281,7 +283,7 @@ all:
 
 ## Example Inventory - Configuring MongoDB TLS accepting all other defaults
 
-To configure a MongoDB TLS, add the `mongodb_tls_enabled` flag to the `mongodb_primary` group vars
+To configure MongoDB TLS, add the `mongodb_tls_enabled` flag to the `mongodb_node` group vars
 and set it to `true`, and configure the `mongo_cert_keyfile_source` and `mongo_root_ca_file_source`.
 
 ```yaml
@@ -291,22 +293,22 @@ all:
     platform_release: 6
 
   children:
-    mongodb_primary:
-      hosts:
-        <host1>:
-          ansible_host: <addr1>
+    mongodb_node:
       vars:
-        mongodb_replication_enabled: true
         mongodb_tls_enabled: true
         mongo_cert_keyfile_source: mongodb.pem
         mongo_root_ca_file_source: rootCA.pem
-
-    mongodb_replica:
-      hosts:
-        <host2>:
-          ansible_host: <addr2>
-        <host3>:
-          ansible_host: <addr3>
+      children:
+        mongodb_primary:
+          hosts:
+            <host1>:
+              ansible_host: <addr1>
+        mongodb_replica:
+          hosts:
+            <host2>:
+              ansible_host: <addr2>
+            <host3>:
+              ansible_host: <addr3>
 ```
 
 ## Running the Playbook
@@ -349,15 +351,3 @@ repeated executions can put the configuration in a bad state. To "reset" the con
 state that the installation tag produced you can run this command:
 
 ```bash
-ansible-playbook itential.deployer.mongodb -i <inventory> --tags initialize_mongo_config
-```
-
-The tag `reconfigure_priority` reconfigures the replica set member list based on the current
-inventory groups. Use this tag when you need to update the replica set configuration without
-performing a full reinstall — for example, after moving a host between the `mongodb_primary` and
-`mongodb_replica` groups, or after adding new members to the replica set. If the current primary is
-not the first host in `mongodb_primary`, the role will step it down to trigger a new election:
-
-```bash
-ansible-playbook itential.deployer.mongodb -i <inventory> --tags reconfigure_priority
-```

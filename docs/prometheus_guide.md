@@ -115,16 +115,16 @@ exporter may consume all available file descriptors and cause the mongod process
 ```yaml
 all:
   children:
-    mongodb_primary:
-      hosts:
-        <MONGODB-HOST-1>:
+    mongodb_node:
       vars:
-        mongodb_replication_enabled: true
         mongodb_exporter_global_conn_pool: true
-
-    mongodb_replica:
-      hosts:
-        <MONGODB-HOST-N>:
+      children:
+        mongodb_primary:
+          hosts:
+            <MONGODB-HOST-1>:
+        mongodb_replica:
+          hosts:
+            <MONGODB-HOST-N>:
 ```
 
 ### Grafana Role Variables
