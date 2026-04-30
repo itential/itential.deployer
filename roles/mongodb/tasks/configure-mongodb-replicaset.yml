@@ -90,7 +90,7 @@
       {{ mongodb_servers + [{'host': item + ':' + (mongodb_port | string), 'priority': 0}] }}
   loop: "{{ groups.mongodb_arbiter }}"
   when:
-    - 'mongodb_primary' in group_names
+    - "'mongodb_primary' in group_names"
     - groups.mongodb_arbiter is defined
 
 
@@ -108,7 +108,7 @@
   loop: "{{ mongodb_data_nodes + (groups.mongodb_arbiter | default([])) }}"
   when:
     - not mongodb_state.replication_enabled
-    - 'mongodb_primary' in group_names
+    - "'mongodb_primary' in group_names"
 
 # Create or reconfigure the replicaset.
 # When replication is not yet enabled: initiates a new replicaset from the coordinator.
@@ -153,7 +153,7 @@
     - "'Unable to determine if auth is enabled' not in rs.msg"
     - "'replicaset is in a converged state' not in rs.msg"
   when:
-    - 'mongodb_primary' in group_names
+    - "'mongodb_primary' in group_names"
     - mongodb_state.replication_enabled | bool
   vars:
     ansible_python_interpreter: "{{ mongodb_python_venv }}/bin/python3"
@@ -169,7 +169,7 @@
   delay: "{{ mongodb_status_interval }}"
   until: mongodb_state_after_replicaset is not failed
   when:
-    - 'mongodb_primary' in group_names
+    - "'mongodb_primary' in group_names"
     - mongodb_state.replication_enabled | bool
   vars:
     ansible_python_interpreter: "{{ mongodb_python_venv }}/bin/python3"
@@ -191,7 +191,7 @@
     - mongodb_state_post_reconfig.primary is defined
     - (mongodb_state_post_reconfig.primary | regex_replace(':.*$', '')) == groups['mongodb_primary'][0]
   when:
-    - 'mongodb_primary' in group_names
+    - "'mongodb_primary' in group_names"
     - replicaset_result is changed
     - mongodb_state_after_replicaset.primary is defined
     - (mongodb_state_after_replicaset.primary | regex_replace(':.*$', '')) != groups['mongodb_primary'][0]
