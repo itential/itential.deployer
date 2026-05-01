@@ -71,3 +71,11 @@ mongodb_user_itential_password: itential
 
 # The name of the mongo replica set
 mongodb_replset_name: "{{ mongodb_replset_name_default }}"
+
+# Replica set member priorities.
+# mongodb_primary_priority applies to all hosts in the mongodb_primary group.
+# mongodb_replica_priority is the default for hosts in the mongodb_replica group
+# and can be overridden per host by setting mongodb_replica_priority in the
+# host's vars section of the inventory.
+mongodb_primary_priority: 10
+mongodb_replica_priority: 5

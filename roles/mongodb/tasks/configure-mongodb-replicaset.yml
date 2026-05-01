@@ -67,18 +67,19 @@
   ansible.builtin.set_fact:
     mongodb_servers: >-
       {{ mongodb_servers + [{'host': item + ':' + (mongodb_port | string),
-      'priority': 10}] }}
+      'priority': mongodb_primary_priority}] }}
   loop: "{{ groups['mongodb_primary'] | default([]) }}"
   when: "'mongodb_primary' in group_names"
 
 
 # Hosts in the mongodb_replica group are assigned the lower priority, making
-# them secondary members of the replica set.
+# them secondary members of the replica set. The priority can be overridden
+# per host by setting mongodb_replica_priority in the host's vars.
 - name: Add replica nodes to the replicaset members list
   ansible.builtin.set_fact:
     mongodb_servers: >-
       {{ mongodb_servers + [{'host': item + ':' + (mongodb_port | string),
-      'priority': 5}] }}
+      'priority': hostvars[item]['mongodb_replica_priority'] | default(mongodb_replica_priority)}] }}
   loop: "{{ groups['mongodb_replica'] | default([]) }}"
   when: "'mongodb_primary' in group_names"
 

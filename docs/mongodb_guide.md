@@ -103,6 +103,8 @@ The following table contains the most commonly overridden variables.
 | `mongodb_auth_enabled` | Boolean | Flag to enable MongoDB authentication. | `true` |
 | `mongodb_itential_db_name` | String | The name of the itential database. | `itential` |
 | `mongodb_port` | Integer | The MongoDB listen port. | `27017` |
+| `mongodb_primary_priority` | Integer | Election priority assigned to all hosts in the `mongodb_primary` group. Higher values make the host a preferred primary candidate. | `10` |
+| `mongodb_replica_priority` | Integer | Default election priority for hosts in the `mongodb_replica` group. Can be overridden per host by setting `mongodb_replica_priority` in the host's vars. | `5` |
 | `mongodb_replset_name` | String | The MongoDB replica set name. | `rs0` |
 | `mongodb_ssl_root_dir` | String | The base directory for SSL certs and key files. | `/etc/ssl/certs` |
 | `mongodb_tls_enabled` | Boolean | Flag to enable MongoDB TLS. | `false` |
@@ -279,6 +281,37 @@ all:
       hosts:
         <host3>:
           ansible_host: <addr3>
+```
+
+## Example Inventory - Configuring MongoDB Replica Set with Custom Priorities
+
+By default, hosts in `mongodb_primary` receive priority `10` and hosts in `mongodb_replica` receive
+priority `5`. Both defaults can be changed via group vars. Additionally, each replica host can
+override the priority individually by setting `mongodb_replica_priority` directly in its host entry.
+
+```yaml
+all:
+  vars:
+    repository_api_key: #key
+    platform_release: 6
+
+  children:
+    mongodb_node:
+      vars:
+        mongodb_primary_priority: 10  # optional, this is the default
+        mongodb_replica_priority: 5   # default for all replicas unless overridden per host
+      children:
+        mongodb_primary:
+          hosts:
+            <host1>:
+              ansible_host: <addr1>
+        mongodb_replica:
+          hosts:
+            <host2>:
+              ansible_host: <addr2>
+            <host3>:
+              ansible_host: <addr3>
+              mongodb_replica_priority: 2  # lower priority for this specific replica
 ```
 
 ## Example Inventory - Configuring MongoDB TLS accepting all other defaults
