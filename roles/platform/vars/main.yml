@@ -6,7 +6,7 @@ platform_root_dir_default: /opt/itential/platform
 platform_server_dir_default: /opt/itential/platform/server
 platform_services_dir_default: /opt/itential/platform/services
 platform_config_dir_default: /etc/itential
-platform_log_dir_default: /var/log/itential
+platform_log_dir_default: /var/log/itential/platform
 platform_itential_home_dir_default: /home/itential
 
 # The Platform server and services directories cannot be overridden in the inventory. Only the

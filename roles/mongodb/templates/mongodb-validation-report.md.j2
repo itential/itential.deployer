@@ -9,27 +9,27 @@
 
 ## Host Details
 
-{% if host_details is defined %}
+{% if mongodb_host_details is defined %}
 ### Operating System
-- **Distribution:** {{ host_details.os.distribution | default('Unknown') }} {{ host_details.os.distribution_version | default('') }}
-- **OS Family:** {{ host_details.os.os_family | default('Unknown') }}
-- **Kernel:** {{ host_details.os.kernel | default('Unknown') }}
-- **Architecture:** {{ host_details.os.architecture | default('Unknown') }}
-- **Hostname:** {{ host_details.os.hostname | default('Unknown') }}
-- **FQDN:** {{ host_details.os.fqdn | default('Unknown') }}
+- **Distribution:** {{ mongodb_host_details.os.distribution | default('Unknown') }} {{ mongodb_host_details.os.distribution_version | default('') }}
+- **OS Family:** {{ mongodb_host_details.os.os_family | default('Unknown') }}
+- **Kernel:** {{ mongodb_host_details.os.kernel | default('Unknown') }}
+- **Architecture:** {{ mongodb_host_details.os.architecture | default('Unknown') }}
+- **Hostname:** {{ mongodb_host_details.os.hostname | default('Unknown') }}
+- **FQDN:** {{ mongodb_host_details.os.fqdn | default('Unknown') }}
 
 ### Hardware
-- **CPU Count:** {{ host_details.hardware.cpu.processor_count | default('Unknown') }}
-- **CPU Cores:** {{ host_details.hardware.cpu.processor_cores | default('Unknown') }}
-- **CPU vCPUs:** {{ host_details.hardware.cpu.processor_vcpus | default('Unknown') }}
-- **Threads per Core:** {{ host_details.hardware.cpu.processor_threads_per_core | default('Unknown') }}
-- **Total Memory:** {{ host_details.hardware.memory.memtotal_mb | default('Unknown') }} MB
-- **Free Memory:** {{ host_details.hardware.memory.memfree_mb | default('Unknown') }} MB
-- **Swap Total:** {{ host_details.hardware.memory.swaptotal_mb | default('Unknown') }} MB
+- **CPU Count:** {{ mongodb_host_details.hardware.cpu.processor_count | default('Unknown') }}
+- **CPU Cores:** {{ mongodb_host_details.hardware.cpu.processor_cores | default('Unknown') }}
+- **CPU vCPUs:** {{ mongodb_host_details.hardware.cpu.processor_vcpus | default('Unknown') }}
+- **Threads per Core:** {{ mongodb_host_details.hardware.cpu.processor_threads_per_core | default('Unknown') }}
+- **Total Memory:** {{ mongodb_host_details.hardware.memory.memtotal_mb | default('Unknown') }} MB
+- **Free Memory:** {{ mongodb_host_details.hardware.memory.memfree_mb | default('Unknown') }} MB
+- **Swap Total:** {{ mongodb_host_details.hardware.memory.swaptotal_mb | default('Unknown') }} MB
 
 ### Disk Mounts
-{% if host_details.hardware.disk is defined and host_details.hardware.disk | length > 0 %}
-{% for disk in host_details.hardware.disk %}
+{% if mongodb_host_details.hardware.disk is defined and mongodb_host_details.hardware.disk | length > 0 %}
+{% for disk in mongodb_host_details.hardware.disk %}
 - **{{ disk.mount }}:** {{ disk.size_gb }} GB
 {% endfor %}
 {% else %}
@@ -37,19 +37,19 @@
 {% endif %}
 
 ### Networking
-- **Primary IP:** {{ host_details.networking.default_ipv4.address | default('N/A') }}
-- **Gateway:** {{ host_details.networking.default_ipv4.gateway | default('N/A') }}
-- **Interface:** {{ host_details.networking.default_ipv4.interface | default('N/A') }}
-- **MAC Address:** {{ host_details.networking.default_ipv4.macaddress | default('N/A') }}
+- **Primary IP:** {{ mongodb_host_details.networking.default_ipv4.address | default('N/A') }}
+- **Gateway:** {{ mongodb_host_details.networking.default_ipv4.gateway | default('N/A') }}
+- **Interface:** {{ mongodb_host_details.networking.default_ipv4.interface | default('N/A') }}
+- **MAC Address:** {{ mongodb_host_details.networking.default_ipv4.macaddress | default('N/A') }}
 
 ### Security
-{% if host_details.security.selinux is defined %}
-- **SELinux Status:** {{ host_details.security.selinux.status | default('Unknown') }}
-- **SELinux Mode:** {{ host_details.security.selinux.mode | default('Unknown') }}
-- **SELinux Type:** {{ host_details.security.selinux.type | default('Unknown') }}
+{% if mongodb_host_details.security.selinux is defined %}
+- **SELinux Status:** {{ mongodb_host_details.security.selinux.status | default('Unknown') }}
+- **SELinux Mode:** {{ mongodb_host_details.security.selinux.mode | default('Unknown') }}
+- **SELinux Type:** {{ mongodb_host_details.security.selinux.type | default('Unknown') }}
 {% endif %}
-{% if host_details.security.firewalld is defined %}
-- **Firewalld:** {{ host_details.security.firewalld.state | default('Unknown') }}
+{% if mongodb_host_details.security.firewalld is defined %}
+- **Firewalld:** {{ mongodb_host_details.security.firewalld.state | default('Unknown') }}
 {% endif %}
 {% else %}
 Host details not available
@@ -82,11 +82,7 @@ Host details not available
 ## Connectivity
 
 **Connection Tests:**
-- **No Auth:** {{ 'SUCCESS ✓' if (mongodb_ping_noauth is defined and mongodb_ping_noauth.rc == 0) else 'FAILED ✗' }}
-- **Admin User:** {{ 'SUCCESS ✓' if (mongodb_ping_admin is defined and mongodb_ping_admin.rc == 0) else 'FAILED ✗' }}
-{% if mongodb_tls_mode.rc == 0 %}
-- **TLS Connection:** {{ 'SUCCESS ✓' if (mongodb_ping_tls is defined and mongodb_ping_tls.rc == 0) else 'FAILED ✗' }}
-{% endif %}
+- **Ping:** {{ 'SUCCESS ✓' if (mongodb_ping is defined and mongodb_ping.rc == 0) else 'FAILED ✗' }}
 
 **Listening Ports:**
 ```
@@ -186,7 +182,7 @@ Log path not configured or could not be determined (likely using journald)
 {% endfor %}
 
 **Connection Test Results:**
-- **admin:** {{ 'PASSED ✓' if (mongodb_ping_admin is defined and mongodb_ping_admin.rc == 0) else 'FAILED ✗' }}
+- **admin:** {{ 'PASSED ✓' if (mongodb_ping is defined and mongodb_ping.rc == 0) else 'FAILED ✗' }}
 - **itential:** {{ 'PASSED ✓' if (mongodb_user_itential_ping is defined and mongodb_user_itential_ping.rc == 0) else 'FAILED ✗' }}
 {% else %}
 No users found or unable to retrieve user list
@@ -321,7 +317,7 @@ Replica set not configured ✗
 
 ## Validation Summary
 
-**Overall Status:** {{ 'PASSED ✓' if (mongodb_ping_admin is defined and mongodb_ping_admin.rc == 0 and mongodb_process is defined and mongodb_process.rc == 0) else 'FAILED ✗' }}
+**Overall Status:** {{ 'PASSED ✓' if (mongodb_ping is defined and mongodb_ping.rc == 0 and mongodb_process is defined and mongodb_process.rc == 0) else 'FAILED ✗' }}
 
 ### Checks:
 
@@ -332,12 +328,11 @@ Replica set not configured ✗
 - **MongoDB Service Exists:** NO ✗
 {% endif %}
 - **MongoDB Process Running:** {{ 'YES ✓' if (mongodb_process is defined and mongodb_process.rc == 0) else 'NO ✗' }}
-- **MongoDB Responding:** {{ 'YES ✓' if (mongodb_ping_admin is defined and mongodb_ping_admin.rc == 0) else 'NO ✗' }}
+- **MongoDB Ping:** {{ 'YES ✓' if (mongodb_ping is defined and mongodb_ping.rc == 0) else 'NO ✗' }}
 - **Config File Present:** {{ 'YES ✓' if (mongodb_conf_file is defined and mongodb_conf_file.stat.exists) else 'NO ✗' }}
 - **Authentication Enabled:** {{ 'YES ✓' if (mongodb_auth_enabled is defined and mongodb_auth_enabled.rc == 0) else 'NO ✗' }}
 {% if mongodb_tls_mode is defined and mongodb_tls_mode.rc == 0 %}
 - **TLS Configured:** YES ✓
-- **TLS Connection:** {{ 'SUCCESS ✓' if (mongodb_ping_tls is defined and mongodb_ping_tls.rc == 0) else 'FAILED ✗' }}
 {% else %}
 - **TLS Configured:** NO ✗
 {% endif %}

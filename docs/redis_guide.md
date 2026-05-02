@@ -81,6 +81,46 @@ replica2 redis_replica_priority=50
 replica3 redis_replica_priority=0  # Never promote
 ```
 
+## Automatic Redis Maxmemory Calculation
+
+When `redis_maxmemory_bytes` is set to `auto`, the installation process automatically calculates the Redis `maxmemory` value based on the system's total available RAM.
+
+The following formula is used:
+`maxmemory = max(redis_maxmemory_min_mb, system_ram × redis_maxmemory_ratio)`
+
+The `max()` function ensures Redis always receives **at least the configured minimum memory**, even on systems with small amounts of RAM.
+
+After the calculation, the value is converted to **bytes**, since Redis expects the `maxmemory` configuration parameter to be specified in bytes.
+
+---
+
+### Example
+
+For a system with **10 GB of RAM**:
+
+* system ram = 10240 MB
+* redis max memory ratio = 0.60
+
+The calculation becomes: 10240 × 0.60 = 6144 MB
+
+Converted to bytes: 6144 x 1024 x 1024 = 6442450944 bytes
+
+This value will be written to the Redis configuration as:
+
+`maxmemory 6442450944`
+
+### Manual Override
+
+If `redis_maxmemory_bytes` is set to a numeric value instead of `auto`, the automatic calculation is skipped and the specified value is used directly.
+
+Example:
+
+`redis_maxmemory_bytes: 8589934592`
+
+This will configure Redis with:
+
+`maxmemory 8589934592`
+
 ## Variables
 
 ### Static Variables
@@ -141,11 +181,14 @@ The following tables lists the default variables located in `roles/redis/default
 | `redis_group` | String | The Redis Linux group. | `redis` |
 | `redis_bind` | String | A space-separated list of hostnames/IP addresses on which Redis listeners will be created. | `bind 127.0.0.1 {{ ansible_default_ipv4.address }}` |
 | `redis_tls_enabled` | Boolean | Flag to enable TLS connections. | `false` |
-| `redis_certify_report_dir_remote` | String | Remote directory for certification reports. | `/var/tmp/itential-reports/redis` |
-| `redis_certify_report_dir_local` | String | Local directory for certification reports. | `/tmp/itential-reports/redis` |
 | `redis_tls_port` | Integer | The Redis TLS listen port. | Varies by platform |
 | `redis_tls_auth_clients` | String | TLS client authentication setting. | `no` |
 | `redis_tls_protocols` | String | Enabled TLS protocol versions. | `TLSv1.2 TLSv1.3` |
+| `redis_maxmemory_bytes` | String/Integer | Maximum memory Redis can use (maxmemory). When set to auto, the installer calculates the value from the system RAM using: `maxmemory = max(redis_maxmemory_min_mb, system_ram × redis_maxmemory_ratio)`. If a numeric value is provided, that value (in bytes) is used directly and the automatic calculation is skipped. | `auto` |
+| `redis_maxmemory_ratio` | Float | Define how much memory the system will use. Only work if `redis_maxmemory_bytes` is configured as auto. Default value 0.6 means 60%. | `0.60` |
+| `redis_maxmemory_min_mb` | Integer | This parameter defines the minimum amount of memory Redis is allowed to use, even if the automatic calculation would result in a smaller value. It acts as a safety floor for the maxmemory calculation. | `512` |
+| `redis_certify_report_dir_remote` | String | Remote directory for certification reports. | `/var/tmp/itential-reports/redis` |
+| `redis_certify_report_dir_local` | String | Local directory for certification reports. | `/tmp/itential-reports/redis` |
 
 ### Auth Variables
 

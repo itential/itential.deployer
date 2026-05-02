@@ -2,6 +2,19 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
 
+- name: Set MongoDB auth connection options
+  ansible.builtin.set_fact:
+    mongodb_auth_args: "{{ '-u ' + mongodb_user_admin + ' -p ' + mongodb_user_admin_password +
+      ' --authenticationDatabase admin' if mongodb_auth_enabled | bool else '' }}"
+
+- name: Set MongoDB TLS connection options
+  ansible.builtin.set_fact:
+    mongodb_tls_args: "{{ '--tls --tlsCAFile ' + mongodb_tls_ca_dest if mongodb_tls_enabled | bool else '' }}"
+
+- name: Set mongosh command
+  ansible.builtin.set_fact:
+    mongodb_mongosh_cmd: "mongosh --quiet --host {{ inventory_hostname }} {{ mongodb_auth_args }} {{ mongodb_tls_args }}"
+
 - name: Ensure report directory exists
   ansible.builtin.file:
     path: "{{ mongodb_certify_report_dir_remote }}"
@@ -80,10 +93,10 @@
   ansible.builtin.stat:
     path: "{{ mongodb_data_dir.stdout }}"
   register: mongodb_data_dir_stat
+  ignore_errors: true
   when:
     - mongodb_data_dir.stdout is defined
     - mongodb_data_dir.stdout != ""
-  ignore_errors: true
 
 - name: Get data directory size
   ansible.builtin.command: du -sh {{ mongodb_data_dir.stdout }}
@@ -98,24 +111,12 @@
 # CONNECTIVITY TESTS
 # ============================================================================
 
-- name: Test basic MongoDB connection (no auth)
+- name: Test basic MongoDB connection
   ansible.builtin.shell: |
-    mongosh --quiet --eval "db.adminCommand('ping')" 2>&1
-  register: mongodb_ping_noauth
+    {{ mongodb_mongosh_cmd }} --eval "db.adminCommand('ping')" 2>&1
+  register: mongodb_ping
   ignore_errors: true
   changed_when: false
-
-- name: Test MongoDB connection with admin user
-  ansible.builtin.shell: |
-    mongosh --quiet -u {{ mongodb_user_admin }} -p {{ mongodb_user_admin_password }} \
-    --authenticationDatabase admin --eval "db.adminCommand('ping')"
-  register: mongodb_ping_admin
-  ignore_errors: true
-  changed_when: false
-  no_log: true
-  when:
-    - mongodb_user_admin is defined
-    - mongodb_user_admin_password is defined
 
 # ============================================================================
 # TLS/SSL CHECKS
@@ -129,46 +130,46 @@
   changed_when: false
   when: mongodb_conf_file.stat.exists
 
-- name: Get TLS certificate path from config
-  ansible.builtin.shell: |
-    grep -E '^\s*certificateKeyFile:' /etc/mongod.conf | awk '{print $2}'
-  register: mongodb_tls_cert_path
-  ignore_errors: true
-  changed_when: false
-  when: mongodb_conf_file.stat.exists
-
-- name: Check TLS certificate file exists
+- name: Check TLS server certificate file exists
   ansible.builtin.stat:
-    path: "{{ mongodb_tls_cert_path.stdout }}"
-  register: mongodb_tls_cert_file
-  when:
-    - mongodb_tls_cert_path.stdout is defined
-    - mongodb_tls_cert_path.stdout != ""
+    path: "{{ mongodb_tls_cert_dest }}"
+  register: mongodb_tls_cert_file_stat_result
   ignore_errors: true
+  when: mongodb_tls_enabled | bool
 
-- name: Get TLS certificate expiration
+- name: Check TLS CA certificate file exists
+  ansible.builtin.stat:
+    path: "{{ mongodb_tls_ca_dest }}"
+  register: mongodb_tls_ca_file_stat_result
+  ignore_errors: true
+  when: mongodb_tls_enabled | bool
+
+- name: Check replica set auth keyfile exists
+  ansible.builtin.stat:
+    path: "{{ mongodb_auth_key_dest }}"
+  register: mongodb_auth_key_file_stat_result
+  ignore_errors: true
+  when: mongodb_tls_enabled | bool
+
+- name: Get TLS server certificate expiration
   ansible.builtin.shell: |
-    openssl x509 -in {{ mongodb_tls_cert_path.stdout }} -noout -enddate
+    openssl x509 -in {{ mongodb_tls_cert_dest }} -noout -enddate
   register: mongodb_tls_cert_expiry
   ignore_errors: true
   changed_when: false
   when:
-    - mongodb_tls_cert_path.stdout is defined
-    - mongodb_tls_cert_path.stdout != ""
-    - mongodb_tls_cert_file.stat.exists | default(false)
+    - mongodb_tls_enabled | bool
+    - mongodb_tls_cert_file_stat_result.stat.exists | default(false)
 
-- name: Test MongoDB connection with TLS
+- name: Get TLS CA certificate expiration
   ansible.builtin.shell: |
-    mongosh --tls --quiet -u {{ mongodb_user_admin }} -p {{ mongodb_user_admin_password }} \
-    --authenticationDatabase admin --eval "db.adminCommand('ping')"
-  register: mongodb_ping_tls
+    openssl x509 -in {{ mongodb_tls_ca_dest }} -noout -enddate
+  register: mongodb_tls_ca_expiry
   ignore_errors: true
   changed_when: false
-  no_log: true
   when:
-    - mongodb_user_admin is defined
-    - mongodb_user_admin_password is defined
-    - mongodb_tls_mode.rc == 0
+    - mongodb_tls_enabled | bool
+    - mongodb_tls_ca_file_stat_result.stat.exists | default(false)
 
 # ============================================================================
 # SERVER STATUS AND METRICS
@@ -176,27 +177,19 @@
 
 - name: Get MongoDB server status
   ansible.builtin.shell: |
-    mongosh --quiet -u {{ mongodb_user_admin }} -p {{ mongodb_user_admin_password }} \
-    --authenticationDatabase admin --eval "JSON.stringify(db.serverStatus())"
+    {{ mongodb_mongosh_cmd }} --eval "EJSON.stringify(db.serverStatus(), null, null, {relaxed: true})"
   register: mongodb_server_status
   ignore_errors: true
   changed_when: false
   no_log: true
-  when:
-    - mongodb_user_admin is defined
-    - mongodb_user_admin_password is defined
 
 - name: Get MongoDB build info
   ansible.builtin.shell: |
-    mongosh --quiet -u {{ mongodb_user_admin }} -p {{ mongodb_user_admin_password }} \
-    --authenticationDatabase admin --eval "JSON.stringify(db.serverBuildInfo())"
+    {{ mongodb_mongosh_cmd }} --eval "JSON.stringify(db.serverBuildInfo())"
   register: mongodb_build_info
   ignore_errors: true
   changed_when: false
   no_log: true
-  when:
-    - mongodb_user_admin is defined
-    - mongodb_user_admin_password is defined
 
 # ============================================================================
 # REPLICA SET STATUS
@@ -212,43 +205,34 @@
 
 - name: Get replica set status
   ansible.builtin.shell: |
-    mongosh --quiet -u {{ mongodb_user_admin }} -p {{ mongodb_user_admin_password }} \
-    --authenticationDatabase admin --eval "JSON.stringify(rs.status())"
+    {{ mongodb_mongosh_cmd }} --eval "JSON.stringify(rs.status())"
   register: mongodb_replset_status
   ignore_errors: true
   changed_when: false
   no_log: true
   when:
-    - mongodb_user_admin is defined
-    - mongodb_user_admin_password is defined
     - mongodb_replset_name.stdout is defined
     - mongodb_replset_name.stdout != ""
 
 - name: Get replica set configuration
   ansible.builtin.shell: |
-    mongosh --quiet -u {{ mongodb_user_admin }} -p {{ mongodb_user_admin_password }} \
-    --authenticationDatabase admin --eval "JSON.stringify(rs.conf())"
+    {{ mongodb_mongosh_cmd }} --eval "JSON.stringify(rs.conf())"
   register: mongodb_replset_config
   ignore_errors: true
   changed_when: false
   no_log: true
   when:
-    - mongodb_user_admin is defined
-    - mongodb_user_admin_password is defined
     - mongodb_replset_name.stdout is defined
     - mongodb_replset_name.stdout != ""
 
 - name: Get replica set member details
   ansible.builtin.shell: |
-    mongosh --quiet -u {{ mongodb_user_admin }} -p {{ mongodb_user_admin_password }} \
-    --authenticationDatabase admin --eval "JSON.stringify(rs.isMaster())"
+    {{ mongodb_mongosh_cmd }} --eval "JSON.stringify(rs.isMaster())"
   register: mongodb_replset_ismaster
   ignore_errors: true
   changed_when: false
   no_log: true
   when:
-    - mongodb_user_admin is defined
-    - mongodb_user_admin_password is defined
     - mongodb_replset_name.stdout is defined
     - mongodb_replset_name.stdout != ""
 
@@ -258,19 +242,15 @@
 
 - name: Get list of MongoDB users
   ansible.builtin.shell: |
-    mongosh --quiet -u {{ mongodb_user_admin }} -p {{ mongodb_user_admin_password }} \
-    --authenticationDatabase admin admin --eval "JSON.stringify(db.getUsers())"
+    {{ mongodb_mongosh_cmd }} admin --eval 'JSON.stringify(db.system.users.find({}, { user: 1, db: 1, roles: 1 }).toArray())'
   register: mongodb_users_list
   ignore_errors: true
   changed_when: false
   no_log: true
-  when:
-    - mongodb_user_admin is defined
-    - mongodb_user_admin_password is defined
 
 - name: Parse MongoDB users
   ansible.builtin.set_fact:
-    mongodb_users: "{{ (mongodb_users_list.stdout | from_json).users | default([]) }}"
+    mongodb_users: "{{ mongodb_users_list.stdout | from_json | default([]) }}"
   when:
     - mongodb_users_list is defined
     - mongodb_users_list.rc == 0
@@ -280,8 +260,9 @@
 # Test individual users
 - name: Test connection with itential user
   ansible.builtin.shell: |
-    mongosh --quiet -u {{ mongodb_user_itential }} -p {{ mongodb_user_itential_password }} \
-    --authenticationDatabase "itential" --eval "db.adminCommand('ping')"
+    mongosh --quiet {{ mongodb_tls_args }} --host {{ inventory_hostname }} \
+    -u {{ mongodb_user_itential }} -p {{ mongodb_user_itential_password }} \
+    --authenticationDatabase itential --eval "db.adminCommand('ping')"
   register: mongodb_user_itential_ping
   ignore_errors: true
   changed_when: false
@@ -296,25 +277,19 @@
 
 - name: List all databases
   ansible.builtin.shell: |
-    mongosh --quiet -u {{ mongodb_user_admin }} -p {{ mongodb_user_admin_password }} \
-    --authenticationDatabase admin --eval "JSON.stringify(db.adminCommand('listDatabases'))"
+    {{ mongodb_mongosh_cmd }} --eval "EJSON.stringify(db.adminCommand('listDatabases'), null, null, {relaxed: true})"
   register: mongodb_databases
   ignore_errors: true
   changed_when: false
   no_log: true
-  when: mongodb_user_admin is defined and mongodb_user_admin_password is defined
 
 - name: Get database stats
   ansible.builtin.shell: |
-    mongosh --quiet -u {{ mongodb_user_admin }} -p {{ mongodb_user_admin_password }} \
-    --authenticationDatabase admin --eval "JSON.stringify(db.stats())"
+    {{ mongodb_mongosh_cmd }} --eval "EJSON.stringify(db.stats(), null, null, {relaxed: true})"
   register: mongodb_db_stats
   ignore_errors: true
   changed_when: false
   no_log: true
-  when:
-    - mongodb_user_admin is defined
-    - mongodb_user_admin_password is defined
 
 # ============================================================================
 # LOGS
@@ -346,13 +321,11 @@
 
 - name: Check security settings
   ansible.builtin.shell: |
-    mongosh --quiet -u {{ mongodb_user_admin }} -p {{ mongodb_user_admin_password }} \
-    --authenticationDatabase admin --eval "JSON.stringify(db.adminCommand({getCmdLineOpts: 1}))"
+    {{ mongodb_mongosh_cmd }} --eval "JSON.stringify(db.adminCommand({getCmdLineOpts: 1}))"
   register: mongodb_security_settings
   ignore_errors: true
   changed_when: false
   no_log: true
-  when: mongodb_user_admin is defined and mongodb_user_admin_password is defined
 
 # ============================================================================
 # PERFORMANCE METRICS
@@ -360,27 +333,19 @@
 
 - name: Get current operations
   ansible.builtin.shell: |
-    mongosh --quiet -u {{ mongodb_user_admin }} -p {{ mongodb_user_admin_password }} \
-    --authenticationDatabase admin --eval "JSON.stringify(db.currentOp())"
+    {{ mongodb_mongosh_cmd }} --eval "JSON.stringify(db.currentOp())"
   register: mongodb_current_ops
   ignore_errors: true
   changed_when: false
   no_log: true
-  when:
-    - mongodb_user_admin is defined
-    - mongodb_user_admin_password is defined
 
 - name: Get connection count
   ansible.builtin.shell: |
-    mongosh --quiet -u {{ mongodb_user_admin }} -p {{ mongodb_user_admin_password }} \
-    --authenticationDatabase admin --eval "db.serverStatus().connections"
+    {{ mongodb_mongosh_cmd }} --eval "db.serverStatus().connections"
   register: mongodb_connections
   ignore_errors: true
   changed_when: false
   no_log: true
-  when:
-    - mongodb_user_admin is defined
-    - mongodb_user_admin_password is defined
 
 # ============================================================================
 # GATHER HOST INFORMATION
@@ -388,7 +353,7 @@
 
 - name: Gather host information
   itential.deployer.gather_host_information:
-  register: host_details
+  register: mongodb_host_details
 
 # ============================================================================
 # GENERATE REPORT

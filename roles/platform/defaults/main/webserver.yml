@@ -17,7 +17,7 @@ platform_webserver_http_enabled: true
 platform_webserver_http_port: 3000
 
 # If true, allows the webserver to respond to secure HTTPS requests.
-platform_webserver_https_enabled: false
+platform_webserver_https_enabled: true
 
 # The port on which the webserver listens for HTTPS requests.
 platform_webserver_https_port: 3443

@@ -13,42 +13,17 @@ all:
     redis_master:
       hosts:
         redis01.example.com:
-
-    redis_replica:
-      hosts:
-        redis02.example.com:
-        redis03.example.com:
-
-    redis_sentinel:
-      hosts:
-        redis01.example.com:
-        redis02.example.com:
-        redis03.example.com:
-
-    redis_nodes:
-      hosts:
-        redis01.example.com:
-        redis02.example.com:
-        redis03.example.com:
       vars:
         # The default Redis passwords are overridden.
         # NOTE: Using Ansible Vault or Hashicorp Vault for passwords is highly recommended.
         redis_user_admin_password: <redis-admin-password>
         redis_user_itential_password: <redis-itential-password>
-        redis_user_repluser_password: <redis-repluser-password>
-        redis_user_sentineladmin_password: <redis-sentineladmin-password>
-        redis_user_sentineluser_password: <redis-sentineluser-password>
         redis_user_prometheus_password: <redis-prometheus-password>
 
     mongodb:
       hosts:
         mongodb01.example.com:
-        mongodb02.example.com:
-        mongodb03.example.com:
       vars:
-        # Enable replication between the MongoDB nodes.
-        mongodb_replication_enabled: true
-
         # The default MongoDB passwords are overridden.
         # NOTE: Using Ansible Vault or Hashicorp Vault for passwords is highly recommended.
         mongodb_user_admin_password: <mongodb-admin-password>
@@ -58,7 +33,8 @@ all:
         # mongodb_tls_enabled: true
         # mongodb_tls_copy_certs: true
 
-        # When uploading certs/keys, the source directory on the control node must be defined.
+        # When uploading certs/keys, the source directory on the control node must be defined and
+        # be a valid directory.
         mongodb_pki_src_dir: </path/to/certs/on/control/node>
 
         # The following TLS-related variables can be overridden.
@@ -77,7 +53,6 @@ all:
     platform:
       hosts:
         itential-platform01.example.com:
-        itential-platform02.example.com:
       vars:
         # The Platform encryption key must be defined.
         # It is an open64-length hex string, representing a 256-bit AES encryption key.
@@ -89,9 +64,8 @@ all:
         platform_packages:
           - itential-platform-<version>.noarch.rpm
 
-        # When uploading certs/keys, the source directories on the control node must be defined.
-        platform_https_pki_src_dir: </path/to/platform/https/certs/on/control/node>
-        platform_mongodb_pki_src_dir: </path/to/platform/mongodb/certs/on/control/node>
+        platform_https_pki_src_dir: </path/to/certs/on/control/node>
+        platform_mongodb_pki_src_dir: "{{ platform_https_pki_src_dir }}"
 
         # The default MongoDB username, database name and TLS setting are used.
         # platform_mongo_user: itential
@@ -100,20 +74,15 @@ all:
 
         # The MongoDB password and URL are overridden.
         platform_mongo_password: <mongodb-itential-password>
-        platform_mongo_url: mongodb://mongodb01.example.com:27017,mongodb02.example.com:27017,mongodb03.example.com:27017/itential?replicaSet=rs0
+        platform_mongo_url: mongodb://mongodb01.example.com:27017/itential
 
         # The default Redis username is used.
         # platform_redis_username: itential
 
         # The Redis password and sentinels are overridden.
         platform_redis_password: <redis-itential-password>
-        platform_redis_sentinels:
-          - host: redis01.example.com
-            port: 26379
-          - host: redis02.example.com
-            port: 26379
-          - host: redis03.example.com
-            port: 26379
+
+        platform_redis_host: redis01.example.com
 
     gateway:
       hosts:

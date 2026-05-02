@@ -31,14 +31,14 @@ platform_vault_approle_path: approle
 # The file path to a token file. The token is used for authentication to access Vault secrets.
 platform_vault_token_file: "{{ platform_vault_token_dir }}/vault.token"
 
-# Reference for the path to secret and name of key in Hashicorp Vault
-# Syntax is $SECRET_{path to secret in Vault} $KEY_{name of key in secretPath}
-# For example, in perf lab Hashi Vault
-# secrets are at Secrets/itential/iap. Hence "$SECRET_iap"
-# Key is "redisPassword" for the password value. Hence "$KEY_redisPassword"
-platform_redis_password_vault: "$SECRET_iap $KEY_redisPassword"
+# Reference for the path to secret and name of key in Hashicorp Vault.
+# Syntax: $SECRET_{path to secret in Vault} $KEY_{name of key in secret path}
+# These must be overridden in inventory when platform_configure_vault is true.
+# Example: platform_redis_password_vault: "$SECRET_iap $KEY_redisPassword"
+platform_redis_password_vault: ""
 
-platform_mongo_password_vault: "$SECRET_iap $KEY_mongoDb"
+# Example: platform_mongo_password_vault: "$SECRET_iap $KEY_mongoDb"
+platform_mongo_password_vault: ""
 
 # The file path to the .env file containing Role ID and Secret ID for AppRole authentication.
 platform_vault_role_secrets_env_file: "{{ platform_vault_token_dir }}/vault-role-secrets.env"
