@@ -42,7 +42,7 @@ processManagement:
 # Security
 security:
   authorization: {{ authMode }}
-{% if (stage != "initialize" and stage != "replication") and mongodb_auth_enabled | bool and mongodb_replication_enabled | bool %}
+{% if (stage != "initialize" and stage != "replication") and mongodb_auth_enabled | bool and groups['mongodb_replica'] | default([]) | length > 0 %}
   # The path to a key file that stores the shared secret that MongoDB
   # instances use to authenticate to each other in a sharded cluster
   # or replica set. Not required for standalone instance.
@@ -98,7 +98,7 @@ net:
     allowInvalidHostnames: true
 {% endif %}
 
-{% if stage != "initialize" and mongodb_replication_enabled | bool %}
+{% if stage != "initialize" and groups['mongodb_replica'] | default([]) | length > 0 %}
 # Replication Settings
 replication:
   # The name of the replica set that the mongod is part of. All hosts

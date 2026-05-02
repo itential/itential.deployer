@@ -7,7 +7,7 @@
 # with a keyFile or x509 certificate. The following block will create this key file,
 # distribute it to each node, and set the appropriate ownership and permissions.
 - name: Create replica set keyfile
-  when: mongodb_replication_enabled | bool
+  when: groups['mongodb_replica'] | default([]) | length > 0
   block:
 
     - name: Ensure PKI base directory exists
@@ -29,7 +29,7 @@
     - name: Check if replica set key exists on the primary node
       ansible.builtin.stat:
         path: "{{ mongodb_auth_key_dest }}"
-      when: inventory_hostname == groups['mongodb'][0]
+      when: inventory_hostname == groups['mongodb_primary'][0]
       register: keyfile_stat
 
     # Use openssl to generate a key file on primary mongo node. The primary is the
@@ -42,15 +42,15 @@
       args:
         creates: "{{ mongodb_auth_key_dest }}"
       when:
-        - inventory_hostname == groups['mongodb'][0]
+        - inventory_hostname == groups['mongodb_primary'][0]
         - not keyfile_stat.stat.exists
 
     - name: Get the key from the primary node
       ansible.builtin.slurp:
         src: '{{ mongodb_auth_key_dest }}'
       register: keyfile
-      delegate_to: "{{ groups['mongodb'][0] }}"
-      when: inventory_hostname != groups['mongodb'][0]
+      delegate_to: "{{ groups['mongodb_primary'][0] }}"
+      when: inventory_hostname != groups['mongodb_primary'][0]
 
     - name: Copy the key file to the secondary nodes
       ansible.builtin.copy:
@@ -59,7 +59,7 @@
         owner: "{{ mongodb_owner }}"
         group: "{{ mongodb_group }}"
         mode: "0400"
-      when: inventory_hostname != groups['mongodb'][0]
+      when: inventory_hostname != groups['mongodb_primary'][0]
 
     - name: Set the key file ownership and permissions
       ansible.builtin.file:

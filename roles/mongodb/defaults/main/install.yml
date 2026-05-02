@@ -13,7 +13,7 @@ mongodb_python_app_dependencies:
   - pymongo
 
 # To isolate Python, a virtual environment is used.
-mongodb_python_venv_root: /var/tmp
+mongodb_python_venv_root: /usr/local/lib
 mongodb_python_venv_name: mongodb_venv
 mongodb_python_venv: "{{ mongodb_python_venv_root }}/{{ mongodb_python_venv_name }}"
 

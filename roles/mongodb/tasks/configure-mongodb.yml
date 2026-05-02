@@ -8,7 +8,7 @@
 - name: Configure MongoDB replica set
   ansible.builtin.include_tasks:
     file: configure-mongodb-replicaset.yml
-  when: mongodb_replication_enabled | bool
+  when: groups['mongodb_replica'] | default([]) | length > 0
 
 # Configure auth
 - name: Configure MongoDB Auth
