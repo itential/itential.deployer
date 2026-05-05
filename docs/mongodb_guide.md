@@ -83,7 +83,7 @@ The variables in this section are configured in the inventory in the `all` group
 
 | Variable | Group | Type | Description | Default Value |
 | :------- | :---- | :--- | :---------- | :------------ |
-| `platform_release` | `all` | Fixed-point | Designates the IAP major version. If this is not included then the `mongodb_primary` group must specify the MongoDB packages (the precise Mongo version) to install. | N/A |
+| `platform_release` | `all` | Fixed-point | Designates the IAP major version. If this is not included then the `mongodb_primary`, `mongodb_replica` and `mongodb_arbiter` groups must specify the MongoDB packages (the precise Mongo version) to install. | N/A |
 
 When the `platform_release` is defined in the inventory then the playbook will use default values
 for the MongoDB version to install. These defaults are determined by the Itential Platform version
