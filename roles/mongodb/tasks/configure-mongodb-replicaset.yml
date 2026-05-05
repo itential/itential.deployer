@@ -132,7 +132,7 @@
     replica_set: "{{ mongodb_replset_name }}"
     validate: true
     reconfigure: "{{ mongodb_state.replication_enabled }}"
-  register: replicaset_result
+  register: mongodb_replicaset_result
   when: "'mongodb_primary' in group_names"
   vars:
     ansible_python_interpreter: "{{ mongodb_python_venv }}/bin/python3"
