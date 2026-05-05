@@ -229,10 +229,6 @@ values defined with Platform 6.
 
 ```yaml
 all:
-  vars:
-    repository_api_key: #key
-    platform_release: 6
-
   children:
     mongodb_primary:
       hosts:
@@ -248,9 +244,6 @@ This example shows how to override the default version of MongoDB that is instal
 
 ```yaml
 all:
-  vars:
-    repository_api_key: #key
-
   children:
     mongodb_primary:
       hosts:
@@ -273,10 +266,6 @@ enabled when the `mongodb_replica` group is defined. Place shared variables in `
 
 ```yaml
 all:
-  vars:
-    repository_api_key: #key
-    platform_release: 6
-
   children:
     mongodb_node:
       vars:
@@ -302,10 +291,6 @@ elections but hold no data.
 
 ```yaml
 all:
-  vars:
-    repository_api_key: #key
-    platform_release: 6
-
   children:
     mongodb_node:
       children:
@@ -332,10 +317,6 @@ override the priority individually by setting `mongodb_replica_priority` directl
 
 ```yaml
 all:
-  vars:
-    repository_api_key: #key
-    platform_release: 6
-
   children:
     mongodb_node:
       vars:
@@ -362,10 +343,6 @@ and set it to `true`, and configure the `mongodb_pki_src_dir`.
 
 ```yaml
 all:
-  vars:
-    repository_api_key: #key
-    platform_release: 6
-
   children:
     mongodb_node:
       vars:
