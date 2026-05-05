@@ -54,8 +54,7 @@ mongodb_tls_copy_certs: true
 # Default mongo user names
 mongodb_user_admin: admin
 mongodb_user_itential: itential
-mongodb_user_monitor: monitor
-mongodb_monitor_user_enabled: true
+mongodb_monitor_user_enabled: false
 
 # Default mongo user passwords
 # These are meant to be changed by the customer. By default they are meant to

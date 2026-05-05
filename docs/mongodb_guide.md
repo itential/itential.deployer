@@ -107,6 +107,8 @@ The following table contains the most commonly overridden variables.
 | `mongodb_auth_key_dest` | String | Full destination path for replica set keyfile. | `{{ mongodb_pki_private_dir }}/{{ mongodb_auth_key_file }}` |
 | `mongodb_user_admin_password` | String | The MongoDB admin user password. | `admin` |
 | `mongodb_user_itential_password` | String | The MongoDB itential user password. | `itential` |
+| `mongodb_user_monitor_password` | String | The MongoDB monitor user password. | `monitor` |
+| `mongodb_monitor_user_enabled` | Boolean | Flag to enable the monitor user. | `false` |
 
 > :warning: It is assumed that these default passwords will be changed to meet more rigorous
 security standards. These are intended to be defaults strictly used just for ease of the

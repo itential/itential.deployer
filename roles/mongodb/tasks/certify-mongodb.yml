@@ -274,16 +274,13 @@
 - name: Test connection with monitor user
   ansible.builtin.shell: |
     mongosh --quiet {{ mongodb_tls_args }} --host {{ inventory_hostname }} \
-    -u {{ mongodb_user_monitor }} -p {{ mongodb_user_monitor_password }} \
+    -u monitor -p {{ mongodb_user_monitor_password }} \
     --authenticationDatabase admin --eval "db.adminCommand('ping')"
   register: mongodb_user_monitor_ping
   ignore_errors: true
   changed_when: false
   # no_log: true
-  when:
-    - mongodb_monitor_user_enabled | bool
-    - mongodb_user_monitor is defined
-    - mongodb_user_monitor_password is defined
+  when: mongodb_monitor_user_enabled | bool
 
 # ============================================================================
 # DATABASE INFORMATION

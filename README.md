@@ -305,6 +305,7 @@ these variables just define the variable in the deployer host file.
 | :----------- | :--------------- | :------------ | :---------- |
 | admin | admin | mongodb_user_admin_password | Has full root access to the mongo database. |
 | itential | itential | mongodb_user_itential_password | Has read and write access to the “itential” database only. |
+| monitor | monitor | mongodb_user_monitor_password | Read-only access to the admin, local, and itential databases for monitoring systems. Enabled via `mongodb_monitor_user_enabled`. |
 
 #### Redis Accounts
 
@@ -315,6 +316,7 @@ these variables just define the variable in the deployer host file.
 | repluser | repluser | redis_user_repluser_password | Has access to the minimum set of commands to perform replication: psync, replconf, ping. |
 | admin | sentineladmin | redis_user_sentineladmin_password | Full root access to Redis Sentinel. |
 | sentineluser | sentineluser | redis_user_sentineluser_password | Has access to the minimum set of commands to perform sentinel monitoring: multi, slaveof, ping, exec, subscribe, config.rewrite, role, publish, info, client.setname, client.kill, script.kill. |
+| monitor | monitor | redis_user_monitor_password | Read-only access to gather metric and cluster data from Redis and Sentinel. Enabled via `redis_monitor_user_enabled`. |
 
 ### Obtaining the Itential Binaries
 

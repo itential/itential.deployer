@@ -55,7 +55,7 @@ redis_user_monitor_password: monitor
 
 # By default the monitor user will not be created. If set to true, the monitor user will be
 # created with the appropriate ACL to allow monitoring systems to gather metric data.
-redis_monitor_user_enabled: true
+redis_monitor_user_enabled: false
 
 # Redis TLS configuration options
 redis_tls_port: "{{ redis_tls_port_default }}"

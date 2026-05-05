@@ -29,7 +29,7 @@ More info on Redis authorization: <https://redis.io/docs/manual/security/>
 | itential | itential | Has access to all keys, all channels, and all commands except: -asking -cluster -readonly -readwrite -bgrewriteaof -bgsave -failover -flushall -flushdb -psync -replconf -replicaof -save -shutdown -sync |
 | repluser | repluser | Has access to the minimum set of commands to perform replication. |
 | sentineluser | sentineluser | Has access to the minimum set of commands to perform sentinel monitoring. |
-| prometheus | prometheus | Has access to the minimum set of commands to perform Redis and Sentinel monitoring with Prometheus. Required by the optional redis_exporter service. |
+| monitor | monitor | Has access to the minimum set of commands to gather metric and cluster data from Redis and Sentinel. Required by monitoring systems such as the optional redis_exporter service. |
 
 :::(Warning) (⚠ Warning: ) It is assumed that these default passwords will be changed to meet more
 rigorous standards.  These are intended to be defaults strictly used just for ease of the
@@ -200,8 +200,8 @@ The following tables lists the default variables located in `roles/redis/default
 | `redis_user_repluser_password` | String | The Redis repluser user's default password | `repluser` |
 | `redis_user_sentineladmin_password` | String | The Redis Sentinel admin user's default password | `admin` |
 | `redis_user_sentineluser_password` | String | The Redis Sentinel default user's default password | `sentinel` |
-| `redis_user_prometheus_password` | String | The Redis prometheus user's default password | `prometheus` |
-| `redis_prometheus_user_enabled` | Boolean | Flag to enable the prometheus user | `false` |
+| `redis_user_monitor_password` | String | The Redis monitor user's default password | `monitor` |
+| `redis_monitor_user_enabled` | Boolean | Flag to enable the monitor user | `false` |
 
 ### Replication Variables
 

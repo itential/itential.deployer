@@ -38,7 +38,7 @@ all:
         redis_user_repluser_password: <redis-repluser-password>
         redis_user_sentineladmin_password: <redis-sentineladmin-password>
         redis_user_sentineluser_password: <redis-sentineluser-password>
-        redis_user_prometheus_password: <redis-prometheus-password>
+        redis_user_monitor_password: <redis-monitor-password>
 
     mongodb:
       hosts:

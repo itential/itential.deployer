@@ -184,7 +184,7 @@
         login_port: "{{ mongodb_port }}"
         login_host: "{{ mongodb_state.primary if mongodb_state.replication_enabled else groups['mongodb'][0] }}"
         database: "{{ mongodb_admin_db_name }}"
-        name: "{{ mongodb_user_monitor }}"
+        name: monitor
         password: "{{ mongodb_user_monitor_password }}"
         state: present
         roles:
