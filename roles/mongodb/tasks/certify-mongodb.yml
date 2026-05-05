@@ -279,8 +279,9 @@
   register: mongodb_user_monitor_ping
   ignore_errors: true
   changed_when: false
-  # no_log: true
-  when: mongodb_monitor_user_enabled | bool
+  when:
+    - mongodb_monitor_user_enabled | bool
+    - mongodb_user_monitor_password is truthy
 
 # ============================================================================
 # DATABASE INFORMATION

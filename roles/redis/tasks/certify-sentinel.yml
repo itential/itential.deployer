@@ -331,6 +331,7 @@
   changed_when: false
   when:
     - redis_monitor_user_enabled | bool
+    - redis_user_monitor_password is truthy
     - sentinel_is_running | bool
 
 # =========================================================================

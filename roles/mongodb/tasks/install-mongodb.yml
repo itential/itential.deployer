@@ -177,7 +177,9 @@
     # This creates the monitor user used by monitoring systems to gather cluster
     # and database metrics. Authenticates against the admin database (authSource=admin).
     - name: Add monitor user to database
-      when: mongodb_monitor_user_enabled | bool
+      when:
+        - mongodb_monitor_user_enabled | bool
+        - mongodb_user_monitor_password is truthy
       community.mongodb.mongodb_user:
         login_user: "{{ mongodb_user_admin if mongodb_state.auth_enabled else omit }}"
         login_password: "{{ mongodb_user_admin_password if mongodb_state.auth_enabled else omit }}"
