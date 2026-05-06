@@ -51,11 +51,11 @@ redis_user_itential_password: itential
 redis_user_repluser_password: repluser
 redis_user_sentineladmin_password: admin
 redis_user_sentineluser_password: sentineluser
-redis_user_prometheus_password: prometheus
+redis_user_monitor_password: monitor
 
-# By default the prometheus user will not be created. If set to true, the prometheus user will be
-# created with the appropriate ACL to allow the Redis exporter to work.
-redis_prometheus_user_enabled: false
+# By default the monitor user will not be created. If set to true, the monitor user will be
+# created with the appropriate ACL to allow monitoring systems to gather metric data.
+redis_monitor_user_enabled: false
 
 # Redis TLS configuration options
 redis_tls_port: "{{ redis_tls_port_default }}"

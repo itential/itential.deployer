@@ -18,7 +18,7 @@ all:
         # NOTE: Using Ansible Vault or Hashicorp Vault for passwords is highly recommended.
         redis_user_admin_password: <redis-admin-password>
         redis_user_itential_password: <redis-itential-password>
-        redis_user_prometheus_password: <redis-prometheus-password>
+        redis_user_monitor_password: <redis-monitor-password>
 
     mongodb:
       hosts:

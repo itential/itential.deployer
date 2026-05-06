@@ -54,12 +54,14 @@ mongodb_tls_copy_certs: true
 # Default mongo user names
 mongodb_user_admin: admin
 mongodb_user_itential: itential
+mongodb_monitor_user_enabled: false
 
 # Default mongo user passwords
 # These are meant to be changed by the customer. By default they are meant to
 # be predictable and simple.
 mongodb_user_admin_password: admin
 mongodb_user_itential_password: itential
+mongodb_user_monitor_password: monitor
 
 # The name of the mongo replica set
 mongodb_replset_name: "{{ mongodb_replset_name_default }}"

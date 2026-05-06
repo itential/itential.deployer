@@ -897,8 +897,8 @@ replica-announce-port {{ redis_port }}
 user default off
 user admin on allkeys allchannels allcommands >{{ redis_user_admin_password }}
 user itential on ~* &* -@all +@read +@write +@stream +@transaction +@sortedset +@list +@hash +@string +@fast +@scripting +@connection +@pubsub +script|load +script|exists -script|flush -flushall -flushdb -save -bgsave -bgrewriteaof -replicaof -psync -replconf -shutdown -failover -cluster -asking -sync -readonly -readwrite +info +role >{{ redis_user_itential_password }}
-{% if redis_prometheus_user_enabled %}
-user prometheus on -@all +@connection +memory -readonly +strlen +config|get +xinfo +pfcount +zcard +type +xlen -readwrite -command +client -wait +scard +llen +hlen +get +eval +slowlog +cluster|info -hello -echo +info +latency +scan -reset -auth -asking >{{ redis_user_prometheus_password }}
+{% if redis_monitor_user_enabled and redis_user_monitor_password %}
+user monitor on -@all +@connection +memory -readonly +strlen +config|get +xinfo +pfcount -quit +zcard +type +xlen -readwrite -command +client -wait +scard +llen +hlen +get +eval +slowlog +cluster|info +cluster|slots +cluster|nodes -hello -echo +info +latency +scan -reset -auth -asking >{{ redis_user_monitor_password }}
 {% endif %}
 {% if redis_is_data_node %}
 {% if redis_has_replicas %}

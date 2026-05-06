@@ -211,18 +211,21 @@
   failed_when: false
   changed_when: false
 
-- name: Confirm "prometheus" user login
+- name: Confirm "monitor" user login (Redis)
   ansible.builtin.shell: |
     set -o pipefail &&
     {{ redis_bin_dir }}/redis-cli \
-      --user prometheus \
+      --user monitor \
       -p {{ redis_port }} \
-      -a "{{ redis_user_prometheus_password }}" \
+      -a "{{ redis_user_monitor_password }}" \
       --no-auth-warning \
       PING
-  register: redis_prometheus_user_ping
+  register: redis_monitor_user_ping
   failed_when: false
   changed_when: false
+  when:
+    - redis_monitor_user_enabled | bool
+    - redis_user_monitor_password is truthy
 
 # =========================================================================
 # Generate the report and copy to control node

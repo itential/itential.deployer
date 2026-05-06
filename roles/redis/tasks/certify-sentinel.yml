@@ -316,6 +316,24 @@
     - sentinel_acl_list.rc is defined
     - sentinel_acl_list.rc == 0
 
+- name: Confirm "monitor" user login (Sentinel)
+  ansible.builtin.shell: |
+    set -o pipefail &&
+    {{ redis_bin_dir }}/redis-cli \
+      --user monitor \
+      -p {{ redis_sentinel_port }} \
+      -h "{{ inventory_hostname }}" \
+      -a "{{ redis_user_monitor_password }}" \
+      --no-auth-warning \
+      PING
+  register: sentinel_monitor_user_ping
+  failed_when: false
+  changed_when: false
+  when:
+    - redis_monitor_user_enabled | bool
+    - redis_user_monitor_password is truthy
+    - sentinel_is_running | bool
+
 # =========================================================================
 # Generate the report and copy to control node
 # =========================================================================

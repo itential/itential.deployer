@@ -173,3 +173,29 @@
         update_password: always
       vars:
         ansible_python_interpreter: "{{ mongodb_python_venv }}/bin/python3"
+
+    # This creates the monitor user used by monitoring systems to gather cluster
+    # and database metrics. Authenticates against the admin database (authSource=admin).
+    - name: Add monitor user to database
+      when:
+        - mongodb_monitor_user_enabled | bool
+        - mongodb_user_monitor_password is truthy
+      community.mongodb.mongodb_user:
+        login_user: "{{ mongodb_user_admin if mongodb_state.auth_enabled else omit }}"
+        login_password: "{{ mongodb_user_admin_password if mongodb_state.auth_enabled else omit }}"
+        login_port: "{{ mongodb_port }}"
+        login_host: "{{ mongodb_state.primary if mongodb_state.replication_enabled else groups['mongodb'][0] }}"
+        database: "{{ mongodb_admin_db_name }}"
+        name: monitor
+        password: "{{ mongodb_user_monitor_password }}"
+        state: present
+        roles:
+          - db: "{{ mongodb_admin_db_name }}"
+            role: clusterMonitor
+          - db: local
+            role: read
+          - db: "{{ mongodb_itential_db_name }}"
+            role: read
+        update_password: always
+      vars:
+        ansible_python_interpreter: "{{ mongodb_python_venv }}/bin/python3"

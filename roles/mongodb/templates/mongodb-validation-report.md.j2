@@ -184,6 +184,7 @@ Log path not configured or could not be determined (likely using journald)
 **Connection Test Results:**
 - **admin:** {{ 'PASSED ✓' if (mongodb_ping is defined and mongodb_ping.rc == 0) else 'FAILED ✗' }}
 - **itential:** {{ 'PASSED ✓' if (mongodb_user_itential_ping is defined and mongodb_user_itential_ping.rc == 0) else 'FAILED ✗' }}
+- **monitor:** {{ 'PASSED ✓' if ((mongodb_user_monitor_ping.rc | default(-1)) == 0) else 'FAILED ✗' }}
 {% else %}
 No users found or unable to retrieve user list
 {% endif %}

@@ -122,6 +122,9 @@ sentinel auth-user {{ redis_sentinel_master_name }} sentineluser
 user default off
 user admin on >{{ redis_user_sentineladmin_password }} ~* &* +@all
 user sentineluser on >{{ redis_user_sentineluser_password }} &* -@all +auth +client|getname +client|id +client|setname +command +hello +ping +role +sentinel|is-master-down-by-addr +sentinel|get-master-addr-by-name +sentinel|master +sentinel|myid +sentinel|replicas +sentinel|sentinels
+{% if redis_monitor_user_enabled and redis_user_monitor_password %}
+user monitor on >{{ redis_user_monitor_password }} -@all +@connection -command +client -hello +info -auth +sentinel|masters +sentinel|replicas +sentinel|slaves +sentinel|sentinels +sentinel|ckquorum
+{% endif %}
 {% endif %}
 
 # sentinel down-after-milliseconds <master-name> <milliseconds>

@@ -145,11 +145,11 @@ Redis INFO not available - check connectivity and authentication
 {% endfor %}
 
 ### User Connection Test Results:
-- **admin:** {{ 'PASSED ✓' if (redis_ping is defined and redis_ping.rc == 0) else 'FAILED ✗' }}
-- **itential:** {{ 'PASSED ✓' if (redis_itential_user_ping is defined and redis_itential_user_ping.rc == 0) else 'FAILED ✗' }}
-- **repluser:** {{ 'PASSED ✓' if (redis_repl_user_ping is defined and redis_repl_user_ping.rc == 0) else 'FAILED ✗' }}
-- **sentineluser:** {{ 'PASSED ✓' if (redis_sentineluser_user_ping is defined and redis_sentineluser_user_ping.rc == 0) else 'FAILED ✗' }}
-- **prometheus:** {{ 'PASSED ✓' if (redis_prometheus_user_ping is defined and redis_prometheus_user_ping.rc == 0) else 'FAILED ✗' }}
+- **admin:** {{ 'PASSED ✓' if ((redis_ping.rc | default(-1)) == 0 and 'PONG' in (redis_ping.stdout | default(''))) else 'FAILED ✗' }}
+- **itential:** {{ 'PASSED ✓' if ((redis_itential_user_ping.rc | default(-1)) == 0 and 'PONG' in (redis_itential_user_ping.stdout | default(''))) else 'FAILED ✗' }}
+- **repluser:** {{ 'PASSED ✓' if ((redis_repl_user_ping.rc | default(-1)) == 0 and 'PONG' in (redis_repl_user_ping.stdout | default(''))) else 'FAILED ✗' }}
+- **sentineluser:** {{ 'PASSED ✓' if ((redis_sentineluser_user_ping.rc | default(-1)) == 0 and 'PONG' in (redis_sentineluser_user_ping.stdout | default(''))) else 'FAILED ✗' }}
+- **monitor:** {{ 'PASSED ✓' if ((redis_monitor_user_ping.rc | default(-1)) == 0 and 'PONG' in (redis_monitor_user_ping.stdout | default(''))) else 'FAILED ✗' }}
 {% else %}
 No Redis users were found!
 {% endif %}
@@ -305,8 +305,9 @@ No other Replicas were found!
 {% endfor %}
 
 ### Connection Test Results:
-- **admin:** {{ 'PASSED ✓' if (sentinel_ping is defined and sentinel_ping.rc == 0) else 'FAILED ✗' }}
-- **sentineluser:** {{ 'PASSED ✓' if (sentinel_user_ping is defined and sentinel_user_ping.rc == 0) else 'FAILED ✗' }}
+- **admin:** {{ 'PASSED ✓' if ((sentinel_ping.rc | default(-1)) == 0 and 'PONG' in (sentinel_ping.stdout | default(''))) else 'FAILED ✗' }}
+- **sentineluser:** {{ 'PASSED ✓' if ((sentinel_user_ping.rc | default(-1)) == 0 and 'PONG' in (sentinel_user_ping.stdout | default(''))) else 'FAILED ✗' }}
+- **monitor:** {{ 'PASSED ✓' if ((sentinel_monitor_user_ping.rc | default(-1)) == 0 and 'PONG' in (sentinel_monitor_user_ping.stdout | default(''))) else 'FAILED ✗' }}
 {% else %}
 No Sentinel users were found!
 {% endif %}
