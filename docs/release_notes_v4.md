@@ -4,11 +4,18 @@ The following documents the new and breaking changes in the v4 release.
 
 ---
 
-## Commits in `v4` (12)
+## Commits in `v4` (21)
 
 | Hash | Description |
 |------|-------------|
-| 3ec62b5 | Add redis maxmemmory calculation and change the parameter in the redis.conf accordingly (#308) |
+| a1de97e | Increase Redis maxmemory allocation from 60% to 80% (#326) |
+| 42ff9a8 | Add inventory group-based replica set configuration with priority support (#322) |
+| c09a084 | Creates monitor user for redis, sentinel, mongo (#323) |
+| 0b5d50d | Fix default platform log directory (#320) |
+| 5563a3a | Set blank default to HashiVault. Updated docs (#319) |
+| ca76a20 | Fix issues found during v4 integration testing (#315) |
+| 63eb39a | Created minimal_tls.yaml example inventory (#316) |
+| 00b22d9 | Add TLS example inventories (#311) |
 | a641765 | Fix ansible-lint errors in TLS changes (#310) |
 | e7dd3e9 | Add TLS standardization for platform, mongo, gateway & redis roles (#300) |
 | 1066487 | Add example inventories (#306) |
@@ -142,7 +149,43 @@ redis_sentinel:  # all sentinel hosts
 
 ---
 
-### 9. `os_compatibility` module removed, replaced by `gather_host_information`
+### 9. MongoDB inventory group structure changed
+
+The MongoDB installation previously used a single `mongodb` group. The new structure requires dedicated groups:
+
+```yaml
+mongodb_primary:   # hosts preferred for primary election (higher priority)
+mongodb_replica:   # replica/secondary hosts (lower priority, overridable per host)
+mongodb_arbiter:   # arbiter-only hosts (optional, priority 0)
+```
+
+New variables control election priorities:
+
+| Variable | Default | Notes |
+|---|---|---|
+| `mongodb_primary_priority` | `10` | Applied to all hosts in `mongodb_primary` |
+| `mongodb_replica_priority` | `5` | Default for hosts in `mongodb_replica`; can be overridden per host via host vars |
+
+The internal `mongodb_data_nodes` fact replaces direct references to `groups['mongodb']` throughout the role.
+
+**Action required:** Existing inventories using a flat `mongodb` group must be restructured. Hosts that were in the old `mongodb` group should be placed in either `mongodb_primary` or `mongodb_replica` depending on their intended role in the replica set.
+
+---
+
+### 10. Redis monitor user variable renamed (was Prometheus user)
+
+The Prometheus ACL user variables have been renamed to a generic monitor user:
+
+| Removed variable | Replacement variable |
+|---|---|
+| `redis_prometheus_user_enabled` | `redis_monitor_user_enabled` |
+| `redis_user_prometheus_password` | `redis_user_monitor_password` |
+
+**Action required:** Update any inventory that sets `redis_prometheus_user_enabled` or `redis_user_prometheus_password` to the new variable names.
+
+---
+
+### 11. `os_compatibility` module removed, replaced by `gather_host_information`
 
 | Removed | Added |
 |---|---|
@@ -152,7 +195,7 @@ redis_sentinel:  # all sentinel hosts
 
 ---
 
-### 10. Vault token/role/secret defaults changed from `""` to `undefined`
+### 12. Vault token/role/secret defaults changed from `""` to `undefined`
 
 | Variable | Old default | New default |
 |---|---|---|
@@ -202,10 +245,10 @@ Each role now has a dedicated `defaults/main/pki.yml` file providing a consisten
 New variable `redis_replica_priority` controls Sentinel failover preference. Set to `auto` (default) to calculate automatically based on position, or an explicit integer (0–100). Setting to `0` prevents promotion.
 
 ### Redis Max Memory
-New variable `redis_maxmemory_bytes` controls maximum memory for Redis. Set to `auto` (default) to calculate automatically based default ratio of 0.60 and a minimum of 512 bytes. Optionally, maximum memory can be set manually.
+New variable `redis_maxmemory_bytes` controls maximum memory for Redis. Set to `auto` (default) to calculate automatically based on a default ratio of 0.80 of available system memory and a minimum of 512 bytes. Optionally, maximum memory can be set manually.
 
-### Redis Prometheus User Disabled by Default
-`redis_prometheus_user_enabled: false` — the Prometheus ACL user is no longer created unless explicitly enabled.
+### Redis Monitor User (opt-in)
+`redis_monitor_user_enabled: false` — a generic monitor ACL user for Redis and Sentinel is available but not created unless explicitly enabled. Similarly, `mongodb_monitor_user_enabled: false` controls the MongoDB monitor user.
 
 ### New `env` Inventory Variable
 A new top-level `env` variable is expected in inventories to declare environment type. Used by the verify stage to select resource specs.
@@ -222,8 +265,8 @@ Twelve example inventory files added under `example_inventories/`:
 | Directory | Files |
 |---|---|
 | `aio/` | `aio_default_passwords.yaml`, `aio_override_default_passwords.yaml` |
-| `minimal/` | `minimal_default_passwords.yaml`, `minimal_override_default_passwords.yaml` |
-| `ha2/` | `ha2_default_passwords.yaml`, `ha2_override_default_passwords.yaml` |
+| `minimal/` | `minimal_default_passwords.yaml`, `minimal_override_default_passwords.yaml`, `minimal_tls.yaml` |
+| `ha2/` | `ha2_default_passwords.yaml`, `ha2_override_default_passwords.yaml`, `ha2_tls.yaml` |
 | `asa/` | `asa_default_passwords.yaml`, `asa_override_default_passwords.yaml`, `asa_tls.yaml` |
 | `platform/` | `external_urls.yaml` |
 | `redis/` | `redis_from_remi_repo.yaml`, `redis_from_source.yaml`, `redis_from_system_repo.yaml` |
@@ -269,7 +312,7 @@ New: `docs/tls_guide.md`
 
 - **README**: Sample inventories section removed (replaced by `example_inventories/` directory).
 - New verify/certify playbook documentation added. ASA architecture description updated to clarify 3-datacenter requirement.
-- **`redis_prometheus_user_enabled`**: New var, defaults `false` — no change to existing behavior.
+- **`redis_monitor_user_enabled`**: New var (renamed from `redis_prometheus_user_enabled`), defaults `false` — no change to existing behavior if the old var was not explicitly set.
 - **`redis_replica_priority`**: New var, `auto` by default — no change to existing behavior.
 - **`redis_maxmemory_bytes`**: New var, `auto` by default - no change to existing behavior.
 - **`redis_sentinel_quorum`**: New var, `auto` by default — no change to existing behavior.
@@ -279,3 +322,8 @@ New: `docs/tls_guide.md`
 - **Gateway firewall rules**: Logic simplified — no longer depends on `gateway_haproxy_enabled` (which no longer exists). HTTP port rule applies when HTTPS is disabled; HTTPS port rule applies when HTTPS is enabled.
 - **`platform_vault_token_dir`**: Changed reference from `platform_server_dir_default` to `platform_server_dir` — functionally equivalent if the role sets this variable as expected.
 - **`platform_mongo_tls_allow_invalid_certificates`**: Changed from static `false` to conditional `{{ false if platform_mongo_tls_enabled | bool else '' }}` — behavior unchanged when TLS is enabled; when TLS is disabled the value becomes an empty string rather than `false`.
+- **Platform log directory bug fix**: `platform_log_dir_default` corrected from `/var/log/itential` to `/var/log/itential/platform` to match the actual directory used by the platform service.
+- **HashiVault password vault defaults clarified**: `platform_redis_password_vault` and `platform_mongo_password_vault` now default to `""` (empty string) instead of example lab-specific values. Inventories that rely on the old defaults must explicitly set these variables when `platform_configure_vault` is true.
+- **MongoDB monitor user**: New vars `mongodb_monitor_user_enabled` (default `false`) and `mongodb_user_monitor_password` — no change to existing behavior unless explicitly enabled.
+- **TLS example inventories**: New dedicated TLS example inventories added (`asa_tls.yaml`, `ha2_tls.yaml`, `minimal_tls.yaml`) and existing example inventories updated with TLS variable sections.
+- **Integration testing fixes**: Certify/validate task files and example inventories updated to fix issues discovered during v4 integration testing — no functional change to production deployment behavior.
