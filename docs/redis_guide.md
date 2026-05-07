@@ -185,7 +185,7 @@ The following tables lists the default variables located in `roles/redis/default
 | `redis_tls_auth_clients` | String | TLS client authentication setting. | `no` |
 | `redis_tls_protocols` | String | Enabled TLS protocol versions. | `TLSv1.2 TLSv1.3` |
 | `redis_maxmemory_bytes` | String/Integer | Maximum memory Redis can use (maxmemory). When set to auto, the installer calculates the value from the system RAM using: `maxmemory = max(redis_maxmemory_min_mb, system_ram × redis_maxmemory_ratio)`. If a numeric value is provided, that value (in bytes) is used directly and the automatic calculation is skipped. | `auto` |
-| `redis_maxmemory_ratio` | Float | Define how much memory the system will use. Only work if `redis_maxmemory_bytes` is configured as auto. Default value 0.6 means 60%. | `0.60` |
+| `redis_maxmemory_ratio` | Float | Define how much memory the system will use. Only work if `redis_maxmemory_bytes` is configured as auto. Default value 0.8 means 80%. | `0.80` |
 | `redis_maxmemory_min_mb` | Integer | This parameter defines the minimum amount of memory Redis is allowed to use, even if the automatic calculation would result in a smaller value. It acts as a safety floor for the maxmemory calculation. | `512` |
 | `redis_certify_report_dir_remote` | String | Remote directory for certification reports. | `/var/tmp/itential-reports/redis` |
 | `redis_certify_report_dir_local` | String | Local directory for certification reports. | `/tmp/itential-reports/redis` |

@@ -69,7 +69,7 @@ redis_tls_protocols: "TLSv1.2 TLSv1.3"
 redis_maxmemory_bytes: auto
 
 # Used only when redis_maxmemory_bytes == "auto"
-redis_maxmemory_ratio: 0.60
+redis_maxmemory_ratio: 0.80
 redis_maxmemory_min_mb: 512
 
 # Default location for the certification report files
