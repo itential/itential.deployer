@@ -79,12 +79,10 @@ This is an example directory structure on a Target Node on a RedHat 9 server:
         │   └── wheels
         │       ├── app
         │       └── base
-        ├── redis
-        │   ├── archives
-        │   └── rpms
-        │       └── build
-        └── vault
-            └── rpms
+        └── redis
+            ├── archives
+            └── rpms
+                └── build
 ```
 
 ### Control Node Download Directory Structure
@@ -124,12 +122,10 @@ playbooks/files/itential_packages
         │   └── wheels
         │       ├── app
         │       └── base
-        ├── redis
-        │   ├── archives
-        │   └── rpms
-        │       └── build
-        └── vault
-            └── rpms
+        └── redis
+            ├── archives
+            └── rpms
+                └── build
 ```
 
 ## Running the Install Playbooks in Offline Mode
@@ -265,15 +261,3 @@ The following variables are defined in the `redis` role.
 | `redis_offline_target_node_archives_dir` | String | Redis target node archives directory | `{{ redis_offline_target_node_root }}/archives` |
 | `redis_offline_control_node_rpms_dir` | String | Redis control node RPMs directory | `{{ redis_offline_control_node_root }}/rpms` |
 | `redis_offline_control_node_archives_dir` | String | Redis control node archives directory | `{{ redis_offline_control_node_root }}/archives` |
-
-### Vault
-
-The following variables are defined in the `vault` role.
-
-| Variable | Type | Description | Default |
-| :------- | :--- | :---------- | :------ |
-| `vault_offline_packages_root` | String | Vault packages root directory | `{{ offline_itential_packages_path }}/{{ platform_release }}/vault` |
-| `vault_offline_target_node_root` | String | Vault target node root directory | `{{ offline_target_node_root }}/{{ vault_offline_packages_root }}` |
-| `vault_offline_control_node_root` | String | Vault control node root directory | `{{ offline_control_node_root }}/{{ vault_offline_packages_root }}` |
-| `vault_offline_target_node_rpms_dir` | String | Vault target node RPMs directory | `{{ vault_offline_target_node_root }}/rpms` |
-| `vault_offline_control_node_rpms_dir` | String | Vault control node RPMs directory | `{{ vault_offline_control_node_root }}/rpms` |

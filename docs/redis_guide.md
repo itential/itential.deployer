@@ -29,7 +29,7 @@ More info on Redis authorization: <https://redis.io/docs/manual/security/>
 | itential | itential | Has access to all keys, all channels, and all commands except: -asking -cluster -readonly -readwrite -bgrewriteaof -bgsave -failover -flushall -flushdb -psync -replconf -replicaof -save -shutdown -sync |
 | repluser | repluser | Has access to the minimum set of commands to perform replication. |
 | sentineluser | sentineluser | Has access to the minimum set of commands to perform sentinel monitoring. |
-| prometheus | prometheus | Has access to the minimum set of commands to perform Redis and Sentinel monitoring with Prometheus. Required by the optional redis_exporter service. |
+| monitor | monitor | Has access to the minimum set of commands to gather metric and cluster data from Redis and Sentinel. Required by monitoring systems such as the optional redis_exporter service. |
 
 :::(Warning) (⚠ Warning: ) It is assumed that these default passwords will be changed to meet more
 rigorous standards.  These are intended to be defaults strictly used just for ease of the
@@ -44,6 +44,42 @@ primary.  It will update the config file for the non-primary Redis servers to re
 primary using hostname.  It will start the Redis Sentinel service when complete.
 
 For more information on Redis replication: <https://redis.io/docs/manual/replication/>
+
+### Replica Priority
+
+Controls which replica Sentinel prefers to promote during failover.
+Lower values = higher priority (more likely to be promoted).
+
+**Default:** `auto` (calculates based on position)
+
+**Options:**
+- `auto` - Automatic priority based on inventory order:
+  - Master: 10
+  - First replica: 50
+  - Second replica: 100
+  - Third replica: 150, etc.
+- `0` - Never promote this replica
+- `1-255` - Explicit priority value
+
+**Examples:**
+```yaml
+# Use automatic priorities (recommended)
+redis_replica_priority: auto
+
+# Set explicit priority
+redis_replica_priority: 25
+
+# Prevent promotion (standby only)
+redis_replica_priority: 0
+```
+
+**Per-host override in inventory:**
+```ini
+[redis-replica]
+replica1 redis_replica_priority=10
+replica2 redis_replica_priority=50
+replica3 redis_replica_priority=0  # Never promote
+```
 
 ## Automatic Redis Maxmemory Calculation
 
@@ -62,27 +98,28 @@ After the calculation, the value is converted to **bytes**, since Redis expects 
 
 For a system with **10 GB of RAM**:
 
-system_ram = 10240 MB
-redis_maxmemory_ratio = 0.60
+* system ram = 10240 MB
+* redis max memory ratio = 0.60
 
-The calculation becomes:
-10240 × 0.60 = 6144 MB
+The calculation becomes: 10240 × 0.60 = 6144 MB
 
-Converted to bytes:
-redis_maxmemory_bytes = 6442450944
+Converted to bytes: 6144 x 1024 x 1024 = 6442450944 bytes
 
 This value will be written to the Redis configuration as:
-maxmemory 6442450944
+
+`maxmemory 6442450944`
 
 ### Manual Override
 
 If `redis_maxmemory_bytes` is set to a numeric value instead of `auto`, the automatic calculation is skipped and the specified value is used directly.
 
 Example:
-redis_maxmemory_bytes: 8589934592
+
+`redis_maxmemory_bytes: 8589934592`
 
 This will configure Redis with:
-maxmemory 8589934592
+
+`maxmemory 8589934592`
 
 ## Variables
 
@@ -142,13 +179,16 @@ The following tables lists the default variables located in `roles/redis/default
 | `redis_port` | Integer | The Redis listen port. | `6379` |
 | `redis_owner` | String | The Redis Linux user. | `redis` |
 | `redis_group` | String | The Redis Linux group. | `redis` |
-| `redis_bind_ipv6` | Boolean | Flag to enable IPv6. | `true` |
-| `redis_bind_addr_source` | String | The bind address source. Will default to the Ansible `inventory_hostname` unless explicitly set to `default_ipv4_address`. | `inventory_hostname` |
-| `redis_bind_addrs` | String | A space-separated list of hostnames/IP addresses on which Redis listeners will be created. If `redis_bind_ipv6` is set to `true`, `::1` will be added to the addresses. The `redis_bind_addr_source` will also be added to the addresses. | `127.0.0.1` |
+| `redis_bind` | String | A space-separated list of hostnames/IP addresses on which Redis listeners will be created. | `bind 127.0.0.1 {{ ansible_default_ipv4.address }}` |
 | `redis_tls_enabled` | Boolean | Flag to enable TLS connections. | `false` |
+| `redis_tls_port` | Integer | The Redis TLS listen port. | Varies by platform |
+| `redis_tls_auth_clients` | String | TLS client authentication setting. | `no` |
+| `redis_tls_protocols` | String | Enabled TLS protocol versions. | `TLSv1.2 TLSv1.3` |
 | `redis_maxmemory_bytes` | String/Integer | Maximum memory Redis can use (maxmemory). When set to auto, the installer calculates the value from the system RAM using: `maxmemory = max(redis_maxmemory_min_mb, system_ram × redis_maxmemory_ratio)`. If a numeric value is provided, that value (in bytes) is used directly and the automatic calculation is skipped. | `auto` |
-| `redis_maxmemory_ratio` | Float | Define how much memory the system will use. Only work if `redis_maxmemory_bytes` is configured as auto. Default value 0.6 means 60%. | `0.60` |
+| `redis_maxmemory_ratio` | Float | Define how much memory the system will use. Only work if `redis_maxmemory_bytes` is configured as auto. Default value 0.8 means 80%. | `0.80` |
 | `redis_maxmemory_min_mb` | Integer | This parameter defines the minimum amount of memory Redis is allowed to use, even if the automatic calculation would result in a smaller value. It acts as a safety floor for the maxmemory calculation. | `512` |
+| `redis_certify_report_dir_remote` | String | Remote directory for certification reports. | `/var/tmp/itential-reports/redis` |
+| `redis_certify_report_dir_local` | String | Local directory for certification reports. | `/tmp/itential-reports/redis` |
 
 ### Auth Variables
 
@@ -160,17 +200,47 @@ The following tables lists the default variables located in `roles/redis/default
 | `redis_user_repluser_password` | String | The Redis repluser user's default password | `repluser` |
 | `redis_user_sentineladmin_password` | String | The Redis Sentinel admin user's default password | `admin` |
 | `redis_user_sentineluser_password` | String | The Redis Sentinel default user's default password | `sentinel` |
-| `redis_user_prometheus_password` | String | The Redis prometheus user's default password | `prometheus` |
+| `redis_user_monitor_password` | String | The Redis monitor user's default password | `monitor` |
+| `redis_monitor_user_enabled` | Boolean | Flag to enable the monitor user | `false` |
 
 ### Replication Variables
 
 | Variable | Type | Description | Default Value |
 | :------- | :--- | :---------- | :------------ |
-| `redis_replication_enabled` | Boolean | Flag to enable Redis replication. When set to `true`, Redis replication will be configured and the Redis Sentinel service started. | `false` |
-| `redis_sentinel_port` | Integer | The Redis Sentinel listen port | `26379` |
+| `redis_replicaof` | String | The Redis replicaof setting.<br>Use replicaof to make a Redis instance a copy of another Redis server. | "{{ groups['redis_master'][0] }} {{ redis_port}}" |
+| `redis_replica_priority` | String/Integer | Controls which replica Sentinel prefers to promote during failover.<br>Refer to Replica Priority section above for details. | `auto` |
+
+### Sentinel Variables
+
+| Variable | Type | Description | Default Value |
+| :------- | :--- | :---------- | :------------ |
 | `redis_sentinel_conf_file` | String | The location of the Redis Sentinel configuration file. | `/etc/redis/sentinel.conf` |
 | `redis_sentinel_log` | String | The location of the Redis Sentinel log file. | `/var/log/redis/sentinel.log` |
-| `redis_master_name` | String | The Redis master name | `itentialmaster` |
+| `redis_sentinel_port` | Integer | The Redis Sentinel listen port | `26379` |
+| `redis_sentinel_bind` | String | A space-separated list of hostnames/IP addresses on which Redis listeners will be created. | `bind 127.0.0.1 {{ ansible_default_ipv4.address }}` |
+| `redis_sentinel_master_name` | String | The Redis master name | `itentialmaster` |
+| `redis_sentinel_quorum` | String | The Sentinel quorum setting.<br>Auto-calculate quorum based on sentinel count (recommended).<br>Set to explicit number to override (must be <= number of sentinels). | `auto` |
+| `redis_sentinel_certify_report_dir_remote` | String | Remote directory for Sentinel certification reports. | `/var/tmp/itential-reports/sentinel` |
+| `redis_sentinel_certify_report_dir_local` | String | Local directory for Sentinel certification reports. | `/tmp/itential-reports/sentinel` |
+
+### PKI Variables
+
+The following table lists the PKI-related variables located in `roles/redis/defaults/main/pki.yml`.
+
+| Variable | Type | Description | Default Value |
+| :------- | :--- | :---------- | :------------ |
+| `redis_pki_base_dir` | String | Base directory for Redis PKI files. | `/etc/pki/redis` |
+| `redis_pki_private_subdir` | String | Subdirectory name for private keys. | `private` |
+| `redis_pki_private_dir` | String | Full path to private keys directory. | `{{ redis_pki_base_dir }}/{{ redis_pki_private_subdir }}` |
+| `redis_pki_src_dir` | String | Source directory on Ansible controller containing certificates. | `""` |
+| `redis_pki_owner` | String | Owner for PKI directories and files. | `redis` |
+| `redis_pki_group` | String | Group for PKI directories and files. | `redis` |
+| `redis_tls_cert_src` | String | Full source path for Redis server certificate on controller. | `{{ redis_pki_src_dir }}/{{ redis_tls_cert_dest }}` |
+| `redis_tls_key_src` | String | Full source path for Redis server private key on controller. | `{{ redis_pki_src_dir }}/{{ redis_tls_key_dest }}` |
+| `redis_tls_ca_src` | String | Full source path for CA bundle on controller. | `{{ redis_pki_src_dir }}/{{ redis_tls_ca_dest }}` |
+| `redis_tls_dh_params_src` | String | Full source path for DH parameters on controller. | `{{ redis_pki_src_dir }}/{{ redis_tls_dh_params_dest }}` |
+| `redis_sentinel_tls_cert_src` | String | Full source path for Sentinel certificate on controller. | `{{ redis_pki_src_dir }}/{{ redis_sentinel_tls_cert_dest }}` |
+| `redis_sentinel_tls_key_src` | String | Full source path for Sentinel private key on controller. | `{{ redis_pki_src_dir }}/{{ redis_sentinel_tls_key_dest }}` |
 
 ### Offline Variables
 
@@ -210,15 +280,15 @@ be found in `roles/redis/vars/platform-release-<platform_release>.yml`.
 
 ## Building Your Inventory
 
-To install and configure Redis, add a `redis` group and host(s) to your inventory.  The following
-inventory shows a basic Redis configuration with a single Redis node with no authentication.
+To install and configure Redis, add a `redis_master` group and host(s) to your inventory.  The following
+inventory shows a basic Redis configuration with a single Redis node with authentication.
 
 ### Example Inventory - Single Redis Node
 
 ```yaml
 all:
   children:
-    redis:
+    redis_master:
       hosts:
         <host1>:
           ansible_host: <addr1>
@@ -231,11 +301,12 @@ all:
 ```yaml
 all:
   children:
-    redis:
+    redis_master:
       hosts:
         <host1>:
           ansible_host: <addr1>
       vars:
+        platform_release: 6
         redis_source_url: https://github.com/redis/redis/archive/7.2.7.tar.gz
 ```
 
@@ -244,7 +315,7 @@ all:
 ```yaml
 all:
   children:
-    redis:
+    redis_master:
       hosts:
         <host1>:
           ansible_host: <addr1>
@@ -253,41 +324,59 @@ all:
         redis_install_from_source: false
 ```
 
-To enable authentication, add the `redis_auth_enabled` flag to the `redis` group and set it to `true`.
-
-### Example Inventory - Configure Redis Authentication
-
-```yaml
-all:
-  children:
-    redis:
-      hosts:
-        <host1>:
-          ansible_host: <addr1>
-      vars:
-        platform_release: 6
-        redis_auth_enabled: true
-```
-
-To configure a Redis replica set, add the `redis_replication_enabled` flag to the `redis` group and set it to `true` and add the additional hosts.
+To configure a Redis replica set, add the replica hosts to the `redis_replica` group and configure the `redis_replicaof` variable.
 
 ### Example Inventory - Configure Redis Replication
 
 ```yaml
 all:
+  vars:
+    platform_release: 6
   children:
-    redis:
+    redis_master:
       hosts:
         <host1>:
           ansible_host: <addr1>
+
+    redis_replica:
+      hosts:
         <host2>:
           ansible_host: <addr2>
         <host3>:
           ansible_host: <addr3>
       vars:
-        platform_release: 6
-        redis_auth_enabled: true
-        redis_replication_enabled: true
+        redis_replicaof: <master-hostname-or-ip> <redis-port> # defaults to "{{ groups['redis_master'][0] }} {{ redis_port}}"
+```
+
+To configure Sentinels, add the sentinel hosts to the `redis_sentinel` group.
+
+```yaml
+all:
+  vars:
+    platform_release: 6
+  children:
+    redis_master:
+      hosts:
+        <host1>:
+          ansible_host: <addr1>
+
+    redis_replica:
+      hosts:
+        <host2>:
+          ansible_host: <addr2>
+        <host3>:
+          ansible_host: <addr3>
+      vars:
+        redis_replicaof: <master-hostname-or-ip> <redis-port> # defaults to "{{ groups['redis_master'][0] }} {{ redis_port}}"
+
+    redis_sentinel:
+      hosts:
+        <host4>:
+          ansible_host: <addr4>
+        <host5>:
+          ansible_host: <addr5>
+        <host6>:
+          ansible_host: <addr6>
 ```
 
 ## Running the Playbook

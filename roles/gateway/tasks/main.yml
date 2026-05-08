@@ -1,6 +1,11 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
+- name: Include tasks to validate variables
+  ansible.builtin.include_tasks:
+    file: validate-vars.yml
+  tags: always
+
 - name: Install Gateway
   block:
     - name: Validation steps
@@ -97,10 +102,13 @@
         state: directory
       when: gateway_enable_python_venv | bool
 
-    - name: Copy certs
-      ansible.builtin.include_tasks:
-        file: copy-certs.yml
-      when: gateway_https and gateway_ssl_copy_certs
+    - name: Prepare Gateway PKI infrastructure
+      ansible.builtin.include_tasks: configure-gateway-https.yml
+      when: gateway_pki_copy_certs | bool
+      tags:
+        - gateway
+        - upload_gateway_certificates
+        - certificates
 
     - name: Install Python
       tags: install_python
@@ -303,10 +311,11 @@
       ansible.posix.firewalld:
         port: "{{ gateway_port }}/tcp"
         permanent: true
-        state: "{{ (gateway_https or gateway_haproxy_enabled) | ternary('disabled', 'enabled') }}"
+        state: enabled
         zone: public
         immediate: true
       when:
+        - not (gateway_https_enabled | bool)
         - ansible_facts.services["firewalld.service"] is defined
         - ansible_facts.services["firewalld.service"].state == "running"
         - ansible_facts.services["firewalld.service"].status == "enabled"
@@ -315,10 +324,11 @@
       ansible.posix.firewalld:
         port: "{{ gateway_https_port }}/tcp"
         permanent: true
-        state: "{{ (gateway_https or gateway_haproxy_enabled) | ternary('enabled', 'disabled') }}"
+        state: enabled
         zone: public
         immediate: true
       when:
+        - gateway_https_enabled | bool
         - ansible_facts.services["firewalld.service"] is defined
         - ansible_facts.services["firewalld.service"].state == "running"
         - ansible_facts.services["firewalld.service"].status == "enabled"

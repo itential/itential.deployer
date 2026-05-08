@@ -13,19 +13,6 @@ mongodb_log_dir: /var/log/mongodb
 # Directory that stores the mongodb pid file
 mongodb_pid_dir: /var/run/mongodb
 
-# The base directory for SSL certs and key files
-mongodb_ssl_root_dir: /etc/ssl/certs
-
-# Key file destination location
-# The key file is used to authenticate members of a replica set
-mongodb_auth_keyfile_destination: "{{ mongodb_ssl_root_dir }}/mongodb/mongo-replicaset-key.pem"
-
-# Destination location of the certificate key file used for TLS connections
-mongodb_cert_keyfile_destination: "{{ mongodb_ssl_root_dir }}/mongodb/mongo-certificate.pem"
-
-# Destination location of the CA root file used for TLS connections
-mongodb_root_ca_file_destination: "{{ mongodb_ssl_root_dir }}/mongodb/mongo-rootCA.pem"
-
 # The Mongo user and group
 mongodb_owner: mongod
 mongodb_group: mongod
@@ -53,21 +40,40 @@ mongodb_port: "{{ mongodb_port_default }}"
 mongodb_itential_db_name: itential
 
 # Feature flags that can be overridden in the hosts file
-# Essentially, a default installation will not have replication, authorization,
-# or TLS settings applied.
+# Enabling auth and TLS by default to ensure secure communication, can be disabled if not needed
 mongodb_replication_enabled: false
 mongodb_auth_enabled: true
-mongodb_tls_enabled: false
+mongodb_tls_enabled: true
+
+# Flag to manage MongoDB PKI infrastructure
+# Enabling this by default to ensure secure communication, can be disabled if certificates are managed externally
+# When true: Creates PKI directories and copies certificate files
+# When false: Assumes certificates are managed externally
+mongodb_tls_copy_certs: true
 
 # Default mongo user names
 mongodb_user_admin: admin
 mongodb_user_itential: itential
+mongodb_monitor_user_enabled: false
 
 # Default mongo user passwords
 # These are meant to be changed by the customer. By default they are meant to
 # be predictable and simple.
 mongodb_user_admin_password: admin
 mongodb_user_itential_password: itential
+mongodb_user_monitor_password: monitor
 
 # The name of the mongo replica set
 mongodb_replset_name: "{{ mongodb_replset_name_default }}"
+
+# Default location for the certification report files
+mongodb_certify_report_dir_remote: /var/tmp/itential-reports/mongodb
+mongodb_certify_report_dir_local: /tmp/itential-reports/mongodb
+
+# Replica set member priorities.
+# mongodb_primary_priority applies to all hosts in the mongodb_primary group.
+# mongodb_replica_priority is the default for hosts in the mongodb_replica group
+# and can be overridden per host by setting mongodb_replica_priority in the
+# host's vars section of the inventory.
+mongodb_primary_priority: 10
+mongodb_replica_priority: 5

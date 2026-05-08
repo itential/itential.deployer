@@ -28,22 +28,15 @@
     7. [Create the Inventory File](#create-the-inventory-file)
     8. [Run the Itential Deployer](#run-the-itential-deployer)
     9. [Confirm Successful Installation](#confirm-successful-installation)
-6. [Sample Inventories](#sample-inventories)
-    1. [All-in-one Architecture Inventory](#all-in-one-architecture-inventory)
-    2. [Minimal Architecture Inventory](#minimal-architecture-inventory)
-    3. [Highly Available Architecture Inventory](#highly-available-architecture-inventory)
-    4. [Active/Standby Architecture Inventory](#activestandby-architecture-inventory)
-7. [Component Guides](#component-guides)
+6. [Component Guides](#component-guides)
     1. [MongoDB](#mongodb)
     2. [Redis](#redis)
-    3. [Hashicorp Vault](#hashicorp-vault)
-    4. [Itential Platform](#itential-platform)
-    5. [Itential Gateway](#itential-gateway)
-    6. [Prometheus and Grafana](#prometheus-and-grafana)
-8. [Patching Itential Platform and IAG](#patching-itential-platform-and-iag)
-9. [Using Internal YUM Repositories](#using-internal-yum-repositories)
-10. [Running the Deployer in Offline Mode](#running-the-deployer-in-offline-mode)
-11. [Appendix A: Definition of "Highly Available" Dependencies](#appendix-a-definition-of-highly-available-dependencies)
+    3. [Itential Platform](#itential-platform)
+    4. [Itential Gateway](#itential-gateway)
+7. [Patching Itential Platform and IAG](#patching-itential-platform-and-iag)
+8. [Using Internal YUM Repositories](#using-internal-yum-repositories)
+9. [Running the Deployer in Offline Mode](#running-the-deployer-in-offline-mode)
+10. [Appendix A: Definition of "Highly Available" Dependencies](#appendix-a-definition-of-highly-available-dependencies)
 
 ## Overview
 
@@ -70,7 +63,6 @@ The Itential deployer can deploy supported Itential architectures.
 - Minimal Architecture
 - Highly Available Architecture
 - Active/Standby Architecture
-- Blue Green Architecture
 
 ### All-in-one Architecture
 
@@ -125,17 +117,26 @@ SSL when communicating with components on other VMs and across clusters.
 
 An Active/Standby Architecture (ASA) is an architecture (that is normally used for making HA2
 architectures redundant) reserved for production environments where Disaster Recovery is required.
-It is not required that they be geographically redundant but they could be. The intent is to
-provide a standby environment that can be used in the event of a disaster on the active stack. The
-standby stack should be preconfigured to be quickly made into the active stack. Care needs to be
-taken that the same level of access to 3rd party systems existing in the standby stack matches
-those in the active stack. Security must be taken into account if this is used as a production
-environment.
+The intent is to provide a secondary environment that can be used in the event of a disaster in the
+active datacenter. The secondary stack should be preconfigured to be quickly made into the primary
+stack. Care needs to be taken that the same level of access to 3rd party systems existing in the
+secondary stack matches those in the primary stack. Security must be taken into account if this is
+used as a production environment.
 
-The ideal ASA architecture will appear as two HA2 stacks except for MongoDB. One or more of the
-MongoDB instances must be hosted in the standby location as a replica of the primary. Ideally, the
-MongoDB cluster will consist of 5 members: 4 data-bearing members and a MongoDB arbiter. This will
-allow for a cluster of three mongos in the worst-case disaster scenario.
+The ASA architecture MUST utilize 3 data centers in order to be fully geographically redundant. This
+is due to the way that MongoDB and Redis handle data replication and the promotion of a new primary
+in disaster scenarios.
+
+The MongoDB cluster will consist of 5 members: 4 data-bearing members and a MongoDB arbiter, 2
+data-bearing members in the primary data center, 2 data-bearing members in the secondary data
+center, and the arbiter in a third data center. This will preserve a majority of voting members (3)
+in the event of a data center loss.
+
+Redis must also consider the preservation of voting members in this architecture but it works
+slightly different than MongoDB. Redis will consist of 4 data-bearing members, 2 data-bearing
+members in the primary data center, 2 data-bearing members in the secondary data center. Unlike
+MongoDB, Redis HA requires Redis Sentinel. These must be distributed in 3 data centers to preserve
+a majority of voting members (3) in the event of a data center loss.
 
 Itential recommends applying sound security principles to ALL environments. In the ASA, this would
 include configuring all components to use authentication and use SSL when communicating with
@@ -304,6 +305,7 @@ these variables just define the variable in the deployer host file.
 | :----------- | :--------------- | :------------ | :---------- |
 | admin | admin | mongodb_user_admin_password | Has full root access to the mongo database. |
 | itential | itential | mongodb_user_itential_password | Has read and write access to the “itential” database only. |
+| monitor | monitor | mongodb_user_monitor_password | Read-only access to the admin, local, and itential databases for monitoring systems. Enabled via `mongodb_monitor_user_enabled`. |
 
 #### Redis Accounts
 
@@ -314,6 +316,7 @@ these variables just define the variable in the deployer host file.
 | repluser | repluser | redis_user_repluser_password | Has access to the minimum set of commands to perform replication: psync, replconf, ping. |
 | admin | sentineladmin | redis_user_sentineladmin_password | Full root access to Redis Sentinel. |
 | sentineluser | sentineluser | redis_user_sentineluser_password | Has access to the minimum set of commands to perform sentinel monitoring: multi, slaveof, ping, exec, subscribe, config.rewrite, role, publish, info, client.setname, client.kill, script.kill. |
+| monitor | monitor | redis_user_monitor_password | Read-only access to gather metric and cluster data from Redis and Sentinel. Enabled via `redis_monitor_user_enabled`. |
 
 ### Obtaining the Itential Binaries
 
@@ -386,6 +389,22 @@ applicable, IAG). For more information, refer to the [Itential Dependencies] pag
 - **Administrative Privileges**: The `ansible` user must have administrative privileges on managed
 nodes.
 - **SSH Access**: The control node must have SSH connectivity to all managed nodes.
+
+The deployer includes a playbook that can be used to confirm the environment is suitable and ready for installation.
+
+```bash
+# Verify everything
+ansible-playbook -i <path-to-inventory> itential.deployer.verify
+
+# Verify Redis
+ansible-playbook -i <path-to-inventory> itential.deployer.verify_redis
+
+# Verify MongoDB
+ansible-playbook -i <path-to-inventory> itential.deployer.verify_mongodb
+
+# Verify Platform
+ansible-playbook -i <path-to-inventory> itential.deployer.verify_platform
+```
 
 **&#9432; Note:**
 Although the Itential Deployer can be used to configure nodes that use any supported operating
@@ -536,32 +555,39 @@ mkdir -p inventories/dev
 vi inventories/dev/hosts
 ```
 
-</br>
-
 #### Example: Inventory File (YAML Format)
 
 ```yaml
 all:
   vars:
     platform_release: 6
+    # Declare the purpose of the environment to help the verification stage check resources.
+    # Possible values: "dev", "test", "prod"
+    env: dev
 
   children:
-    redis:
+    redis_master:
       hosts:
-        example1.host.com:
+        host01.example.com:
 
     mongodb:
       hosts:
-        example1.host.com:
+        host01.example.com:
 
     platform:
       hosts:
-        example1.host.com:
+        host01.example.com:
       vars:
-        platform_encryption_key: <openssl rand -hex 32> # 64-length hex string, representing a 256-bit AES  encryption key.
+        # open64-length hex string, representing a 256-bit AES encryption key
+        # example command to generate key: 'openssl rand -hex 32'
+        platform_encryption_key: <key>
+
+        # NOTE: the platform packages list varies depending on entitlement
         platform_packages:
-          - https://registry.aws.itential.com/repository/PLATFORM/Platform%206.0.0/itential-platform-6.0.0-1.noarch.rpm
-        repository_username: user.name
+          - https://registry.aws.itential.com/repository/PLATFORM/Platform%206.0.0/itential-platform-<version>.noarch.rpm
+
+        # Credentials for downloading from the Itential repository
+        repository_username: <username>
         repository_password: !vault |
           $ANSIBLE_VAULT;1.1;AES123
           12341234123412341234123412341234123412341234123412341234123412341234123412341234
@@ -569,13 +595,22 @@ all:
           12341234123412341234123412341241234123412341234123412341234123412341234123412341
           1234123412341324
 
+        # MongoDB connection
+        platform_mongo_url: mongodb://host01.example.com:27017/itential
+
+        # Redis connection
+        platform_redis_host: host01.example.com
+
     gateway:
       hosts:
-        example2.host.com:
+        host02.example.com:
       vars:
         gateway_release: 4.3
-        gateway_whl_file: automation_gateway-4.3.56-py3-none-any.whl
+        gateway_whl_file: automation_gateway-<version>-py3-none-any.whl
 ```
+
+**&#9432; Note:**
+Additional example inventories can be found in the `example_inventories` directory.
 
 ### Run the Itential Deployer
 
@@ -590,8 +625,29 @@ ansible-playbook itential.deployer.site -i inventories/dev -v
 
 ### Confirm Successful Installation
 
-After the Itential Deployer is finished running, perform the following checks on each component to
-confirm successful installation.
+Deployer includes a playbook that can certify an installation and provide valuable information for
+documentation purposes. Run this playbook after installation to certify an installation:
+
+```bash
+# Certify everything
+ansible-playbook -i <path-to-inventory> itential.deployer.certify
+
+# Certify Redis
+ansible-playbook -i <path-to-inventory> itential.deployer.certify_redis
+
+# Certify MongoDB
+ansible-playbook -i <path-to-inventory> itential.deployer.certify_mongodb
+
+# Certify Platform
+ansible-playbook -i <path-to-inventory> itential.deployer.certify_platform
+```
+
+This will generate markdown files one per host that contain rich detail about what was done during
+the installation and also several assertions that can highlight areas of concern. These markdown
+files will be copied to the control node and should be preserved as a "receipt" of installation. By
+default, these files will be copied to `/tmp/itential-reports/` on the control node.
+
+Additionally, perform the following checks on each component to confirm successful installation.
 
 #### Itential Platform and IAG
 
@@ -698,276 +754,6 @@ $ sudo systemctl status redis
              └─15723 "/usr/bin/redis-server 127.0.0.1:6379"
 ```
 
-## Sample Inventories
-
-Below are simplified sample host files that describe the basic configurations to produce the
-supported architectures. These are intended to be starting points only.
-
-### All-in-one Architecture Inventory
-
-Simple environment. Itential Platform and all of its dependencies all on one host.
-
-#### Example: All-in-one Inventory File (YAML Format)
-
-```yaml
-all:
-  vars:
-    platform_release: 6
-
-  children:
-    redis:
-      hosts:
-        example1.host.com:
-
-    mongodb:
-      hosts:
-        example1.host.com:
-
-    platform:
-      hosts:
-        example1.host.com:
-      vars:
-        platform_encryption_key: <openssl rand -hex 32> # 64-length hex string, representing a 256-bit AES  encryption key.
-        platform_packages:
-          - itential-platform-6.0.0-1.noarch.rpm
-
-    gateway:
-      hosts:
-        example2.host.com:
-      vars:
-        gateway_release: 4.3
-        gateway_whl_file: automation_gateway-4.3.56-py3-none-any.whl
-```
-
-### Minimal Architecture Inventory
-
-Similar to All-in-one but installs components on separate hosts.
-
-#### Example: Minimal Architecture Inventory File (YAML Format)
-
-```yaml
-all:
-  vars:
-    platform_release: 6
-
-  children:
-    redis:
-      hosts:
-        redis.host.com:
-
-    mongodb:
-      hosts:
-        mongodb.host.com:
-
-    platform:
-      hosts:
-        itential-platform.host.com:
-      vars:
-        platform_encryption_key: <openssl rand -hex 32> # 64-length hex string, representing a 256-bit AES  encryption key.
-        platform_packages:
-          - itential-platform-6.0.0-1.noarch.rpm
-        # MongoDB config
-        platform_mongo_url: mongodb://mongodb.host.com:27017/itential
-        # Redis config
-        platform_redis_host: redis.host.com
-
-    gateway:
-      hosts:
-        automation-gateway.host.com:
-      vars:
-        gateway_release: 4.3
-        gateway_whl_file: automation_gateway-4.3.56-py3-none-any.whl
-```
-
-### Highly Available Architecture Inventory
-
-Fault tolerant architecture.
-
-#### Example: Highly Available Architecture Inventory File (YAML Format)
-
-```yaml
-all:
-  vars:
-    platform_release: 6
-
-  children:
-    redis:
-      hosts:
-        redis1.host.com:
-        redis2.host.com:
-        redis3.host.com:
-      vars:
-        redis_replication_enabled: true
-
-    mongodb:
-      hosts:
-        mongodb1.host.com:
-        mongodb2.host.com:
-        mongodb3.host.com:
-      vars:
-        mongodb_replication_enabled: true
-
-    platform:
-      hosts:
-        itential-platform1.host.com:
-        itential-platform2.host.com:
-      vars:
-        platform_packages:
-          - itential-platform-6.0.0-1.noarch.rpm
-        # MongoDB config
-        platform_mongo_url: mongodb://itential:itential@mongodb1.host.com:27017,mongodb2.host.com:27017,mongodb3.host.com:27017/itential?replicaSet=rs0
-        # Redis config
-        platform_redis_sentinels:
-          - host: redis1.host.com
-            port: 26379
-          - host: redis2.host.com
-            port: 26379
-          - host: redis3.host.com
-            port: 26379
-
-    gateway:
-      hosts:
-        automation-gateway1.host.com:
-      vars:
-        gateway_release: 4.3
-        gateway_whl_file: automation_gateway-4.3.56-py3-none-any.whl
-```
-
-### Highly Available Architecture Inventory leveraging external dependencies
-
-Fault tolerant architecture using external dependencies.
-
-#### Example: Highly Available Architecture Inventory File using external dependencies (YAML Format)
-
-```yaml
-all:
-  vars:
-    platform_release: 6
-  children:
-    platform:
-      hosts:
-        itential-platform1.host.com:
-        itential-platform2.host.com:
-      vars:
-        platform_packages:
-          - itential-platform-6.0.0-1.noarch.rpm
-        # MongoDB config
-        platform_mongo_auth_enabled: true
-        platform_mongo_url: <a-valid-mongo-connection-string>
-        # Redis config
-        platform_redis_host: <The-FQDN-to-the-Redis-service>
-        platform_redis_port: 6379
-        platform_redis_username: itential
-        platform_redis_password: <super-secret-password>
-        # Or if connecting to Redis Sentinel
-        # platform_redis_sentinels:
-        #   - host: redis1.host.com
-        #     port: 26379
-        #   - host: redis2.host.com
-        #     port: 26379
-        #   - host: redis3.host.com
-        #     port: 26379
-    gateway:
-      hosts:
-        automation-gateway1.host.com:
-      vars:
-        gateway_release: 4.3
-        gateway_whl_file: automation_gateway-4.3.56-py3-none-any.whl
-```
-
-### Active/Standby Architecture Inventory
-
-#### Example: Active/Standby Architecture Inventory File (YAML Format)
-
-```yaml
-all:
-  vars:
-    platform_release: 6
-
-  children:
-    redis:
-      hosts:
-        datacenter1.redis1.host.com:
-        datacenter1.redis2.host.com:
-        datacenter1.redis3.host.com:
-      vars:
-        redis_replication_enabled: true
-
-    redis_secondary:
-      hosts:
-        datacenter2.redis1.host.com:
-        datacenter2.redis2.host.com:
-        datacenter2.redis3.host.com:
-      vars:
-        redis_replication_enabled: true
-
-    mongodb:
-      hosts:
-        datacenter1.mongodb1.host.com:
-        datacenter1.mongodb2.host.com:
-        datacenter2.mongodb3.host.com:
-        datacenter2.mongodb4.host.com:
-      vars:
-        mongodb_replication_enabled: true
-
-    mongodb_arbiter:
-      hosts:
-        datacenter3.mongodb-arbiter.host.com:
-
-    platform:
-      hosts:
-        datacenter1.itential-platform1.host.com:
-        datacenter1.itential-platform2.host.com:
-      vars:
-        platform_packages:
-          - itential-platform-6.0.0-1.noarch.rpm
-        platform_job_worker_enabled: false
-        platform_task_worker_enabled: false
-        # MongoDB config
-        platform_mongo_auth_enabled: true
-        platform_mongo_url: mongodb://itential:itential@datacenter1.mongodb1.host.com:27017,datacenter1.mongodb2.host.com:27017,datacenter2.mongodb3.host.com:27017,datacenter2.mongodb4.host.com:27017,datacenter3.mongodb-arbiter.host.com:27017/itential?replicaset=rs0
-        # Redis config
-        platform_redis_sentinel_username: itential
-        platform_redis_sentinel_password: <super-secret-password>
-        platform_redis_sentinels:
-          - host: datacenter1.redis1.host.com
-            port: 26379
-          - host: datacenter1.redis2.host.com
-            port: 26379
-          - host: datacenter1.redis3.host.com
-            port: 26379
-
-    platform_secondary:
-      hosts:
-        datacenter2.itential-platform3.host.com:
-        datacenter2.itential-platform4.host.com:
-      vars:
-        platform_packages:
-          - itential-platform-6.0.0-1.noarch.rpm
-        platform_job_worker_enabled: false
-        platform_task_worker_enabled: false
-        # MongoDB config
-        platform_mongo_auth_enabled: true
-        platform_mongo_url: mongodb://itential:itential@datacenter1.mongodb1.host.com:27017,datacenter1.mongodb2.host.com:27017,datacenter2.mongodb3.host.com:27017,datacenter2.mongodb4.host.com:27017,datacenter3.mongodb-arbiter.host.com:27017/itential?replicaset=rs0
-        # Redis config
-        platform_redis_sentinel_username: itential
-        platform_redis_sentinel_password: <super-secret-password>
-        platform_redis_sentinels:
-          - host: datacenter2.redis1.host.com
-            port: 26379
-          - host: datacenter2.redis2.host.com
-            port: 26379
-          - host: datacenter2.redis3.host.com
-            port: 26379
-
-    gateway:
-      hosts:
-        datacenter2.automation-gateway1.host.com:
-      vars:
-        gateway_release: 4.3
-        gateway_whl_file: automation_gateway-4.3.56-py3-none-any.whl
-```
-
 ## Component Guides
 
 In addition to the `itential.deployer.site` playbook, there are playbooks for each component.
@@ -984,10 +770,6 @@ corresponding variables are detailed in the following guides.
 
 [Redis Guide](docs/redis_guide.md)
 
-### Hashicorp Vault
-
-[Hashicorp Vault Guide](docs/vault_guide.md)
-
 ### Itential Platform
 
 [Itential Platform Guide](docs/itential_platform_guide.md)
@@ -995,10 +777,6 @@ corresponding variables are detailed in the following guides.
 ### Itential Gateway
 
 [Itential Gatway Guide](docs/itential_gateway_guide.md)
-
-### Prometheus and Grafana
-
-[Prometheus and Grafana Guide](docs/prometheus_guide.md)
 
 ## Patching Itential Platform and IAG
 

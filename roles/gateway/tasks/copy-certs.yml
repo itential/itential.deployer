@@ -1,27 +1,32 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-
 - name: Copy the cert file
   ansible.builtin.copy:
-    src: "{{ gateway_ssl_cert_src }}"
-    dest: "{{ gateway_ssl_cert_dest }}"
-    mode: "0400"
+    src: "{{ gateway_https_cert_src }}"
+    dest: "{{ gateway_https_cert_dest }}"
+    mode: "0644"
     owner: "{{ gateway_user }}"
     group: "{{ gateway_group }}"
+  when: gateway_https_cert_src | length > 0
+  notify: restart automation-gateway
 
 - name: Copy the key file
   ansible.builtin.copy:
-    src: "{{ gateway_ssl_key_src }}"
-    dest: "{{ gateway_ssl_key_dest }}"
-    mode: "0400"
+    src: "{{ gateway_https_key_src }}"
+    dest: "{{ gateway_https_key_dest }}"
+    mode: "0600"
     owner: "{{ gateway_user }}"
     group: "{{ gateway_group }}"
+  when: gateway_https_key_src | length > 0
+  notify: restart automation-gateway
 
 - name: Copy the root CA file
   ansible.builtin.copy:
-    src: "{{ gateway_ssl_rootca_src }}"
-    dest: "{{ gateway_ssl_rootca_dest }}"
-    mode: "0400"
-    group: "{{ gateway_group }}"
+    src: "{{ gateway_https_ca_src }}"
+    dest: "{{ gateway_https_ca_dest }}"
+    mode: "0644"
     owner: "{{ gateway_user }}"
+    group: "{{ gateway_group }}"
+  when: gateway_https_ca_src | length > 0
+  notify: restart automation-gateway

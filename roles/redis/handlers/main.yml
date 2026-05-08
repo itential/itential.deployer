@@ -2,12 +2,14 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
 - name: Enable and Start Redis
+  listen: restart redis
   throttle: 1
   ansible.builtin.systemd:
     name: redis
     enabled: true
     state: restarted
     daemon_reload: true
+  when: redis_is_data_node
 
 - name: Enable and Start Redis Sentinel
   throttle: 1
@@ -16,7 +18,7 @@
     enabled: true
     state: restarted
     daemon_reload: true
-  when: redis_replication_enabled
+  when: redis_is_sentinel_node
 
 - name: Update Itential release file
   ansible.builtin.include_tasks:

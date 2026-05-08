@@ -11,35 +11,6 @@
     name: vm.overcommit_memory
     value: 1
 
-# Check if firewalld is running, if it is then open the appropriate ports
-- name: Gather service facts
-  ansible.builtin.service_facts:
-
-- name: Open Redis port on FirewallD Public Zone
-  ansible.posix.firewalld:
-    port: "{{ redis_port }}/tcp"
-    permanent: true
-    state: enabled
-    zone: public
-    immediate: true
-  when:
-    - ansible_facts.services["firewalld.service"] is defined
-    - ansible_facts.services["firewalld.service"].state == "running"
-    - ansible_facts.services["firewalld.service"].status == "enabled"
-
-- name: Open Sentinel port on FirewallD Public Zone
-  ansible.posix.firewalld:
-    port: "{{ redis_sentinel_port }}/tcp"
-    permanent: true
-    state: enabled
-    zone: public
-    immediate: true
-  when:
-    - ansible_facts.services["firewalld.service"] is defined
-    - ansible_facts.services["firewalld.service"].state == "running"
-    - ansible_facts.services["firewalld.service"].status == "enabled"
-    - redis_replication_enabled | bool
-
 - name: Create Redis group
   ansible.builtin.group:
     name: "{{ redis_group }}"

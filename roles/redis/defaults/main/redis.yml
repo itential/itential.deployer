@@ -26,31 +26,22 @@ redis_group: redis
 # Default redis port
 redis_port: "{{ redis_port_default }}"
 
-# The default redis sentinel listen port
-redis_sentinel_port: "{{ redis_sentinel_port_default }}"
-
-# Flag to enable IPv6
-redis_bind_ipv6: true
-
-# The bind address source
-# Will default to inventory_hostname unless set to default_ipv4_address
-redis_bind_addr_source: inventory_hostname
-
-# The hostnames and/or IP addresses on which redis should listen for
-# client connections, separated by spaces.
-#
-# If redis_bind_ipv6 is set to true, '::1' will be added to the
-# redis_bind_addrs.
-#
-# The inventory_hostname or default_ipv4_address will be automatically added
-# to the redis_bind_addrs depending on the redis_bind_addr_source.
-redis_bind_addrs: 127.0.0.1
+# Bind to localhost + private network interface
+redis_bind: 127.0.0.1 {{ ansible_default_ipv4.address }}
 
 # Feature flags that can be overridden in the hosts file
-# Essentially, a default installation will have auth, but not replication or tls
+# Essentially, a default installation will have auth, but not tls
 redis_auth_enabled: true
-redis_replication_enabled: false
 redis_tls_enabled: false
+
+# Replication settings
+redis_replicaof: "{{ groups['redis_master'][0] }} {{ redis_port }}"
+
+# Redis replica priority for Sentinel failover
+# Lower values = higher priority (more likely to be promoted)
+# Set to 'auto' to calculate based on position, or specify explicit value (0-100)
+# 0 = never promote this replica
+redis_replica_priority: auto
 
 # Default redis user passwords
 # These are meant to be changed by the customer. By default they are meant to
@@ -60,7 +51,16 @@ redis_user_itential_password: itential
 redis_user_repluser_password: repluser
 redis_user_sentineladmin_password: admin
 redis_user_sentineluser_password: sentineluser
-redis_user_prometheus_password: prometheus
+redis_user_monitor_password: monitor
+
+# By default the monitor user will not be created. If set to true, the monitor user will be
+# created with the appropriate ACL to allow monitoring systems to gather metric data.
+redis_monitor_user_enabled: false
+
+# Redis TLS configuration options
+redis_tls_port: "{{ redis_tls_port_default }}"
+redis_tls_auth_clients: "no"
+redis_tls_protocols: "TLSv1.2 TLSv1.3"
 
 # Redis memory sizing defaults (dedicated Redis node)
 
@@ -69,5 +69,9 @@ redis_user_prometheus_password: prometheus
 redis_maxmemory_bytes: auto
 
 # Used only when redis_maxmemory_bytes == "auto"
-redis_maxmemory_ratio: 0.60
+redis_maxmemory_ratio: 0.80
 redis_maxmemory_min_mb: 512
+
+# Default location for the certification report files
+redis_certify_report_dir_remote: /var/tmp/itential-reports/redis
+redis_certify_report_dir_local: /tmp/itential-reports/redis

@@ -102,19 +102,23 @@
           ansible.builtin.include_tasks:
             file: configure-vault.yml
 
-    - name: Copy certs
-      tags: copy_certs
-      block:
-        - name: Copy certs
-          ansible.builtin.include_tasks:
-            file: copy-certs.yml
+# Prepare PKI infrastructure and copy certificates
+# Run when either copy_certs flag is true (regardless of enabled status)
+- name: Prepare Platform PKI and copy certificates
+  ansible.builtin.include_tasks:
+    file: copy-certs.yml
+  when: platform_webserver_https_copy_certs | bool or platform_mongodb_copy_certs | bool
+  tags:
+    - platform
+    - platform_certificates
+    - certificates
 
+- name: Configure Platform
+  tags: configure_platform
+  block:
     - name: Configure Platform
-      tags: configure_platform
-      block:
-        - name: Configure Platform
-          ansible.builtin.include_tasks:
-            file: configure-platform.yml
+      ansible.builtin.include_tasks:
+        file: configure-platform.yml
 
 - name: Start Itential Platform service
   tags:

@@ -37,17 +37,19 @@ gateway_group: itential
 gateway_user_home_dir: "/home/{{ gateway_user }}"
 gateway_user_shell_rc_file: "{{ gateway_user_home_dir }}/.bashrc"
 
-# Default HTTPS/SSL settings
-gateway_https: false
+# Flag to enable HTTPS in Gateway configuration
+# Enabling this by default to ensure secure communication, can be disabled if not needed
+# When true: Gateway listens on HTTPS port with TLS enabled
+# When false: Gateway listens on HTTP port
+gateway_https_enabled: true
 gateway_https_port: 8443
-gateway_ssl_copy_certs: true
-gateway_ssl_dir: "{{ gateway_install_dir }}/conf/certs"
-gateway_ssl_cert_src: server.crt
-gateway_ssl_cert_dest: "{{ gateway_ssl_dir }}/{{ gateway_ssl_cert_src }}"
-gateway_ssl_key_src: server.key
-gateway_ssl_key_dest: "{{ gateway_ssl_dir }}/{{ gateway_ssl_key_src }}"
-gateway_ssl_rootca_src: rootCA.crt
-gateway_ssl_rootca_dest: "{{ gateway_ssl_dir }}/{{ gateway_ssl_rootca_src }}"
+
+# Flag to manage Gateway PKI infrastructure
+# Enabling this by default to ensure secure communication, can be disabled if certificates are managed externally
+# When true: Creates PKI directories and copies certificate files
+# When false: Assumes certificates are managed externally
+gateway_pki_copy_certs: true
+
 gateway_tlsv1_2: false
 
 # The number of http server threads for handling requests

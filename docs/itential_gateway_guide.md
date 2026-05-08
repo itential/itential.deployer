@@ -1,12 +1,8 @@
-# Gateway Roles
+# Gateway Role
 
-The playbook and roles in this section install and configure the Itential Automation Gateway (IAG).
-There are currently two IAG-related roles:
+The playbook and role in this section install and configure the Itential Automation Gateway (IAG).
 
-* `gateway` – Installs IAG and performs a base configuration.
-* `gateway_haproxy` – Installs and configures HAProxy.
-
-## Roles
+## Role
 
 ### Gateway Role
 
@@ -15,15 +11,11 @@ the appropriate versions of Python, Pip, and Ansible. It creates the appropriate
 directories, log files, and systemd services. It will start the automation-gateway service when
 complete.
 
-### Gateway HAProxy Role
-
-The `gateway_haproxy` role will install and configure an HAProxy instance as an HTTPS proxy for IAG.
-
 ## Variables
 
 ### Static Variables
 
-The variables located in the `vars` directory of each role are "static" and not meant to be overridden by the user.  Since these variable files are included at run-time based on the IAG release and OS major version, they have a higher precedence than the variables in the inventory and are not easily overridden.
+The variables located in the `vars` directory of the role are "static" and not meant to be overridden by the user. Since these variable files are included at run-time based on the IAG release and OS major version, they have a higher precedence than the variables in the inventory and are not easily overridden.
 
 ### Gateway Role Variables
 
@@ -42,7 +34,7 @@ The `gateway_release` and either `gateway_whl_file` or `gateway_archive_download
 configured in the inventory. When `gateway_archive_download_url` is configured, the
 `repository_username`/`repository_password` or `repository_api_key` must be defined.
 
-The following table lists the default variables located in `roles/gateway/defaults/main.yml`.
+The following table lists the default variables located in `roles/gateway/defaults/main/gateway.yml`.
 
 | Variable | Type | Description | Default Value |
 | :------- | :--- | :---------- | :------------ |
@@ -50,74 +42,140 @@ The following table lists the default variables located in `roles/gateway/defaul
 | `gateway_enable_nornir` | Boolean | Flag to enable Nornir. | `true` |
 | `gateway_enable_netmiko` | Boolean | Flag to enable Netmiko. | `true` |
 | `gateway_enable_scripts` | Boolean | Flag to enable scripts. | `true` |
-| `gateway_enable_httpreq` | Boolean | Flag to enable HTTP requests. | `true` |
 | `gateway_enable_netconf` | Boolean | Flag to enable Netconf requests. | `true` |
+| `gateway_enable_httpreq` | Boolean | Flag to enable HTTP requests. | `true` |
 | `gateway_enable_python_venv` | Boolean | Flag to enable Python virtual environments. | `true` |
 | `gateway_enable_grpc` | Boolean | Flag to enable GRPC requests. | `true` |
 | `gateway_enable_git` | Boolean | Flag to enable Git integration. | `true` |
-| `gateway_install_dir` | String |  The base directory where to install the IAG files. | `/opt/automation-gateway` |
-| `gateway_data_dir` | String | The IAG data directory. | `/opt/automation-gateway` |
+| `gateway_install_dir` | String | The base directory where to install the IAG files. | `/opt/automation-gateway` |
+| `gateway_ansible_collections_path` | String | The location of IAG Ansible collections. | `{{ gateway_install_dir }}/ansible/collections` |
+| `gateway_data_dir` | String | The IAG data directory. | `/var/lib/automation-gateway` |
 | `gateway_log_dir` | String | The IAG log directory. | `/var/log/automation-gateway` |
 | `gateway_port` | Integer | The IAG HTTP listen port. | `8083` |
 | `gateway_properties_location` | String | The location of the IAG configuration file. | `/etc/automation-gateway` |
 | `gateway_user` | String | The IAG Linux user. | `itential` |
 | `gateway_group` | String | The IAG Linux group. | `itential` |
-| `gateway_https` | Boolean | Flag to enable HTTPS. | `false` |
-| `gateway_https_port` | Integer | The IAG or HAProxy HTTPS listen port. | `8443` |
-| `gateway_ssl_copy_certs` | Boolean | Flag to enable copying the IAG SSL certificate. | `true` |
-| `gateway_ssl_dir` | String | The IAG SSL directory. | `{{ gateway_install_dir }}/conf/certs` |
-| `gateway_ssl_cert_src` | String | The SSL cert file. | `server.crt` |
-| `gateway_ssl_cert_dest` | String | The SSL cert destination. | `{{ gateway_ssl_dir }}/{{ gateway_ssl_cert_src }}` |
-| `gateway_ssl_key_src` | String | The SSL key file. | `server.key` |
-| `gateway_ssl_key_dest` | String | The SSL key file destination. | `{{ gateway_ssl_dir }}/{{ gateway_ssl_key_src }}` |
-| `gateway_ssl_rootca_src` | String | The SSL root CA file. | `rootCA.crt` |
-| `gateway_ssl_rootca_dest` | String | The SSL root CA destination. | `{{ gateway_ssl_dir }}/{{ gateway_ssl_rootca_src }}` |
+| `gateway_user_home_dir` | String | The home directory for the IAG user. | `/home/{{ gateway_user }}` |
+| `gateway_user_shell_rc_file` | String | The shell RC file for the IAG user. | `{{ gateway_user_home_dir }}/.bashrc` |
+| `gateway_https_enabled` | Boolean | Flag to enable HTTPS in Gateway configuration. | `true` |
+| `gateway_https_port` | Integer | The IAG HTTPS listen port. | `8443` |
+| `gateway_pki_copy_certs` | Boolean | Flag to manage PKI infrastructure (create directories and copy certificates). | `true` |
 | `gateway_tlsv1_2` | Boolean | Flag to enable TLS 1.2. | `false` |
 | `gateway_http_server_threads` | Integer | The number of http server threads for handling requests. | `{{ ansible_processor_cores * 4 }}` |
+| `gateway_venv_name` | String | The name of the Python virtual environment. | `venv` |
+| `gateway_python_venv` | String | The full path to the Python virtual environment. | `{{ gateway_install_dir }}/{{ gateway_venv_name }}` |
 
-## Gateway HAProxy Role Variables
+### Gateway PKI Variables
 
-The variables in this section may be overridden in the inventory in the `gateway` group vars.
-
-The following table lists the default variables located in `roles/gateway_haproxy/defaults/main.yml`.
+The following table lists the PKI-related variables located in `roles/gateway/defaults/main/pki.yml`. These variables define the PKI infrastructure and certificate file locations.
 
 | Variable | Type | Description | Default Value |
 | :------- | :--- | :---------- | :------------ |
-| `gateway_haproxy_enabled` | Boolean | Flag to enable HAProxy. | `false` |
-| `gateway_haproxy_conf_file` | String | The location of the HAProxy configuration file. | `/etc/haproxy/haproxy.cfg` |
-| `gateway_haproxy_ssl_cert_src` | String | The HAProxy SSL certificate file. | `server.pem` |
-| `gateway_haproxy_ssl_cert_dest` | String | The HAProxy SSL certificate destination. | `"/etc/ssl/certs{{ gateway_haproxy_ssl_cert_src }}"` |
+| `gateway_pki_base_dir` | String | Base directory for Gateway PKI files. | `/etc/pki/automation-gateway` |
+| `gateway_pki_private_subdir` | String | Subdirectory name for private keys. | `private` |
+| `gateway_pki_https_subdir` | String | Subdirectory name for HTTPS certificates. | `https` |
+| `gateway_pki_private_dir` | String | Full path to private keys directory. | `{{ gateway_pki_base_dir }}/{{ gateway_pki_private_subdir }}` |
+| `gateway_pki_https_dir` | String | Full path to HTTPS certificates directory. | `{{ gateway_pki_base_dir }}/{{ gateway_pki_https_subdir }}` |
+| `gateway_pki_src_dir` | String | Source directory on Ansible controller containing certificates. Must be set in inventory when copying certificates. | `""` |
+| `gateway_https_cert_file` | String | HTTPS certificate filename (supports per-host certificates). | `{{ inventory_hostname }}.crt` |
+| `gateway_https_key_file` | String | HTTPS private key filename (supports per-host certificates). | `{{ inventory_hostname }}.key` |
+| `gateway_https_ca_file` | String | CA bundle filename. | `ca-bundle.crt` |
+| `gateway_https_cert_dest` | String | Full destination path for HTTPS certificate. | `{{ gateway_pki_https_dir }}/{{ gateway_https_cert_file }}` |
+| `gateway_https_key_dest` | String | Full destination path for HTTPS private key. | `{{ gateway_pki_private_dir }}/{{ gateway_https_key_file }}` |
+| `gateway_https_ca_dest` | String | Full destination path for CA bundle. | `{{ gateway_pki_https_dir }}/{{ gateway_https_ca_file }}` |
+| `gateway_https_cert_src` | String | Full source path for HTTPS certificate on controller. | `{{ gateway_pki_src_dir }}/{{ gateway_https_cert_file }}` |
+| `gateway_https_key_src` | String | Full source path for HTTPS private key on controller. | `{{ gateway_pki_src_dir }}/{{ gateway_https_key_file }}` |
+| `gateway_https_ca_src` | String | Full source path for CA bundle on controller. | `{{ gateway_pki_src_dir }}/{{ gateway_https_ca_file }}` |
 
 ## Configuring HTTPS
 
-The Gateway roles support two methods for configuring HTTPS - IAG Native HTTPS and HTTPS via
-HAProxy.  The Gateway roles do not generate SSL certificates.
+Gateway supports flexible HTTPS configuration with independent control over infrastructure preparation and HTTPS enablement. The Gateway role does not generate SSL certificates.
 
-### IAG Native HTTPS
+### Configuration Variables
 
-To configure IAG Native HTTPS:
+Two variables control Gateway HTTPS behavior:
 
-* Required
-  * Set `gateway_https` to `true` in the inventory.
-  * Place the SSL certs and keys in either the playbook or role `files` directory.
-  * Do not configure `gateway_haproxy_enabled` in the inventory so HTTPS via HAProxy does not get installed.
-* Optional
-  * Set SSL-related variables from `roles/gateway/defaults/main.yml` in the inventory.
+* `gateway_pki_copy_certs` - Controls PKI infrastructure (directories and certificate files)
+* `gateway_https_enabled` - Controls HTTPS enablement in Gateway configuration
 
-### HTTPS Via HAProxy
+### Use Cases
 
-To configure HTTPS via HAProxy:
+**Use Case 1: Full HTTPS Deployment (Standard)**
 
-* Required
-  * Set `gateway_haproxy_enabled` to `true` in the inventory.
-  * Place the SSL certificate (PEM file) in either the playbook or role `files` directory.
-  * Do not configure `gateway_https` in the inventory so IAG Native HTTPS does not get configured.
-* Optional
-  * Set the `gateway_haproxy_ssl_cert_src` and `gateway_haproxy_ssl_cert_dest` variables in the inventory.
+Deploy Gateway with HTTPS enabled and automated certificate management.
 
- Itential does not attempt to create any HTTPS certificates. These must be
- created independently. When they are included in the appropriate location
- the installer will ensure that they get uploaded to the correct location.
+```yaml
+gateway_pki_copy_certs: true        # Prepare infrastructure and copy certificates
+gateway_https_enabled: true         # Enable HTTPS in Gateway
+gateway_pki_src_dir: "<path/to/local/gateway/certs>"
+```
+
+**Use Case 2: Prepare Certificates Only (Staged Deployment)**
+
+Prepare PKI infrastructure and deploy certificates without enabling HTTPS. Useful for staged rollouts or pre-deployment preparation.
+
+```yaml
+gateway_pki_copy_certs: true        # Prepare infrastructure and copy certificates
+gateway_https_enabled: false        # Keep HTTPS disabled for now
+gateway_pki_src_dir: "<path/to/local/gateway/certs>"
+```
+
+Gateway will run on HTTP. Enable HTTPS later by setting `gateway_https_enabled: true` and re-running the playbook.
+
+**Use Case 3: HTTP Only (Development)**
+
+Deploy Gateway with HTTP only, no certificate infrastructure.
+
+```yaml
+gateway_pki_copy_certs: false       # No certificate infrastructure
+gateway_https_enabled: false        # HTTP only
+```
+
+**Use Case 4: External Certificate Management**
+
+Use externally managed certificates (cert-manager, Vault, manual placement) with HTTPS enabled.
+
+```yaml
+gateway_pki_copy_certs: false       # Don't copy certificates (managed externally)
+gateway_https_enabled: true         # Enable HTTPS
+```
+
+**Important:** Certificates must exist at expected paths:
+* `/etc/pki/automation-gateway/https/{{ inventory_hostname }}.crt`
+* `/etc/pki/automation-gateway/private/{{ inventory_hostname }}.key`
+* `/etc/pki/automation-gateway/https/ca-bundle.crt`
+
+**Note:** All these paths are configurable in `roles/gateway/defaults/main/pki.yml` file or in inventory file
+
+### Certificate Organization
+
+The deployer expects certificates organized in a flat directory structure:
+
+```
+<path/to/local/gateway/certs>/
+    ├─ gateway-server1.example.com.crt
+    ├─ gateway-server1.example.com.key
+    ├─ gateway-server2.example.com.crt
+    ├─ gateway-server2.example.com.key
+    └─ ca-bundle.crt
+```
+
+Set `gateway_pki_src_dir` to point to this directory. The deployer will automatically select the correct certificate file for each host using `{{ inventory_hostname }}`.
+
+### Certificate Naming
+
+By default, certificates are named using `{{ inventory_hostname }}`:
+* Certificate: `{{ inventory_hostname }}.crt`
+* Key: `{{ inventory_hostname }}.key`
+* CA bundle: `ca-bundle.crt` (shared across all hosts)
+
+To use different naming:
+
+```yaml
+# Use a shared certificate for all Gateway servers
+gateway_https_cert_file: "gateway.crt"
+gateway_https_key_file: "gateway.key"
+```
 
 ## Building the Inventory
 
@@ -131,70 +189,116 @@ all:
   children:
     gateway:
       hosts:
-        <host1>:
-          ansible_host: <addr1>
+        gateway-server1.example.com:
+          ansible_host: 10.1.1.10
       vars:
         gateway_release: 4.3
-        gateway_whl_file: <wheel-file>
+        gateway_whl_file: automation_gateway-4.3.0-py3-none-any.whl
 ```
 
-To configure IAG Native HTTPS, add the `gateway_https` flag to the `gateway` group and set it to
-`true` and configure the SSL-related variables (optional).
-
-## Example Inventory - IAG Native SSL
+## Example Inventory - IAG Native HTTPS (Full Deployment)
 
 ```yaml
 all:
   children:
     gateway:
       hosts:
-        <host1>:
-          ansible_host: <addr1>
+        gateway-server1.example.com:
+          ansible_host: 10.1.1.10
       vars:
         gateway_release: 4.3
-        gateway_whl_file: <wheel-file>
-        gateway_https: true
+        gateway_whl_file: automation_gateway-4.3.0-py3-none-any.whl
+        gateway_https_enabled: true
+        gateway_pki_copy_certs: true
+        gateway_pki_src_dir: "<path/to/local/gateway/certs>"
 ```
 
-To configure HTTPS via HAProxy, add the `gateway_haproxy_enabled` flag to the `gateway` group and
-set it to `true`.
+Certificate directory structure:
+```
+<path/to/local/gateway/certs>/
+    ├─ gateway-server1.example.com.crt
+    ├─ gateway-server1.example.com.key
+    └─ ca-bundle.crt
+```
 
-## Example Inventory - IAG SSL Via HAProxy
+## Example Inventory - Multiple Gateway Servers with HTTPS
 
 ```yaml
 all:
   children:
     gateway:
       hosts:
-        <host1>:
-          ansible_host: <addr1>
+        gateway-server1.example.com:
+          ansible_host: 10.1.1.10
+        gateway-server2.example.com:
+          ansible_host: 10.1.1.11
+        gateway-server3.example.com:
+          ansible_host: 10.1.1.12
       vars:
         gateway_release: 4.3
-        gateway_whl_file: <wheel-file>
-        gateway_haproxy_enabled: true
+        gateway_whl_file: automation_gateway-4.3.0-py3-none-any.whl
+        gateway_https_enabled: true
+        gateway_pki_copy_certs: true
+        gateway_pki_src_dir: "<path/to/local/gateway/certs>"
 ```
+
+Certificate directory structure:
+```
+<path/to/local/gateway/certs>/
+    ├─ gateway-server1.example.com.crt
+    ├─ gateway-server1.example.com.key
+    ├─ gateway-server2.example.com.crt
+    ├─ gateway-server2.example.com.key
+    ├─ gateway-server3.example.com.crt
+    ├─ gateway-server3.example.com.key
+    └─ ca-bundle.crt
+```
+
+Each Gateway server will receive its unique certificate automatically based on its hostname.
+
+## Example Inventory - Staged Deployment (Prepare Certificates First)
+
+```yaml
+all:
+  children:
+    gateway:
+      hosts:
+        gateway-server1.example.com:
+          ansible_host: 10.1.1.10
+      vars:
+        gateway_release: 4.3
+        gateway_whl_file: automation_gateway-4.3.0-py3-none-any.whl
+        gateway_https_enabled: false        # Deploy without HTTPS initially
+        gateway_pki_copy_certs: true        # But prepare certificates
+        gateway_pki_src_dir: "<path/to/local/gateway/certs>"
+```
+
+Later, enable HTTPS by changing `gateway_https_enabled: true` and re-running the playbook.
 
 ## Running the Playbook
 
-To execute all Gateway roles, run the `gateway` playbook:
+To execute the Gateway role, run the `gateway` playbook:
 
 ```bash
 ansible-playbook itential.deployer.gateway -i <inventory>
 ```
 
-You can also run select IAG roles by using the following tags:
+You can also use the following tags:
 
-* `gateway_install`
-* `gateway_haproxy`
+* `upload_gateway_certificates` - Only manage certificate infrastructure
+* `install_python` - Only install Python
+* `install_python_dependencies` - Only install Python dependencies
+* `install_gateway_build_packages` - Only install Gateway build packages
+* `uninstall_gateway_build_packages` - Only uninstall Gateway build packages
 
-To execute only the `gateway` role, run the `itential.deployer.gateway` playbook with the `gateway_install` tag:
+To execute only certificate management tasks:
 
 ```bash
-ansible-playbook itential.deployer.gateway -i <inventory> --tags gateway_install
+ansible-playbook itential.deployer.gateway -i <inventory> --tags upload_gateway_certificates
 ```
 
-To execute only the `gateway_haproxy` role, run the `itential.deployer.gateway` playbook with the `gateway_haproxy` tag:
+To skip certificate management:
 
 ```bash
-ansible-playbook itential.deployer.gateway -i <inventory> --tags gateway_haproxy
+ansible-playbook itential.deployer.gateway -i <inventory> --skip-tags upload_gateway_certificates
 ```

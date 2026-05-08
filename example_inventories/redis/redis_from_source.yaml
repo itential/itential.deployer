@@ -1,0 +1,15 @@
+---
+# In this example, Redis is installed and configured using the Redis source packages.
+all:
+  vars:
+    # The Platform release must be defined.
+    #  - valid values: 6, 6.0
+    platform_release: 6
+
+  children:
+    redis_master:
+      hosts:
+        redis01.example.com:
+      vars:
+        # By default, Redis will be installed from source.
+        # redis_install_from_source: true

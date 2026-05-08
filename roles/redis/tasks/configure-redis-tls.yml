@@ -1,0 +1,82 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Create Redis PKI base directory
+  ansible.builtin.file:
+    path: "{{ redis_pki_base_dir }}"
+    state: directory
+    owner: "{{ redis_pki_owner }}"
+    group: "{{ redis_pki_group }}"
+    mode: "0750"
+  tags:
+    - redis
+    - redis_certificates
+    - certificates
+
+- name: Create Redis private directory
+  ansible.builtin.file:
+    path: "{{ redis_pki_private_dir }}"
+    state: directory
+    owner: "{{ redis_pki_owner }}"
+    group: "{{ redis_pki_group }}"
+    mode: "0700"
+  tags:
+    - redis
+    - redis_certificates
+    - certificates
+
+- name: Copy Redis TLS certificate
+  ansible.builtin.copy:
+    src: "{{ redis_tls_cert_src }}"
+    dest: "{{ redis_tls_cert_dest }}"
+    owner: "{{ redis_pki_owner }}"
+    group: "{{ redis_pki_group }}"
+    mode: "0644"
+  when: redis_tls_cert_src | length > 0
+  notify: restart redis
+  tags:
+    - redis
+    - redis_certificates
+    - certificates
+
+- name: Copy Redis TLS private key
+  ansible.builtin.copy:
+    src: "{{ redis_tls_key_src }}"
+    dest: "{{ redis_tls_key_dest }}"
+    owner: "{{ redis_pki_owner }}"
+    group: "{{ redis_pki_group }}"
+    mode: "0600"
+  when: redis_tls_key_src | length > 0
+  notify: restart redis
+  tags:
+    - redis
+    - redis_certificates
+    - certificates
+
+- name: Copy Redis CA bundle
+  ansible.builtin.copy:
+    src: "{{ redis_tls_ca_src }}"
+    dest: "{{ redis_tls_ca_dest }}"
+    owner: "{{ redis_pki_owner }}"
+    group: "{{ redis_pki_group }}"
+    mode: "0644"
+  when: redis_tls_ca_src | length > 0
+  notify: restart redis
+  tags:
+    - redis
+    - redis_certificates
+    - certificates
+
+- name: Copy Redis DH params
+  ansible.builtin.copy:
+    src: "{{ redis_tls_dh_params_src }}"
+    dest: "{{ redis_tls_dh_params_dest }}"
+    owner: "{{ redis_pki_owner }}"
+    group: "{{ redis_pki_group }}"
+    mode: "0644"
+  when: redis_tls_dh_params_src | length > 0
+  notify: restart redis
+  tags:
+    - redis
+    - redis_certificates
+    - certificates

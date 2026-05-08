@@ -24,15 +24,11 @@ platform_mongo_db_name: itential
 platform_mongo_url: mongodb://localhost:27017
 
 # Instruct the MongoDB driver to use TLS protocols when connecting to the database.
-platform_mongo_tls_enabled: false
+platform_mongo_tls_enabled: true
 
 # If true, disables the validation checks for TLS certificates on other servers in the cluster
 # and allows the use of invalid or self-signed certificates to connect.
-platform_mongo_tls_allow_invalid_certificates: false
-
-# The .pem file that contains the root certificate chain from the Certificate Authority.
-# Specify the file name of the .pem file using absolute paths.
-platform_mongo_tls_ca_file:
+platform_mongo_tls_allow_invalid_certificates: "{{ false if platform_mongo_tls_enabled | bool else '' }}"
 
 # The maximum number of connections in a connection pool.
 # Each application/adapter has its own connection pool.

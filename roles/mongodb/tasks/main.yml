@@ -6,6 +6,15 @@
     file: validate-vars.yml
   tags: always
 
+# Set node type facts based on inventory group membership.
+# mongodb_primary group hosts get the primary role with higher priority.
+# mongodb_replica group hosts get the secondary role with lower priority.
+- name: Set MongoDB node type facts
+  ansible.builtin.set_fact:
+    mongodb_is_primary_node: "{{ 'mongodb_primary' in group_names }}"
+    mongodb_is_replica_node: "{{ 'mongodb_replica' in group_names }}"
+    mongodb_data_nodes: "{{ groups['mongodb_primary'] | default([]) + groups['mongodb_replica'] | default([]) }}"
+
 # Installs all the necessary components and dependencies for MongoDB.
 # This will start the server with the simplest config.
 - name: Install MongoDB and all necessary components
@@ -21,7 +30,7 @@
   ansible.builtin.import_tasks:
     file: configure-mongodb.yml
   tags: configure_mongodb
-  when: mongodb_auth_enabled | bool or mongodb_tls_enabled | bool or mongodb_replication_enabled | bool
+  when: mongodb_auth_enabled | bool or mongodb_tls_enabled | bool or groups['mongodb_replica'] | default([]) | length > 0
 
 - name: Assert that MongoDB is running
   ansible.builtin.systemd:

@@ -7,21 +7,29 @@
 # with a keyFile or x509 certificate. The following block will create this key file,
 # distribute it to each node, and set the appropriate ownership and permissions.
 - name: Create replica set keyfile
-  when: mongodb_replication_enabled | bool
+  when: groups['mongodb_replica'] | default([]) | length > 0
   block:
 
-    - name: Ensure that the directory exists for the certificates and key files
+    - name: Ensure PKI base directory exists
       ansible.builtin.file:
         state: directory
-        path: "{{ mongodb_ssl_root_dir }}/mongodb"
-        owner: root
-        group: root
-        mode: "0775"
+        path: "{{ mongodb_pki_base_dir }}"
+        owner: "{{ mongodb_owner }}"
+        group: "{{ mongodb_group }}"
+        mode: "0750"
+
+    - name: Ensure PKI private directory exists for keyfile
+      ansible.builtin.file:
+        state: directory
+        path: "{{ mongodb_pki_private_dir }}"
+        owner: "{{ mongodb_owner }}"
+        group: "{{ mongodb_group }}"
+        mode: "0700"
 
     - name: Check if replica set key exists on the primary node
       ansible.builtin.stat:
-        path: "{{ mongodb_auth_keyfile_destination }}"
-      when: inventory_hostname == groups['mongodb'][0]
+        path: "{{ mongodb_auth_key_dest }}"
+      when: inventory_hostname == groups['mongodb_primary'][0]
       register: keyfile_stat
 
     # Use openssl to generate a key file on primary mongo node. The primary is the
@@ -30,35 +38,35 @@
     # same key file.
     - name: Generate a new replica set key with OpenSSL
       ansible.builtin.shell:
-        cmd: openssl rand -base64 756 > "{{ mongodb_auth_keyfile_destination }}"
+        cmd: openssl rand -base64 756 > "{{ mongodb_auth_key_dest }}"
       args:
-        creates: "{{ mongodb_auth_keyfile_destination }}"
+        creates: "{{ mongodb_auth_key_dest }}"
       when:
-        - inventory_hostname == groups['mongodb'][0]
+        - inventory_hostname == groups['mongodb_primary'][0]
         - not keyfile_stat.stat.exists
 
     - name: Get the key from the primary node
       ansible.builtin.slurp:
-        src: '{{ mongodb_auth_keyfile_destination }}'
+        src: '{{ mongodb_auth_key_dest }}'
       register: keyfile
-      delegate_to: "{{ groups['mongodb'][0] }}"
-      when: inventory_hostname != groups['mongodb'][0]
+      delegate_to: "{{ groups['mongodb_primary'][0] }}"
+      when: inventory_hostname != groups['mongodb_primary'][0]
 
     - name: Copy the key file to the secondary nodes
       ansible.builtin.copy:
-        dest: "{{ mongodb_auth_keyfile_destination }}"
+        dest: "{{ mongodb_auth_key_dest }}"
         content: "{{ keyfile.content | b64decode }}"
         owner: "{{ mongodb_owner }}"
         group: "{{ mongodb_group }}"
         mode: "0400"
-      when: inventory_hostname != groups['mongodb'][0]
+      when: inventory_hostname != groups['mongodb_primary'][0]
 
     - name: Set the key file ownership and permissions
       ansible.builtin.file:
-        path: "{{ mongodb_auth_keyfile_destination }}"
+        path: "{{ mongodb_auth_key_dest }}"
         owner: "{{ mongodb_owner }}"
         group: "{{ mongodb_group }}"
-        mode: '0400'
+        mode: "0400"
 
 # Execute the template to apply changes to the mongo.conf for auth
 - name: Create MongoDB config file (auth)

@@ -1,0 +1,54 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+# ============================================================================
+# MongoDB PKI Configuration - All components customizable
+# ============================================================================
+
+# Base PKI directory - override to use different root location
+mongodb_pki_base_dir: /etc/pki/mongodb
+
+# Subdirectory names - customize the layout
+mongodb_pki_private_subdir: private
+
+# Derived subdirectory paths - built from base + subdir name
+mongodb_pki_private_dir: "{{ mongodb_pki_base_dir }}/{{ mongodb_pki_private_subdir }}"
+
+# ============================================================================
+# Certificate and Key Filenames - Customize naming
+# ============================================================================
+
+# TLS server certificate filename (combined cert + key PEM)
+mongodb_tls_server_cert_file: "{{ inventory_hostname }}.pem"
+
+# CA certificate filename
+mongodb_tls_ca_file: ca-bundle.crt
+
+# Replica set authentication keyfile filename
+mongodb_auth_key_file: replica.key
+
+# ============================================================================
+# Full Certificate Paths - Built from components, but can be overridden
+# ============================================================================
+
+# TLS server certificate path (used by mongod for TLS connections)
+mongodb_tls_cert_dest: "{{ mongodb_pki_base_dir }}/{{ mongodb_tls_server_cert_file }}"
+
+# CA certificate path (used to validate client certificates)
+mongodb_tls_ca_dest: "{{ mongodb_pki_base_dir }}/{{ mongodb_tls_ca_file }}"
+
+# Replica set keyfile path (used for internal authentication)
+mongodb_auth_key_dest: "{{ mongodb_pki_private_dir }}/{{ mongodb_auth_key_file }}"
+
+# ============================================================================
+# Source Directory and File Paths - Define source directory in inventory
+# ============================================================================
+
+# Source directory for certificate files (on Ansible controller)
+# Set this in your inventory to point to your certificate directory
+mongodb_pki_src_dir: ""
+
+# Source paths - built from source directory + filename
+# These auto-build from mongodb_pki_src_dir, but can be overridden individually
+mongodb_tls_cert_src: "{{ mongodb_pki_src_dir }}/{{ mongodb_tls_server_cert_file }}"
+mongodb_tls_ca_src: "{{ mongodb_pki_src_dir }}/{{ mongodb_tls_ca_file }}"

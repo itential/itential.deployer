@@ -1,0 +1,59 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+# ============================================================================
+# Gateway PKI Configuration - All components customizable
+# ============================================================================
+
+# Base PKI directory - override to use different root location
+gateway_pki_base_dir: /etc/pki/automation-gateway
+
+# Subdirectory names - customize the layout
+gateway_pki_private_subdir: private
+gateway_pki_https_subdir: https
+
+# Derived subdirectory paths - built from base + subdir name
+gateway_pki_private_dir: "{{ gateway_pki_base_dir }}/{{ gateway_pki_private_subdir }}"
+gateway_pki_https_dir: "{{ gateway_pki_base_dir }}/{{ gateway_pki_https_subdir }}"
+
+# ============================================================================
+# Certificate and Key Filenames - Customize naming
+# ============================================================================
+
+# HTTPS server certificate filename
+gateway_https_cert_file: "{{ inventory_hostname }}.crt"
+
+# HTTPS server private key filename
+gateway_https_key_file: "{{ inventory_hostname }}.key"
+
+# HTTPS CA bundle filename
+gateway_https_ca_file: ca-bundle.crt
+
+# ============================================================================
+# Full Certificate Paths - Built from components
+# ============================================================================
+
+# HTTPS server certificate path
+gateway_https_cert_dest: "{{ gateway_pki_https_dir }}/{{ gateway_https_cert_file }}"
+
+# HTTPS server private key path
+gateway_https_key_dest: "{{ gateway_pki_private_dir }}/{{ gateway_https_key_file }}"
+
+# HTTPS CA bundle path
+gateway_https_ca_dest: "{{ gateway_pki_https_dir }}/{{ gateway_https_ca_file }}"
+
+# ============================================================================
+# Source Directory - Define in inventory
+# ============================================================================
+
+# Source directory for certificate files (on Ansible controller)
+gateway_pki_src_dir: ""
+
+# ============================================================================
+# Source File Paths - Built from source directory + filename
+# ============================================================================
+
+# HTTPS source paths - auto-build from source dir + filename
+gateway_https_cert_src: "{{ gateway_pki_src_dir }}/{{ gateway_https_cert_file }}"
+gateway_https_key_src: "{{ gateway_pki_src_dir }}/{{ gateway_https_key_file }}"
+gateway_https_ca_src: "{{ gateway_pki_src_dir }}/{{ gateway_https_ca_file }}"

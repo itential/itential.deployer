@@ -1,0 +1,38 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+# This task file prepares Gateway PKI infrastructure
+# It is independent of whether HTTPS is enabled in Gateway configuration
+- name: Prepare Gateway PKI infrastructure
+  tags:
+    - gateway
+    - upload_gateway_certificates
+    - certificates
+  block:
+    - name: Create Gateway PKI base directory
+      ansible.builtin.file:
+        path: "{{ gateway_pki_base_dir }}"
+        state: directory
+        owner: "{{ gateway_user }}"
+        group: "{{ gateway_group }}"
+        mode: "0750"
+
+    - name: Create Gateway PKI https directory
+      ansible.builtin.file:
+        path: "{{ gateway_pki_https_dir }}"
+        state: directory
+        owner: "{{ gateway_user }}"
+        group: "{{ gateway_group }}"
+        mode: "0750"
+
+    - name: Create Gateway PKI private directory
+      ansible.builtin.file:
+        path: "{{ gateway_pki_private_dir }}"
+        state: directory
+        owner: "{{ gateway_user }}"
+        group: "{{ gateway_group }}"
+        mode: "0700"
+
+    - name: Copy Gateway certificates
+      ansible.builtin.include_tasks:
+        file: copy-certs.yml

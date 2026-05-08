@@ -1,0 +1,21 @@
+# Copyright (c) 2026, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+
+- name: Load Itential Platform release default variables
+  ansible.builtin.include_vars:
+    file: "{{ item }}"
+  with_first_found:
+    - "platform-release-{{ platform_release }}.yml"
+    - "platform-release-{{ platform_release | string | split('.') | first }}.yml"
+    - "platform-release-undefined.yml"
+
+- name: Verify Redis host requirements
+  ansible.builtin.include_role:
+    name: common
+    tasks_from: verify-host
+  vars:
+    component_name: "Redis"
+    hw_specs_var_name: "redis_hw_specs"
+
+# redis specific verification tasks go here...

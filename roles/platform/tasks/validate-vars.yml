@@ -70,6 +70,79 @@
         fail_msg: platform_encryption_key must be a 64 character hexadecimal string
       when: validate_platform_encryption_key | default(true)
 
+    - name: Validate Hashicorp Vault variables
+      when: platform_configure_vault | bool
+      block:
+        - name: Validate Hashicorp token is set when using token authentication
+          ansible.builtin.assert:
+            that: platform_vault_token is truthy
+            fail_msg: platform_vault_token must be defined when using token authentication
+          when: platform_vault_auth_method == 'token'
+
+        - name: Validate Hashicorp approle id and secret id are set when using approle authentication
+          ansible.builtin.assert:
+            that:
+              - platform_vault_role_id is truthy
+              - platform_vault_secret_id is truthy
+            fail_msg: platform_vault_role_id and platform_vault_secret_id must be defined when using approle authentication
+          when: platform_vault_auth_method == 'approle'
+
+    - name: Validate platform_https_pki_src_dir and platform_pki_base_dir when copying HTTPS certificates
+      ansible.builtin.assert:
+        that:
+          - platform_https_pki_src_dir is defined
+          - platform_https_pki_src_dir | length > 0
+          - platform_pki_base_dir is defined
+          - platform_pki_base_dir | length > 0
+        fail_msg: >-
+          platform_https_pki_src_dir and platform_pki_base_dir must be defined and cannot be empty
+          when platform_webserver_https_copy_certs is enabled.
+        success_msg:
+          - "platform_https_pki_src_dir is set to: {{ platform_https_pki_src_dir }}"
+          - "platform_pki_base_dir is set to: {{ platform_pki_base_dir }}"
+      when: platform_webserver_https_copy_certs | bool
+
+    - name: Validate platform_pki_base_dir when HTTPS is enabled
+      ansible.builtin.assert:
+        that:
+          - platform_pki_base_dir is defined
+          - platform_pki_base_dir | length > 0
+        fail_msg: >-
+          platform_pki_base_dir must be defined and cannot be empty
+          when platform_webserver_https_enabled is true.
+        success_msg: "platform_pki_base_dir is set to: {{ platform_pki_base_dir }}"
+      when:
+        - not (platform_webserver_https_copy_certs | bool)
+        - platform_webserver_https_enabled | bool
+
+    - name: Validate platform_mongodb_pki_src_dir and platform_pki_base_dir when copying MongoDB certificates
+      ansible.builtin.assert:
+        that:
+          - platform_mongodb_pki_src_dir is defined
+          - platform_mongodb_pki_src_dir | length > 0
+          - platform_pki_base_dir is defined
+          - platform_pki_base_dir | length > 0
+        fail_msg: >-
+          platform_mongodb_pki_src_dir and platform_pki_base_dir must be defined and cannot be empty
+          when platform_mongodb_copy_certs is enabled.
+        success_msg:
+          - "platform_mongodb_pki_src_dir is set to: {{ platform_mongodb_pki_src_dir }}"
+          - "platform_pki_base_dir is set to: {{ platform_pki_base_dir }}"
+      when: platform_mongodb_copy_certs | bool
+
+    - name: Validate platform_pki_base_dir when MongoDB TLS is enabled
+      ansible.builtin.assert:
+        that:
+          - platform_pki_base_dir is defined
+          - platform_pki_base_dir | length > 0
+        fail_msg: >-
+          platform_pki_base_dir must be defined and cannot be empty
+          when platform_mongo_tls_enabled is true.
+        success_msg: "platform_pki_base_dir is set to: {{ platform_pki_base_dir }}"
+      when:
+        - not (platform_mongodb_copy_certs | bool)
+        - platform_mongo_tls_enabled | bool
+
     - name: Set installation variables when using Itential Platform release defaults
       when: platform_release is defined
       block:
@@ -114,6 +187,26 @@
             platform_python_app_dependencies:
               "{{ platform_python_app_dependencies_default[ansible_distribution_major_version] }}"
           when: platform_python_app_dependencies is not defined
+
+    - name: Validate offline install directory for the target OS
+      when: offline_install_enabled | bool
+      block:
+        - name: Stat offline packages directory on the control node
+          ansible.builtin.stat:
+            path: "{{ platform_offline_control_node_root }}"
+          register: platform_offline_dir_stat
+          delegate_to: localhost
+          become: false
+
+        - name: Assert offline packages directory exists on the control node
+          ansible.builtin.assert:
+            that:
+              - platform_offline_dir_stat.stat.exists
+              - platform_offline_dir_stat.stat.isdir
+            fail_msg: >-
+              Offline packages directory {{ platform_offline_control_node_root }} does not exist.
+              Ensure offline packages have been downloaded for
+              {{ ansible_distribution }} {{ ansible_distribution_major_version }}.
 
     - name: Print Itential Platform installation details
       ansible.builtin.debug:

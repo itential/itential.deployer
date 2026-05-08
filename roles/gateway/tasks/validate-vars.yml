@@ -1,0 +1,35 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Validate Gateway PKI configuration
+  tags: always
+  block:
+    - name: Validate gateway_pki_src_dir and gateway_pki_base_dir when copying certificates
+      ansible.builtin.assert:
+        that:
+          - gateway_pki_src_dir is defined
+          - gateway_pki_src_dir | length > 0
+          - gateway_pki_base_dir is defined
+          - gateway_pki_base_dir | length > 0
+        fail_msg: >-
+          gateway_pki_src_dir and gateway_pki_base_dir must be defined and cannot be empty
+          when gateway_pki_copy_certs is enabled.
+          Set gateway_pki_src_dir to the source directory containing certificates
+          and gateway_pki_base_dir to the destination directory.
+        success_msg: >-
+          "gateway_pki_src_dir is set to: {{ gateway_pki_src_dir }}"
+          "gateway_pki_base_dir is set to: {{ gateway_pki_base_dir }}"
+      when: gateway_pki_copy_certs | bool
+
+    - name: Validate gateway_pki_base_dir when HTTPS is enabled
+      ansible.builtin.assert:
+        that:
+          - gateway_pki_base_dir is defined
+          - gateway_pki_base_dir | length > 0
+        fail_msg: >-
+          gateway_pki_base_dir must be defined and cannot be empty
+          when gateway_https_enabled is true.
+          The Gateway configuration file needs to know where certificates are located.
+        success_msg: >-
+          "gateway_pki_base_dir is set to: {{ gateway_pki_base_dir }}"
+      when: gateway_https_enabled | bool

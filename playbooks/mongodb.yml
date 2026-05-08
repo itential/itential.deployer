@@ -3,7 +3,7 @@
 ---
 ### MONGODB
 - name: Install MongoDB
-  hosts: mongodb, mongodb_arbiter
+  hosts: mongodb_primary, mongodb_replica, mongodb_arbiter
   become: true
   roles:
     # Pull in the common vars

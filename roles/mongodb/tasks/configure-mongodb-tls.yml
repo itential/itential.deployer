@@ -1,35 +1,33 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-# Ensure that the directory exists for the certificates and key files
-- name: Ensure that the directory exists for the certificates and key files
-  ansible.builtin.file:
-    state: directory
-    path: "{{ mongodb_ssl_root_dir }}/mongodb"
-    owner: root
-    group: root
-    mode: "0775"
+- name: Prepare MongoDB PKI infrastructure
+  when: mongodb_tls_copy_certs | bool
+  tags:
+    - mongodb
+    - mongodb_certificates
+    - certificates
+  block:
+    - name: Create MongoDB PKI base directory
+      ansible.builtin.file:
+        state: directory
+        path: "{{ mongodb_pki_base_dir }}"
+        owner: "{{ mongodb_owner }}"
+        group: "{{ mongodb_group }}"
+        mode: "0750"
 
-# Copy the predefined certificate file to the mongodb host. This certificate is
-# the .pem file that contains both the TLS certificate and key.
-- name: Copy certificate to MongoDB host if TLS enabled
-  ansible.builtin.copy:
-    src: "{{ mongodb_cert_keyfile_source }}"
-    dest: "{{ mongodb_cert_keyfile_destination }}"
-    mode: "0400"
-    group: "{{ mongodb_group }}"
-    owner: "{{ mongodb_owner }}"
+    - name: Create MongoDB private directory
+      ansible.builtin.file:
+        state: directory
+        path: "{{ mongodb_pki_private_dir }}"
+        owner: "{{ mongodb_owner }}"
+        group: "{{ mongodb_group }}"
+        mode: "0700"
 
-# # Copy the predefined root CA certificate file to the mongodb host.
-- name: Copy CA certificate to MongoDB host if TLS enabled
-  ansible.builtin.copy:
-    src: "{{ mongodb_root_ca_file_source }}"
-    dest: "{{ mongodb_root_ca_file_destination }}"
-    mode: "0400"
-    group: "{{ mongodb_group }}"
-    owner: "{{ mongodb_owner }}"
+    - name: Copy Gateway certificates
+      ansible.builtin.include_tasks:
+        file: copy-certs.yml
 
-# Execute the template to apply changes to the mongo.conf for TLS support
 - name: Create MongoDB config file (TLS)
   ansible.builtin.template:
     src: mongod.conf.j2
@@ -39,13 +37,14 @@
     mode: "0644"
   vars:
     stage: "tls"
+  notify: restart mongod
+  tags:
+    - mongodb
+    - mongodb_config
 
-- name: Start mongo (TLS)
-  ansible.builtin.service:
-    name: mongod
-    state: restarted
-    enabled: true
-  register: mongod_service_result
-  until: mongod_service_result.status.ActiveState == "active"
-  retries: "{{ mongodb_mongod_service_retries }}"
-  delay: "{{ mongodb_mongod_service_delay }}"
+- name: Flush handlers to restart mongod with TLS config
+  ansible.builtin.meta: flush_handlers
+  tags:
+    - mongodb
+    - mongodb_certificates
+    - certificates
