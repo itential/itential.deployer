@@ -45,28 +45,17 @@ all:
         redis_user_sentineluser_password: <redis-sentineluser-password>
         redis_user_monitor_password: <redis-monitor-password>
 
-    mongodb:
-      hosts:
-        mongodb-data01.dc1.example.com:
-        mongodb-data02.dc1.example.com:
-        mongodb-data01.dc2.example.com:
-        mongodb-data02.dc2.example.com:
-
-    mongodb_arbiter:
-      hosts:
-        mongodb-arbiter01.dc3.example.com:
-
-    mongodb_nodes:
-      hosts:
-        mongodb-data01.dc1.example.com:
-        mongodb-data02.dc1.example.com:
-        mongodb-data01.dc2.example.com:
-        mongodb-data02.dc2.example.com:
-        mongodb-arbiter01.dc3.example.com:
+    mongodb_node:
+      children:
+        mongodb_primary:
+          hosts:
+            mongodb-data01.dc1.example.com:
+        mongodb_replica:
+          hosts:
+            mongodb-data02.dc1.example.com:
+            mongodb-data01.dc2.example.com:
+            mongodb-data02.dc2.example.com:
       vars:
-        # Enable replication between the MongoDB nodes.
-        mongodb_replication_enabled: true
-
         # The default MongoDB passwords are overridden.
         # NOTE: Using Ansible Vault or Hashicorp Vault for passwords is highly recommended.
         mongodb_user_admin_password: <mongodb-admin-password>
@@ -91,6 +80,10 @@ all:
         # mongodb_auth_key_dest: "{{ mongodb_pki_private_dir }}/{{ mongodb_auth_key_file }}"
         # mongodb_tls_cert_src: "{{ mongodb_pki_src_dir }}/{{ mongodb_tls_server_cert_file }}"
         # mongodb_tls_ca_src: "{{ mongodb_pki_src_dir }}/{{ mongodb_tls_ca_file }}"
+
+    mongodb_arbiter:
+      hosts:
+        mongodb-arbiter01.dc3.example.com:
 
     platform:
       hosts:

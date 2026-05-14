@@ -20,7 +20,7 @@ all:
         redis_user_itential_password: <redis-itential-password>
         redis_user_monitor_password: <redis-monitor-password>
 
-    mongodb:
+    mongodb_primary:
       hosts:
         mongodb01.example.com:
       vars:
