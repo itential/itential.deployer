@@ -1,0 +1,10 @@
+module itential_mongodb_sysfs 1.0;
+
+require {
+    type sysfs_t;
+    type mongod_t;
+    class dir search;
+}
+
+#============= mongod_t ==============
+allow mongod_t sysfs_t:dir search;

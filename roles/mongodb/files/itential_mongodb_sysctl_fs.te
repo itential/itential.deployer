@@ -1,10 +1,10 @@
 module itential_mongodb_sysctl_fs 1.0;
 
 require {
-	type sysctl_fs_t;
-	type mongod_t;
-	class dir search;
-	class file { open read };
+    type sysctl_fs_t;
+    type mongod_t;
+    class dir search;
+    class file { open read };
 }
 
 #============= mongod_t ==============
