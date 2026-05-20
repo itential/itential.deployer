@@ -314,6 +314,8 @@
         state: enabled
         zone: public
         immediate: true
+      vars:
+        ansible_python_interpreter: "{{ '/usr/libexec/platform-python' if (ansible_os_family == 'RedHat' and ansible_distribution_major_version == '8') else 'auto' }}"
       when:
         - not (gateway_https_enabled | bool)
         - ansible_facts.services["firewalld.service"] is defined
@@ -327,6 +329,8 @@
         state: enabled
         zone: public
         immediate: true
+      vars:
+        ansible_python_interpreter: "{{ '/usr/libexec/platform-python' if (ansible_os_family == 'RedHat' and ansible_distribution_major_version == '8') else 'auto' }}"
       when:
         - gateway_https_enabled | bool
         - ansible_facts.services["firewalld.service"] is defined
