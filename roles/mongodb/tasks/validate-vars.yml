@@ -44,6 +44,13 @@
               Deployer does not support installing MongoDB
               for Itential Platform release {{ platform_release }}
 
+        - name: Check for valid OS for MongoDB installation
+          ansible.builtin.assert:
+            that: ansible_os_family == 'RedHat'
+            fail_msg: >-
+              Deployer does not support installing MongoDB on {{ ansible_distribution }}.
+              Supported platforms: Red Hat family (RHEL 8/9, Rocky Linux 8/9, AlmaLinux 8/9, Amazon Linux 2023).
+
         - name: Set mongodb_version to the default value when not defined in inventory
           ansible.builtin.set_fact:
             mongodb_version: "{{ mongodb_version_default[ansible_distribution_major_version] }}"

@@ -160,6 +160,13 @@
             fail_msg: >-
               Deployer does not support installing Itential Platform release {{ platform_release }}"
 
+        - name: Check for valid OS for Itential Platform installation
+          ansible.builtin.assert:
+            that: ansible_os_family == 'RedHat'
+            fail_msg: >-
+              Deployer does not support installing Itential Platform on {{ ansible_distribution }}.
+              Supported platforms: Red Hat family (RHEL 8/9, Rocky Linux 8/9, AlmaLinux 8/9, Amazon Linux 2023).
+
         - name: Set platform_nodejs_package to the default value
                 when not defined in inventory
           ansible.builtin.set_fact:

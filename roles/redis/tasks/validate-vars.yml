@@ -87,6 +87,13 @@
               Deployer does not support installing Redis
               for Itential Platform release {{ platform_release }}
 
+        - name: Check for valid OS for Redis installation
+          ansible.builtin.assert:
+            that: ansible_os_family == 'RedHat'
+            fail_msg: >-
+              Deployer does not support installing Redis on {{ ansible_distribution }}.
+              Supported platforms: Red Hat family (RHEL 8/9, Rocky Linux 8/9, AlmaLinux 8/9, Amazon Linux 2023).
+
         - name: Set redis_source_url to the default value when not defined in inventory
           ansible.builtin.set_fact:
             redis_source_url: "{{ redis_source_url_default[ansible_distribution_major_version] }}"
