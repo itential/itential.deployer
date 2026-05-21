@@ -153,5 +153,6 @@ See `docs/offline_install_guide.md` for the full workflow.
 | `docs/patch_itential_platform_guide.md` | How to run `patch_platform.yml` to upgrade Platform |
 | `docs/patch_itential_gateway_guide.md` | How to run `patch_gateway.yml` to upgrade IAG |
 | `docs/preflight_guide.md` | How to run the `verify` playbooks and interpret results |
+| `docs/certify_guide.md` | How to run the `certify` playbooks and interpret the certification report |
 | `docs/nginx.md` | Nginx reverse-proxy setup and configuration |
 | `docs/release_notes_v4.md` | Release notes for v4 changes |

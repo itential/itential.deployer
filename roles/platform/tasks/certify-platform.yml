@@ -330,7 +330,7 @@
 - name: Parse Itential config for log_level
   ansible.builtin.shell:
     cmd: >
-      grep '^log_level' /etc/itential/platform.properties |
+      grep '^log_level[[:space:]]*=' /etc/itential/platform.properties |
       awk -F'=' '{print $2}' |
       xargs
   register: platform_log_level
@@ -396,6 +396,182 @@
   ignore_errors: true
   changed_when: false
   when: platform_webserver_https_key.stdout
+
+- name: Check HTTPS certificate file exists
+  ansible.builtin.stat:
+    path: "{{ platform_https_cert_dest }}"
+  register: platform_https_cert_stat
+
+- name: Check HTTPS private key file exists
+  ansible.builtin.stat:
+    path: "{{ platform_https_key_dest }}"
+  register: platform_https_key_stat
+
+- name: Check HTTPS CA certificate file exists
+  ansible.builtin.stat:
+    path: "{{ platform_https_ca_dest }}"
+  register: platform_https_ca_stat
+
+- name: Get PKI base directory info
+  ansible.builtin.stat:
+    path: "{{ platform_pki_base_dir }}"
+  register: platform_pki_dir_stat
+
+- name: Get HTTPS certificate validity dates
+  ansible.builtin.command: openssl x509 -noout -dates -in {{ platform_https_cert_dest }}
+  register: platform_https_cert_dates
+  ignore_errors: true
+  changed_when: false
+  when: platform_https_cert_stat.stat.exists | default(false)
+
+- name: Check if HTTPS certificate expires within 30 days
+  ansible.builtin.command: openssl x509 -noout -checkend 2592000 -in {{ platform_https_cert_dest }}
+  register: platform_https_cert_expiry_warn
+  ignore_errors: true
+  changed_when: false
+  failed_when: false
+  when: platform_https_cert_stat.stat.exists | default(false)
+
+- name: Get HTTPS CA certificate validity dates
+  ansible.builtin.command: openssl x509 -noout -dates -in {{ platform_https_ca_dest }}
+  register: platform_https_ca_dates
+  ignore_errors: true
+  changed_when: false
+  when: platform_https_ca_stat.stat.exists | default(false)
+
+- name: Check if HTTPS CA certificate expires within 30 days
+  ansible.builtin.command: openssl x509 -noout -checkend 2592000 -in {{ platform_https_ca_dest }}
+  register: platform_https_ca_expiry_warn
+  ignore_errors: true
+  changed_when: false
+  failed_when: false
+  when: platform_https_ca_stat.stat.exists | default(false)
+
+- name: Get HTTPS certificate subject
+  ansible.builtin.command: openssl x509 -noout -subject -in {{ platform_https_cert_dest }}
+  register: platform_https_cert_subject
+  ignore_errors: true
+  changed_when: false
+  when: platform_https_cert_stat.stat.exists | default(false)
+
+- name: Get HTTPS certificate serial number
+  ansible.builtin.command: openssl x509 -noout -serial -in {{ platform_https_cert_dest }}
+  register: platform_https_cert_serial
+  ignore_errors: true
+  changed_when: false
+  when: platform_https_cert_stat.stat.exists | default(false)
+
+- name: Get HTTPS certificate issuer
+  ansible.builtin.command: openssl x509 -noout -issuer -in {{ platform_https_cert_dest }}
+  register: platform_https_cert_issuer
+  ignore_errors: true
+  changed_when: false
+  when: platform_https_cert_stat.stat.exists | default(false)
+
+- name: Get HTTPS certificate signature algorithm
+  ansible.builtin.shell: >
+    openssl x509 -noout -text -in {{ platform_https_cert_dest }} |
+    grep "Signature Algorithm" | head -1 | sed 's/.*Signature Algorithm: //'
+  register: platform_https_cert_sig_alg
+  ignore_errors: true
+  changed_when: false
+  when: platform_https_cert_stat.stat.exists | default(false)
+
+- name: Get HTTPS certificate public key info
+  ansible.builtin.shell: >
+    openssl x509 -noout -text -in {{ platform_https_cert_dest }} |
+    grep -E "Public Key Algorithm|RSA Public-Key:|Public-Key:" | head -3
+  register: platform_https_cert_key_info
+  ignore_errors: true
+  changed_when: false
+  when: platform_https_cert_stat.stat.exists | default(false)
+
+- name: Get HTTPS certificate extended key usage
+  ansible.builtin.shell: >
+    openssl x509 -noout -ext extendedKeyUsage
+    -in {{ platform_https_cert_dest }} 2>/dev/null || echo "Not present"
+  register: platform_https_cert_eku
+  ignore_errors: true
+  changed_when: false
+  when: platform_https_cert_stat.stat.exists | default(false)
+
+- name: Get HTTPS certificate SANs
+  ansible.builtin.shell: >
+    openssl x509 -noout -ext subjectAltName
+    -in {{ platform_https_cert_dest }} 2>/dev/null || echo "No SANs found"
+  register: platform_https_cert_sans
+  ignore_errors: true
+  changed_when: false
+  when: platform_https_cert_stat.stat.exists | default(false)
+
+- name: Check inventory_hostname in certificate SANs
+  ansible.builtin.set_fact:
+    platform_https_hostname_in_san: "{{ inventory_hostname in (platform_https_cert_sans.stdout | default('')) }}"
+  when:
+    - platform_https_cert_sans is defined
+    - platform_https_cert_sans.stdout is defined
+    - platform_https_cert_sans.stdout != ''
+
+- name: Check ansible_host IP in certificate SANs
+  ansible.builtin.set_fact:
+    platform_https_ip_in_san: "{{ ansible_host in (platform_https_cert_sans.stdout | default('')) }}"
+  when:
+    - platform_https_cert_sans is defined
+    - platform_https_cert_sans.stdout is defined
+    - platform_https_cert_sans.stdout != ''
+    - ansible_host is defined
+    - ansible_host != inventory_hostname
+
+- name: Get HTTPS certificate public key fingerprint
+  ansible.builtin.shell: openssl x509 -pubkey -noout -in {{ platform_https_cert_dest }} | openssl md5
+  register: platform_https_cert_pubkey_md5
+  ignore_errors: true
+  changed_when: false
+  no_log: true
+  when: platform_https_cert_stat.stat.exists | default(false)
+
+- name: Get HTTPS private key public key fingerprint
+  ansible.builtin.shell: openssl pkey -pubout -in {{ platform_https_key_dest }} | openssl md5
+  register: platform_https_key_pubkey_md5
+  ignore_errors: true
+  changed_when: false
+  no_log: true
+  when: platform_https_key_stat.stat.exists | default(false)
+
+- name: Determine cert-key pair match
+  ansible.builtin.set_fact:
+    platform_https_cert_key_match: >-
+      {{ platform_https_cert_pubkey_md5.stdout == platform_https_key_pubkey_md5.stdout }}
+  when:
+    - platform_https_cert_pubkey_md5 is defined
+    - platform_https_cert_pubkey_md5.rc | default(1) == 0
+    - platform_https_key_pubkey_md5 is defined
+    - platform_https_key_pubkey_md5.rc | default(1) == 0
+
+- name: Validate HTTPS certificate chain against CA
+  ansible.builtin.shell: >
+    openssl verify -CAfile {{ platform_https_ca_dest }} {{ platform_https_cert_dest }}
+  register: platform_https_cert_chain_valid
+  ignore_errors: true
+  changed_when: false
+  when:
+    - platform_https_cert_stat.stat.exists | default(false)
+    - platform_https_ca_stat.stat.exists | default(false)
+
+- name: Test live HTTPS TLS handshake
+  ansible.builtin.shell: >
+    echo | openssl s_client
+    -connect {{ inventory_hostname }}:{{ platform_webserver_https_port.stdout }}
+    -CAfile {{ platform_https_ca_dest }}
+    -servername {{ inventory_hostname }} 2>&1 |
+    grep -E "Verify return code|subject=|issuer="
+  register: platform_https_tls_handshake
+  ignore_errors: true
+  changed_when: false
+  when:
+    - platform_webserver_https_enabled.stdout | default('false') | bool
+    - platform_webserver_https_port.stdout | default('') != ''
+    - platform_https_ca_stat.stat.exists | default(false)
 
 # ============================================================================
 # CONFIRM NODEJS
@@ -546,6 +722,82 @@
   when: platform_webserver_log_filename.stdout
 
 # ============================================================================
+# CONFIRM MONGODB CLIENT TLS
+# ============================================================================
+
+- name: Check MongoDB CA certificate file exists
+  ansible.builtin.stat:
+    path: "{{ platform_mongodb_ca_dest }}"
+  register: platform_mongodb_ca_stat
+  when: platform_mongo_tls_enabled.stdout | default('') | bool
+
+- name: Get MongoDB CA certificate validity dates
+  ansible.builtin.command: openssl x509 -noout -dates -in {{ platform_mongodb_ca_dest }}
+  register: platform_mongodb_ca_dates
+  ignore_errors: true
+  changed_when: false
+  when:
+    - platform_mongo_tls_enabled.stdout | default('') | bool
+    - platform_mongodb_ca_stat is defined
+    - platform_mongodb_ca_stat.stat.exists | default(false)
+
+- name: Check if MongoDB CA certificate expires within 30 days
+  ansible.builtin.command: openssl x509 -noout -checkend 2592000 -in {{ platform_mongodb_ca_dest }}
+  register: platform_mongodb_ca_expiry_warn
+  ignore_errors: true
+  changed_when: false
+  failed_when: false
+  when:
+    - platform_mongo_tls_enabled.stdout | default('') | bool
+    - platform_mongodb_ca_stat is defined
+    - platform_mongodb_ca_stat.stat.exists | default(false)
+
+- name: Get MongoDB CA certificate subject
+  ansible.builtin.command: openssl x509 -noout -subject -in {{ platform_mongodb_ca_dest }}
+  register: platform_mongodb_ca_subject
+  ignore_errors: true
+  changed_when: false
+  when:
+    - platform_mongo_tls_enabled.stdout | default('') | bool
+    - platform_mongodb_ca_stat is defined
+    - platform_mongodb_ca_stat.stat.exists | default(false)
+
+- name: Get MongoDB CA certificate issuer
+  ansible.builtin.command: openssl x509 -noout -issuer -in {{ platform_mongodb_ca_dest }}
+  register: platform_mongodb_ca_issuer
+  ignore_errors: true
+  changed_when: false
+  when:
+    - platform_mongo_tls_enabled.stdout | default('') | bool
+    - platform_mongodb_ca_stat is defined
+    - platform_mongodb_ca_stat.stat.exists | default(false)
+
+- name: Set MongoDB TLS check host
+  ansible.builtin.set_fact:
+    platform_mongo_tls_check_host: >-
+      {{ groups['mongodb_primary'][0]
+         if (groups['mongodb_primary'] is defined and groups['mongodb_primary'] | length > 0)
+         else (groups['mongodb'][0]
+               if (groups['mongodb'] is defined and groups['mongodb'] | length > 0)
+               else 'localhost') }}
+  when: platform_mongo_tls_enabled.stdout | default('') | bool
+
+- name: Test live MongoDB TLS handshake using Platform CA
+  ansible.builtin.shell: >
+    echo | openssl s_client
+    -connect {{ platform_mongo_tls_check_host }}:27017
+    -CAfile {{ platform_mongodb_ca_dest }} 2>&1 |
+    grep -E "Verify return code|subject=|issuer="
+  register: platform_mongodb_tls_handshake
+  ignore_errors: true
+  changed_when: false
+  when:
+    - platform_mongo_tls_enabled.stdout | default('') | bool
+    - platform_mongodb_ca_stat is defined
+    - platform_mongodb_ca_stat.stat.exists | default(false)
+    - platform_mongo_tls_check_host is defined
+
+# ============================================================================
 # GATHER HOST INFORMATION
 # ============================================================================
 
@@ -576,4 +828,5 @@
     msg:
       - "Platform validation complete for {{ inventory_hostname }}"
       - "Overall Status: {{ 'PASSED ✓' if (platform_process is defined and platform_process.rc == 0) else 'FAILED ✗' }}"
-      - "Report saved to: {{ platform_certify_report_file }} on both the remote and control nodes."
+      - "Remote report: {{ platform_certify_report_file }}"
+      - "Local report:  {{ platform_certify_report_dir_local }}/{{ platform_certify_report_file | basename }}"

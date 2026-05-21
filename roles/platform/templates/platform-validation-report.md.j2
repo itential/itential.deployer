@@ -100,7 +100,7 @@ Host details not available
 - **mongo_user:** {{ (platform_mongo_user.stdout | default('')) or 'Default value' }}
 - **mongo_auth_db:** {{ (platform_mongo_auth_db.stdout | default('')) or 'Default value' }}
 - **mongo_db_name:** {{ platform_mongo_db_name.stdout | default('Unknown') }}
-- **mongo_url:** {{ mongo_url_masked | default('Unknown') }}
+- **mongo_url:** {{ platform_mongo_url_masked | default('Unknown') }}
 - **mongo_tls_enabled:** {{ platform_mongo_tls_enabled.stdout | default('Unknown') }}
 - **redis_db:** {{ (platform_mongo_auth_db.stdout | default('')) or 'Default value' }}
 - **redis_user:** {{ (platform_mongo_auth_db.stdout | default('')) or 'Default value' }}
@@ -126,21 +126,119 @@ Host details not available
 
 ## Custom Services
 
-- **Custom Service Directory:** {{ service_directory | default('Unknown') }}
+- **Custom Service Directory:** {{ platform_service_directory.stdout | default('Unknown') }}
 
-## TLS Files
+## TLS Certificates
 
-{% if platform_webserver_https_cert is defined and platform_webserver_https_cert_stat.stat.exists %}
-- **TLS certificate files exist:** YES ✓
-- **TLS certificate files permissions:** {{ platform_webserver_https_cert_stat.stat.mode }}
+### HTTPS Webserver
+
+#### Files
+
+| File | Exists | Permissions | Path |
+|------|--------|-------------|------|
+| Certificate | {{ 'YES' if platform_https_cert_stat.stat.exists | default(false) else 'NO' }} | {{ platform_https_cert_stat.stat.mode | default('N/A') }} | {{ platform_https_cert_dest }} |
+| Private Key | {{ 'YES' if platform_https_key_stat.stat.exists | default(false) else 'NO' }} | {{ platform_https_key_stat.stat.mode | default('N/A') }} | {{ platform_https_key_dest }} |
+| CA Bundle | {{ 'YES' if platform_https_ca_stat.stat.exists | default(false) else 'NO' }} | {{ platform_https_ca_stat.stat.mode | default('N/A') }} | {{ platform_https_ca_dest }} |
+
+PKI Base Directory: `{{ platform_pki_base_dir }}` — Owner: {{ platform_pki_dir_stat.stat.pw_name | default('N/A') }}:{{ platform_pki_dir_stat.stat.gr_name | default('N/A') }}, Mode: {{ platform_pki_dir_stat.stat.mode | default('N/A') }}
+
+#### Certificate Details
+
+- **Subject:** {{ platform_https_cert_subject.stdout | default('N/A') }}
+- **Issuer:** {{ platform_https_cert_issuer.stdout | default('N/A') }}
+- **Serial:** {{ platform_https_cert_serial.stdout | default('N/A') }}
+- **Signature Algorithm:** {{ platform_https_cert_sig_alg.stdout | default('N/A') }}
+- **Public Key Info:** {{ platform_https_cert_key_info.stdout_lines | default([]) | join(' | ') | default('N/A') }}
+- **Extended Key Usage:** {{ platform_https_cert_eku.stdout | default('N/A') }}
+
+#### Validity
+
+{% if platform_https_cert_dates is defined and platform_https_cert_dates.rc is defined and platform_https_cert_dates.rc == 0 %}
+- **Not Before:** {{ platform_https_cert_dates.stdout | regex_search('notBefore=(.+)', '\\1') | first | default('Unknown') }}
+- **Not After:** {{ platform_https_cert_dates.stdout | regex_search('notAfter=(.+)', '\\1') | first | default('Unknown') }}
+- **Expiry Warning:** {{ 'EXPIRING WITHIN 30 DAYS' if (platform_https_cert_expiry_warn.rc is defined and platform_https_cert_expiry_warn.rc == 1) else 'OK' }}
 {% else %}
-- **TLS certificate files exist:** NO ✗
+- Validity dates not available (certificate file missing or unreadable)
 {% endif %}
-{% if platform_webserver_https_key is defined and platform_webserver_https_key_stat.stat.exists %}
-- **TLS key files exist:** YES ✓
-- **TLS key files permissions:** {{ platform_webserver_https_key_stat.stat.mode }}
+
+{% if platform_https_ca_stat.stat.exists | default(false) %}
+#### CA Bundle Validity
+
+{% if platform_https_ca_dates is defined and platform_https_ca_dates.rc is defined and platform_https_ca_dates.rc == 0 %}
+- **Not Before:** {{ platform_https_ca_dates.stdout | regex_search('notBefore=(.+)', '\\1') | first | default('Unknown') }}
+- **Not After:** {{ platform_https_ca_dates.stdout | regex_search('notAfter=(.+)', '\\1') | first | default('Unknown') }}
+- **Expiry Warning:** {{ 'EXPIRING WITHIN 30 DAYS' if (platform_https_ca_expiry_warn.rc is defined and platform_https_ca_expiry_warn.rc == 1) else 'OK' }}
 {% else %}
-- **TLS key files exist:** NO ✗
+- CA validity dates not available (CA file missing or unreadable)
+{% endif %}
+{% endif %}
+
+#### Subject Alternative Names
+
+```
+{{ platform_https_cert_sans.stdout | default('Not available') }}
+```
+
+- **inventory_hostname ({{ inventory_hostname }}) in SANs:** {{ 'YES' if platform_https_hostname_in_san | default(false) else 'NO' }}
+{% if ansible_host is defined and ansible_host != inventory_hostname %}
+- **ansible_host ({{ ansible_host }}) in SANs:** {{ 'YES' if platform_https_ip_in_san | default(false) else 'NO' }}
+{% endif %}
+
+#### Validation
+
+- **Cert-Key Match:** {{ 'YES' if platform_https_cert_key_match | default(false) else ('NOT VERIFIED' if platform_https_cert_key_match is not defined else 'NO') }}
+- **Chain Valid:** {% if platform_https_cert_chain_valid is defined and platform_https_cert_chain_valid.rc is defined %}{{ 'YES — ' ~ platform_https_cert_chain_valid.stdout if platform_https_cert_chain_valid.rc == 0 else 'NO — ' ~ platform_https_cert_chain_valid.stdout }}{% else %}NOT CHECKED{% endif %}
+
+#### Live TLS Handshake
+
+{% if platform_https_tls_handshake is defined and platform_https_tls_handshake.stdout is defined and platform_https_tls_handshake.stdout != '' %}
+```
+{{ platform_https_tls_handshake.stdout }}
+```
+{% else %}
+Not tested (HTTPS disabled, port unavailable, or CA missing)
+{% endif %}
+
+---
+
+### MongoDB Client TLS
+
+{% if platform_mongo_tls_enabled.stdout | default('') | bool %}
+#### CA File
+
+| File | Exists | Permissions | Path |
+|------|--------|-------------|------|
+| CA Bundle | {{ 'YES' if platform_mongodb_ca_stat.stat.exists | default(false) else 'NO' }} | {{ platform_mongodb_ca_stat.stat.mode | default('N/A') }} | {{ platform_mongodb_ca_dest }} |
+
+{% if platform_mongodb_ca_stat is defined and platform_mongodb_ca_stat.stat.exists | default(false) %}
+#### CA Details
+
+- **Subject:** {{ platform_mongodb_ca_subject.stdout | default('N/A') }}
+- **Issuer:** {{ platform_mongodb_ca_issuer.stdout | default('N/A') }}
+
+{% if platform_mongodb_ca_dates is defined and platform_mongodb_ca_dates.rc is defined and platform_mongodb_ca_dates.rc == 0 %}
+- **Not Before:** {{ platform_mongodb_ca_dates.stdout | regex_search('notBefore=(.+)', '\\1') | first | default('Unknown') }}
+- **Not After:** {{ platform_mongodb_ca_dates.stdout | regex_search('notAfter=(.+)', '\\1') | first | default('Unknown') }}
+- **Expiry Warning:** {{ 'EXPIRING WITHIN 30 DAYS' if (platform_mongodb_ca_expiry_warn.rc is defined and platform_mongodb_ca_expiry_warn.rc == 1) else 'OK' }}
+{% else %}
+- Validity dates not available
+{% endif %}
+{% endif %}
+
+#### Live MongoDB TLS Handshake
+
+Tested against: `{{ platform_mongo_tls_check_host | default('N/A') }}:27017`
+
+{% if platform_mongodb_tls_handshake is defined and platform_mongodb_tls_handshake.stdout is defined and platform_mongodb_tls_handshake.stdout != '' %}
+```
+{{ platform_mongodb_tls_handshake.stdout }}
+```
+{% else %}
+Not tested (CA missing or MongoDB host unavailable)
+{% endif %}
+
+{% else %}
+MongoDB TLS is disabled (`platform_mongo_tls_enabled: false`).
 {% endif %}
 
 ## Log Files
@@ -179,8 +277,8 @@ Host details not available
 
 ## Connectivity
 
-- **HTTP health check:** {{ 'YES ✓' if (platform_http_health_check.status | default(0) == 200) else 'NO ✗' }}
-- **HTTPS health check:** {{ 'YES ✓' if (platform_https_health_check.status | default(0) == 200) else 'NO ✗' }}
+- **HTTP health check:** {{ 'YES ✓' if (platform_http_health_check.status is defined and platform_http_health_check.status == 200) else 'NO ✗' }}
+- **HTTPS health check:** {{ 'YES ✓' if (platform_https_health_check.status is defined and platform_https_health_check.status == 200) else 'NO ✗' }}
 - **MongoDB connectivity:** {{ 'YES ✓' if platform_mongodb_connection else 'NO ✗' }}
 - **Redis connectivity:** {{ 'YES ✓' if platform_redis_connection else 'NO ✗' }}
 
