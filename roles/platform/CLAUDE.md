@@ -236,6 +236,16 @@ Hardware specs for `verify` playbook (`platform_hw_specs`):
 - `platform_packages` must be either local RPM filenames (relative to `playbook_dir/files/`) or full HTTP/HTTPS URLs. Mixed lists are not supported.
 - When using repository download (`gateway_archive_download_url`-style for Platform), set `repository_username`/`repository_password` or `repository_api_key`.
 
+## Certify Behavior (certify-platform.yml)
+
+`certify-platform.yml` runs on all hosts in `platform*` (both `platform` and `platform_secondary`). Each host produces its own report.
+
+**Connectivity checks:** The HTTP and HTTPS health endpoint tasks use `failed_when: false` and return without a `.json` attribute when Platform is down or not yet listening. The downstream MongoDB and Redis connectivity `set_fact` tasks are guarded by `platform_http_health_check.json is defined` and `platform_https_health_check.json is defined`. When Platform is unreachable, connectivity flags remain `false` (initialized earlier) rather than crashing the play.
+
+**Redis TLS for Platform:** Platform requires its own Redis CA cert at `platform_redis_ca_dest` when `platform_redis_tls_enabled: true`. Set `platform_redis_pki_src_dir` in the inventory to enable cert copy. Without it, `platform.properties` will have `redis_tls` commented out and Platform will fail to connect to a TLS-only Redis.
+
+**Multi-host:** The play runs on `hosts: platform*`, so all Platform nodes are certified in parallel. Each host is checked independently using its own `inventory_hostname` and `ansible_host`.
+
 ## Gotchas
 
 - The `platform_server_dir` and `platform_services_dir` are derived from `platform_root_dir` and cannot be independently overridden via inventory — only `platform_root_dir` can be changed.

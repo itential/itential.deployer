@@ -102,7 +102,7 @@
       community.general.make:
         chdir: "{{ redis_build_dir }}"
         params:
-          BUILD_TLS: true
+          BUILD_TLS: "yes"
           PREFIX: "{{ redis_bin_dir | dirname }}"
       tags: make_redis
 
@@ -111,7 +111,8 @@
         chdir: "{{ redis_build_dir }}"
         target: install
         params:
-          USE_SYSTEMD: true
+          BUILD_TLS: "yes"
+          USE_SYSTEMD: "yes"
           PREFIX: "{{ redis_bin_dir | dirname }}"
       tags: make_redis
 

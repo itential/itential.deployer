@@ -17,6 +17,7 @@ redis_build_packages:
   - gcc
   - gcc-c++
   - make
+  - openssl-devel
   - systemd-devel
 
 # The Remi and EPEL repos are used only when:

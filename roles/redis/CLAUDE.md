@@ -171,6 +171,23 @@ Hardware specs for `verify` playbook (`redis_hw_specs`):
 - `redis_master` group must always have at least one member — `redis_replicaof` and sentinel config reference `groups['redis_master'][0]`.
 - When `redis_install_from_source: true`, build packages (`gcc`, `make`, `systemd-devel`, etc.) are installed, used for compilation, then removed. Offline mode requires these pre-staged in `redis_offline_control_node_rpms_dir/build/`.
 
+## Certify Behavior (certify-redis.yml / certify-sentinel.yml)
+
+`certify-redis.yml` runs on `redis_master` and `redis_replica` hosts. `certify-sentinel.yml` runs on `redis_sentinel` hosts.
+
+**TLS-aware redis-cli:** All `redis-cli` commands use a `redis_cli_tls_args` fact set early in the task file. When `redis_tls_enabled: true` this expands to `--tls --cacert {{ redis_tls_ca_dest }}`; when false it is an empty string. No separate task variants are needed.
+
+**Topology-aware user tests:** The certify sets `redis_has_replicas` and `redis_has_sentinels` facts using the same group-membership expressions as `main.yml`. User login tests are gated on those facts:
+- `repluser` — only tested when `redis_has_replicas` is true
+- `sentineluser` — only tested when `redis_has_sentinels` is true
+- `monitor` — only tested when `redis_monitor_user_enabled: true`
+
+In an AIO or standalone deployment (no replica or sentinel groups), those tests are skipped and omitted from the report — they do not count as failures.
+
+**TLS section:** When `redis_tls_enabled: false` the entire TLS section collapses to `- **TLS Status:** DISABLED`. No TLS variables are referenced, so the report is valid for non-TLS deployments.
+
+**Overall status** is determined solely by `redis_ping.rc == 0` (connectivity) and `redis_process.rc == 0` (process running). TLS checks are informational and do not affect the PASSED/FAILED line.
+
 ## Gotchas
 
 - `redis_install_from_source: true` is the default. The Remi repo install (`redis_install_from_source: false`) requires `common_install_yum_repos: true` and the string `remi` in `redis_packages`.

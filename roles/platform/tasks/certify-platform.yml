@@ -664,14 +664,18 @@
     platform_mongodb_connection: "{{ (platform_http_health_check.json.services |
       selectattr('service', 'equalto', 'mongo') |
       selectattr('status', 'equalto', 'running') | list | length) > 0 }}"
-  when: platform_webserver_http_enabled.stdout | bool
+  when:
+    - platform_webserver_http_enabled.stdout | bool
+    - platform_http_health_check.json is defined
 
 - name: Check Redis connection (HTTP)
   ansible.builtin.set_fact:
     platform_redis_connection: "{{ (platform_http_health_check.json.services |
       selectattr('service', 'equalto', 'redis') |
       selectattr('status', 'equalto', 'running') | list | length) > 0 }}"
-  when: platform_webserver_http_enabled.stdout | bool
+  when:
+    - platform_webserver_http_enabled.stdout | bool
+    - platform_http_health_check.json is defined
 
 - name: Check health status endpoint using HTTPS
   ansible.builtin.uri:
@@ -692,14 +696,18 @@
     platform_mongodb_connection: "{{ (platform_https_health_check.json.services |
       selectattr('service', 'equalto', 'mongo') |
       selectattr('status', 'equalto', 'running') | list | length) > 0 }}"
-  when: platform_webserver_https_enabled.stdout | bool
+  when:
+    - platform_webserver_https_enabled.stdout | bool
+    - platform_https_health_check.json is defined
 
 - name: Check Redis connection (HTTPS)
   ansible.builtin.set_fact:
     platform_redis_connection: "{{ (platform_https_health_check.json.services |
       selectattr('service', 'equalto', 'redis') |
       selectattr('status', 'equalto', 'running') | list | length) > 0 }}"
-  when: platform_webserver_https_enabled.stdout | bool
+  when:
+    - platform_webserver_https_enabled.stdout | bool
+    - platform_https_health_check.json is defined
 
 # ============================================================================
 # CONFIRM LOG FILES

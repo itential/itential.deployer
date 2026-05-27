@@ -37,10 +37,20 @@
   failed_when: false
   changed_when: false
 
+- name: Set Redis CLI TLS arguments
+  ansible.builtin.set_fact:
+    redis_cli_tls_args: "{% if redis_tls_enabled | bool %}--tls --cacert {{ redis_tls_ca_dest }}{% endif %}"
+
+- name: Set topology facts
+  ansible.builtin.set_fact:
+    redis_has_replicas: "{{ groups['redis_replica'] is defined and groups['redis_replica'] | length > 0 }}"
+    redis_has_sentinels: "{{ groups['redis_sentinel'] is defined and groups['redis_sentinel'] | length > 0 }}"
+
 - name: Test Redis connectivity
   ansible.builtin.shell: |
     set -o pipefail &&
     {{ redis_bin_dir }}/redis-cli \
+      {{ redis_cli_tls_args }} \
       --user admin \
       -p {{ redis_port }} \
       -a "{{ redis_user_admin_password }}" \
@@ -61,6 +71,7 @@
   ansible.builtin.shell: |
     set -o pipefail &&
     {{ redis_bin_dir }}/redis-cli \
+      {{ redis_cli_tls_args }} \
       --user admin \
       -p {{ redis_port }} \
       -a "{{ redis_user_admin_password }}" \
@@ -75,6 +86,7 @@
   ansible.builtin.shell: |
     set -o pipefail &&
     {{ redis_bin_dir }}/redis-cli \
+      {{ redis_cli_tls_args }} \
       --json \
       --user admin \
       -p {{ redis_port }} \
@@ -144,6 +156,7 @@
   ansible.builtin.shell: |
     set -o pipefail &&
     {{ redis_bin_dir }}/redis-cli \
+      {{ redis_cli_tls_args }} \
       --json \
       --user admin \
       -p {{ redis_port }} \
@@ -176,6 +189,7 @@
   ansible.builtin.shell: |
     set -o pipefail &&
     {{ redis_bin_dir }}/redis-cli \
+      {{ redis_cli_tls_args }} \
       --user itential \
       -p {{ redis_port }} \
       -a "{{ redis_user_itential_password }}" \
@@ -189,6 +203,7 @@
   ansible.builtin.shell: |
     set -o pipefail &&
     {{ redis_bin_dir }}/redis-cli \
+      {{ redis_cli_tls_args }} \
       --user repluser \
       -p {{ redis_port }} \
       -a "{{ redis_user_repluser_password }}" \
@@ -197,11 +212,13 @@
   register: redis_repl_user_ping
   failed_when: false
   changed_when: false
+  when: redis_has_replicas | bool
 
 - name: Confirm "sentineluser" user login
   ansible.builtin.shell: |
     set -o pipefail &&
     {{ redis_bin_dir }}/redis-cli \
+      {{ redis_cli_tls_args }} \
       --user sentineluser \
       -p {{ redis_port }} \
       -a "{{ redis_user_sentineluser_password }}" \
@@ -210,11 +227,13 @@
   register: redis_sentineluser_user_ping
   failed_when: false
   changed_when: false
+  when: redis_has_sentinels | bool
 
 - name: Confirm "monitor" user login (Redis)
   ansible.builtin.shell: |
     set -o pipefail &&
     {{ redis_bin_dir }}/redis-cli \
+      {{ redis_cli_tls_args }} \
       --user monitor \
       -p {{ redis_port }} \
       -a "{{ redis_user_monitor_password }}" \
@@ -226,6 +245,166 @@
   when:
     - redis_monitor_user_enabled | bool
     - redis_user_monitor_password is truthy
+
+# =========================================================================
+# TLS/SSL CHECKS
+# =========================================================================
+
+- name: Check TLS server certificate file exists
+  ansible.builtin.stat:
+    path: "{{ redis_tls_cert_dest }}"
+  register: redis_tls_cert_stat
+  when: redis_tls_enabled | bool
+
+- name: Check TLS private key file exists
+  ansible.builtin.stat:
+    path: "{{ redis_tls_key_dest }}"
+  register: redis_tls_key_stat
+  when: redis_tls_enabled | bool
+
+- name: Check TLS CA certificate file exists
+  ansible.builtin.stat:
+    path: "{{ redis_tls_ca_dest }}"
+  register: redis_tls_ca_stat
+  when: redis_tls_enabled | bool
+
+- name: Get TLS server certificate dates
+  ansible.builtin.shell: |
+    openssl x509 -in {{ redis_tls_cert_dest }} -noout -dates
+  register: redis_tls_cert_dates
+  ignore_errors: true
+  changed_when: false
+  when:
+    - redis_tls_enabled | bool
+    - redis_tls_cert_stat.stat.exists | default(false)
+
+- name: Check TLS server certificate 30-day expiry
+  ansible.builtin.shell: |
+    openssl x509 -in {{ redis_tls_cert_dest }} -noout -checkend 2592000
+  register: redis_tls_cert_expiry_check
+  ignore_errors: true
+  changed_when: false
+  failed_when: false
+  when:
+    - redis_tls_enabled | bool
+    - redis_tls_cert_stat.stat.exists | default(false)
+
+- name: Get TLS server certificate subject and issuer
+  ansible.builtin.shell: |
+    openssl x509 -in {{ redis_tls_cert_dest }} -noout -subject -issuer
+  register: redis_tls_cert_subject_issuer
+  ignore_errors: true
+  changed_when: false
+  when:
+    - redis_tls_enabled | bool
+    - redis_tls_cert_stat.stat.exists | default(false)
+
+- name: Get TLS server certificate SANs
+  ansible.builtin.shell: >
+    openssl x509 -noout -ext subjectAltName
+    -in {{ redis_tls_cert_dest }} 2>/dev/null || echo "No SANs found"
+  register: redis_tls_cert_sans
+  ignore_errors: true
+  changed_when: false
+  when:
+    - redis_tls_enabled | bool
+    - redis_tls_cert_stat.stat.exists | default(false)
+
+- name: Check if inventory_hostname is in certificate SANs
+  ansible.builtin.set_fact:
+    redis_tls_san_hostname_match: "{{ inventory_hostname in (redis_tls_cert_sans.stdout | default('')) }}"
+  when:
+    - redis_tls_enabled | bool
+    - redis_tls_cert_sans is defined
+    - redis_tls_cert_sans.stdout is defined
+    - redis_tls_cert_sans.stdout != ''
+
+- name: Check if ansible_host is in certificate SANs
+  ansible.builtin.set_fact:
+    redis_tls_san_ip_match: "{{ ansible_host in (redis_tls_cert_sans.stdout | default('')) }}"
+  when:
+    - redis_tls_enabled | bool
+    - redis_tls_cert_sans is defined
+    - redis_tls_cert_sans.stdout is defined
+    - redis_tls_cert_sans.stdout != ''
+    - ansible_host is defined
+    - ansible_host != inventory_hostname
+
+- name: Get TLS CA certificate dates
+  ansible.builtin.shell: |
+    openssl x509 -in {{ redis_tls_ca_dest }} -noout -dates
+  register: redis_tls_ca_dates
+  ignore_errors: true
+  changed_when: false
+  when:
+    - redis_tls_enabled | bool
+    - redis_tls_ca_stat.stat.exists | default(false)
+
+- name: Check TLS CA certificate 30-day expiry
+  ansible.builtin.shell: |
+    openssl x509 -in {{ redis_tls_ca_dest }} -noout -checkend 2592000
+  register: redis_tls_ca_expiry_check
+  ignore_errors: true
+  changed_when: false
+  failed_when: false
+  when:
+    - redis_tls_enabled | bool
+    - redis_tls_ca_stat.stat.exists | default(false)
+
+- name: Get TLS certificate public key fingerprint
+  ansible.builtin.shell: openssl x509 -pubkey -noout -in {{ redis_tls_cert_dest }} | openssl md5
+  register: redis_tls_cert_pubkey_md5
+  ignore_errors: true
+  changed_when: false
+  no_log: true
+  when:
+    - redis_tls_enabled | bool
+    - redis_tls_cert_stat.stat.exists | default(false)
+
+- name: Get TLS private key public key fingerprint
+  ansible.builtin.shell: openssl pkey -pubout -in {{ redis_tls_key_dest }} | openssl md5
+  register: redis_tls_key_pubkey_md5
+  ignore_errors: true
+  changed_when: false
+  no_log: true
+  when:
+    - redis_tls_enabled | bool
+    - redis_tls_key_stat.stat.exists | default(false)
+
+- name: Determine TLS cert-key pair match
+  ansible.builtin.set_fact:
+    redis_tls_cert_key_match: >-
+      {{ redis_tls_cert_pubkey_md5.stdout == redis_tls_key_pubkey_md5.stdout }}
+  when:
+    - redis_tls_cert_pubkey_md5 is defined
+    - redis_tls_cert_pubkey_md5.rc | default(1) == 0
+    - redis_tls_key_pubkey_md5 is defined
+    - redis_tls_key_pubkey_md5.rc | default(1) == 0
+
+- name: Validate TLS certificate chain
+  ansible.builtin.shell: >
+    openssl verify -CAfile {{ redis_tls_ca_dest }} {{ redis_tls_cert_dest }}
+  register: redis_tls_chain_valid
+  ignore_errors: true
+  changed_when: false
+  when:
+    - redis_tls_enabled | bool
+    - redis_tls_cert_stat.stat.exists | default(false)
+    - redis_tls_ca_stat.stat.exists | default(false)
+
+- name: Perform live Redis TLS handshake test
+  ansible.builtin.shell: >
+    echo | openssl s_client
+    -connect {{ inventory_hostname }}:{{ redis_port }}
+    -CAfile {{ redis_tls_ca_dest }}
+    -servername {{ inventory_hostname }} 2>&1 |
+    grep -E "Verify return code|subject=|issuer="
+  register: redis_tls_handshake
+  ignore_errors: true
+  changed_when: false
+  when:
+    - redis_tls_enabled | bool
+    - redis_tls_ca_stat.stat.exists | default(false)
 
 # =========================================================================
 # Generate the report and copy to control node

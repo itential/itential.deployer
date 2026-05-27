@@ -151,20 +151,108 @@
   ignore_errors: true
   when: mongodb_tls_enabled | bool
 
-- name: Get TLS server certificate expiration
+- name: Get TLS server certificate dates
   ansible.builtin.shell: |
-    openssl x509 -in {{ mongodb_tls_cert_dest }} -noout -enddate
-  register: mongodb_tls_cert_expiry
+    openssl x509 -in {{ mongodb_tls_cert_dest }} -noout -dates
+  register: mongodb_tls_cert_dates
   ignore_errors: true
   changed_when: false
   when:
     - mongodb_tls_enabled | bool
     - mongodb_tls_cert_file_stat_result.stat.exists | default(false)
 
-- name: Get TLS CA certificate expiration
+- name: Check TLS server certificate 30-day expiry
   ansible.builtin.shell: |
-    openssl x509 -in {{ mongodb_tls_ca_dest }} -noout -enddate
-  register: mongodb_tls_ca_expiry
+    openssl x509 -in {{ mongodb_tls_cert_dest }} -noout -checkend 2592000
+  register: mongodb_tls_cert_expiry_check
+  ignore_errors: true
+  changed_when: false
+  failed_when: false
+  when:
+    - mongodb_tls_enabled | bool
+    - mongodb_tls_cert_file_stat_result.stat.exists | default(false)
+
+- name: Get TLS server certificate subject and issuer
+  ansible.builtin.shell: |
+    openssl x509 -in {{ mongodb_tls_cert_dest }} -noout -subject -issuer
+  register: mongodb_tls_cert_subject_issuer
+  ignore_errors: true
+  changed_when: false
+  when:
+    - mongodb_tls_enabled | bool
+    - mongodb_tls_cert_file_stat_result.stat.exists | default(false)
+
+- name: Get TLS server certificate SANs
+  ansible.builtin.shell: >
+    openssl x509 -noout -ext subjectAltName
+    -in {{ mongodb_tls_cert_dest }} 2>/dev/null || echo "No SANs found"
+  register: mongodb_tls_cert_sans
+  ignore_errors: true
+  changed_when: false
+  when:
+    - mongodb_tls_enabled | bool
+    - mongodb_tls_cert_file_stat_result.stat.exists | default(false)
+
+- name: Check if inventory_hostname is in certificate SANs
+  ansible.builtin.set_fact:
+    mongodb_tls_san_hostname_match: "{{ inventory_hostname in (mongodb_tls_cert_sans.stdout | default('')) }}"
+  when:
+    - mongodb_tls_enabled | bool
+    - mongodb_tls_cert_sans is defined
+    - mongodb_tls_cert_sans.stdout is defined
+    - mongodb_tls_cert_sans.stdout != ''
+
+- name: Check if ansible_host is in certificate SANs
+  ansible.builtin.set_fact:
+    mongodb_tls_san_ip_match: "{{ ansible_host in (mongodb_tls_cert_sans.stdout | default('')) }}"
+  when:
+    - mongodb_tls_enabled | bool
+    - mongodb_tls_cert_sans is defined
+    - mongodb_tls_cert_sans.stdout is defined
+    - mongodb_tls_cert_sans.stdout != ''
+    - ansible_host is defined
+    - ansible_host != inventory_hostname
+
+- name: Get TLS CA certificate dates
+  ansible.builtin.shell: |
+    openssl x509 -in {{ mongodb_tls_ca_dest }} -noout -dates
+  register: mongodb_tls_ca_dates
+  ignore_errors: true
+  changed_when: false
+  when:
+    - mongodb_tls_enabled | bool
+    - mongodb_tls_ca_file_stat_result.stat.exists | default(false)
+
+- name: Check TLS CA certificate 30-day expiry
+  ansible.builtin.shell: |
+    openssl x509 -in {{ mongodb_tls_ca_dest }} -noout -checkend 2592000
+  register: mongodb_tls_ca_expiry_check
+  ignore_errors: true
+  changed_when: false
+  failed_when: false
+  when:
+    - mongodb_tls_enabled | bool
+    - mongodb_tls_ca_file_stat_result.stat.exists | default(false)
+
+- name: Validate TLS certificate chain
+  ansible.builtin.shell: >
+    openssl verify -CAfile {{ mongodb_tls_ca_dest }} {{ mongodb_tls_cert_dest }}
+  register: mongodb_tls_chain_valid
+  ignore_errors: true
+  changed_when: false
+  when:
+    - mongodb_tls_enabled | bool
+    - mongodb_tls_cert_file_stat_result.stat.exists | default(false)
+    - mongodb_tls_ca_file_stat_result.stat.exists | default(false)
+
+- name: Perform live MongoDB TLS handshake test
+  ansible.builtin.shell: >
+    echo | openssl s_client
+    -connect {{ inventory_hostname }}:{{ mongodb_port }}
+    -CAfile {{ mongodb_tls_ca_dest }}
+    -servername {{ inventory_hostname }} 2>&1 |
+    grep -E "Verify return code|subject=|issuer="
+  register: mongodb_tls_handshake
   ignore_errors: true
   changed_when: false
   when:

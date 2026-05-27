@@ -134,6 +134,80 @@ Redis INFO not available - check connectivity and authentication
 
 ---
 
+## TLS Certificates
+
+{% if redis_tls_enabled | bool %}
+- **TLS Status:** ENABLED
+
+#### Files
+
+| File | Exists | Permissions | Path |
+|------|--------|-------------|------|
+| Certificate | {{ 'YES' if (redis_tls_cert_stat is defined and redis_tls_cert_stat.stat is defined and redis_tls_cert_stat.stat.exists) else 'NO' }} | {{ redis_tls_cert_stat.stat.mode | default('N/A') if (redis_tls_cert_stat is defined and redis_tls_cert_stat.stat is defined and redis_tls_cert_stat.stat.exists) else 'N/A' }} | {{ redis_tls_cert_dest }} |
+| Private Key | {{ 'YES' if (redis_tls_key_stat is defined and redis_tls_key_stat.stat is defined and redis_tls_key_stat.stat.exists) else 'NO' }} | {{ redis_tls_key_stat.stat.mode | default('N/A') if (redis_tls_key_stat is defined and redis_tls_key_stat.stat is defined and redis_tls_key_stat.stat.exists) else 'N/A' }} | {{ redis_tls_key_dest }} |
+| CA Bundle | {{ 'YES' if (redis_tls_ca_stat is defined and redis_tls_ca_stat.stat is defined and redis_tls_ca_stat.stat.exists) else 'NO' }} | {{ redis_tls_ca_stat.stat.mode | default('N/A') if (redis_tls_ca_stat is defined and redis_tls_ca_stat.stat is defined and redis_tls_ca_stat.stat.exists) else 'N/A' }} | {{ redis_tls_ca_dest }} |
+
+{% if redis_tls_cert_stat is defined and redis_tls_cert_stat.stat is defined and redis_tls_cert_stat.stat.exists %}
+#### Certificate Details
+
+{% if redis_tls_cert_subject_issuer is defined and redis_tls_cert_subject_issuer.rc is defined and redis_tls_cert_subject_issuer.rc == 0 %}
+- **Subject:** {{ redis_tls_cert_subject_issuer.stdout_lines | select('match', '^subject') | first | default('Unknown') }}
+- **Issuer:** {{ redis_tls_cert_subject_issuer.stdout_lines | select('match', '^issuer') | first | default('Unknown') }}
+{% endif %}
+
+#### Validity
+
+{% if redis_tls_cert_dates is defined and redis_tls_cert_dates.rc is defined and redis_tls_cert_dates.rc == 0 %}
+- **Not Before:** {{ redis_tls_cert_dates.stdout | regex_search('notBefore=(.+)', '\\1') | first | default('Unknown') }}
+- **Not After:** {{ redis_tls_cert_dates.stdout | regex_search('notAfter=(.+)', '\\1') | first | default('Unknown') }}
+- **Expiry Warning:** {{ 'EXPIRES WITHIN 30 DAYS' if (redis_tls_cert_expiry_check is defined and redis_tls_cert_expiry_check.rc is defined and redis_tls_cert_expiry_check.rc == 1) else 'OK' }}
+{% endif %}
+
+#### Subject Alternative Names
+
+```
+{{ redis_tls_cert_sans.stdout | default('Not available') if (redis_tls_cert_sans is defined and redis_tls_cert_sans.rc is defined and redis_tls_cert_sans.rc == 0) else 'Not available' }}
+```
+
+- **inventory_hostname ({{ inventory_hostname }}) in SANs:** {{ 'YES' if (redis_tls_san_hostname_match is defined and redis_tls_san_hostname_match) else 'NO' }}
+- **ansible_host ({{ ansible_host }}) in SANs:** {{ 'YES' if (redis_tls_san_ip_match is defined and redis_tls_san_ip_match) else 'NO' }}
+
+#### Validation
+
+- **Cert-Key Match:** {{ 'YES' if (redis_tls_cert_key_match is defined and redis_tls_cert_key_match) else ('NOT CHECKED' if not (redis_tls_key_stat is defined and redis_tls_key_stat.stat is defined and redis_tls_key_stat.stat.exists) else 'FAILED') }}
+- **Chain Valid:** {{ 'YES' if (redis_tls_chain_valid is defined and redis_tls_chain_valid.rc is defined and redis_tls_chain_valid.rc == 0) else ('NOT CHECKED' if not (redis_tls_ca_stat is defined and redis_tls_ca_stat.stat is defined and redis_tls_ca_stat.stat.exists) else 'FAILED') }}
+
+{% endif %}
+
+{% if redis_tls_ca_stat is defined and redis_tls_ca_stat.stat is defined and redis_tls_ca_stat.stat.exists %}
+#### CA Bundle Validity
+
+{% if redis_tls_ca_dates is defined and redis_tls_ca_dates.rc is defined and redis_tls_ca_dates.rc == 0 %}
+- **Not Before:** {{ redis_tls_ca_dates.stdout | regex_search('notBefore=(.+)', '\\1') | first | default('Unknown') }}
+- **Not After:** {{ redis_tls_ca_dates.stdout | regex_search('notAfter=(.+)', '\\1') | first | default('Unknown') }}
+- **Expiry Warning:** {{ 'EXPIRES WITHIN 30 DAYS' if (redis_tls_ca_expiry_check is defined and redis_tls_ca_expiry_check.rc is defined and redis_tls_ca_expiry_check.rc == 1) else 'OK' }}
+{% endif %}
+
+{% endif %}
+
+#### Live TLS Handshake
+
+{% if redis_tls_handshake is defined and redis_tls_handshake.rc is defined %}
+Tested against: `{{ inventory_hostname }}:{{ redis_port }}`
+
+```
+{{ redis_tls_handshake.stdout | default('No output') }}
+```
+{% else %}
+Not tested (CA missing)
+{% endif %}
+
+{% else %}
+- **TLS Status:** DISABLED
+{% endif %}
+
+---
+
 ## Redis User Auth Tests
 
 **The following users were found:**
@@ -147,9 +221,15 @@ Redis INFO not available - check connectivity and authentication
 ### User Connection Test Results:
 - **admin:** {{ 'PASSED ✓' if ((redis_ping.rc | default(-1)) == 0 and 'PONG' in (redis_ping.stdout | default(''))) else 'FAILED ✗' }}
 - **itential:** {{ 'PASSED ✓' if ((redis_itential_user_ping.rc | default(-1)) == 0 and 'PONG' in (redis_itential_user_ping.stdout | default(''))) else 'FAILED ✗' }}
+{% if redis_has_replicas | default(false) | bool %}
 - **repluser:** {{ 'PASSED ✓' if ((redis_repl_user_ping.rc | default(-1)) == 0 and 'PONG' in (redis_repl_user_ping.stdout | default(''))) else 'FAILED ✗' }}
+{% endif %}
+{% if redis_has_sentinels | default(false) | bool %}
 - **sentineluser:** {{ 'PASSED ✓' if ((redis_sentineluser_user_ping.rc | default(-1)) == 0 and 'PONG' in (redis_sentineluser_user_ping.stdout | default(''))) else 'FAILED ✗' }}
+{% endif %}
+{% if redis_monitor_user_enabled | default(false) | bool %}
 - **monitor:** {{ 'PASSED ✓' if ((redis_monitor_user_ping.rc | default(-1)) == 0 and 'PONG' in (redis_monitor_user_ping.stdout | default(''))) else 'FAILED ✗' }}
+{% endif %}
 {% else %}
 No Redis users were found!
 {% endif %}

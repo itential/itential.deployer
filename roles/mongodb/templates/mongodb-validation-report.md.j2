@@ -156,15 +156,71 @@ Log path not configured or could not be determined (likely using journald)
 
 ### TLS/SSL Configuration
 
-{% if mongodb_tls_mode is defined and mongodb_tls_mode.rc == 0 %}
-- **TLS Mode:** {{ mongodb_tls_mode.stdout | default('Not configured') }}
-{% if mongodb_tls_cert_path.stdout is defined and mongodb_tls_cert_path.stdout != "" %}
-- **Certificate Path:** `{{ mongodb_tls_cert_path.stdout }}`
-- **Certificate Exists:** {{ 'YES ✓' if (mongodb_tls_cert_file is defined and mongodb_tls_cert_file.stat.exists) else 'NO' }}
-{% if mongodb_tls_cert_expiry is defined and mongodb_tls_cert_expiry.rc == 0 %}
-- **Certificate Expiration:** {{ mongodb_tls_cert_expiry.stdout }}
+{% if mongodb_tls_enabled | bool %}
+- **TLS Mode:** {{ mongodb_tls_mode.stdout | default('Not detected') if (mongodb_tls_mode is defined and mongodb_tls_mode.rc is defined and mongodb_tls_mode.rc == 0) else 'Not detected in config' }}
+
+#### Files
+
+| File | Exists | Permissions | Path |
+|------|--------|-------------|------|
+| Server Cert (PEM) | {{ 'YES' if (mongodb_tls_cert_file_stat_result is defined and mongodb_tls_cert_file_stat_result.stat is defined and mongodb_tls_cert_file_stat_result.stat.exists) else 'NO' }} | {{ mongodb_tls_cert_file_stat_result.stat.mode | default('N/A') if (mongodb_tls_cert_file_stat_result is defined and mongodb_tls_cert_file_stat_result.stat is defined and mongodb_tls_cert_file_stat_result.stat.exists) else 'N/A' }} | {{ mongodb_tls_cert_dest }} |
+| CA Bundle | {{ 'YES' if (mongodb_tls_ca_file_stat_result is defined and mongodb_tls_ca_file_stat_result.stat is defined and mongodb_tls_ca_file_stat_result.stat.exists) else 'NO' }} | {{ mongodb_tls_ca_file_stat_result.stat.mode | default('N/A') if (mongodb_tls_ca_file_stat_result is defined and mongodb_tls_ca_file_stat_result.stat is defined and mongodb_tls_ca_file_stat_result.stat.exists) else 'N/A' }} | {{ mongodb_tls_ca_dest }} |
+| Replica Keyfile | {{ 'YES' if (mongodb_auth_key_file_stat_result is defined and mongodb_auth_key_file_stat_result.stat is defined and mongodb_auth_key_file_stat_result.stat.exists) else 'NO' }} | {{ mongodb_auth_key_file_stat_result.stat.mode | default('N/A') if (mongodb_auth_key_file_stat_result is defined and mongodb_auth_key_file_stat_result.stat is defined and mongodb_auth_key_file_stat_result.stat.exists) else 'N/A' }} | {{ mongodb_auth_key_dest }} |
+
+{% if mongodb_tls_cert_file_stat_result is defined and mongodb_tls_cert_file_stat_result.stat is defined and mongodb_tls_cert_file_stat_result.stat.exists %}
+#### Certificate Details
+
+{% if mongodb_tls_cert_subject_issuer is defined and mongodb_tls_cert_subject_issuer.rc is defined and mongodb_tls_cert_subject_issuer.rc == 0 %}
+- **Subject:** {{ mongodb_tls_cert_subject_issuer.stdout_lines | select('match', '^subject') | first | default('Unknown') }}
+- **Issuer:** {{ mongodb_tls_cert_subject_issuer.stdout_lines | select('match', '^issuer') | first | default('Unknown') }}
 {% endif %}
+
+#### Validity
+
+{% if mongodb_tls_cert_dates is defined and mongodb_tls_cert_dates.rc is defined and mongodb_tls_cert_dates.rc == 0 %}
+- **Not Before:** {{ mongodb_tls_cert_dates.stdout | regex_search('notBefore=(.+)', '\\1') | first | default('Unknown') }}
+- **Not After:** {{ mongodb_tls_cert_dates.stdout | regex_search('notAfter=(.+)', '\\1') | first | default('Unknown') }}
+- **Expiry Warning:** {{ 'EXPIRES WITHIN 30 DAYS' if (mongodb_tls_cert_expiry_check is defined and mongodb_tls_cert_expiry_check.rc is defined and mongodb_tls_cert_expiry_check.rc == 1) else 'OK' }}
 {% endif %}
+
+#### Subject Alternative Names
+
+```
+{{ mongodb_tls_cert_sans.stdout | default('Not available') if (mongodb_tls_cert_sans is defined and mongodb_tls_cert_sans.rc is defined and mongodb_tls_cert_sans.rc == 0) else 'Not available' }}
+```
+
+- **inventory_hostname ({{ inventory_hostname }}) in SANs:** {{ 'YES' if (mongodb_tls_san_hostname_match is defined and mongodb_tls_san_hostname_match) else 'NO' }}
+- **ansible_host ({{ ansible_host }}) in SANs:** {{ 'YES' if (mongodb_tls_san_ip_match is defined and mongodb_tls_san_ip_match) else 'NO' }}
+
+#### Validation
+
+- **Chain Valid:** {{ 'YES' if (mongodb_tls_chain_valid is defined and mongodb_tls_chain_valid.rc is defined and mongodb_tls_chain_valid.rc == 0) else ('NOT CHECKED' if not (mongodb_tls_ca_file_stat_result is defined and mongodb_tls_ca_file_stat_result.stat is defined and mongodb_tls_ca_file_stat_result.stat.exists) else 'FAILED') }}
+
+#### Live TLS Handshake
+
+{% if mongodb_tls_handshake is defined and mongodb_tls_handshake.rc is defined %}
+Tested against: `{{ inventory_hostname }}:{{ mongodb_port }}`
+
+```
+{{ mongodb_tls_handshake.stdout | default('No output') }}
+```
+{% else %}
+Not tested (CA missing)
+{% endif %}
+
+{% endif %}
+
+{% if mongodb_tls_ca_file_stat_result is defined and mongodb_tls_ca_file_stat_result.stat is defined and mongodb_tls_ca_file_stat_result.stat.exists %}
+#### CA Certificate Details
+
+{% if mongodb_tls_ca_dates is defined and mongodb_tls_ca_dates.rc is defined and mongodb_tls_ca_dates.rc == 0 %}
+- **Not Before:** {{ mongodb_tls_ca_dates.stdout | regex_search('notBefore=(.+)', '\\1') | first | default('Unknown') }}
+- **Not After:** {{ mongodb_tls_ca_dates.stdout | regex_search('notAfter=(.+)', '\\1') | first | default('Unknown') }}
+- **Expiry Warning:** {{ 'EXPIRES WITHIN 30 DAYS' if (mongodb_tls_ca_expiry_check is defined and mongodb_tls_ca_expiry_check.rc is defined and mongodb_tls_ca_expiry_check.rc == 1) else 'OK' }}
+{% endif %}
+
+{% endif %}
+
 {% else %}
 - **TLS:** Not configured ✗
 {% endif %}
