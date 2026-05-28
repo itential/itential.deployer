@@ -48,7 +48,7 @@ all:
         # redis_tls_auth_clients: "no"
         # redis_tls_protocols: TLSv1.3
 
-    mongodb:
+    mongodb_primary:
       hosts:
         mongodb01.example.com:
       vars:

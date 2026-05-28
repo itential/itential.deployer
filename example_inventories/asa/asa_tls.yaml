@@ -73,9 +73,12 @@ all:
         # redis_tls_auth_clients: "no"
         # redis_tls_protocols: TLSv1.3
 
-    mongodb:
+    mongodb_primary:
       hosts:
         mongodb-data01.dc1.example.com:
+
+    mongodb_replica:
+      hosts:
         mongodb-data02.dc1.example.com:
         mongodb-data01.dc2.example.com:
         mongodb-data02.dc2.example.com:
@@ -84,17 +87,13 @@ all:
       hosts:
         mongodb-arbiter01.dc3.example.com:
 
-    mongodb_nodes:
+    mongodb_node:
       hosts:
         mongodb-data01.dc1.example.com:
         mongodb-data02.dc1.example.com:
         mongodb-data01.dc2.example.com:
         mongodb-data02.dc2.example.com:
-        mongodb-arbiter01.dc3.example.com:
       vars:
-        # Enable replication between the MongoDB nodes.
-        mongodb_replication_enabled: true
-
         # The default MongoDB passwords are overridden.
         # NOTE: Using Ansible Vault or Hashicorp Vault for passwords is highly recommended.
         mongodb_user_admin_password: <mongodb-admin-password>
