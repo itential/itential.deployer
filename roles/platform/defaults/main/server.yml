@@ -27,40 +27,40 @@ platform_service_blacklist:
 platform_encrypted: true
 
 # The amount of time a service should wait before shutting down, in seconds.
-platform_shutdown_timeout: 3
+platform_shutdown_timeout:
 
 # The application/adapter launch delay, in seconds.
 platform_service_launch_delay: 1
 
 # The application/adapter launch timeout, in seconds.
-platform_service_launch_timeout: 600
+platform_service_launch_timeout:
 
 # How often to update service health, measured in seconds.
-platform_service_health_check_interval: 5
+platform_service_health_check_interval:
 
 # The number of failed health checks in a row before a service is considered to be “unhealthy”.
-platform_service_health_check_unhealthy_threshold: 3
+platform_service_health_check_unhealthy_threshold:
 
 # If true, the platform will periodically check for dead processes.
-platform_dead_process_check_enabled: false
+platform_dead_process_check_enabled:
 
 # How often to check if application/adapter stopped sending healthcheck pings, in seconds.
-platform_dead_process_check_interval: 5
+platform_dead_process_check_interval:
 
 # Maximum time period for application/adapter without sending healthcheck ping, in seconds.
-platform_dead_process_max_period: 15
+platform_dead_process_max_period:
 
 # Specifies the amount of times services will retry on crash before stopping.
-platform_service_crash_recovery_max_retries: 10
+platform_service_crash_recovery_max_retries:
 
 # Specifies the amount of times between each retry before the count will reset in milliseconds.
-platform_service_crash_recovery_reset_retries_after_ms: 60000
+platform_service_crash_recovery_reset_retries_after_ms:
 
 # The timeout for external API requests, in seconds.
-platform_external_request_timeout: 5
+platform_external_request_timeout:
 
 # The interval for how often IAP polls for the number of devices, in hours.
-platform_device_count_polling_interval: 24
+platform_device_count_polling_interval:
 
 # If true, the platform will track detailed audit events.
-platform_audit_enabled: false
+platform_audit_enabled:

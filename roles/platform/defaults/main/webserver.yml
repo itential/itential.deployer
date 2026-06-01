@@ -2,13 +2,13 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
 # A toggle to instruct the webserver to include HTTP cache control headers on the response.
-platform_webserver_cache_control_enabled: false
+platform_webserver_cache_control_enabled:
 
 # Timeout to use for incoming HTTP requests to the platform API, in milliseconds.
-platform_webserver_timeout: 300000
+platform_webserver_timeout:
 
 # The value of the HTTP Access-Control-Allow-Origin header returned to clients.
-platform_webserver_response_header_access_control_allow_origin: "*"
+platform_webserver_response_header_access_control_allow_origin:
 
 # If true, allows the webserver to respond to insecure HTTP requests.
 platform_webserver_http_enabled: true
@@ -29,13 +29,13 @@ platform_webserver_https_passphrase:
 platform_webserver_https_secure_protocol: TLS_method
 
 # The allowed SSL/TLS cipher suite.
-platform_webserver_https_ciphers: "ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA384:DHE-RSA-AES256-SHA384:ECDHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA256:HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA" # noqa line-length yaml[line-length]
+platform_webserver_https_ciphers:
 
 # Specifies the number of renegotiations that are allowed in a single HTTPS connection.
-platform_webserver_https_client_reneg_limit: 3
+platform_webserver_https_client_reneg_limit:
 
 # Specifies the time renegotiation window in seconds for a single HTTPS connection.
-platform_webserver_https_client_reneg_window: 600
+platform_webserver_https_client_reneg_window:
 
 # The set of allowed HTTP verbs in addition to those defined in the standard HTTP/1.1 protocol.
 platform_webserver_http_allowed_optional_verbs:

@@ -9,4 +9,4 @@ platform_device_broker_run_command_adapter_preference:
 
 # If true, the platform will perform strict JSON Schema validation on messages into the brokers and
 # coming back to the broker layer from adapters.
-platform_broker_validation_enabled: false
+platform_broker_validation_enabled:

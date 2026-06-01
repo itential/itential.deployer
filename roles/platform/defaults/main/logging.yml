@@ -2,58 +2,58 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
 # The maximum number of each log file to keep as rotation occurs.
-platform_log_max_files: 100
+platform_log_max_files:
 
 # The maximum file size in bytes of each log file before rotation occurs.
-platform_log_max_file_size: 1048576
+platform_log_max_file_size:
 
 # The minimum log level to display in the log file.
-platform_log_level: info
+platform_log_level:
 
 # The absolute directory path where log files are written.
 platform_log_dir: "{{ platform_log_dir_default }}"
 
 # The name of the primary platform log file.
-platform_log_filename: platform.log
+platform_log_filename:
 
 # The minimum log level to display in the console (stdout).
-platform_log_level_console: warn
+platform_log_level_console:
 
 # The absolute directory path where webserver log files are written.
 platform_webserver_log_directory: "{{ platform_log_dir }}"
 
 # The name of the webserver log file.
-platform_webserver_log_filename: webserver.log
+platform_webserver_log_filename:
 
 # The minimum log level to send to the syslog server.
-platform_log_level_syslog: warning
+platform_log_level_syslog:
 
 # The hostname or IP address of the syslog server.
-platform_syslog_host: localhost
+platform_syslog_host:
 
 # The port number of the syslog server.
-platform_syslog_port: 514
+platform_syslog_port:
 
 # The protocol to use when sending logs to the syslog server.
-platform_syslog_protocol: udp4
+platform_syslog_protocol:
 
 # The syslog facility to use when sending logs to the syslog server.
-platform_syslog_facility: local0
+platform_syslog_facility:
 
 # The syslog message format to use when sending logs to the syslog server.
-platform_syslog_type: BSD
+platform_syslog_type:
 
 # The path to the syslog server file.
-platform_syslog_path: /dev/log
+platform_syslog_path:
 
 # The process property to include as the process id in the syslog message.
-platform_syslog_pid: process.pid
+platform_syslog_pid:
 
 # The hostname to include in the syslog message.
-platform_syslog_localhost: localhost
+platform_syslog_localhost:
 
 # The process property to include as the application name in the syslog message.
-platform_syslog_app_name: process.title
+platform_syslog_app_name:
 
 # The end of line character to include in the syslog message.
 platform_syslog_eol:
