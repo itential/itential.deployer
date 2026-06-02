@@ -506,7 +506,9 @@
 
 - name: Check inventory_hostname in certificate SANs
   ansible.builtin.set_fact:
-    platform_https_hostname_in_san: "{{ inventory_hostname in ((platform_https_cert_sans | default({})).stdout | default('')) }}"
+    platform_https_hostname_in_san: >-
+      {{ (inventory_hostname | default('')) in
+      ((platform_https_cert_sans | default({})).stdout | default('')) }}
   when:
     - platform_https_cert_sans is defined
     - platform_https_cert_sans.stdout is defined
@@ -514,7 +516,9 @@
 
 - name: Check ansible_host IP in certificate SANs
   ansible.builtin.set_fact:
-    platform_https_ip_in_san: "{{ ansible_host in ((platform_https_cert_sans | default({})).stdout | default('')) }}"
+    platform_https_ip_in_san: >-
+      {{ (ansible_host | default('')) in
+      ((platform_https_cert_sans | default({})).stdout | default('')) }}
   when:
     - platform_https_cert_sans is defined
     - platform_https_cert_sans.stdout is defined

@@ -151,7 +151,7 @@
   ignore_errors: true
   when: mongodb_tls_enabled | bool
 
-- name: Get TLS server certificate dates
+- name: Get TLS server certificate expiration dates
   ansible.builtin.shell: |
     openssl x509 -in {{ mongodb_tls_cert_dest }} -noout -dates
   register: mongodb_tls_cert_dates

@@ -312,7 +312,9 @@
 
 - name: Check if inventory_hostname is in certificate SANs
   ansible.builtin.set_fact:
-    redis_tls_san_hostname_match: "{{ inventory_hostname in ((redis_tls_cert_sans | default({})).stdout | default('')) }}"
+    redis_tls_san_hostname_match: >-
+      {{ (inventory_hostname | default('')) in
+      ((redis_tls_cert_sans | default({})).stdout | default('')) }}
   when:
     - redis_tls_enabled | bool
     - redis_tls_cert_sans is defined
@@ -321,7 +323,9 @@
 
 - name: Check if ansible_host is in certificate SANs
   ansible.builtin.set_fact:
-    redis_tls_san_ip_match: "{{ ansible_host in ((redis_tls_cert_sans | default({})).stdout | default('')) }}"
+    redis_tls_san_ip_match: >-
+      {{ (ansible_host | default('')) in
+      ((redis_tls_cert_sans | default({})).stdout | default('')) }}
   when:
     - redis_tls_enabled | bool
     - redis_tls_cert_sans is defined
