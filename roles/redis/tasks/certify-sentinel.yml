@@ -35,6 +35,7 @@
   ansible.builtin.shell: |
     set -o pipefail &&
     {{ redis_bin_dir }}/redis-cli \
+      {% if redis_tls_enabled | bool %}--tls --cacert {{ redis_tls_ca_dest }}{% endif %} \
       --user admin \
       -p {{ redis_sentinel_port }} \
       -h "{{ inventory_hostname }}" \
@@ -350,7 +351,7 @@
 
 - name: Copy validation report to the control node
   ansible.builtin.fetch:
-    dest: "{{ redis_certify_report_dir_local }}/"
+    dest: "{{ redis_sentinel_certify_report_dir_local }}/"
     fail_on_missing: false
     flat: true
     src: "{{ redis_sentinel_certify_report_file }}"
