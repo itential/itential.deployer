@@ -41,7 +41,6 @@ mongodb_itential_db_name: itential
 
 # Feature flags that can be overridden in the hosts file
 # Enabling auth and TLS by default to ensure secure communication, can be disabled if not needed
-mongodb_replication_enabled: false
 mongodb_auth_enabled: true
 mongodb_tls_enabled: true
 

@@ -14,6 +14,7 @@
     mongodb_is_primary_node: "{{ 'mongodb_primary' in group_names }}"
     mongodb_is_replica_node: "{{ 'mongodb_replica' in group_names }}"
     mongodb_data_nodes: "{{ groups['mongodb_primary'] | default([]) + groups['mongodb_replica'] | default([]) }}"
+    mongodb_has_replicas: "{{ groups['mongodb_replica'] is defined and groups['mongodb_replica'] | length > 0 }}"
 
 # Installs all the necessary components and dependencies for MongoDB.
 # This will start the server with the simplest config.
@@ -30,7 +31,7 @@
   ansible.builtin.import_tasks:
     file: configure-mongodb.yml
   tags: configure_mongodb
-  when: mongodb_auth_enabled | bool or mongodb_tls_enabled | bool or groups['mongodb_replica'] | default([]) | length > 0
+  when: mongodb_auth_enabled | bool or mongodb_tls_enabled | bool or mongodb_has_replicas
 
 - name: Assert that MongoDB is running
   ansible.builtin.systemd:

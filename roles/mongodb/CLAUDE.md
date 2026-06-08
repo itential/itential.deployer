@@ -55,7 +55,6 @@ Conditionally includes (in order):
 | `mongodb_auth_enabled` | `true` | Enable MongoDB authentication |
 | `mongodb_tls_enabled` | `true` | Enable TLS |
 | `mongodb_tls_copy_certs` | `true` | Copy certs from control node to target |
-| `mongodb_replication_enabled` | `false` | Enable replica set configuration |
 | `mongodb_replset_name` | `rs0` | Replica set name |
 | `mongodb_user_admin` | `admin` | Admin user name |
 | `mongodb_user_itential` | `itential` | App user name |
@@ -114,7 +113,7 @@ Flow (`configure-mongodb-tls.yml`):
 2. Write `mongod.conf` with `stage: tls` (enables TLS settings in the template)
 3. Flush handlers (restarts mongod immediately with TLS config)
 
-**`mongodb_pki_src_dir` must be set in inventory** when `mongodb_tls_copy_certs: true`. The cert file is `<inventory_hostname>.pem` (combined cert + key in PEM format) — MongoDB requires a single PEM with both. The replica keyfile (`replica.key`) is only needed when `mongodb_replication_enabled: true`.
+**`mongodb_pki_src_dir` must be set in inventory** when `mongodb_tls_copy_certs: true`. The cert file is `<inventory_hostname>.pem` (combined cert + key in PEM format) — MongoDB requires a single PEM with both. The replica keyfile (`replica.key`) is only needed when there are `mongodb_replica` nodes.
 
 To disable TLS (e.g., AIO dev environments):
 ```yaml
