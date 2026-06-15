@@ -34,8 +34,8 @@ platform_user: itential
 platform_group: itential
 
 # SSH key used for cloning adapters from private Git repositories over SSH
-platform_adapter_ssh_key_dir: "/home/{{ platform_user }}/.ssh"
-platform_adapter_ssh_key_file: "rd_rsa"
+platform_adapter_ssh_key_dir: "{{ platform_itential_home_dir }}/.ssh"
+platform_adapter_ssh_key_file: ""
 
 # Flag to determine whether to use rsync when uploading artifacts
 platform_upload_using_rsync: false
