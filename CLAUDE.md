@@ -10,7 +10,7 @@
 |-------|-------|
 | Namespace | `itential` |
 | Name | `deployer` |
-| Version | `3.7.2` |
+| Version | `4.0.0` |
 | Min ansible-core | `>=2.11, <2.17` |
 | Min Python | `>=3.9` |
 

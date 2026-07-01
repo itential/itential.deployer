@@ -164,7 +164,14 @@ Confirms the properties file and systemd unit file are present and shows file pe
 
 ### Critical Configuration Properties
 
-Key values read directly from `platform.properties`: MongoDB URL and TLS settings, Redis host and Sentinel configuration, webserver ports, log file paths, and the default admin username.
+Key values read directly from `platform.properties`: MongoDB URL and TLS settings, MongoDB read/write concern levels, Redis host and Sentinel configuration, webserver ports, log file paths, and the default admin username.
+
+| Property | Description |
+|----------|-------------|
+| `mongo_read_concern` | The read concern level configured for the IAP MongoDB connection. Recommended value: `majority`. If not set, Platform uses the MongoDB driver default (`local`), which allows reads of data that may be rolled back on failover. |
+| `mongo_write_concern` | The write concern level configured for the IAP MongoDB connection. Recommended value: `majority`. If not set, Platform uses the MongoDB driver default, which may acknowledge writes before they are replicated to a majority of nodes. |
+
+Both values are captured as-is from the properties file. The report shows `Not set` when either property is absent. No validation or enforcement is performed — this is an observation check to surface the current configuration for review.
 
 ### Custom Services
 
