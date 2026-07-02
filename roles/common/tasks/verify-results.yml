@@ -1,0 +1,21 @@
+# Copyright (c) 2026, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+
+# Display results
+- name: Display failed validation results
+  ansible.builtin.debug:
+    msg: "{{ validation_errors }}"
+  when: cpu_validation is failed or memory_validation is failed or disk_validation is failed or platform_validation is failed
+
+# Assert that none of the tests failed
+- name: Verify that all tests passed
+  ansible.builtin.assert:
+    that:
+      - "cpu_validation is not failed"
+      - "memory_validation is not failed"
+      - "disk_validation is not failed"
+      - "proxy_validation is not failed"
+      - "platform_validation is not failed"
+    fail_msg: "See above, assertions not passed! ✗"
+    success_msg: "All assertions passed! ✓"

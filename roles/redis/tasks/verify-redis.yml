@@ -19,3 +19,8 @@
     hw_specs_var_name: "redis_hw_specs"
 
 # redis specific verification tasks go here...
+
+- name: Verify Platform host requirements
+  ansible.builtin.include_role:
+    name: common
+    tasks_from: verify-results

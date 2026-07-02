@@ -18,4 +18,51 @@
     component_name: "Platform"
     hw_specs_var_name: "platform_hw_specs"
 
-    # platform specific verification tasks go here...
+# platform specific verification tasks go here...
+- name: Verify TLS certs for platform webserver are defined
+  ansible.builtin.assert:
+    that: platform_https_pki_src_dir is defined and platform_https_pki_src_dir | length > 0
+    fail_msg: "TLS certificate directory is undefined. Itential Platform requires TLS certificates."
+    success_msg: "TLS certificate directory is defined"
+    quiet: true
+  ignore_errors: true
+  register: platform_tls_dir_validation
+  when: platform_webserver_https_enabled | bool
+
+- name: Verify that expected certificate files exist on the control node
+  ansible.builtin.stat:
+    path: "{{ platform_https_pki_src_dir }}/{{ item }}"
+  loop:
+    - "{{ platform_https_cert_file }}"
+    - "{{ platform_https_key_file }}"
+    - "{{ platform_https_ca_file }}"
+  register: cert_file_stats
+  delegate_to: localhost
+  become: false
+  when:
+    - platform_webserver_https_enabled | bool
+    - platform_tls_dir_validation is not failed
+
+- name: Assert that all expected certificate files exist
+  ansible.builtin.assert:
+    that: cert_file_stats.results | map(attribute='stat.exists') | list | min
+    fail_msg: "One or more expected certificate files are missing in {{ platform_https_pki_src_dir }}"
+    success_msg: "All expected certificate files are present"
+    quiet: true
+  ignore_errors: true
+  register: platform_tls_contents_validation
+  when:
+    - platform_webserver_https_enabled | bool
+    - platform_tls_dir_validation is not failed
+
+- name: Add TLS files error to list
+  ansible.builtin.set_fact:
+    validation_errors: "{{ validation_errors + ['Platform TLS: TLS files for Itential Platform webserver appear to be missing'] }}"
+  when:
+    - platform_webserver_https_enabled | bool
+    - platform_tls_dir_validation is failed or platform_tls_contents_validation is failed
+
+- name: Verify Platform host requirements
+  ansible.builtin.include_role:
+    name: common
+    tasks_from: verify-results
