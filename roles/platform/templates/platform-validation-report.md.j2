@@ -102,6 +102,8 @@ Host details not available
 - **mongo_db_name:** {{ platform_mongo_db_name.stdout | default('Unknown') }}
 - **mongo_url:** {{ platform_mongo_url_masked | default('Unknown') }}
 - **mongo_tls_enabled:** {{ platform_mongo_tls_enabled.stdout | default('Unknown') }}
+- **mongo_read_concern:** {{ (platform_mongo_read_concern.stdout | default('')) or 'Not set' }}
+- **mongo_write_concern:** {{ (platform_mongo_write_concern.stdout | default('')) or 'Not set' }}
 - **redis_db:** {{ (platform_mongo_auth_db.stdout | default('')) or 'Default value' }}
 - **redis_user:** {{ (platform_mongo_auth_db.stdout | default('')) or 'Default value' }}
 - **redis_host:** {{ (platform_redis_host.stdout | default('')) or 'Unknown' }}
