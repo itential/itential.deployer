@@ -11,6 +11,10 @@
     name: vm.overcommit_memory
     value: 1
 
+- name: Disable Transparent Huge Pages (THP)
+  ansible.builtin.import_tasks:
+    file: disable-thp.yml
+
 - name: Create Redis group
   ansible.builtin.group:
     name: "{{ redis_group }}"
