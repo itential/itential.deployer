@@ -56,7 +56,6 @@ gateway_python_wheel_build_dependencies:
   - ansible-pylibssh==1.4.0
   - mypy_extensions==0.4.4
   - ncclient==0.6.19
-  - netifaces==0.10.9
   - pygnmi==0.8.9
 
 # These Python modules are pinned here because we are using 'pip download' and not 'pip install'

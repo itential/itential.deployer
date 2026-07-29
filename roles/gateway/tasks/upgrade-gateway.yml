@@ -46,21 +46,21 @@
 - name: Upgrade IAG
   ansible.builtin.pip:
     name: "{{ workingdir.path }}/{{ gateway_whl_file | basename }}"
-    virtualenv: "{{ gateway_install_dir }}/venv"
+    virtualenv: "{{ gateway_python_venv }}"
 
 # Using chown and chmod is a faster way to enforce the file ownership and
 # permissions. The file module in ansible checks each and every file/dir
 # in the tree, 'chown -R ' does not, it just sets it.
 - name: Set appropriate ownership on all gateway files
   ansible.builtin.command:
-    cmd: "chown -R {{ gateway_user }}:{{ gateway_group }} {{ gateway_install_dir }}/venv"
+    cmd: "chown -R {{ gateway_user }}:{{ gateway_group }} {{ gateway_python_venv }}"
   register: chown_output
   changed_when: chown_output.rc == 0
   failed_when: chown_output.rc != 0
 
 - name: Set appropriate permissions on all gateway files
   ansible.builtin.command:
-    cmd: "chmod -R 775 {{ gateway_install_dir }}/venv"
+    cmd: "chmod -R 775 {{ gateway_python_venv }}"
   register: chmod_output
   changed_when: chmod_output.rc == 0
   failed_when: chmod_output.rc != 0
