@@ -30,7 +30,6 @@
       ansible.builtin.tempfile:
         state: directory
       register: gateway_workingdir
-      tags: always
 
     - name: Install Gateway dependency packages
       ansible.builtin.dnf:
@@ -53,20 +52,17 @@
       when: offline_install_enabled | bool
       tags: install_gateway_packages
 
-    - name: Create gateway user
-      tags: create_gateway_user
-      block:
-        - name: Create itential group
-          ansible.builtin.group:
-            name: "{{ gateway_group }}"
+    - name: Create itential group
+      ansible.builtin.group:
+        name: "{{ gateway_group }}"
 
-        - name: Create itential user
-          ansible.builtin.user:
-            name: "{{ gateway_user }}"
-            group: "{{ gateway_group }}"
-            groups: wheel
-            generate_ssh_key: true
-            state: present
+    - name: Create itential user
+      ansible.builtin.user:
+        name: "{{ gateway_user }}"
+        group: "{{ gateway_group }}"
+        groups: wheel
+        generate_ssh_key: true
+        state: present
 
     - name: Create working directories
       ansible.builtin.file:
@@ -96,7 +92,6 @@
         - "{{ gateway_install_dir }}/repos"
         - "{{ gateway_install_dir }}/scripts"
         - "{{ gateway_install_dir }}/ssh"
-      tags: create_dirs
 
     - name: Create Python venv directory
       ansible.builtin.file:
@@ -106,7 +101,6 @@
         mode: "0775"
         state: directory
       when: gateway_enable_python_venv | bool
-      tags: create_dirs
 
     - name: Prepare Gateway PKI infrastructure
       ansible.builtin.include_tasks: configure-gateway-https.yml
