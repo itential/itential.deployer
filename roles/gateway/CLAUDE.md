@@ -144,7 +144,6 @@ gateway_pki_copy_certs: false
 | `gateway_python_version` | `3.9` |
 | `gateway_python_packages` | `python39`+`python39-pip` (RHEL 8); `python3`+`python3-pip` (RHEL 9, AL2023) |
 | `gateway_python_base_dependencies` | `pip==24.0`, `setuptools==78.1.1`, `wheel==0.43.0` |
-| `gateway_python_wheel_build_dependencies` | `ansible-pylibssh==1.3.0`, `ncclient==0.6.19`, `netifaces==0.10.9`, `pygnmi==0.8.9`, `mypy_extensions==0.4.4` |
 | `gateway_build_packages` | `gcc-c++`, `libssh-devel`, `make`, `pkgconf-pkg-config`, `python3(9)-devel` |
 
 Release 4.2 uses the same package sets but different pinned versions (e.g., `setuptools==69.0.3`, `ncclient==0.6.10`).
