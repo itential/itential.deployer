@@ -150,7 +150,7 @@
             - name: Install collections
               ansible.builtin.command:
                 argv:
-                  - "{{ gateway_install_dir }}/venv/bin/ansible-galaxy"
+                  - "{{ gateway_python_venv }}/bin/ansible-galaxy"
                   - collection
                   - install
                   - -p
@@ -194,7 +194,7 @@
 
     - name: Check if Automation Gateway is already installed
       ansible.builtin.stat:
-        path: "{{ gateway_install_dir }}/venv/automation-gateway"
+        path: "{{ gateway_python_venv }}/automation-gateway"
       register: gateway_installed
 
     - name: Propagate IAG archive
@@ -246,7 +246,8 @@
     - name: Install IAG
       ansible.builtin.pip:
         name: "{{ gateway_workingdir.path }}/{{ gateway_whl_file | basename }}"
-        virtualenv: "{{ gateway_install_dir }}/venv"
+        virtualenv: "{{ gateway_python_venv }}"
+        extra_args: --log /var/log/pip.log
       when: not offline_install_enabled | bool
 
     - name: Set ownership/permissions and create properties.yml
@@ -257,12 +258,12 @@
         # in the tree, 'chown -R ' does not, it just sets it.
         - name: Set appropriate ownership on all gateway files
           ansible.builtin.command:
-            cmd: "chown -R {{ gateway_user }}:{{ gateway_group }} {{ gateway_install_dir }}/venv"
+            cmd: "chown -R {{ gateway_user }}:{{ gateway_group }} {{ gateway_python_venv }}"
           changed_when: true
 
         - name: Set appropriate permissions on all gateway files
           ansible.builtin.command:
-            cmd: "chmod -R 775 {{ gateway_install_dir }}/venv"
+            cmd: "chmod -R 775 {{ gateway_python_venv }}"
           changed_when: true
 
         - name: Create properties.yml using template based on the version
