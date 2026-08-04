@@ -175,6 +175,7 @@
             dest: /etc/ansible/ansible.cfg
             mode: "0644"
             backup: true
+            force: false
 
         - name: Create empty ansible inventory files
           ansible.builtin.file:
@@ -273,6 +274,7 @@
             owner: "{{ gateway_user }}"
             group: "{{ gateway_group }}"
             mode: "0600"
+            backup: true
 
     - name: Create Nornir files
       when: gateway_enable_nornir | bool
