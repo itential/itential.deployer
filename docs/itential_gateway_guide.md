@@ -23,7 +23,7 @@ The variables in this section may be overridden in the inventory in the `gateway
 
 | Variable | Type | Description | Default Value |
 | :------- | :--- | :---------- | :------------ |
-| `gateway_release` | Fixed-point | Designates which major release version of IAG to install. | N/A |
+| `gateway_release` | Fixed-point | Designates which major release version of IAG to install. Supported values: `4.2`, `4.3`, `4.4`. | N/A |
 | `gateway_whl_file` | String | The name of the IAG wheel file to install. | N/A |
 | `gateway_archive_download_url` | String | The URL for the download of the iag whl file from a repository. | N/A |
 | `repository_username` | String | The username for authentication of the repository from gateway_archive_download_url. | N/A |
@@ -62,8 +62,9 @@ The following table lists the default variables located in `roles/gateway/defaul
 | `gateway_pki_copy_certs` | Boolean | Flag to manage PKI infrastructure (create directories and copy certificates). | `true` |
 | `gateway_tlsv1_2` | Boolean | Flag to enable TLS 1.2. | `false` |
 | `gateway_http_server_threads` | Integer | The number of http server threads for handling requests. | `{{ ansible_processor_cores * 4 }}` |
-| `gateway_venv_name` | String | The name of the Python virtual environment. | `venv` |
+| `gateway_venv_name` | String | The name of the Python virtual environment. | `venv_gateway_{{ gateway_release }}` |
 | `gateway_python_venv` | String | The full path to the Python virtual environment. | `{{ gateway_install_dir }}/{{ gateway_venv_name }}` |
+| `gateway_ansible_collections` | List | Ansible collections to install into IAG's Python virtual environment when `gateway_enable_ansible: true`. Must be set in inventory; no default is provided. | N/A |
 
 ### Gateway PKI Variables
 
@@ -182,6 +183,10 @@ gateway_https_key_file: "gateway.key"
 To install and configure IAG, add a `gateway` group and host(s) to your inventory and configure the
 `gateway_release` and `gateway_whl_file`.
 
+`gateway_release` currently supports `4.2`, `4.3`, and `4.4`. The examples below use `4.3`; to
+install `4.4` instead, set `gateway_release: 4.4` and point `gateway_whl_file` (or
+`gateway_archive_download_url`) at the corresponding `automation_gateway-4.4.x-py3-none-any.whl`.
+
 ## Example Inventory - Single IAG Node
 
 ```yaml
@@ -285,10 +290,12 @@ ansible-playbook itential.deployer.gateway -i <inventory>
 
 You can also use the following tags:
 
-* `upload_gateway_certificates` - Only manage certificate infrastructure
+* `install_gateway_packages` - Only install Gateway dependency packages
+* `upload_gateway_certificates` (aliases: `gateway`, `certificates`) - Only manage certificate infrastructure
 * `install_python` - Only install Python
-* `install_python_dependencies` - Only install Python dependencies
 * `install_gateway_build_packages` - Only install Gateway build packages
+* `install_python_dependencies` - Only install Python dependencies
+* `configure_ansible` - Only configure Ansible collections and config for IAG
 * `uninstall_gateway_build_packages` - Only uninstall Gateway build packages
 
 To execute only certificate management tasks:

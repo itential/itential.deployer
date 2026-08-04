@@ -51,8 +51,8 @@ Installs and configures Itential Automation Gateway (IAG). Handles Python virtua
 | `gateway_tlsv1_2` | `false` | Allow TLSv1.2 (in addition to 1.3) |
 | `gateway_user` | `itential` | OS user for IAG process |
 | `gateway_group` | `itential` | OS group |
-| `gateway_venv_name` | `venv` | Name of the Python virtualenv directory |
-| `gateway_python_venv` | `{{ gateway_install_dir }}/venv` | Path to the Python virtualenv |
+| `gateway_venv_name` | `venv_gateway_{{ gateway_release }}` | Name of the Python virtualenv directory |
+| `gateway_python_venv` | `{{ gateway_install_dir }}/{{ gateway_venv_name }}` | Path to the Python virtualenv |
 | `gateway_http_server_threads` | `{{ ansible_processor_cores * 4 }}` | IAG HTTP thread count |
 | `gateway_enable_ansible` | `true` | Install Ansible and configure collections |
 | `gateway_enable_nornir` | `true` | Create Nornir config/inventory files |
@@ -118,6 +118,7 @@ gateway_pki_copy_certs: false
 
 | Template | Rendered To | Purpose |
 |----------|-------------|---------|
+| `properties.4.4.yml.j2` | `/etc/automation-gateway/properties.yml` | IAG properties for release 4.4 (port, TLS, Ansible paths, feature flags) |
 | `properties.4.3.yml.j2` | `/etc/automation-gateway/properties.yml` | IAG properties for release 4.3 (port, TLS, Ansible paths, feature flags) |
 | `properties.4.2.yml.j2` | `/etc/automation-gateway/properties.yml` | IAG properties for release 4.2 |
 | `properties.2023.3.yml.j2` | (legacy) | Legacy release templates |
@@ -137,18 +138,19 @@ gateway_pki_copy_certs: false
 |---------|--------------|--------|
 | Restart automation-gateway | `restart automation-gateway` | `systemctl restart automation-gateway` |
 
-## Release-Specific Vars (vars/gateway-release-4.3.yml)
+## Release-Specific Vars (vars/gateway-release-4.4.yml)
 
 | Variable | Value |
 |----------|-------|
-| `gateway_python_version` | `3.9` |
-| `gateway_python_packages` | `python39`+`python39-pip` (RHEL 8); `python3`+`python3-pip` (RHEL 9, AL2023) |
+| `gateway_python_version` | `3.12` |
+| `gateway_python_packages` | `python3.12`+`python3.12-pip` (RHEL 8, RHEL 9, AL2023) |
 | `gateway_python_base_dependencies` | `pip==24.0`, `setuptools==78.1.1`, `wheel==0.43.0` |
-| `gateway_build_packages` | `gcc-c++`, `libssh-devel`, `make`, `pkgconf-pkg-config`, `python3(9)-devel` |
+| `gateway_build_packages` | `gcc-c++`, `libssh-devel`, `make`, `pkgconf-pkg-config`, `python3.12-devel` |
+| `gateway_python_app_dependencies` | `importlib-metadata==4.12.0`, `grpcio-tools==1.63.2` |
 
-Release 4.2 uses the same package sets but different pinned versions (e.g., `setuptools==69.0.3`, `ncclient==0.6.10`).
+Release 4.3 (`vars/gateway-release-4.3.yml`) uses Python `3.9` (`python39` on RHEL 8, `python3` on RHEL 9/AL2023) and different pinned versions (e.g., `importlib-metadata==4.13.0`, `grpcio-tools==1.53.0`). Release 4.2 uses the same package sets as 4.3 but different pinned versions (e.g., `setuptools==69.0.3`, `ncclient==0.6.10`).
 
-Supported `gateway_release` values: `4.2`, `4.3`. Legacy date-format releases (`2021.1` through `2023.3`) have property templates but no dedicated vars files.
+Supported `gateway_release` values: `4.2`, `4.3`, `4.4`. Legacy date-format releases (`2021.1` through `2023.3`) have property templates but no dedicated vars files.
 
 ## IAG Installation Methods
 
