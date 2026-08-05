@@ -156,3 +156,12 @@ See `docs/offline_install_guide.md` for the full workflow.
 | `docs/certify_guide.md` | How to run the `certify` playbooks and interpret the certification report |
 | `docs/nginx.md` | Nginx reverse-proxy setup and configuration |
 | `docs/release_notes_v4.md` | Release notes for v4 changes |
+
+## CI
+
+| Workflow | Trigger | Purpose |
+|----------|---------|---------|
+| `ansible-lint.yml` | push/PR to `main`, `dev` | Lint validation |
+| `role-readme-check.yml` | push/PR to `dev` | Fails the build if any `roles/*/` directory is missing a README (Ansible Galaxy requirement) |
+| `updateChangelog.yml` | GitHub release or manual | Updates the changelog |
+| `publish_ansible_collection.yml` | GitHub release or manual | Publish to Galaxy |
