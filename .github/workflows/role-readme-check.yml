@@ -1,0 +1,27 @@
+# .github/workflows/role-readme-check.yml
+#
+# Ansible Galaxy requires every role to have its own README. This job fails the build
+# (blocking merge to dev) if any directory under roles/ is missing one.
+name: role-readme-check
+on:
+  push:
+    branches: ["dev"]
+  pull_request:
+    branches: ["dev"]
+jobs:
+  check-role-readmes:
+    name: Role READMEs # Naming the build is important to use it as a status check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify every role has a README
+        run: |
+          missing=0
+          for dir in roles/*/; do
+            role=$(basename "$dir")
+            if ! ls "$dir" 2>/dev/null | grep -qi '^readme'; then
+              echo "::error::Role '$role' is missing a README (required by Ansible Galaxy)"
+              missing=1
+            fi
+          done
+          exit "$missing"
