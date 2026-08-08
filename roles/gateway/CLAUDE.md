@@ -18,17 +18,17 @@ Installs and configures Itential Automation Gateway (IAG). Handles Python virtua
 10. Install build packages (`gateway_build_packages`) — online only (removed in `always` block)
 11. Install Python dependencies (`install-python-dependencies.yml`)
 12. Configure Ansible (when `gateway_enable_ansible: true`): install collections → create `ansible.cfg` → create empty inventory/vault files
-13. Check if IAG is already installed (`stat` on `venv/automation-gateway`)
+13. Check if IAG is already installed (`stat` on `venv/bin/automation-gateway`)
 14. Copy or download IAG wheel file when not already installed
 15. `pip install` IAG wheel into `gateway_install_dir/venv`
-16. Set ownership (`chown -R`) and permissions (`chmod -R 775`) on venv
-17. Create `properties.yml` from versioned template
+16. Set ownership (`chown -R`) and permissions (`chmod -R 775`) on venv (tagged `configure_gateway`)
+17. Create `properties.yml` from versioned template (tagged `configure_gateway`)
 18. Create Nornir inventory/config files (when `gateway_enable_nornir: true`)
-19. Write `automation-gateway.service` systemd unit
+19. Write `automation-gateway.service` systemd unit (tagged `configure_gateway`)
 20. Open firewalld port (HTTP or HTTPS depending on `gateway_https_enabled`)
 21. `configure-selinux.yml`
 22. Copy test scripts to `gateway_install_dir/scripts/`
-23. Start and enable `automation-gateway` service
+23. Start and enable `automation-gateway` service (tagged `always` — runs even when other tags are selected via `--tags`)
 24. `update-release-file.yml`
 25. Remove temp working directory
 26. `always` block: remove build packages that were installed; assert service is active
@@ -176,8 +176,10 @@ Only one of `gateway_whl_file` or `gateway_archive_download_url` should be set.
 ## Gotchas
 
 - Build packages (`gcc`, `libssh-devel`, `make`, etc.) are installed to compile Python wheel dependencies, then removed in the `always` block — even if the play fails. This cleanup runs unconditionally.
-- The IAG install is skipped if `{{ gateway_install_dir }}/venv/automation-gateway` already exists (`stat` check). To force reinstall, remove this file/symlink first.
+- The IAG install is skipped if `{{ gateway_python_venv }}/bin/automation-gateway` already exists (`stat` check). To force reinstall, remove this file/symlink first.
+- The "Set ownership/permissions and create properties.yml" block and the "Write automation-gateway.service to host" task are no longer gated by `not gateway_installed.stat.exists` — they now run on every playbook execution (tagged `configure_gateway`), so `properties.yml` and the systemd unit are regenerated and ownership/permissions are reapplied on re-runs, not just on first install.
 - `gateway_http_server_threads` defaults to `ansible_processor_cores * 4`. On systems where `ansible_processor_cores` is unavailable or 0, this will produce 0 threads. Verify the value is sensible on target hardware.
 - `gateway_pki_copy_certs: true` runs unconditionally when set, regardless of `gateway_https_enabled`. This means if you disable HTTPS but leave `gateway_pki_copy_certs: true`, the role will still try to copy certs (and fail if `gateway_pki_src_dir` is empty).
 - The Ansible `ansible.cfg` written to `/etc/ansible/ansible.cfg` sets the collections path to `gateway_ansible_collections_path`. If `/etc/ansible/ansible.cfg` already exists, it is backed up but replaced.
 - The `gateway_release` variable maps to both a vars file (`vars/gateway-release-<N>.yml`) and a properties template (`templates/properties.<N>.yml.j2`). Adding a new release requires both files.
+- `gateway_venv_name` is a fixed name (`venv`) shared across all releases — it is not suffixed with `gateway_release`. Because different releases pin different `gateway_python_version` values (e.g. `3.9` for 4.3, `3.12` for 4.4), `install-python.yml` checks the existing venv's Python version on every run. If it doesn't match the release's `gateway_python_version`, the existing venv is moved to a `.bak.py<old_version>.<timestamp>` sibling path and a fresh venv is created, which also causes the IAG install/properties steps in `main.yml` to re-run (since the `{{ gateway_python_venv }}/bin/automation-gateway` stat check will report not-installed). This logic only runs via the main install flow (`main.yml` → `install-python.yml`) — `upgrade-gateway.yml` (used by `patch_gateway.yml`) does not check or rebuild the venv, consistent with patch upgrades not supporting major version changes.

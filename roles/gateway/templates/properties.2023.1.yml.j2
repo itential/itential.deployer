@@ -249,7 +249,7 @@ inventory_file: "{{ gateway_install_dir }}/ansible/inventory/hosts"
 # NOTE: Use only the site-packages paths you need for your installation to avoid
 #       cross environment issues in the case where multiple of these paths exist
 module_path:
-  - "{{ gateway_install_dir }}/venv/lib/python3.9/site-packages/ansible/modules"
+  - "{{ gateway_python_venv }}/lib/python3.9/site-packages/ansible/modules"
   - "{{ gateway_install_dir }}/ansible/modules"
 
 # Path(s) to the Ansible collections that should be discovered by Automation Gateway and exclusively used in Ansible's execution environment.
@@ -259,13 +259,13 @@ collection_path:
 
 # Path(s) to the Ansible roles that should be discovered by Automation Gateway and appended to Ansible's execution environment.
 role_path:
-  - "{{ gateway_install_dir }}/venv/lib/python3.9/site-packages/automation_gateway/integrations/roles"
+  - "{{ gateway_python_venv }}/lib/python3.9/site-packages/automation_gateway/integrations/roles"
   - "{{ gateway_install_dir }}/ansible/roles"
 
 # Path(s) to customized roles that extend device support of the Itential roles found in the release, i.e., itential_cli, itential_get_config.
 #extended_device_role_path:
   #This is a sample path to roles that extend device support
-  #- "{{ gateway_install_dir }}/venv/lib/python3.9/site-packages/automation_gateway/integrations/extensible_device_roles"
+  #- "{{ gateway_python_venv }}/lib/python3.9/site-packages/automation_gateway/integrations/extensible_device_roles"
 
 # Discovery behavior for Ansible playbooks. Determines whether or not to
 # recursively search the directories found in the 'playbook_path' parameter, or
@@ -274,7 +274,7 @@ playbook_recursive: true
 
 # Path(s) to the Ansible playbooks that should be discovered by Automation Gateway and appended to Ansible's execution environment.
 playbook_path:
-  - "{{ gateway_install_dir }}/venv/lib/python3.9/site-packages/automation_gateway/integrations/playbooks"
+  - "{{ gateway_python_venv }}/lib/python3.9/site-packages/automation_gateway/integrations/playbooks"
   - "{{ gateway_install_dir }}/ansible/playbooks"
 
 #################

@@ -296,7 +296,12 @@ You can also use the following tags:
 * `install_gateway_build_packages` - Only install Gateway build packages
 * `install_python_dependencies` - Only install Python dependencies
 * `configure_ansible` - Only configure Ansible collections and config for IAG
+* `configure_gateway` - Only set venv ownership/permissions, render `properties.yml`, and write the `automation-gateway.service` unit
 * `uninstall_gateway_build_packages` - Only uninstall Gateway build packages
+
+**Note:** The task that restarts and enables the `automation-gateway` service is tagged `always`, so it
+runs on every execution of the playbook regardless of which `--tags`/`--skip-tags` you pass (unless you
+explicitly `--skip-tags always`).
 
 To execute only certificate management tasks:
 
