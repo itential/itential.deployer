@@ -10,3 +10,6 @@
 
 - name: Verify Platform Installation
   import_playbook: itential.deployer.verify_platform
+
+- name: Verify Gateway Installation
+  import_playbook: itential.deployer.verify_gateway

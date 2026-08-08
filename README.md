@@ -248,6 +248,17 @@ If internal YUM repositories are used, refer to the
 > proxy or other such method to restrict access, this list may not represent the final URLs that are
 > required.
 
+To verify connectivity to these repositories from the target hosts (excluding the Ansible
+Control Node rows, which are the control node's own responsibility), run the `verify` playbook:
+
+```bash
+ansible-playbook itential.deployer.verify -i <inventory>
+```
+
+This checks each component's target hosts (`gateway`, `platform*`, `mongodb*`, `redis_master`/
+`redis_replica`) against the rows in the table above. See
+[Confirm Requirements](#confirm-requirements) for details.
+
 ### Ports and Networking
 
 In a clustered environment where components are installed on more than one host, the following
@@ -390,7 +401,7 @@ applicable, IAG). For more information, refer to the [Itential Dependencies] pag
 nodes.
 - **SSH Access**: The control node must have SSH connectivity to all managed nodes.
 
-The deployer includes a playbook that can be used to confirm the environment is suitable and ready for installation.
+The deployer includes a playbook that can be used to confirm the environment is suitable and ready for installation. This includes checking outbound connectivity from each component's target hosts to the URLs listed in the [Required Public Repositories](#required-public-repositories) table above.
 
 ```bash
 # Verify everything
@@ -404,6 +415,9 @@ ansible-playbook -i <path-to-inventory> itential.deployer.verify_mongodb
 
 # Verify Platform
 ansible-playbook -i <path-to-inventory> itential.deployer.verify_platform
+
+# Verify Gateway
+ansible-playbook -i <path-to-inventory> itential.deployer.verify_gateway
 ```
 
 **&#9432; Note:**

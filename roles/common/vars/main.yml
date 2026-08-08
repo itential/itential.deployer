@@ -1,0 +1,94 @@
+# Copyright (c) 2026, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+# Mirrors the "Required Public Repositories" table in README.md, excluding the
+# "Ansible Control Node" rows (those are the control node's responsibility, not a target
+# host's, and are not checked by verify-connectivity.yml). Keep this list in sync with
+# README.md if that table changes.
+#
+# component: matches the component_name passed in to verify-connectivity.yml
+# url: the bare location from the README table
+# type: "bare" checks only that the URL is reachable (any HTTP response counts).
+#       "path" additionally checks a real, specific resource (check_target) that the
+#       component actually needs, expecting a genuine successful response.
+# check_target: required when type is "path"
+# notes: carried over from the README table's Notes column
+common_required_repositories:
+  - component: "Gateway"
+    url: "https://registry.aws.itential.com"
+    type: bare
+    notes: "Itential packages"
+  - component: "Gateway"
+    url: "https://galaxy.ansible.com"
+    type: bare
+    notes: "Community Ansible collections"
+  - component: "Gateway"
+    url: "https://pypi.org"
+    type: bare
+    notes: "Python modules"
+
+  - component: "Platform"
+    url: "https://registry.aws.itential.com"
+    type: bare
+    notes: "Itential packages"
+  - component: "Platform"
+    url: "https://registry.npmjs.org"
+    type: bare
+    notes: "Core NPM packages"
+  - component: "Platform"
+    url: "https://pypi.org"
+    type: bare
+    notes: "Python modules"
+  - component: "Platform"
+    url: "https://gitlab.com"
+    type: path
+    check_target: "https://gitlab.com/itentialopensource/adapters"
+    notes: "Platform Opensource Adapters NodeJS source repository"
+
+  - component: "MongoDB"
+    url: "https://repo.mongodb.org"
+    type: path
+    check_target: "https://repo.mongodb.org/yum/redhat/"
+    notes: "MongoDB YUM RPMs"
+  - component: "MongoDB"
+    url: "https://www.mongodb.org"
+    type: bare
+    notes: "MongoDB YUM RPMs"
+  - component: "MongoDB"
+    url: "https://pgp.mongodb.org"
+    type: bare
+    notes: "MongoDB YUM repository GPG Key"
+  - component: "MongoDB"
+    url: "https://pgp.mongodb.com"
+    type: bare
+    notes: "MongoDB YUM repository GPG Key"
+  - component: "MongoDB"
+    url: "https://pypi.org"
+    type: bare
+    notes: "Python modules"
+
+  - component: "Redis"
+    url: "http://rpms.remirepo.net"
+    type: path
+    check_target: "http://rpms.remirepo.net/enterprise/"
+    notes: "Redis YUM RPMs"
+  - component: "Redis"
+    url: "https://dl.fedoraproject.org"
+    type: path
+    check_target: "https://dl.fedoraproject.org/pub/epel/"
+    notes: "EPEL YUM RPMs"
+  - component: "Redis"
+    url: "https://github.com"
+    type: path
+    check_target: "https://codeload.github.com/redis/redis/tar.gz/refs/heads/unstable"
+    notes: "Redis source packages"
+  - component: "Redis"
+    url: "https://codeload.github.com"
+    type: bare
+    notes: "Redis source packages"
+
+  - component: "Vault"
+    url: "https://rpm.releases.hashicorp.com"
+    type: path
+    check_target: "https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo"
+    notes: "Vault YUM RPMs"

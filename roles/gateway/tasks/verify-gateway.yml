@@ -1,0 +1,30 @@
+# Copyright (c) 2026, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+# Unlike verify-mongodb.yml/verify-redis.yml/verify-platform.yml, this does not call
+# common:verify-host — Gateway has no documented hardware-spec requirements (gateway_hw_specs)
+# in this collection yet. This task file only verifies connectivity to Gateway's required
+# public repositories.
+
+- name: Initialize validation errors list
+  ansible.builtin.set_fact:
+    validation_errors: []
+
+- name: Verify connectivity to required public repositories
+  ansible.builtin.include_role:
+    name: common
+    tasks_from: verify-connectivity
+  vars:
+    component_name: "Gateway"
+
+- name: Display failed validation results
+  ansible.builtin.debug:
+    msg: "{{ validation_errors }}"
+  when: connectivity_validation is failed
+
+- name: Verify that all tests passed
+  ansible.builtin.assert:
+    that:
+      - "connectivity_validation is not failed"
+    fail_msg: "See above, assertions not passed! ✗"
+    success_msg: "All assertions passed! ✓"

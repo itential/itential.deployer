@@ -19,6 +19,23 @@
     hw_specs_var_name: "platform_hw_specs"
 
 # platform specific verification tasks go here...
+- name: Verify connectivity to required public repositories
+  ansible.builtin.include_role:
+    name: common
+    tasks_from: verify-connectivity
+  vars:
+    component_name: "Platform"
+
+# Vault itself isn't installed by this collection, but Platform is the component that
+# integrates with it, so its repository is checked here when Vault integration is enabled.
+- name: Verify connectivity to Vault's required public repositories
+  ansible.builtin.include_role:
+    name: common
+    tasks_from: verify-connectivity
+  vars:
+    component_name: "Vault"
+  when: platform_configure_vault | bool
+
 - name: Verify TLS certs for platform webserver are defined
   ansible.builtin.assert:
     that: platform_https_pki_src_dir is defined and platform_https_pki_src_dir | length > 0

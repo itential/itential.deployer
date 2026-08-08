@@ -33,6 +33,10 @@ Installs and configures Itential Automation Gateway (IAG). Handles Python virtua
 25. Remove temp working directory
 26. `always` block: remove build packages that were installed; assert service is active
 
+## Other Entry Points
+
+- `tasks/verify-gateway.yml` (invoked by `playbooks/verify_gateway.yml`, tags_from `verify-gateway`) — checks connectivity to Gateway's required public repositories (`common_required_repositories` filtered to `component: "Gateway"`) via `common:verify-connectivity`. Unlike the other components' verify flows, it does not call `common:verify-host` (no `gateway_hw_specs` exists yet), so it skips OS/CPU/RAM/disk/proxy validation entirely.
+
 ## Key Variables
 
 ### gateway.yml defaults
