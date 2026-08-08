@@ -19,6 +19,41 @@
         offline_rpms_path: "{{ gateway_offline_control_node_rpms_dir }}/python"
       when: offline_install_enabled | bool
 
+    - name: Check for existing Gateway Python virtual environment
+      ansible.builtin.stat:
+        path: "{{ gateway_python_venv }}/bin/python3"
+      register: gateway_venv_python_stat
+
+    - name: Backup Gateway virtual environment on Python version change
+      when: gateway_venv_python_stat.stat.exists
+      block:
+        - name: Get Python version used by the existing virtual environment
+          ansible.builtin.command:
+            cmd: "{{ gateway_python_venv }}/bin/python3 -V"
+          register: gateway_existing_python_version_raw
+          changed_when: false
+
+        - name: Set fact for existing virtual environment Python version
+          ansible.builtin.set_fact:
+            gateway_existing_python_version: '{{ gateway_existing_python_version_raw.stdout
+              | regex_search("[0-9]+\.[0-9]+") }}'
+
+        - name: Move existing virtual environment to a backup path
+          when: gateway_existing_python_version != gateway_python_version | string
+          block:
+            - name: Set backup path for existing virtual environment
+              ansible.builtin.set_fact:
+                gateway_venv_backup_path: "{{ gateway_python_venv }}.bak.py{{ gateway_existing_python_version
+                  }}.{{ ansible_date_time.iso8601_basic_short }}"
+
+            - name: Move existing virtual environment to backup path
+              ansible.builtin.command:
+                argv:
+                  - mv
+                  - "{{ gateway_python_venv }}"
+                  - "{{ gateway_venv_backup_path }}"
+              changed_when: true
+
     - name: Setup Python virtual environment
       ansible.builtin.command:
         chdir: "{{ gateway_install_dir }}"

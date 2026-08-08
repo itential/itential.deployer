@@ -195,7 +195,7 @@
 
     - name: Check if Automation Gateway is already installed
       ansible.builtin.stat:
-        path: "{{ gateway_python_venv }}/automation-gateway"
+        path: "{{ gateway_python_venv }}/bin/automation-gateway"
       register: gateway_installed
 
     - name: Propagate IAG archive
@@ -252,7 +252,7 @@
       when: not offline_install_enabled | bool
 
     - name: Set ownership/permissions and create properties.yml
-      when: not gateway_installed.stat.exists
+      tags: configure_gateway
       block:
         # Using chown and chmod is a faster way to enforce the file ownership and
         # permissions. The file module in ansible checks each and every file/dir
@@ -305,6 +305,7 @@
         dest: /etc/systemd/system/automation-gateway.service
         mode: "0644"
         backup: true
+      tags: configure_gateway
 
     # Check if firewalld is running, if it is then open the appropriate ports
     - name: Gather service facts
@@ -359,6 +360,7 @@
         enabled: true
         state: restarted
         daemon_reload: true
+      tags: always
 
     - name: Update release file
       ansible.builtin.include_tasks:
