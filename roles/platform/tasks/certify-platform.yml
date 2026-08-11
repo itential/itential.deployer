@@ -140,6 +140,28 @@
   changed_when: false
   when: platform_conf_file.stat.exists
 
+- name: Parse Itential config for mongo_read_concern
+  ansible.builtin.shell:
+    cmd: >
+      grep '^mongo_read_concern' /etc/itential/platform.properties |
+      awk -F'=' '{print $2}' |
+      xargs
+  register: platform_mongo_read_concern
+  ignore_errors: true
+  changed_when: false
+  when: platform_conf_file.stat.exists
+
+- name: Parse Itential config for mongo_write_concern
+  ansible.builtin.shell:
+    cmd: >
+      grep '^mongo_write_concern' /etc/itential/platform.properties |
+      awk -F'=' '{print $2}' |
+      xargs
+  register: platform_mongo_write_concern
+  ignore_errors: true
+  changed_when: false
+  when: platform_conf_file.stat.exists
+
 - name: Parse Itential config for redis_username
   ansible.builtin.shell:
     cmd: >

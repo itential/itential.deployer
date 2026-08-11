@@ -71,18 +71,6 @@
     - gateway_ansible_collections is iterable
     - gateway_ansible_collections | length > 0
 
-- name: Build wheels from source distributions
-  ansible.builtin.command:
-    cmd: >
-      offline_download/bin/pip3 wheel
-      {{ item }}
-      -w {{ gateway_offline_target_node_wheels_dir }}/app
-      --no-deps
-  args:
-    chdir: "{{ gateway_pkgs_temp_dir.path }}"
-  loop: "{{ gateway_python_wheel_build_dependencies }}"
-  changed_when: true
-
 - name: Download automation-gateway and remaining dependencies
   ansible.builtin.command:
     cmd: >
@@ -92,11 +80,23 @@
     chdir: "{{ gateway_pkgs_temp_dir.path }}"
   changed_when: true
 
-- name: Find source distributions after building wheels
+- name: Find source distributions after downloading
   ansible.builtin.find:
     paths: "{{ gateway_offline_target_node_wheels_dir }}/app"
     patterns: "*.tar.gz"
   register: gateway_source_dists
+
+- name: Build wheels from source distributions
+  ansible.builtin.command:
+    cmd: >
+      offline_download/bin/pip3 wheel
+      {{ item.path }}
+      -w {{ gateway_offline_target_node_wheels_dir }}/app
+      --no-deps
+  args:
+    chdir: "{{ gateway_pkgs_temp_dir.path }}"
+  loop: "{{ gateway_source_dists.files }}"
+  changed_when: true
 
 - name: Delete source distributions
   ansible.builtin.file:

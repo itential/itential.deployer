@@ -150,7 +150,7 @@
             - name: Install collections
               ansible.builtin.command:
                 argv:
-                  - "{{ gateway_install_dir }}/venv/bin/ansible-galaxy"
+                  - "{{ gateway_python_venv }}/bin/ansible-galaxy"
                   - collection
                   - install
                   - -p
@@ -175,6 +175,7 @@
             dest: /etc/ansible/ansible.cfg
             mode: "0644"
             backup: true
+            force: false
 
         - name: Create empty ansible inventory files
           ansible.builtin.file:
@@ -194,7 +195,7 @@
 
     - name: Check if Automation Gateway is already installed
       ansible.builtin.stat:
-        path: "{{ gateway_install_dir }}/venv/automation-gateway"
+        path: "{{ gateway_python_venv }}/bin/automation-gateway"
       register: gateway_installed
 
     - name: Propagate IAG archive
@@ -246,23 +247,24 @@
     - name: Install IAG
       ansible.builtin.pip:
         name: "{{ gateway_workingdir.path }}/{{ gateway_whl_file | basename }}"
-        virtualenv: "{{ gateway_install_dir }}/venv"
+        virtualenv: "{{ gateway_python_venv }}"
+        extra_args: --log /var/log/pip.log
       when: not offline_install_enabled | bool
 
     - name: Set ownership/permissions and create properties.yml
-      when: not gateway_installed.stat.exists
+      tags: configure_gateway
       block:
         # Using chown and chmod is a faster way to enforce the file ownership and
         # permissions. The file module in ansible checks each and every file/dir
         # in the tree, 'chown -R ' does not, it just sets it.
         - name: Set appropriate ownership on all gateway files
           ansible.builtin.command:
-            cmd: "chown -R {{ gateway_user }}:{{ gateway_group }} {{ gateway_install_dir }}/venv"
+            cmd: "chown -R {{ gateway_user }}:{{ gateway_group }} {{ gateway_python_venv }}"
           changed_when: true
 
         - name: Set appropriate permissions on all gateway files
           ansible.builtin.command:
-            cmd: "chmod -R 775 {{ gateway_install_dir }}/venv"
+            cmd: "chmod -R 775 {{ gateway_python_venv }}"
           changed_when: true
 
         - name: Create properties.yml using template based on the version
@@ -272,6 +274,7 @@
             owner: "{{ gateway_user }}"
             group: "{{ gateway_group }}"
             mode: "0600"
+            backup: true
 
     - name: Create Nornir files
       when: gateway_enable_nornir | bool
@@ -302,6 +305,7 @@
         dest: /etc/systemd/system/automation-gateway.service
         mode: "0644"
         backup: true
+      tags: configure_gateway
 
     # Check if firewalld is running, if it is then open the appropriate ports
     - name: Gather service facts
@@ -356,6 +360,7 @@
         enabled: true
         state: restarted
         daemon_reload: true
+      tags: always
 
     - name: Update release file
       ansible.builtin.include_tasks:
