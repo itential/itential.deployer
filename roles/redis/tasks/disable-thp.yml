@@ -57,8 +57,18 @@
         enabled: true
         daemon_reload: true
 
-    - name: Install and configure tuned
+    - name: Check if tuned is installed
+      ansible.builtin.command:
+        cmd: which tuned-adm
+      register: tuned_installed
+      changed_when: false
+      failed_when: false
       when: ansible_distribution_file_variety == "RedHat"
+
+    - name: Install and configure tuned
+      when:
+        - ansible_distribution_file_variety == "RedHat"
+        - tuned_installed.rc == 0
       block:
         - name: Create custom tuned profile directory
           ansible.builtin.file:
