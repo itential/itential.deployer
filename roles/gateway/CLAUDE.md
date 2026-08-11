@@ -35,7 +35,7 @@ Installs and configures Itential Automation Gateway (IAG). Handles Python virtua
 
 ## Other Entry Points
 
-- `tasks/verify-gateway.yml` (invoked by `playbooks/verify_gateway.yml`, tags_from `verify-gateway`) — checks connectivity to Gateway's required public repositories (`common_required_repositories` filtered to `component: "Gateway"`) via `common:verify-connectivity`. Unlike the other components' verify flows, it does not call `common:verify-host` (no `gateway_hw_specs` exists yet), so it skips OS/CPU/RAM/disk/proxy validation entirely.
+- `tasks/verify-gateway.yml` (invoked by `playbooks/verify_gateway.yml`, tags_from `verify-gateway`) — checks connectivity to Gateway's required public repositories (`common_required_repositories` filtered to `component: "Gateway"`) via `common:verify-connectivity`. Unlike the other components' verify flows, it does not call `common:verify-host` (no `gateway_hw_specs` exists yet), so it skips OS/CPU/RAM/disk/proxy validation entirely. Its final assert uses `ignore_errors: true` and sets a per-host `verification_passed` fact instead of failing hard, for the same reason described in `roles/common/CLAUDE.md`'s "Non-Fatal Verify Design" section — so that a Gateway failure doesn't abort `playbooks/verify.yml` before the other imported verify playbooks run.
 
 ## Key Variables
 

@@ -30,6 +30,10 @@
   ansible.builtin.set_fact:
     os: "{{ host_info.os }}"
 
+- name: Initialize validation errors list
+  ansible.builtin.set_fact:
+    validation_errors: []
+
 # OS and Architecture validation
 - name: Check OS compatibility
   ansible.builtin.set_fact:
@@ -47,6 +51,13 @@
     fail_msg: "{{ os.distribution }} {{ os.distribution_version }} is not a supported OS!"
     success_msg: "OS validation passed!"
     quiet: true
+  ignore_errors: true
+  register: os_validation
+
+- name: Add OS error to list
+  ansible.builtin.set_fact:
+    validation_errors: "{{ validation_errors + ['OS: ' ~ os.distribution ~ ' ' ~ os.distribution_version ~ ' is not a supported OS'] }}"
+  when: os_validation is failed
 
 - name: Check architecture compatibility
   ansible.builtin.set_fact:
@@ -58,10 +69,13 @@
     fail_msg: "{{ os.architecture }} is not a supported architecture!"
     success_msg: "Architecture validation passed!"
     quiet: true
+  ignore_errors: true
+  register: arch_validation
 
-- name: Initialize validation errors list
+- name: Add Architecture error to list
   ansible.builtin.set_fact:
-    validation_errors: []
+    validation_errors: "{{ validation_errors + ['Architecture: ' ~ os.architecture ~ ' is not a supported architecture'] }}"
+  when: arch_validation is failed
 
 - name: Get root partition size
   ansible.builtin.set_fact:
