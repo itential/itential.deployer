@@ -1,8 +1,49 @@
 # Changelog
 
-## v4.1.0 (June 08, 2026)
+## v4.2.0 (August 11, 2026)
 
-* 
+* Add CLAUDE.md documentation for collection root and all roles  https://github.com/itential/itential.deployer/pull/332
+* Add OS family validation to prevent cryptic failures on unsupported distros  https://github.com/itential/itential.deployer/pull/336
+* Add Redis TLS variables to example inventories  https://github.com/itential/itential.deployer/pull/339
+* Add Redis to TLS docs, edited docs to be more instructional  https://github.com/itential/itential.deployer/pull/350
+* Add Sentinel TLS flags for certify report  https://github.com/itential/itential.deployer/pull/346
+* Add default for Gateway Manager websocket port  https://github.com/itential/itential.deployer/pull/343
+* Add mongo read/write concern capture to platform certify  https://github.com/itential/itential.deployer/pull/355
+* Add mongodb sysfs selinux module  https://github.com/itential/itential.deployer/pull/333
+* Add redis maxmemory calculation and change the parameter in the redis.conf accordingly   https://github.com/itential/itential.deployer/pull/308
+* Add support for Gateway 4.4  https://github.com/itential/itential.deployer/pull/357
+* Add support for Redis TLS  https://github.com/itential/itential.deployer/pull/338
+* Add tasks to verify HTTPS cert variables  https://github.com/itential/itential.deployer/pull/356
+* Added Ansible role to disable Transparent Huge Pages (THP) for Redis, which can improve performance. The role includes tasks to disable THP and templates for a systemd service and tuned configuration to ensure THP remains disabled across reboots.  https://github.com/itential/itential.deployer/pull/352
+* Added Certify TLS  https://github.com/itential/itential.deployer/pull/342
+* Added NUMA detection and configure mongodb and the OS to work correctly using NUMA  https://github.com/itential/itential.deployer/pull/294
+* Added directory validation to offline installs  https://github.com/itential/itential.deployer/pull/307
+* Additional safety checks in certify template  https://github.com/itential/itential.deployer/pull/345
+* Additional template changes for sentinel and arbiter  https://github.com/itential/itential.deployer/pull/347
+* Backup the Gateway properties file  https://github.com/itential/itential.deployer/pull/359
+* Check if tuned is installed before using it in Redis role
+* Checking additional conditions for mongodb state  https://github.com/itential/itential.deployer/pull/344
+* Enable ansible lint on dev branch  https://github.com/itential/itential.deployer/pull/297
+* Fix ansible.posix.firewalld failing on RHEL/Rocky 8 with non-system Python  https://github.com/itential/itential.deployer/pull/335
+* Fix hard-coded venv path in Gateway property templates  https://github.com/itential/itential.deployer/pull/362
+* Fix issue with setting mongodb node type facts  https://github.com/itential/itential.deployer/pull/358
+* Platform default vars  https://github.com/itential/itential.deployer/pull/340
+* Redis doc update  https://github.com/itential/itential.deployer/pull/330
+* Remove unused MongoDB replication flag  https://github.com/itential/itential.deployer/pull/348
+* Set selinux contexts when using non-standard Gateway4 directories  https://github.com/itential/itential.deployer/pull/309
+* Set vm.max_map_count kernel parameter on MongoDB servers  https://github.com/itential/itential.deployer/pull/288
+* Update Gateway docs with 4.4 info  https://github.com/itential/itential.deployer/pull/360
+* Update galaxy version and changelog for release 3.7.2 [skip ci]  https://github.com/itential/itential.deployer/pull/324
+* Updated examples to reflect new mongodb group names  https://github.com/itential/itential.deployer/pull/341
+* added readme check  https://github.com/itential/itential.deployer/pull/361
+* redis: grant monitor user ACL perms needed for BullMQ queue metrics
+
+Full Changelog: https://github.com/itential/itential.deployer/compare/v4.1.0...v4.2.0 
+
+
+## v4.1.0 (June 09, 2026)
+
+* Update galaxy version and changelog for release 4.1.0 [skip ci]
 
 Full Changelog: https://github.com/itential/itential.deployer/compare/v4.0.0...v4.1.0 
 
