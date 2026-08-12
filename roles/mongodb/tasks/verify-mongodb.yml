@@ -27,7 +27,7 @@
   vars:
     component_name: "MongoDB"
 
-- name: Verify Platform host requirements
+- name: Report MongoDB results
   ansible.builtin.include_role:
     name: common
     tasks_from: verify-results

@@ -237,7 +237,6 @@ the Deployer will either install the required repository or download the package
 | Redis | <https://dl.fedoraproject.org> | TCP | EPEL YUM RPMs<br>When installing Redis from the Remi repository |
 | Redis | <https://github.com> | TCP | Redis source packages <br>When installing Redis from source |
 | Redis | <https://codeload.github.com> | TCP | Redis source packages<br>When installing Redis from source |
-| Vault | <https://rpm.releases.hashicorp.com> | TCP | Vault YUM RPMs |
 
 If internal YUM repositories are used, refer to the
 [Using Internal YUM Repositories](#using-internal-yum-repositories) section.

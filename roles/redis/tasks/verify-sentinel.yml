@@ -20,7 +20,14 @@
 
 # redis sentinel specific verification tasks go here...
 
-- name: Verify Platform host requirements
+- name: Verify connectivity to required public repositories
+  ansible.builtin.include_role:
+    name: common
+    tasks_from: verify-connectivity
+  vars:
+    component_name: "Redis"
+
+- name: Report Redis Sentinel results
   ansible.builtin.include_role:
     name: common
     tasks_from: verify-results

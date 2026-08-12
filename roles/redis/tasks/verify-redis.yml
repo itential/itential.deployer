@@ -27,7 +27,7 @@
   vars:
     component_name: "Redis"
 
-- name: Verify Platform host requirements
+- name: Report Redis results
   ansible.builtin.include_role:
     name: common
     tasks_from: verify-results

@@ -50,7 +50,7 @@ Execution order:
 3. For entries with `type: path` that passed step 2, request the specific `check_target` resource and expect an actual `[200, 301, 302]` response. Append failures to `validation_errors`.
 4. Assert both checks passed (`ignore_errors: true`, registers `connectivity_validation`), following the same pattern as `cpu_validation`/`memory_validation`/etc. in `verify-host.yml`.
 
-Called from `verify-mongodb.yml`, `verify-redis.yml`, and `verify-platform.yml` (which also calls it a second time with `component_name: "Vault"`, gated on `platform_configure_vault | bool`, since this collection doesn't have its own Vault role/host group but Platform is what integrates with it) and `verify-gateway.yml`.
+Called from `verify-mongodb.yml`, `verify-redis.yml`, `verify-platform.yml` and `verify-gateway.yml`.
 
 ## Key Variables
 

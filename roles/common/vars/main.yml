@@ -86,9 +86,3 @@ common_required_repositories:
     url: "https://codeload.github.com"
     type: bare
     notes: "Redis source packages"
-
-  - component: "Vault"
-    url: "https://rpm.releases.hashicorp.com"
-    type: path
-    check_target: "https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo"
-    notes: "Vault YUM RPMs"
