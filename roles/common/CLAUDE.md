@@ -2,14 +2,14 @@
 
 ## Purpose
 
-Provides shared default variables consumed by all other roles. Has no `main.yml` task entry point — it is imported by playbooks solely to inject its defaults into the variable scope. Also contains the shared `verify-host.yml`, `verify-connectivity.yml`, and `verify-results.yml` task files used by the `verify_*` playbooks.
+Provides shared default variables consumed by all other roles. Has no `main.yml` task entry point — it is imported by playbooks solely to inject its defaults into the variable scope. Also contains the shared `verify-host.yml`, `verify-connectivity.yml`, and `verify-results.yml` task files used by the `verify_*` playbooks. Has no `vars/main.yml` — each component role owns its own variables (e.g. required-repository lists live in `roles/<component>/vars/main.yml`, not here); `common` only ships `defaults/`.
 
 ## Entry Point Tasks
 
 There is no `tasks/main.yml`. The task files are:
 
 - `tasks/verify-host.yml` — imported by `verify-mongodb`, `verify-redis`, and `verify-platform` task files via `tasks_from:`. Checks OS/arch/HW specs/proxy and initializes `validation_errors`. Not called by Gateway's `verify-gateway.yml` (Gateway has no `gateway_hw_specs`/HW requirements defined yet).
-- `tasks/verify-connectivity.yml` — imported by `verify-mongodb`, `verify-redis`, `verify-platform`, and `verify-gateway` (all four components) via `tasks_from:`. Checks outbound connectivity to the URLs in `common_required_repositories` (`vars/main.yml`) that match the caller's `component_name`. See "verify-connectivity.yml Logic" below.
+- `tasks/verify-connectivity.yml` — imported by `verify-mongodb`, `verify-redis`, `verify-platform`, and `verify-gateway` (all four components) via `tasks_from:`. Checks outbound connectivity to the URLs in the caller's own `<component>_required_repositories` list, passed in as `required_repositories`. See "verify-connectivity.yml Logic" below.
 - `tasks/verify-results.yml` — imported by `verify-mongodb`, `verify-redis`, and `verify-platform` (not Gateway, which does its own minimal assert) to print `validation_errors` and assert `cpu_validation`/`memory_validation`/`disk_validation`/`os_validation`/`arch_validation`/`proxy_validation`/`connectivity_validation` all passed. Each lookup is wrapped in `| default({'failed': false})` before the `is failed`/`is not failed` test, since not every caller registers every one of these (e.g. `verify-sentinel.yml` never calls `verify-connectivity.yml`, so `connectivity_validation` is undefined there). The final assert itself uses `ignore_errors: true` and sets a per-host `verification_passed` fact — see "Non-Fatal Verify Design" below.
 
 None of these task files are called by any role's `main.yml`.
@@ -40,17 +40,16 @@ Expects one variable from the caller:
 
 | Variable | Example | Purpose |
 |----------|---------|---------|
-| `component_name` | `"MongoDB"` | Selects the matching rows from `common_required_repositories` |
+| `required_repositories` | `"{{ redis_required_repositories }}"` | The list of repository dicts to check — owned by the calling component's role, not by `common` |
 
-`common_required_repositories` (`vars/main.yml`, auto-loaded whenever the `common` role is used) mirrors the "Required Public Repositories" table in `README.md`, excluding the Ansible Control Node rows. Each entry has a `component`, `url`, `type` (`bare` or `path`), optional `check_target`, and `notes`.
+Each component role defines its own `<component>_required_repositories` list in `roles/<component>/vars/main.yml` (`redis_required_repositories`, `mongodb_required_repositories`, `platform_required_repositories`, `gateway_required_repositories`), auto-loaded whenever that role runs. Together they mirror the "Required Public Repositories" table in `README.md`, excluding the Ansible Control Node rows. Each entry has a `url`, `type` (`bare` or `path`), optional `check_target`, and `notes`. Redis Sentinel-only hosts reuse `redis_required_repositories` (`verify-sentinel.yml`) since Sentinel is installed from the same Redis source/package.
 
 Execution order:
-1. Filter `common_required_repositories` down to entries matching `component_name`
-2. Check baseline reachability of every entry's bare `url` via `ansible.builtin.uri` — any real HTTP status (100-599) counts as reachable; only a connection-level failure (DNS/TCP/TLS/timeout, which `fetch_url` reports as `status: -1`) counts as unreachable. Append failures to `validation_errors`.
-3. For entries with `type: path` that passed step 2, request the specific `check_target` resource and expect an actual `[200, 301, 302]` response. Append failures to `validation_errors`.
-4. Assert both checks passed (`ignore_errors: true`, registers `connectivity_validation`), following the same pattern as `cpu_validation`/`memory_validation`/etc. in `verify-host.yml`.
+1. Check baseline reachability of every entry's bare `url` via `ansible.builtin.uri` — any real HTTP status (100-599) counts as reachable; only a connection-level failure (DNS/TCP/TLS/timeout, which `fetch_url` reports as `status: -1`) counts as unreachable. Append failures to `validation_errors`.
+2. For entries with `type: path` that passed step 1, request the specific `check_target` resource and expect an actual `[200, 301, 302]` response. Append failures to `validation_errors`.
+3. Assert both checks passed (`ignore_errors: true`, registers `connectivity_validation`), following the same pattern as `cpu_validation`/`memory_validation`/etc. in `verify-host.yml`.
 
-Called from `verify-mongodb.yml`, `verify-redis.yml`, `verify-platform.yml` and `verify-gateway.yml`.
+Called from `verify-mongodb.yml`, `verify-redis.yml`, `verify-sentinel.yml`, `verify-platform.yml`, and `verify-gateway.yml`.
 
 ## Key Variables
 
@@ -62,7 +61,6 @@ Called from `verify-mongodb.yml`, `verify-redis.yml`, `verify-platform.yml` and 
 | `offline_target_node_root` | `/var/tmp` | `defaults/main/offline.yml` | Root on target nodes for offline package staging. |
 | `offline_control_node_root` | `{{ playbook_dir }}/files` | `defaults/main/offline.yml` | Root on control node where offline packages are staged. |
 | `offline_itential_packages_path` | `itential_packages/{{ ansible_distribution \| lower }}_{{ ansible_distribution_major_version }}` | `defaults/main/offline.yml` | OS-specific subdirectory under the offline roots. |
-| `common_required_repositories` | See `vars/main.yml` | `vars/main.yml` | List of required public repositories per component, consumed by `verify-connectivity.yml`. Keep in sync with the README table. |
 
 ## Non-Fatal Verify Design
 

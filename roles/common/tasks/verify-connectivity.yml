@@ -6,16 +6,12 @@
 # rows, which are the control node's responsibility, not a target host's).
 #
 # Expects one variable from the caller:
-#   - component_name: must match a "component" value in common_required_repositories
-#     (roles/common/vars/main.yml), e.g. "Gateway", "Platform", "MongoDB", "Redis", "Vault"
+#   - required_repositories: list of repository dicts -- each component owns its own list in
+#     roles/<component>/vars/main.yml (e.g. redis_required_repositories), with url, type
+#     (bare|path), optional check_target, and notes.
 #
 # Appends a message to validation_errors for every failure, then sets connectivity_validation
 # via an ignore_errors assert, following the same pattern as verify-host.yml.
-
-- name: Select required repositories for this component
-  ansible.builtin.set_fact:
-    component_required_repositories: "{{ common_required_repositories
-      | selectattr('component', 'equalto', component_name) | list }}"
 
 - name: Check baseline reachability of required repositories
   ansible.builtin.uri:
@@ -27,7 +23,7 @@
     validate_certs: true
     timeout: 10
   register: repository_reachability
-  loop: "{{ component_required_repositories }}"
+  loop: "{{ required_repositories }}"
   loop_control:
     label: "{{ item.url }}"
   ignore_errors: true

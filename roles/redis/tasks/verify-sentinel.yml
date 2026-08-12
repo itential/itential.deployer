@@ -25,7 +25,7 @@
     name: common
     tasks_from: verify-connectivity
   vars:
-    component_name: "Redis"
+    required_repositories: "{{ redis_required_repositories }}"
 
 - name: Report Redis Sentinel results
   ansible.builtin.include_role:

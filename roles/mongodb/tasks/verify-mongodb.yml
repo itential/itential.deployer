@@ -25,7 +25,7 @@
     name: common
     tasks_from: verify-connectivity
   vars:
-    component_name: "MongoDB"
+    required_repositories: "{{ mongodb_required_repositories }}"
 
 - name: Report MongoDB results
   ansible.builtin.include_role:

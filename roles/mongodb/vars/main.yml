@@ -6,3 +6,23 @@ mongodb_port_default: 27017
 
 # The name of the mongo replica set
 mongodb_replset_name_default: rs0
+
+# Public repositories required for installing MongoDB, checked by the verify_mongodb playbook.
+# Mirrors the MongoDB rows of the "Required Public Repositories" table in README.md.
+mongodb_required_repositories:
+  - url: "https://repo.mongodb.org"
+    type: path
+    check_target: "https://repo.mongodb.org/yum/redhat/"
+    notes: "MongoDB YUM RPMs"
+  - url: "https://www.mongodb.org"
+    type: bare
+    notes: "MongoDB YUM RPMs"
+  - url: "https://pgp.mongodb.org"
+    type: bare
+    notes: "MongoDB YUM repository GPG Key"
+  - url: "https://pgp.mongodb.com"
+    type: bare
+    notes: "MongoDB YUM repository GPG Key"
+  - url: "https://pypi.org"
+    type: bare
+    notes: "Python modules"

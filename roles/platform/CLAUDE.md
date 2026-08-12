@@ -168,6 +168,12 @@ Installs and configures Itential Platform (IAP). Handles OS user/directory setup
 | `platform_log_max_file_size` | `1048576` | Max log file size (bytes; ~1 MB) |
 | `platform_log_filename` | `platform.log` | Primary log filename |
 
+### vars/main.yml
+
+| Variable | Purpose |
+|----------|---------|
+| `platform_required_repositories` | List of repository dicts (`url`, `type`, optional `check_target`, `notes`) checked by `verify-platform.yml` via `common:verify-connectivity`. Mirrors the Platform rows of the README "Required Public Repositories" table. |
+
 ## TLS Configuration
 
 HTTPS and MongoDB client TLS are both **enabled by default** (copy-certs flags default to `true`).

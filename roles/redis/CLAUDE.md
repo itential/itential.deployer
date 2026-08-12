@@ -102,6 +102,12 @@ Installs and configures Redis and Redis Sentinel for use with Itential Platform.
 | All `_dest` vars | Built from base dir + filename | Destination paths on target |
 | All `_src` vars | Built from `redis_pki_src_dir` + filename | Source paths on control node |
 
+### vars/main.yml
+
+| Variable | Purpose |
+|----------|---------|
+| `redis_required_repositories` | List of repository dicts (`url`, `type`, optional `check_target`, `notes`) checked by `verify-redis.yml` and `verify-sentinel.yml` via `common:verify-connectivity`. Mirrors the Redis rows of the README "Required Public Repositories" table. |
+
 ## TLS Configuration
 
 TLS is **disabled by default** (`redis_tls_enabled: false`).

@@ -24,7 +24,7 @@
     name: common
     tasks_from: verify-connectivity
   vars:
-    component_name: "Platform"
+    required_repositories: "{{ platform_required_repositories }}"
 
 - name: Verify TLS certs for platform webserver are defined
   ansible.builtin.assert:

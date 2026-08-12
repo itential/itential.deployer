@@ -15,7 +15,7 @@
     name: common
     tasks_from: verify-connectivity
   vars:
-    component_name: "Gateway"
+    required_repositories: "{{ gateway_required_repositories }}"
 
 - name: Display failed validation results
   ansible.builtin.debug:

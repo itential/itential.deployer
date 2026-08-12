@@ -11,3 +11,23 @@ redis_data_dir_default: /var/lib/redis
 # Default ports
 redis_port_default: 6379
 redis_sentinel_port_default: 26379
+
+# Public repositories required for installing Redis (and Redis Sentinel, which is installed
+# from the same source/package), checked by the verify_redis playbook. Mirrors the Redis rows
+# of the "Required Public Repositories" table in README.md.
+redis_required_repositories:
+  - url: "http://rpms.remirepo.net"
+    type: path
+    check_target: "http://rpms.remirepo.net/enterprise/"
+    notes: "Redis YUM RPMs"
+  - url: "https://dl.fedoraproject.org"
+    type: path
+    check_target: "https://dl.fedoraproject.org/pub/epel/"
+    notes: "EPEL YUM RPMs"
+  - url: "https://github.com"
+    type: path
+    check_target: "https://codeload.github.com/redis/redis/tar.gz/refs/heads/unstable"
+    notes: "Redis source packages"
+  - url: "https://codeload.github.com"
+    type: bare
+    notes: "Redis source packages"

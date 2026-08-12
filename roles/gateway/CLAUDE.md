@@ -35,7 +35,7 @@ Installs and configures Itential Automation Gateway (IAG). Handles Python virtua
 
 ## Other Entry Points
 
-- `tasks/verify-gateway.yml` (invoked by `playbooks/verify_gateway.yml`, tags_from `verify-gateway`) — checks connectivity to Gateway's required public repositories (`common_required_repositories` filtered to `component: "Gateway"`) via `common:verify-connectivity`. Unlike the other components' verify flows, it does not call `common:verify-host` (no `gateway_hw_specs` exists yet), so it skips OS/CPU/RAM/disk/proxy validation entirely. Its final assert uses `ignore_errors: true` and sets a per-host `verification_passed` fact instead of failing hard, for the same reason described in `roles/common/CLAUDE.md`'s "Non-Fatal Verify Design" section — so that a Gateway failure doesn't abort `playbooks/verify.yml` before the other imported verify playbooks run.
+- `tasks/verify-gateway.yml` (invoked by `playbooks/verify_gateway.yml`, tags_from `verify-gateway`) — checks connectivity to Gateway's required public repositories (`gateway_required_repositories`, passed to `common:verify-connectivity` as `required_repositories`) via `common:verify-connectivity`. Unlike the other components' verify flows, it does not call `common:verify-host` (no `gateway_hw_specs` exists yet), so it skips OS/CPU/RAM/disk/proxy validation entirely. Its final assert uses `ignore_errors: true` and sets a per-host `verification_passed` fact instead of failing hard, for the same reason described in `roles/common/CLAUDE.md`'s "Non-Fatal Verify Design" section — so that a Gateway failure doesn't abort `playbooks/verify.yml` before the other imported verify playbooks run.
 
 ## Key Variables
 
@@ -97,6 +97,12 @@ Installs and configures Itential Automation Gateway (IAG). Handles Python virtua
 | `gateway_offline_control_node_rpms_dir` | `{{ gateway_control_node_root }}/rpms` | RPM source dir (control) |
 | `gateway_offline_control_node_wheels_dir` | `{{ gateway_control_node_root }}/wheels` | Wheels source dir (control) |
 | `gateway_offline_control_node_collections_dir` | `{{ gateway_control_node_root }}/collections` | Collections source dir (control) |
+
+### vars/main.yml
+
+| Variable | Purpose |
+|----------|---------|
+| `gateway_required_repositories` | List of repository dicts (`url`, `type`, optional `check_target`, `notes`) checked by `verify-gateway.yml` via `common:verify-connectivity`. Mirrors the Gateway rows of the README "Required Public Repositories" table. Previously this list lived in `roles/common/vars/main.yml`; `common` no longer has a `vars/` directory. |
 
 ## TLS Configuration
 

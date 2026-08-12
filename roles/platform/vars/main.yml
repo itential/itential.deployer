@@ -19,3 +19,20 @@ platform_vault_role_id_property: "${ITENTIAL_VAULT_ROLE_ID}"
 
 # What to write in application properties file for Secret ID (defaults to env var reference)
 platform_vault_secret_id_property: "${ITENTIAL_VAULT_SECRET_ID}"
+
+# Public repositories required for installing Itential Platform, checked by the verify_platform
+# playbook. Mirrors the Platform rows of the "Required Public Repositories" table in README.md.
+platform_required_repositories:
+  - url: "https://registry.aws.itential.com"
+    type: bare
+    notes: "Itential packages"
+  - url: "https://registry.npmjs.org"
+    type: bare
+    notes: "Core NPM packages"
+  - url: "https://pypi.org"
+    type: bare
+    notes: "Python modules"
+  - url: "https://gitlab.com"
+    type: path
+    check_target: "https://gitlab.com/itentialopensource/adapters"
+    notes: "Platform Opensource Adapters NodeJS source repository"
