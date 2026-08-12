@@ -1,8 +1,16 @@
 # Changelog
 
-## v4.0.0 (May 22, 2026)
+## v4.1.0 (June 08, 2026)
+
+* 
+
+Full Changelog: https://github.com/itential/itential.deployer/compare/v4.0.0...v4.1.0 
+
+
+## v4.0.0 (May 26, 2026)
 
 * Release V4  https://github.com/itential/itential.deployer/pull/337
+* Update galaxy version and changelog for release 4.0.0 [skip ci]
 
 Full Changelog: https://github.com/itential/itential.deployer/compare/v3.7.2...v4.0.0 
 
