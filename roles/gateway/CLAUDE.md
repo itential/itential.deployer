@@ -33,6 +33,10 @@ Installs and configures Itential Automation Gateway (IAG). Handles Python virtua
 25. Remove temp working directory
 26. `always` block: remove build packages that were installed; assert service is active
 
+## Other Entry Points
+
+- `tasks/verify-gateway.yml` (invoked by `playbooks/verify_gateway.yml`, tags_from `verify-gateway`) — now follows the same three-step pattern as `verify-redis.yml`/`verify-mongodb.yml`/`verify-platform.yml`: `common:verify-host` (OS/arch/CPU/RAM/disk/proxy, against `gateway_hw_specs`), `common:verify-connectivity` (`gateway_required_repositories`, passed as `required_repositories`), then `common:verify-results` (combined assert + reporting). Passes `component_name: "Gateway"` to each. `verify-results.yml`'s final assert uses `ignore_errors: true` and sets a per-host `verification_passed` fact and merges this component's errors into `component_validation_errors`, for the same reason described in `roles/common/CLAUDE.md`'s "Non-Fatal Verify Design" section — so that a Gateway failure doesn't abort `playbooks/verify.yml` before the other imported verify playbooks run.
+
 ## Key Variables
 
 ### gateway.yml defaults
@@ -93,6 +97,17 @@ Installs and configures Itential Automation Gateway (IAG). Handles Python virtua
 | `gateway_offline_control_node_rpms_dir` | `{{ gateway_control_node_root }}/rpms` | RPM source dir (control) |
 | `gateway_offline_control_node_wheels_dir` | `{{ gateway_control_node_root }}/wheels` | Wheels source dir (control) |
 | `gateway_offline_control_node_collections_dir` | `{{ gateway_control_node_root }}/collections` | Collections source dir (control) |
+
+### vars/main.yml
+
+| Variable | Purpose |
+|----------|---------|
+| `gateway_required_repositories` | List of repository dicts (`url`, `type`, optional `check_target`, `notes`) checked by `verify-gateway.yml` via `common:verify-connectivity`. Mirrors the Gateway rows of the README "Required Public Repositories" table. Previously this list lived in `roles/common/vars/main.yml`; `common` no longer has a `vars/` directory. |
+| `gateway_hw_specs` | CPU/RAM/disk requirements per `env` (`dev`/`test`/`prod`), checked by `verify-gateway.yml` via `common:verify-host`. Unlike `redis_hw_specs`/`mongodb_hw_specs`/`platform_hw_specs`, this is defined in `vars/main.yml` rather than a `vars/platform-release-<N>.yml` file, since Gateway's hardware requirements are not release-specific. |
+
+Hardware specs for `verify` playbook (`gateway_hw_specs`):
+- dev: 4 CPU, 16 GB RAM, 10 GB disk
+- test/prod: 16 CPU, 32 GB RAM, 50 GB disk
 
 ## TLS Configuration
 

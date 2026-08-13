@@ -19,6 +19,13 @@
     hw_specs_var_name: "platform_hw_specs"
 
 # platform specific verification tasks go here...
+- name: Verify connectivity to required public repositories
+  ansible.builtin.include_role:
+    name: common
+    tasks_from: verify-connectivity
+  vars:
+    required_repositories: "{{ platform_required_repositories }}"
+
 - name: Verify TLS certs for platform webserver are defined
   ansible.builtin.assert:
     that: platform_https_pki_src_dir is defined and platform_https_pki_src_dir | length > 0
@@ -62,7 +69,9 @@
     - platform_webserver_https_enabled | bool
     - platform_tls_dir_validation is failed or platform_tls_contents_validation is failed
 
-- name: Verify Platform host requirements
+- name: Report Platform results
   ansible.builtin.include_role:
     name: common
     tasks_from: verify-results
+  vars:
+    component_name: "Platform"

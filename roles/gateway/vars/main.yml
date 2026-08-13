@@ -1,0 +1,29 @@
+# Copyright (c) 2026, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+gateway_hw_specs:
+  "dev":
+    "cpu_count": 4
+    "ram_size": 16
+    "disk_size": 10
+  "test":
+    "cpu_count": 16
+    "ram_size": 32
+    "disk_size": 50
+  "prod":
+    "cpu_count": 16
+    "ram_size": 32
+    "disk_size": 50
+
+# Public repositories required for installing Itential Gateway, checked by the verify_gateway
+# playbook. Mirrors the Gateway rows of the "Required Public Repositories" table in README.md.
+gateway_required_repositories:
+  - url: "https://registry.aws.itential.com"
+    type: bare
+    notes: "Itential packages"
+  - url: "https://galaxy.ansible.com"
+    type: bare
+    notes: "Community Ansible collections"
+  - url: "https://pypi.org"
+    type: bare
+    notes: "Python modules"

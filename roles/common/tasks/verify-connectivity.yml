@@ -1,0 +1,78 @@
+# Copyright (c) 2026, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+# Verifies outbound connectivity to the public repositories a component needs, as listed in
+# the "Required Public Repositories" table in README.md (excluding the Ansible Control Node
+# rows, which are the control node's responsibility, not a target host's).
+#
+# Expects one variable from the caller:
+#   - required_repositories: list of repository dicts -- each component owns its own list in
+#     roles/<component>/vars/main.yml (e.g. redis_required_repositories), with url, type
+#     (bare|path), optional check_target, and notes.
+#
+# Appends a message to validation_errors for every failure, then sets connectivity_validation
+# via an ignore_errors assert, following the same pattern as verify-host.yml.
+
+- name: Check baseline reachability of required repositories
+  ansible.builtin.uri:
+    url: "{{ item.url }}"
+    method: GET
+    # Accept any real HTTP status code (100-599) as "reachable" -- fetch_url only returns
+    # status -1 when the request never got a response at all (DNS/TCP/TLS/timeout failure).
+    status_code: "{{ range(100, 600) | list }}"
+    validate_certs: true
+    timeout: 10
+  register: repository_reachability
+  loop: "{{ required_repositories }}"
+  loop_control:
+    label: "{{ item.url }}"
+  ignore_errors: true
+
+- name: Add unreachable repository errors to list
+  ansible.builtin.set_fact:
+    validation_errors: "{{ validation_errors + ['Connectivity: ' ~ item.item.url ~ ' (' ~
+      item.item.notes ~ ') is unreachable: ' ~ (item.msg | default('unknown error'))] }}"
+  loop: "{{ repository_reachability.results }}"
+  loop_control:
+    label: "{{ item.item.url }}"
+  when: item is failed
+
+- name: Identify repositories needing a resource-specific check
+  ansible.builtin.set_fact:
+    repositories_needing_path_check: "{{ repository_reachability.results
+      | rejectattr('failed')
+      | map(attribute='item')
+      | selectattr('type', 'equalto', 'path')
+      | list }}"
+
+- name: Check resource-specific access for path-type repositories
+  ansible.builtin.uri:
+    url: "{{ item.check_target }}"
+    method: GET
+    status_code: [200, 301, 302]
+    validate_certs: true
+    timeout: 10
+  register: repository_path_check
+  loop: "{{ repositories_needing_path_check }}"
+  loop_control:
+    label: "{{ item.check_target }}"
+  ignore_errors: true
+
+- name: Add resource-specific check failures to list
+  ansible.builtin.set_fact:
+    validation_errors: "{{ validation_errors + ['Connectivity: ' ~ item.item.check_target ~ ' (' ~
+      item.item.notes ~ ') did not return a successful response'] }}"
+  loop: "{{ repository_path_check.results | default([]) }}"
+  loop_control:
+    label: "{{ item.item.check_target }}"
+  when: item is failed
+
+- name: Verify that repository connectivity checks passed
+  ansible.builtin.assert:
+    that:
+      - repository_reachability.results | selectattr('failed') | list | length == 0
+      - repository_path_check.results | default([]) | selectattr('failed') | list | length == 0
+    fail_msg: "One or more required repository connectivity checks failed! See above."
+    quiet: true
+  ignore_errors: true
+  register: connectivity_validation

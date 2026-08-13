@@ -45,10 +45,11 @@ Also requires the `jmespath` Python module on the control node.
 | `certify_redis.yml` | `itential.deployer.certify_redis` | Generate Redis/Sentinel installation certification reports |
 | `certify_mongodb.yml` | `itential.deployer.certify_mongodb` | Generate MongoDB installation certification reports |
 | `certify_platform.yml` | `itential.deployer.certify_platform` | Generate Platform installation certification reports |
-| `verify.yml` | `itential.deployer.verify` | Pre-install environment verification (OS, HW specs, proxy) for all components |
+| `verify.yml` | `itential.deployer.verify` | Pre-install environment verification (OS, HW specs, proxy, required repository connectivity) for all components |
 | `verify_redis.yml` | `itential.deployer.verify_redis` | Pre-install verification for Redis hosts |
 | `verify_mongodb.yml` | `itential.deployer.verify_mongodb` | Pre-install verification for MongoDB hosts |
 | `verify_platform.yml` | `itential.deployer.verify_platform` | Pre-install verification for Platform hosts |
+| `verify_gateway.yml` | `itential.deployer.verify_gateway` | Pre-install verification for Gateway hosts |
 | `download_packages_site.yml` | `itential.deployer.download_packages_site` | Download all packages for offline install (Platform stack + Gateway) |
 | `download_packages_platform_site.yml` | `itential.deployer.download_packages_platform_site` | Download all packages for Platform stack offline install |
 | `download_packages_platform.yml` | `itential.deployer.download_packages_platform` | Download Platform packages for offline install |
