@@ -73,3 +73,5 @@
   ansible.builtin.include_role:
     name: common
     tasks_from: verify-results
+  vars:
+    component_name: "Platform"

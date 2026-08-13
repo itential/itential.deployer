@@ -35,7 +35,7 @@ Installs and configures Itential Automation Gateway (IAG). Handles Python virtua
 
 ## Other Entry Points
 
-- `tasks/verify-gateway.yml` (invoked by `playbooks/verify_gateway.yml`, tags_from `verify-gateway`) — checks connectivity to Gateway's required public repositories (`gateway_required_repositories`, passed to `common:verify-connectivity` as `required_repositories`) via `common:verify-connectivity`. Unlike the other components' verify flows, it does not call `common:verify-host` (no `gateway_hw_specs` exists yet), so it skips OS/CPU/RAM/disk/proxy validation entirely. Its final assert uses `ignore_errors: true` and sets a per-host `verification_passed` fact instead of failing hard, for the same reason described in `roles/common/CLAUDE.md`'s "Non-Fatal Verify Design" section — so that a Gateway failure doesn't abort `playbooks/verify.yml` before the other imported verify playbooks run.
+- `tasks/verify-gateway.yml` (invoked by `playbooks/verify_gateway.yml`, tags_from `verify-gateway`) — now follows the same three-step pattern as `verify-redis.yml`/`verify-mongodb.yml`/`verify-platform.yml`: `common:verify-host` (OS/arch/CPU/RAM/disk/proxy, against `gateway_hw_specs`), `common:verify-connectivity` (`gateway_required_repositories`, passed as `required_repositories`), then `common:verify-results` (combined assert + reporting). Passes `component_name: "Gateway"` to each. `verify-results.yml`'s final assert uses `ignore_errors: true` and sets a per-host `verification_passed` fact and merges this component's errors into `component_validation_errors`, for the same reason described in `roles/common/CLAUDE.md`'s "Non-Fatal Verify Design" section — so that a Gateway failure doesn't abort `playbooks/verify.yml` before the other imported verify playbooks run.
 
 ## Key Variables
 
@@ -103,6 +103,11 @@ Installs and configures Itential Automation Gateway (IAG). Handles Python virtua
 | Variable | Purpose |
 |----------|---------|
 | `gateway_required_repositories` | List of repository dicts (`url`, `type`, optional `check_target`, `notes`) checked by `verify-gateway.yml` via `common:verify-connectivity`. Mirrors the Gateway rows of the README "Required Public Repositories" table. Previously this list lived in `roles/common/vars/main.yml`; `common` no longer has a `vars/` directory. |
+| `gateway_hw_specs` | CPU/RAM/disk requirements per `env` (`dev`/`test`/`prod`), checked by `verify-gateway.yml` via `common:verify-host`. Unlike `redis_hw_specs`/`mongodb_hw_specs`/`platform_hw_specs`, this is defined in `vars/main.yml` rather than a `vars/platform-release-<N>.yml` file, since Gateway's hardware requirements are not release-specific. |
+
+Hardware specs for `verify` playbook (`gateway_hw_specs`):
+- dev: 4 CPU, 16 GB RAM, 10 GB disk
+- test/prod: 16 CPU, 32 GB RAM, 50 GB disk
 
 ## TLS Configuration
 

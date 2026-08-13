@@ -23,6 +23,11 @@
   hosts: all
   gather_facts: false
   tasks:
+    - name: Display per-component verification failures for this host
+      ansible.builtin.debug:
+        var: component_validation_errors
+      when: component_validation_errors is defined and component_validation_errors | length > 0
+
     - name: Fail if any verification check failed for this host
       ansible.builtin.assert:
         that: verification_passed | default(true)

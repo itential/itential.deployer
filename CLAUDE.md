@@ -49,7 +49,7 @@ Also requires the `jmespath` Python module on the control node.
 | `verify_redis.yml` | `itential.deployer.verify_redis` | Pre-install verification for Redis hosts |
 | `verify_mongodb.yml` | `itential.deployer.verify_mongodb` | Pre-install verification for MongoDB hosts |
 | `verify_platform.yml` | `itential.deployer.verify_platform` | Pre-install verification for Platform hosts |
-| `verify_gateway.yml` | `itential.deployer.verify_gateway` | Pre-install verification (required repository connectivity only) for Gateway hosts |
+| `verify_gateway.yml` | `itential.deployer.verify_gateway` | Pre-install verification for Gateway hosts |
 | `download_packages_site.yml` | `itential.deployer.download_packages_site` | Download all packages for offline install (Platform stack + Gateway) |
 | `download_packages_platform_site.yml` | `itential.deployer.download_packages_platform_site` | Download all packages for Platform stack offline install |
 | `download_packages_platform.yml` | `itential.deployer.download_packages_platform` | Download Platform packages for offline install |
