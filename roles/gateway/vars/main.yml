@@ -21,6 +21,9 @@ gateway_required_repositories:
   - url: "https://registry.aws.itential.com"
     type: bare
     notes: "Itential packages"
+  - url: "https://itential.jfrog.io"
+    type: bare
+    notes: "Itential packages"
   - url: "https://galaxy.ansible.com"
     type: bare
     notes: "Community Ansible collections"

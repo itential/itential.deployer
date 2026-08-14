@@ -222,9 +222,11 @@ the Deployer will either install the required repository or download the package
 | Ansible Control Node | <https://galaxy.ansible.com> | TCP | Itential and community Ansible collections |
 | Ansible Control Node | <https://pypi.org> | TCP | Python modules |
 | Itential Gateway | <https://registry.aws.itential.com> | TCP | Itential packages |
+| Itential Gateway | <https://itential.jfrog.io> | TCP | Itential packages |
 | Itential Gateway | <https://galaxy.ansible.com> | TCP | Community Ansible collections |
 | Itential Gateway | <https://pypi.org> | TCP | Python modules |
 | Itential Platform | <https://registry.aws.itential.com> | TCP | Itential packages |
+| Itential Platform | <https://itential.jfrog.io> | TCP | Itential packages |
 | Itential Platform | <https://registry.npmjs.org> | TCP | Core NPM packages |
 | Itential Platform | <https://pypi.org> | TCP | Python modules |
 | Itential Platform | <https://gitlab.com> | TCP | Platform Opensource Adapters NodeJS source repository |
