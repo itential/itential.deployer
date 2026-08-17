@@ -79,7 +79,7 @@ Installs and configures Itential Platform (IAP). Handles OS user/directory setup
 | `platform_webserver_https_port` | `3443` | HTTPS port |
 | `platform_webserver_https_ciphers` | Long cipher list | Allowed TLS ciphers |
 | `platform_webserver_https_secure_protocol` | `TLS_method` | OpenSSL method |
-| `platform_webserver_cache_control_enabled` | `false` | HTTP cache control headers |
+| `platform_webserver_cache_control_enabled` | `true` | HTTP cache control headers. Itential Platform's own application default (when left unset in `platform.properties`) is `false` — the deployer explicitly overrides it to `true`. |
 | `platform_webserver_timeout` | `300000` | Request timeout (ms) |
 
 ### mongodb.yml defaults
