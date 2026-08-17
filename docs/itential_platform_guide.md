@@ -212,7 +212,7 @@ located in `roles/platform/defaults/main/webserver.yml`.
 
 | Variable | Type | Description | Default Value |
 | :------- | :--- | :---------- | :------------ |
-| platform_webserver_cache_control_enabled | Boolean | A toggle to instruct the webserver to include HTTP cache control headers on the response. | `false` |
+| platform_webserver_cache_control_enabled | Boolean | A toggle to instruct the webserver to include HTTP cache control headers on the response. If left unset in `platform.properties`, Itential Platform itself defaults this to `false`; the deployer explicitly overrides that default to `true`. | `true` |
 | platform_webserver_timeout | Integer | Timeout to use for incoming HTTP requests to the platform API, in milliseconds. | 300000 |
 | platform_webserver_response_header_access_control_allow_origin | String | The value of the HTTP Access-Control-Allow-Origin header returned to clients. | `"*"` |
 | platform_webserver_http_enabled | Boolean | If true, allows the webserver to respond to insecure HTTP requests. | `true` |

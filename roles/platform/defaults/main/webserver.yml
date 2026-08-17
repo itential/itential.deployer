@@ -1,8 +1,10 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
-# A toggle to instruct the webserver to include HTTP cache control headers on the response.
-platform_webserver_cache_control_enabled:
+# A toggle to instruct the webserver to include HTTP cache control headers on the response. If
+# left unset in platform.properties, Itential Platform itself defaults this to false; the
+# deployer explicitly overrides that default to true.
+platform_webserver_cache_control_enabled: true
 
 # Timeout to use for incoming HTTP requests to the platform API, in milliseconds.
 platform_webserver_timeout:
