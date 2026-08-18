@@ -5,6 +5,15 @@
 # If false, the task worker must be enabled manually via the UI/API.
 platform_task_worker_enabled: true
 
+# The number of worker threads available for task processing.
+platform_task_worker_thread_count: 1
+
+# The maximum number of tasks to run per period. The value 0 disables the rate limiter.
+platform_task_worker_rate_limit: 0
+
+# The time period in seconds for the task worker rate limit.
+platform_task_worker_rate_limit_period: 1
+
 # If true, will allow jobs to be started after the server startup process is complete.
 # If false, API calls to start Jobs will return an error until enabled manually via the UI/API.
 platform_job_worker_enabled: true

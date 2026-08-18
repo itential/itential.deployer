@@ -4,11 +4,19 @@
 # Flag to enable/disable configuring Vault in Itential Platform
 platform_configure_vault: false
 
+# Name of the secrets provider. Required for CyberArk CCP. Not required for Hashicorp Vault.
+# Valid values: CyberArkCcp, HashicorpVault
+platform_secret_provider_name:
+
 # The directory to store the vault root key in
 platform_vault_token_dir: "{{ platform_server_dir }}/keys"
 
 # The URL to the Hashicorp Vault server.
 platform_vault_url: http://localhost:8200
+
+# The Vault Enterprise namespace to scope all secret operations to. Required for multi-tenant
+# Vault Enterprise configurations. Not required for open-source Vault.
+platform_vault_namespace:
 
 # The authorization method to connect to Hashicorp Vault. Either token or approle.
 platform_vault_auth_method: token
@@ -49,3 +57,53 @@ platform_vault_secrets_endpoint: itential/data
 # If true, only reads secrets from Hashicorp Vault. Otherwise, the platform can write secrets
 # to Vault for storage.
 platform_vault_read_only: true
+
+# The number of milliseconds to wait before timing out requests to the Hashicorp Vault server.
+# Used by Hashicorp Vault only.
+platform_vault_connection_timeout:
+
+# ============================================================================
+# CyberArk Central Credential Provider (CCP) - Used only when platform_secret_provider_name
+# is set to 'CyberArkCcp'
+# ============================================================================
+
+# The URL to the CyberArk Central Credential Provider.
+platform_cyberark_url:
+
+# Specifies the unique ID of the application issuing the password request to CyberArk CCP.
+platform_cyberark_app_id:
+
+# If true, disables the validation checks for TLS certificates and allows the use of invalid
+# or self-signed certificates to connect.
+platform_cyberark_allow_invalid_certificates:
+
+# The .pem file that contains the root certificate chain from the Certificate Authority.
+# Specify the file name of the .pem file using absolute paths.
+platform_cyberark_ca:
+
+# The certificate key file location. Specify the location of the key file using absolute paths.
+platform_cyberark_key:
+
+# The .pem file that contains the client certificate. Specify the file name of the .pem file
+# using absolute paths.
+platform_cyberark_certificate:
+
+# String representation of the PEM-encoded root certificate chain from the Certificate
+# Authority. Alternative to platform_cyberark_ca when the CA contents should be inlined.
+platform_cyberark_ca_contents:
+
+# String representation of the PEM-encoded certificate key. Alternative to platform_cyberark_key
+# when the key contents should be inlined.
+platform_cyberark_key_contents:
+
+# String representation of the PEM-encoded client certificate. Alternative to
+# platform_cyberark_certificate when the certificate contents should be inlined.
+platform_cyberark_certificate_contents:
+
+# The number of seconds that the Central Credential Provider will try to retrieve the secret
+# value.
+platform_cyberark_connection_timeout:
+
+# Set this property to the reason for retrieving the password to have the reason text appear
+# in CyberArk Credential Provider's audit log.
+platform_cyberark_reason_text:
