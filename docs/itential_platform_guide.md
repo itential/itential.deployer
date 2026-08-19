@@ -200,7 +200,7 @@ These variables control SNMP behaviors. The following table lists the default va
 #### Vault Variables
 
 These variables control Hashicorp Vault integration behaviors. The following table lists the
-default variables located in `roles/platform/defaults/main/vault.yml`.
+default variables located in `roles/platform/defaults/main/hashivault.yml`.
 
 | Variable | Type | Description | Default Value |
 | :------- | :--- | :---------- | :------------ |
@@ -223,7 +223,7 @@ default variables located in `roles/platform/defaults/main/vault.yml`.
 | platform_vault_connection_timeout | Integer | The number of milliseconds to wait before timing out requests to the Hashicorp Vault server. Used by Hashicorp Vault only. |  |
 
 The following CyberArk CCP variables are only relevant when `platform_secret_provider_name` is
-set to `CyberArkCcp`. They are also located in `roles/platform/defaults/main/vault.yml`.
+set to `CyberArkCcp`. They are located in `roles/platform/defaults/main/cyberark.yml`.
 
 | Variable | Type | Description | Default Value |
 | :------- | :--- | :---------- | :------------ |

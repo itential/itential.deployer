@@ -163,7 +163,7 @@ Installs and configures Itential Platform (IAP). Handles OS user/directory setup
 | `platform_auth_relay_state_ttl` | `600` | SSO RelayState timeout (seconds) |
 | `platform_auth_unique_sessions_enabled` | `false` | Log out existing sessions on new login |
 
-### vault.yml defaults
+### hashivault.yml defaults
 
 | Variable | Default | Purpose |
 |----------|---------|---------|
@@ -177,6 +177,11 @@ Installs and configures Itential Platform (IAP). Handles OS user/directory setup
 | `platform_secret_provider_name` | (unset) | Secrets provider name; required for CyberArk CCP (`CyberArkCcp`), not required for Hashicorp Vault |
 | `platform_vault_namespace` | (unset) | Vault Enterprise namespace; not used with open-source Vault |
 | `platform_vault_connection_timeout` | (unset) | Vault request timeout (ms) |
+
+### cyberark.yml defaults
+
+| Variable | Default | Purpose |
+|----------|---------|---------|
 | `platform_cyberark_url`, `_app_id`, `_ca(_contents)`, `_key(_contents)`, `_certificate(_contents)`, `_allow_invalid_certificates`, `_connection_timeout`, `_reason_text` | (all unset) | CyberArk CCP connection settings; only relevant when `platform_secret_provider_name: CyberArkCcp` |
 
 ### logging.yml defaults
