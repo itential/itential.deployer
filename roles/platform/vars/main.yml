@@ -26,6 +26,9 @@ platform_required_repositories:
   - url: "https://registry.aws.itential.com"
     type: bare
     notes: "Itential packages"
+  - url: "https://itential.jfrog.io"
+    type: bare
+    notes: "Itential packages"
   - url: "https://registry.npmjs.org"
     type: bare
     notes: "Core NPM packages"
