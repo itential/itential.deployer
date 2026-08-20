@@ -165,6 +165,9 @@ Installs and configures Itential Platform (IAP). Handles OS user/directory setup
 
 ### hashivault.yml defaults
 
+In `6-properties.j2`, the entire `HASHICORP VAULT CONNECTION` section (header and all `vault_*`
+lines, including commented-out placeholders) is only rendered when `platform_configure_vault: true`.
+
 | Variable | Default | Purpose |
 |----------|---------|---------|
 | `platform_configure_vault` | `false` | Enable Vault integration |
@@ -179,6 +182,10 @@ Installs and configures Itential Platform (IAP). Handles OS user/directory setup
 | `platform_vault_connection_timeout` | (unset) | Vault request timeout (ms) |
 
 ### cyberark.yml defaults
+
+In `6-properties.j2`, the entire `CYBERARK CCP CONNECTION` section (header and all `cyberark_*`
+lines, including commented-out placeholders) is only rendered when
+`platform_secret_provider_name: CyberArkCcp`.
 
 | Variable | Default | Purpose |
 |----------|---------|---------|

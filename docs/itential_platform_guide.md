@@ -202,6 +202,10 @@ These variables control SNMP behaviors. The following table lists the default va
 These variables control Hashicorp Vault integration behaviors. The following table lists the
 default variables located in `roles/platform/defaults/main/hashivault.yml`.
 
+The `HASHICORP VAULT CONNECTION` section of `properties.json` is only rendered when
+`platform_configure_vault` is `true`. When it is `false` (the default), none of the
+`vault_*` properties are written to the file, not even as commented-out placeholders.
+
 | Variable | Type | Description | Default Value |
 | :------- | :--- | :---------- | :------------ |
 | platform_configure_vault | Boolean | Flag to enable/disable configuring Vault in Itential Platform | `false` |
@@ -224,6 +228,10 @@ default variables located in `roles/platform/defaults/main/hashivault.yml`.
 
 The following CyberArk CCP variables are only relevant when `platform_secret_provider_name` is
 set to `CyberArkCcp`. They are located in `roles/platform/defaults/main/cyberark.yml`.
+
+The `CYBERARK CCP CONNECTION` section of `properties.json` is only rendered when
+`platform_secret_provider_name` is set to `CyberArkCcp`. Otherwise, none of the `cyberark_*`
+properties are written to the file, not even as commented-out placeholders.
 
 | Variable | Type | Description | Default Value |
 | :------- | :--- | :---------- | :------------ |
