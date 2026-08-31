@@ -49,6 +49,7 @@ Installs and configures Itential Platform (IAP). Handles OS user/directory setup
 | `platform_package_dependencies` | `glibc-common`, `openldap`, `openldap-clients`, `openssl`, `git` | OS packages required before Platform RPM |
 | `platform_encryption_key` | (required) | 64-char hex string (256-bit AES key); generate with `openssl rand -hex 32` |
 | `platform_packages` | (required) | List of RPM package names or download URLs |
+| `platform_package_checksums` | `{}` | Optional dict mapping a `platform_packages` download URL to its expected `get_url`-format checksum (e.g. `sha256:<hash>`); URLs with no entry are downloaded without verification |
 | `platform_app_artifacts_enabled` | `false` | Install app artifacts |
 | `platform_start_service` | `true` | Start the service after install |
 | `platform_upload_using_rsync` | `false` | Use rsync for artifact upload |
