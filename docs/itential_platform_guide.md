@@ -87,6 +87,8 @@ default variables located in `roles/platform/defaults/main/authentication.yml`.
 | platform_auth_broker_principal_enabled | Boolean | Enables a AAA adapter to custom build the principal object for a user with a "buildPrincipal" method. | `false` |
 | platform_auth_session_cookie_name | String | The name of the cookie used for a user session. | `token` |
 | platform_auth_session_ttl | Integer | The time in minutes before a user session expires. | 60 |
+| platform_auth_principal_ttl | Integer | The time in minutes before a user principal expires. If not supplied it will fallback to the session ttl. |  |
+| platform_auth_relay_state_ttl | Integer | The time in seconds before the RelayState from SSO expires. | 600 |
 | platform_default_user_enabled | Boolean | Enables a default user to be used for login when SSO is not configured and no AAA Adapter exists. | `true` |
 | platform_default_user_username | String | The username of the default user. | `admin` |
 | platform_default_user_password | String | The password of the default user. | `admin` |
@@ -125,6 +127,8 @@ default variables located in `roles/platform/defaults/main/logging.yml`.
 | platform_log_dir | String | The absolute directory path where log files are written. | `/var/log/itential/platform` |
 | platform_log_filename | String | The name of the primary platform log file. | `platform.log` |
 | platform_log_level_console | String | The minimum log level to display in the console (stdout). | `warn` |
+| platform_log_format_json | Boolean | If true, log entries will be written in JSON format. Otherwise, log entries will be written in plaintext. | `false` |
+| platform_console_format_json | Boolean | If true, console logs will be written in JSON format. Otherwise, log entries will be written in plaintext. | `false` |
 | platform_webserver_log_directory | String | The absolute directory path where webserver log files are written. | `/var/log/itential/platform` |
 | platform_webserver_log_filename | String | The name of the webserver log file. | `webserver.log` |
 | platform_log_level_syslog | String | The minimum log level to send to the syslog server. | `warning` |
@@ -138,6 +142,7 @@ default variables located in `roles/platform/defaults/main/logging.yml`.
 | platform_syslog_localhost | String | The hostname to include in the syslog message. | `localhost` |
 | platform_syslog_app_name | String | The process property to include as the application name in the syslog message. | `process.title` |
 | platform_syslog_eol | String | The end of line character to include in the syslog message. |  |
+| platform_syslog_format_json | Boolean | If true, syslog logs will be written in JSON format. Otherwise, log entries will be written in plaintext. | `false` |
 
 #### Platform UI Variables
 
@@ -160,11 +165,13 @@ variables located in `roles/platform/defaults/main/redis.yml`.
 
 | Variable | Type | Description | Default Value |
 | :------- | :--- | :---------- | :------------ |
+| platform_redis_persist_queues | List(String) | The platform will match Bull queue names included to persist in Redis on restarts. |  |
 | platform_redis_db | Integer | The Redis keyspace (database number) to use for the connection. | 0 |
 | platform_redis_auth_enabled | String | Flag to enable Redis authentication. | `true` |
 | platform_redis_username | String | The username to use when connecting to Redis. | `itential` |
 | platform_redis_password | String | The password to use when connecting to Redis. | `itential` |
 | platform_redis_max_retries_per_request | Integer |  The maximum number of times to retry a request to Redis when the connection is lost. | 20 |
+| platform_redis_connect_timeout | Integer | The maximum time in milliseconds to wait for initial Redis connection before timing out. | 30000 |
 | platform_redis_max_heartbeat_write_retries | Integer | The maximum number of times to retry writing a heartbeat message to Redis from a service. | 20 |
 | platform_redis_host | String | The hostname of the Redis server. Not used when connecting to Redis Sentinels. | `localhost` |
 | platform_redis_port | Integer | The port to use when connecting to this Redis instance. | 6379 |
@@ -173,6 +180,13 @@ variables located in `roles/platform/defaults/main/redis.yml`.
 | platform_redis_sentinel_password | String | The password to use when connecting to Sentinel. | `sentineluser` |
 | platform_redis_name | String | The Redis primary name. This only has meaning when Redis is running with replication enabled. The sentinels will monitor this node and consider it down only when the sentinels agree. Note: The primary name should not include special characters other than: .-_ and no whitespaces. | `itentialmaster` |
 | platform_redis_tls | Object | Redis TLS configuration options for secure connections. Refer to NodeJS TLS library for all supported options. |  |
+| platform_redis_tls_ca | String | CA certificate used to verify the Redis server certificate when using TLS, as a PEM-encoded string. Alternative to setting `ca` on `platform_redis_tls`. |  |
+| platform_redis_tls_cert | String | Client certificate used to authenticate to the Redis server when using TLS, as a PEM-encoded string. |  |
+| platform_redis_tls_key | String | Client private key used to authenticate to the Redis server when using TLS, as a PEM-encoded string. |  |
+| platform_redis_sentinel_tls | Object | TLS options for the Sentinel connection itself. Only used when `platform_redis_tls_enabled` is `true`. |  |
+| platform_redis_sentinel_command_timeout | Integer | The maximum time in milliseconds to wait for a Redis Sentinel command to complete. Only applies when connecting via Redis Sentinel. | 3000 |
+| platform_redis_command_timeout | Integer | The maximum time in milliseconds to wait for a Redis command to complete before timing out. | 60000 |
+| platform_redis_keep_alive | Integer | Enables TCP keepalive on the Redis socket. Value is the keepalive delay in milliseconds. | 5000 |
 
 #### SNMP Variables
 
@@ -186,13 +200,19 @@ These variables control SNMP behaviors. The following table lists the default va
 #### Vault Variables
 
 These variables control Hashicorp Vault integration behaviors. The following table lists the
-default variables located in `roles/platform/defaults/main/vault.yml`.
+default variables located in `roles/platform/defaults/main/hashivault.yml`.
+
+The `HASHICORP VAULT CONNECTION` section of `properties.json` is only rendered when
+`platform_configure_vault` is `true`. When it is `false` (the default), none of the
+`vault_*` properties are written to the file, not even as commented-out placeholders.
 
 | Variable | Type | Description | Default Value |
 | :------- | :--- | :---------- | :------------ |
 | platform_configure_vault | Boolean | Flag to enable/disable configuring Vault in Itential Platform | `false` |
+| platform_secret_provider_name | String | Name of the secrets provider. Required for CyberArk CCP (`CyberArkCcp`). Not required for Hashicorp Vault. |  |
 | platform_vault_token_dir | String | The directory to store the vault root key in | `{{ platform_server_dir }}/keys` |
 | platform_vault_url | String | The URL to the Hashicorp Vault server. | `http://localhost:8200` |
+| platform_vault_namespace | String | The Vault Enterprise namespace to scope all secret operations to. Required for multi-tenant Vault Enterprise configurations. Not required for open-source Vault. |  |
 | platform_vault_auth_method | String | The authorization method to connect to Hashicorp Vault. Either token or approle. | `token` |
 | platform_vault_token | String | Hashicorp Vault token used for token-based authentication |  |
 | platform_vault_role_id | String | Hashicorp Vault Role ID variable used for AppRole authentication |  |
@@ -204,6 +224,28 @@ default variables located in `roles/platform/defaults/main/vault.yml`.
 | platform_vault_role_secrets_env_file | The file path to the .env file containing Role ID and Secret ID for AppRole authentication | `{{ platform_vault_token_dir }}/vault-role-secrets.env` |
 | platform_vault_secrets_endpoint | String | The endpoint for the Secrets Engine that is used. | `itential/data` |
 | platform_vault_read_only | Boolean | If true, only reads secrets from Hashicorp Vault. Otherwise, the platform can write secrets to Vault for storage. | `true` |
+| platform_vault_connection_timeout | Integer | The number of milliseconds to wait before timing out requests to the Hashicorp Vault server. Used by Hashicorp Vault only. |  |
+
+The following CyberArk CCP variables are only relevant when `platform_secret_provider_name` is
+set to `CyberArkCcp`. They are located in `roles/platform/defaults/main/cyberark.yml`.
+
+The `CYBERARK CCP CONNECTION` section of `properties.json` is only rendered when
+`platform_secret_provider_name` is set to `CyberArkCcp`. Otherwise, none of the `cyberark_*`
+properties are written to the file, not even as commented-out placeholders.
+
+| Variable | Type | Description | Default Value |
+| :------- | :--- | :---------- | :------------ |
+| platform_cyberark_url | String | The URL to the CyberArk Central Credential Provider. |  |
+| platform_cyberark_app_id | String | Specifies the unique ID of the application issuing the password request to CyberArk CCP. |  |
+| platform_cyberark_allow_invalid_certificates | Boolean | If true, disables the validation checks for TLS certificates and allows the use of invalid or self-signed certificates to connect. |  |
+| platform_cyberark_ca | String | The .pem file that contains the root certificate chain from the Certificate Authority. Specify the file name of the .pem file using absolute paths. |  |
+| platform_cyberark_key | String | The certificate key file location. Specify the location of the key file using absolute paths. |  |
+| platform_cyberark_certificate | String | The .pem file that contains the client certificate. Specify the file name of the .pem file using absolute paths. |  |
+| platform_cyberark_ca_contents | String | String representation of the PEM-encoded root certificate chain from the Certificate Authority. |  |
+| platform_cyberark_key_contents | String | String representation of the PEM-encoded certificate key. |  |
+| platform_cyberark_certificate_contents | String | String representation of the PEM-encoded client certificate. |  |
+| platform_cyberark_connection_timeout | Integer | The number of seconds that the Central Credential Provider will try to retrieve the secret value. |  |
+| platform_cyberark_reason_text | String | Set this property to the reason for retrieving the password to have the reason text appear in CyberArk Credential Provider's audit log. |  |
 
 #### Webserver Variables
 
@@ -220,10 +262,14 @@ located in `roles/platform/defaults/main/webserver.yml`.
 | platform_webserver_https_enabled | Boolean | If true, allows the webserver to respond to secure HTTPS requests. | `true` |
 | platform_webserver_https_port | Integer | The port on which the webserver listens for HTTPS requests. | 3443 |
 | platform_https_key_dest | String | The path to the private key file used for HTTPS connections. | `/etc/pki/itential-platform/private/{{ inventory_hostname }}.key` |
+| platform_webserver_https_key_contents | String | Public key used for HTTPS connections, as a PEM-encoded string. Alternative to the file-based key. |  |
 | platform_webserver_https_copy_certs | Boolean | Flag to manage PKI infrastructure (create directories and copy certificates). | `true` |
 | platform_webserver_https_passphrase | String | The passphrase for the private key used to enable TLS sessions. |  |
 | platform_https_cert_dest | String | The path to the certificate file used for HTTPS connections. | `/etc/pki/itential-platform/https/{{ inventory_hostname }}.crt` |
-| platform_webserver_https_secure_protocol | String | The set of allowed SSL/TLS protocol versions. | `TLS_method` |
+| platform_webserver_https_cert_contents | String | Certificate used for HTTPS connections, as a PEM-encoded string. Alternative to the file-based cert. |  |
+| platform_webserver_https_tls_min_version | String | Minimum permitted TLS version (`TLSv1.3`, `TLSv1.2`, `TLSv1.1`, `TLSv1`). Overrides `platform_webserver_https_secure_protocol`. |  |
+| platform_webserver_https_tls_max_version | String | Maximum permitted TLS version (`TLSv1.3`, `TLSv1.2`, `TLSv1.1`, `TLSv1`). Overrides `platform_webserver_https_secure_protocol`. |  |
+| platform_webserver_https_secure_protocol | String | The set of allowed SSL/TLS protocol versions. Ignored when either TLS min or max version is given. | `TLS_method` |
 | platform_webserver_https_ciphers | String |  The allowed SSL/TLS cipher suite. | `ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA384:DHE-RSA-AES256-SHA384:ECDHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA256:HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA` |
 | platform_webserver_https_client_reneg_limit | Integer | Specifies the number of renegotiations that are allowed in a single HTTPS connection. | 3 |
 | platform_webserver_https_client_reneg_window | Integer | Specifies the time renegotiation window in seconds for a single HTTPS connection. | 600 |
@@ -236,8 +282,11 @@ located in `roles/platform/defaults/main/workflow_worker.yml`.
 
 | Variable | Type | Description | Default Value |
 | :------- | :--- | :---------- | :------------ |
-| platform_task_worker_enabled | Boolean | If true, will start working tasks immediately after the server startup process is complete. If false, the task worker must be enabled manually via the UI/API. | `true` |
-| platform_job_worker_enabled | Boolean | If true, will allow jobs to be started after the server startup process is complete. If false, API calls to start Jobs will return an error until enabled manually via the UI/API. | `true` |
+| platform_task_worker_enabled | Boolean | If true, will start working tasks immediately after the server startup process is complete. If false, the task worker must be enabled manually via the UI/API. Left unset by default so Itential Platform's own application default is used. |  |
+| platform_task_worker_thread_count | Integer | The number of worker threads available for task processing. Left unset by default so Itential Platform's own application default is used. |  |
+| platform_task_worker_rate_limit | Integer | The maximum number of tasks to run per period. The value 0 disables the rate limiter. Left unset by default so Itential Platform's own application default is used. |  |
+| platform_task_worker_rate_limit_period | Integer | The time period in seconds for the task worker rate limit. Left unset by default so Itential Platform's own application default is used. |  |
+| platform_job_worker_enabled | Boolean | If true, will allow jobs to be started after the server startup process is complete. If false, API calls to start Jobs will return an error until enabled manually via the UI/API. Left unset by default so Itential Platform's own application default is used. |  |
 
 #### MongoDB Variables
 
@@ -257,7 +306,9 @@ variables located in `roles/platform/defaults/main/mongodb.yml`.
 | platform_mongodb_copy_certs | Boolean | Flag to manage PKI infrastructure (create directories and copy certificates). | `true` |
 | platform_mongo_tls_allow_invalid_certificates | Boolean | If true, disables the validation checks for TLS certificates on other servers in the cluster and allows the use of invalid or self-signed certificates to connect. | `false` |
 | platform_mongo_tls_ca_file | String | The .pem file that contains the root certificate chain from the Certificate Authority. Specify the file name of the .pem file using absolute paths. |  |
+| platform_mongo_tls_ca_contents | String | Root certificate chain from the Certificate Authority, as a PEM-encoded string. Alternative to `platform_mongo_tls_ca_file`. |  |
 | platform_mongo_max_pool_size | Integer | The maximum number of connections in a connection pool. Each application/adapter has its own connection pool. |  |
+| platform_mongo_max_idle_time_ms | Integer | The maximum number of milliseconds that a connection can remain idle in the pool. Set to 0 for no limit. | 300000 |
 
 #### Platform Variables
 
@@ -318,6 +369,7 @@ located in `roles/platform/defaults/main/server.yml`.
 | :------- | :--- | :---------- | :------------ |
 | platform_profile_id | String | The name of the profile document to load from the MongoDB where legacy configuration properties are stored. Not required for installations that are using environment variables or a properties file. | |
 | platform_server_id | String | An identifier for the server instance. This is used to uniquely identify the server in a multi-server environment. If not provided, the server will generate one on startup. | `{{ inventory_hostname }}` |
+| platform_server_id_strategy | String | Strategy used to generate server ID, if one is not set using `platform_server_id`. `mac:port` generates an ID from the MAC address and port; `random` generates a random ID on each startup. | `mac:port` |
 | platform_services | List | A whitelist of services (applications/adapters) to initialize on startup of the platform. If no value is given, all services will be initialized. |  |
 | platform_service_blacklist | List | The service type that will be denied CRUD operation access. |  |
 | platform_encrypted | Boolean | Indicates whether the platform is using encrypted code files. | `true` |
@@ -333,7 +385,18 @@ located in `roles/platform/defaults/main/server.yml`.
 | platform_service_crash_recovery_reset_retries_after_ms | Integer | Specifies the amount of times between each retry before the count will reset in milliseconds. | 60000 |
 | platform_external_request_timeout | Integer | The timeout for external API requests, in seconds. | 5 |
 | platform_device_count_polling_interval | Integer | The interval for how often IAP polls for the number of devices, in hours. | 24 |
+| platform_event_worker_thread_count | Integer | The number of worker threads available for event processing. |  |
+| platform_transformation_worker_thread_count | Integer | The number of worker threads available for transformation processing. |  |
 | platform_audit_enabled | Boolean | If true, the platform will track detailed audit events. | `false` |
+
+#### Telemetry Variables
+
+These variables control OpenTelemetry integration behaviors. The following table lists the
+default variables located in `roles/platform/defaults/main/telemetry.yml`.
+
+| Variable | Type | Description | Default Value |
+| :------- | :--- | :---------- | :------------ |
+| platform_otel_webserver_metrics_enabled | Boolean | Toggle for OpenTelemetry webserver metrics (requests, errors, duration, payload sizes -- served at `/metrics/webserver`). | `true` |
 
 ## Building the Inventory
 

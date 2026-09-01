@@ -62,12 +62,16 @@ Installs and configures Itential Platform (IAP). Handles OS user/directory setup
 | Variable | Default | Purpose |
 |----------|---------|---------|
 | `platform_server_id` | `{{ inventory_hostname }}` | Unique server identifier in multi-node deployments |
+| `platform_server_id_strategy` | `mac:port` | Strategy to generate `server_id` when not explicitly set (`mac:port` or `random`) |
 | `platform_encrypted` | `true` | Platform uses encrypted code files |
-| `platform_task_worker_enabled` | `true` | Start task worker on boot |
-| `platform_job_worker_enabled` | `true` | Allow jobs to start on boot |
+| `platform_task_worker_enabled` | (unset) | Start task worker on boot; left unset so Itential Platform's own application default is used |
+| `platform_job_worker_enabled` | (unset) | Allow jobs to start on boot; left unset so Itential Platform's own application default is used |
 | `platform_service_launch_timeout` | `600` | Seconds before adapter launch is considered failed |
 | `platform_shutdown_timeout` | `3` | Seconds to wait before forcing shutdown |
 | `platform_audit_enabled` | `false` | Enable detailed audit events |
+| `platform_event_worker_thread_count` | (unset) | Worker threads for event processing |
+| `platform_transformation_worker_thread_count` | (unset) | Worker threads for transformation processing |
+| `platform_otel_webserver_metrics_enabled` | `true` (in `telemetry.yml`) | Toggle for OpenTelemetry webserver metrics at `/metrics/webserver` |
 
 ### webserver.yml defaults
 
@@ -81,6 +85,9 @@ Installs and configures Itential Platform (IAP). Handles OS user/directory setup
 | `platform_webserver_https_secure_protocol` | `TLS_method` | OpenSSL method |
 | `platform_webserver_cache_control_enabled` | `true` | HTTP cache control headers. Itential Platform's own application default (when left unset in `platform.properties`) is `false` — the deployer explicitly overrides it to `true`. |
 | `platform_webserver_timeout` | `300000` | Request timeout (ms) |
+| `platform_webserver_https_key_contents` | (unset) | Inline PEM-encoded HTTPS private key, alternative to the file-based `platform_https_key_dest` |
+| `platform_webserver_https_cert_contents` | (unset) | Inline PEM-encoded HTTPS certificate, alternative to the file-based `platform_https_cert_dest` |
+| `platform_webserver_https_tls_min_version` / `_max_version` | (unset) | Pin TLS version range (`TLSv1.3`..`TLSv1`); overrides `platform_webserver_https_secure_protocol` |
 
 ### mongodb.yml defaults
 
@@ -94,6 +101,8 @@ Installs and configures Itential Platform (IAP). Handles OS user/directory setup
 | `platform_mongo_tls_enabled` | `true` | Use TLS for MongoDB connection |
 | `platform_mongo_tls_allow_invalid_certificates` | `false` (when TLS enabled) | Accept invalid/self-signed certs |
 | `platform_mongo_bypass_version_check` | `false` | Skip MongoDB version compatibility check |
+| `platform_mongo_max_idle_time_ms` | `300000` | Max time (ms) a pooled connection may sit idle; `0` disables the limit |
+| `platform_mongo_tls_ca_contents` | (unset) | Inline PEM-encoded CA chain, alternative to the file-based `platform_mongo_tls_ca_file` |
 
 ### redis.yml defaults
 
@@ -110,7 +119,13 @@ Installs and configures Itential Platform (IAP). Handles OS user/directory setup
 | `platform_redis_name` | `itentialmaster` | Redis primary name (must match `redis_sentinel_master_name`) |
 | `platform_redis_tls_enabled` | `true` | Enable TLS for both the Redis data connection and the Sentinel connection |
 | `platform_redis_tls` | (empty) | TLS options dict for NodeJS Redis client |
+| `platform_redis_tls_ca` / `_cert` / `_key` | (unset) | Inline PEM-encoded CA/cert/key, alternative to setting them inside `platform_redis_tls` |
 | `platform_redis_sentinel_tls` | (empty) | TLS options dict for Sentinel connection; used when `platform_redis_tls_enabled: true` |
+| `platform_redis_connect_timeout` | `30000` | Max time (ms) to wait for the initial Redis connection |
+| `platform_redis_command_timeout` | `60000` | Max time (ms) to wait for a Redis command to complete |
+| `platform_redis_sentinel_command_timeout` | `3000` | Max time (ms) to wait for a Sentinel command to complete |
+| `platform_redis_keep_alive` | `5000` | TCP keepalive delay (ms) on the Redis socket |
+| `platform_redis_persist_queues` | (empty) | Bull queue names to persist in Redis across restarts |
 
 ### pki.yml defaults (TLS paths)
 
@@ -144,9 +159,14 @@ Installs and configures Itential Platform (IAP). Handles OS user/directory setup
 | `platform_default_user_username` | `admin` | Default admin username |
 | `platform_default_user_password` | `admin` | Default admin password (change in production) |
 | `platform_auth_session_ttl` | `60` | Session timeout (minutes) |
+| `platform_auth_principal_ttl` | (unset) | User principal timeout (minutes); falls back to `platform_auth_session_ttl` when unset |
+| `platform_auth_relay_state_ttl` | `600` | SSO RelayState timeout (seconds) |
 | `platform_auth_unique_sessions_enabled` | `false` | Log out existing sessions on new login |
 
-### vault.yml defaults
+### hashivault.yml defaults
+
+In `6-properties.j2`, the entire `HASHICORP VAULT CONNECTION` section (header and all `vault_*`
+lines, including commented-out placeholders) is only rendered when `platform_configure_vault: true`.
 
 | Variable | Default | Purpose |
 |----------|---------|---------|
@@ -157,6 +177,19 @@ Installs and configures Itential Platform (IAP). Handles OS user/directory setup
 | `platform_vault_role_id` | (required if approle) | AppRole role ID |
 | `platform_vault_secret_id` | (required if approle) | AppRole secret ID |
 | `platform_vault_read_only` | `true` | Read-only Vault access |
+| `platform_secret_provider_name` | (unset) | Secrets provider name; required for CyberArk CCP (`CyberArkCcp`), not required for Hashicorp Vault |
+| `platform_vault_namespace` | (unset) | Vault Enterprise namespace; not used with open-source Vault |
+| `platform_vault_connection_timeout` | (unset) | Vault request timeout (ms) |
+
+### cyberark.yml defaults
+
+In `6-properties.j2`, the entire `CYBERARK CCP CONNECTION` section (header and all `cyberark_*`
+lines, including commented-out placeholders) is only rendered when
+`platform_secret_provider_name: CyberArkCcp`.
+
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `platform_cyberark_url`, `_app_id`, `_ca(_contents)`, `_key(_contents)`, `_certificate(_contents)`, `_allow_invalid_certificates`, `_connection_timeout`, `_reason_text` | (all unset) | CyberArk CCP connection settings; only relevant when `platform_secret_provider_name: CyberArkCcp` |
 
 ### logging.yml defaults
 

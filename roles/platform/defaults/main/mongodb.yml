@@ -30,6 +30,15 @@ platform_mongo_tls_enabled: true
 # and allows the use of invalid or self-signed certificates to connect.
 platform_mongo_tls_allow_invalid_certificates: "{{ false if platform_mongo_tls_enabled | bool else '' }}"
 
+# Root certificate chain from the Certificate Authority, as a PEM-encoded string.
+# Alternative to platform_mongo_tls_ca_file when the CA contents should be inlined instead of
+# referencing a file path.
+platform_mongo_tls_ca_contents:
+
 # The maximum number of connections in a connection pool.
 # Each application/adapter has its own connection pool.
 platform_mongo_max_pool_size:
+
+# The maximum number of milliseconds that a connection can remain idle in the pool.
+# Set to 0 for no limit.
+platform_mongo_max_idle_time_ms: 300000

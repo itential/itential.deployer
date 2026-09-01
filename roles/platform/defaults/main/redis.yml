@@ -1,6 +1,9 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
+# The platform will match Bull queue names included to persist in Redis on restarts.
+platform_redis_persist_queues:
+
 # The Redis keyspace (database number) to use for the connection.
 platform_redis_db: 0
 
@@ -15,6 +18,9 @@ platform_redis_password: itential
 
 # The maximum number of times to retry a request to Redis when the connection is lost.
 platform_redis_max_retries_per_request: 20
+
+# The maximum time in milliseconds to wait for initial Redis connection before timing out.
+platform_redis_connect_timeout: 30000
 
 # The maximum number of times to retry writing a heartbeat message to Redis from a service.
 platform_redis_max_heartbeat_write_retries: 20
@@ -45,6 +51,23 @@ platform_redis_name: itentialmaster
 platform_redis_tls_enabled: true
 platform_redis_tls: {}
 
+# CA certificate, client certificate, and client private key used to verify/authenticate the
+# Redis TLS connection, as PEM-encoded strings. Alternative to setting these directly on
+# platform_redis_tls when the values should be inlined instead of nested in the TLS options dict.
+platform_redis_tls_ca:
+platform_redis_tls_cert:
+platform_redis_tls_key:
+
 # TLS options for the Sentinel connection itself. Refer to the NodeJS TLS library for all
 # supported options. Only used when platform_redis_tls_enabled is true.
 platform_redis_sentinel_tls: {}
+
+# The maximum time in milliseconds to wait for a Redis Sentinel command to complete. Only
+# applies when connecting via Redis Sentinel.
+platform_redis_sentinel_command_timeout: 3000
+
+# The maximum time in milliseconds to wait for a Redis command to complete before timing out.
+platform_redis_command_timeout: 60000
+
+# Enables TCP keepalive on the Redis socket. Value is the keepalive delay in milliseconds.
+platform_redis_keep_alive: 5000
