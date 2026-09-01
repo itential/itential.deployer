@@ -34,12 +34,9 @@ server_id = {{ platform_server_id }}
 
 # Strategy used to generate server ID, if one is not set using the server_id property.
 # Selecting mac:port will generate a server_id using a combination of MAC address and port,
-# while random will generate a random ID on each startup.
-{% if platform_server_id_strategy %}
-server_id_strategy = {{ platform_server_id_strategy }}
-{% else %}
+# while random will generate a random ID on each startup. Not used since server_id is always
+# set (platform_server_id defaults to the inventory hostname).
 # server_id_strategy =
-{% endif %}
 
 # A whitelist of services (applications/adapters) to initialize on startup of the platform.
 # If no value is given, all services will be initialized.
