@@ -64,8 +64,8 @@ Installs and configures Itential Platform (IAP). Handles OS user/directory setup
 | `platform_server_id` | `{{ inventory_hostname }}` | Unique server identifier in multi-node deployments |
 | `platform_server_id_strategy` | `mac:port` | Strategy to generate `server_id` when not explicitly set (`mac:port` or `random`) |
 | `platform_encrypted` | `true` | Platform uses encrypted code files |
-| `platform_task_worker_enabled` | `true` | Start task worker on boot |
-| `platform_job_worker_enabled` | `true` | Allow jobs to start on boot |
+| `platform_task_worker_enabled` | (unset) | Start task worker on boot; left unset so Itential Platform's own application default is used |
+| `platform_job_worker_enabled` | (unset) | Allow jobs to start on boot; left unset so Itential Platform's own application default is used |
 | `platform_service_launch_timeout` | `600` | Seconds before adapter launch is considered failed |
 | `platform_shutdown_timeout` | `3` | Seconds to wait before forcing shutdown |
 | `platform_audit_enabled` | `false` | Enable detailed audit events |

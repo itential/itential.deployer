@@ -282,11 +282,11 @@ located in `roles/platform/defaults/main/workflow_worker.yml`.
 
 | Variable | Type | Description | Default Value |
 | :------- | :--- | :---------- | :------------ |
-| platform_task_worker_enabled | Boolean | If true, will start working tasks immediately after the server startup process is complete. If false, the task worker must be enabled manually via the UI/API. | `true` |
-| platform_task_worker_thread_count | Integer | The number of worker threads available for task processing. | 1 |
-| platform_task_worker_rate_limit | Integer | The maximum number of tasks to run per period. The value 0 disables the rate limiter. | 0 |
-| platform_task_worker_rate_limit_period | Integer | The time period in seconds for the task worker rate limit. | 1 |
-| platform_job_worker_enabled | Boolean | If true, will allow jobs to be started after the server startup process is complete. If false, API calls to start Jobs will return an error until enabled manually via the UI/API. | `true` |
+| platform_task_worker_enabled | Boolean | If true, will start working tasks immediately after the server startup process is complete. If false, the task worker must be enabled manually via the UI/API. Left unset by default so Itential Platform's own application default is used. |  |
+| platform_task_worker_thread_count | Integer | The number of worker threads available for task processing. Left unset by default so Itential Platform's own application default is used. |  |
+| platform_task_worker_rate_limit | Integer | The maximum number of tasks to run per period. The value 0 disables the rate limiter. Left unset by default so Itential Platform's own application default is used. |  |
+| platform_task_worker_rate_limit_period | Integer | The time period in seconds for the task worker rate limit. Left unset by default so Itential Platform's own application default is used. |  |
+| platform_job_worker_enabled | Boolean | If true, will allow jobs to be started after the server startup process is complete. If false, API calls to start Jobs will return an error until enabled manually via the UI/API. Left unset by default so Itential Platform's own application default is used. |  |
 
 #### MongoDB Variables
 
