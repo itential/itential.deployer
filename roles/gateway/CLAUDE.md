@@ -44,6 +44,7 @@ Installs and configures Itential Automation Gateway (IAG). Handles Python virtua
 | Variable | Default | Purpose |
 |----------|---------|---------|
 | `gateway_install_dir` | `/opt/automation-gateway` | IAG installation root |
+| `gateway_build_temp_dir_path` | (undefined) | Optional `path` for the build/staging working directory's `ansible.builtin.tempfile` task. Undefined by default so the module falls back to its own directory resolution; set explicitly (e.g. `/var/tmp`) on hosts where `/tmp` is mounted `noexec` |
 | `gateway_data_dir` | `/var/lib/automation-gateway` | IAG data directory |
 | `gateway_log_dir` | `/var/log/automation-gateway` | IAG log directory |
 | `gateway_properties_location` | `/etc/automation-gateway` | Properties file directory |

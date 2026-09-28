@@ -227,6 +227,7 @@ The following tables lists the default variables located in `roles/redis/default
 | `redis_source_url` | String | The Redis source URL | Varies depending on OS and Platform release |
 | `redis_remi_repo_url` | String | The URL of the Remi repo RPM. Note: this is only used when the `redis_install_from_source` is set to `false` and the Remi packages are being installed. | `http://rpms.remirepo.net/enterprise/remi-release-{{ ansible_distribution_major_version }}.rpm` |
 | `redis_epel_repo_url` | String | The URL of the EPEL repo RPM. Note: this is only used when the `redis_install_from_source` is set to `false` and the Remi packages are being installed. | `https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_distribution_major_version }}.noarch.rpm` |
+| `redis_build_temp_dir_path` | String | Optional directory for the source-build working directory. Undefined by default, in which case Ansible's own temp-directory resolution is used unchanged. Set this (e.g. to `/var/tmp`) only if `/tmp` is mounted `noexec` on the target host, which breaks the source build. | Undefined |
 
 ### Redis Variables
 

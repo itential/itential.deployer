@@ -27,8 +27,15 @@
           when: gateway_invalid_release is defined
 
     - name: Create temporary working directory
+      # gateway_build_temp_dir_path is intentionally undefined by default (rather than
+      # defaulting to a literal "/tmp") so that when it is not set, the path argument is
+      # omitted entirely and this module falls back to its own normal directory
+      # resolution (TMPDIR/TEMP/TMP env vars, then /tmp, /var/tmp, /usr/tmp) - the same
+      # behavior as before this variable existed. Set it explicitly (e.g. to /var/tmp)
+      # only on hosts where /tmp is mounted noexec.
       ansible.builtin.tempfile:
         state: directory
+        path: "{{ gateway_build_temp_dir_path | default(omit) }}"
       register: gateway_workingdir
 
     - name: Install Gateway dependency packages
