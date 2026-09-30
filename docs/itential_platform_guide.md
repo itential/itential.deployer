@@ -209,7 +209,6 @@ The `HASHICORP VAULT CONNECTION` section of `properties.json` is only rendered w
 | Variable | Type | Description | Default Value |
 | :------- | :--- | :---------- | :------------ |
 | platform_configure_vault | Boolean | Flag to enable/disable configuring Vault in Itential Platform | `false` |
-| platform_secret_provider_name | String | Name of the secrets provider. Required for CyberArk CCP (`CyberArkCcp`). Not required for Hashicorp Vault. |  |
 | platform_vault_token_dir | String | The directory to store the vault root key in | `{{ platform_server_dir }}/keys` |
 | platform_vault_url | String | The URL to the Hashicorp Vault server. | `http://localhost:8200` |
 | platform_vault_namespace | String | The Vault Enterprise namespace to scope all secret operations to. Required for multi-tenant Vault Enterprise configurations. Not required for open-source Vault. |  |
@@ -225,6 +224,15 @@ The `HASHICORP VAULT CONNECTION` section of `properties.json` is only rendered w
 | platform_vault_secrets_endpoint | String | The endpoint for the Secrets Engine that is used. | `itential/data` |
 | platform_vault_read_only | Boolean | If true, only reads secrets from Hashicorp Vault. Otherwise, the platform can write secrets to Vault for storage. | `true` |
 | platform_vault_connection_timeout | Integer | The number of milliseconds to wait before timing out requests to the Hashicorp Vault server. Used by Hashicorp Vault only. |  |
+
+#### Secret Provider Variables
+
+This variable selects the secrets provider. The following table lists the default variable
+located in `roles/platform/defaults/main/secret_provider.yml`.
+
+| Variable | Type | Description | Default Value |
+| :------- | :--- | :---------- | :------------ |
+| platform_secret_provider_name | String | Name of the secrets provider. Required for CyberArk CCP (`CyberArkCcp`). Not required for Hashicorp Vault. |  |
 
 The following CyberArk CCP variables are only relevant when `platform_secret_provider_name` is
 set to `CyberArkCcp`. They are located in `roles/platform/defaults/main/cyberark.yml`.

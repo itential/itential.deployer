@@ -4,10 +4,6 @@
 # Flag to enable/disable configuring Vault in Itential Platform
 platform_configure_vault: false
 
-# Name of the secrets provider. Required for CyberArk CCP. Not required for Hashicorp Vault.
-# Valid values: CyberArkCcp, HashicorpVault
-platform_secret_provider_name:
-
 # The directory to store the vault root key in
 platform_vault_token_dir: "{{ platform_server_dir }}/keys"
 

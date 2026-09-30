@@ -177,9 +177,14 @@ lines, including commented-out placeholders) is only rendered when `platform_con
 | `platform_vault_role_id` | (required if approle) | AppRole role ID |
 | `platform_vault_secret_id` | (required if approle) | AppRole secret ID |
 | `platform_vault_read_only` | `true` | Read-only Vault access |
-| `platform_secret_provider_name` | (unset) | Secrets provider name; required for CyberArk CCP (`CyberArkCcp`), not required for Hashicorp Vault |
 | `platform_vault_namespace` | (unset) | Vault Enterprise namespace; not used with open-source Vault |
 | `platform_vault_connection_timeout` | (unset) | Vault request timeout (ms) |
+
+### secret_provider.yml defaults
+
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `platform_secret_provider_name` | (unset) | Secrets provider name; required for CyberArk CCP (`CyberArkCcp`), not required for Hashicorp Vault |
 
 ### cyberark.yml defaults
 
