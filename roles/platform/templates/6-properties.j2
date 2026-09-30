@@ -32,6 +32,12 @@ server_id = {{ platform_server_id }}
 # server_id =
 {% endif %}
 
+# Strategy used to generate server ID, if one is not set using the server_id property.
+# Selecting mac:port will generate a server_id using a combination of MAC address and port,
+# while random will generate a random ID on each startup. Not used since server_id is always
+# set (platform_server_id defaults to the inventory hostname).
+# server_id_strategy =
+
 # A whitelist of services (applications/adapters) to initialize on startup of the platform.
 # If no value is given, all services will be initialized.
 {% if platform_services %}
@@ -147,6 +153,20 @@ device_count_polling_interval = {{ platform_device_count_polling_interval }}
 # device_count_polling_interval =
 {% endif %}
 
+# The number of worker threads available for event processing.
+{% if platform_event_worker_thread_count %}
+event_worker_thread_count = {{ platform_event_worker_thread_count }}
+{% else %}
+# event_worker_thread_count =
+{% endif %}
+
+# The number of worker threads available for transformation processing.
+{% if platform_transformation_worker_thread_count %}
+transformation_worker_thread_count = {{ platform_transformation_worker_thread_count }}
+{% else %}
+# transformation_worker_thread_count =
+{% endif %}
+
 # If true, the platform will track detailed audit events.
 {% if ( (platform_audit_enabled is defined) and
         (platform_audit_enabled is boolean) ) %}
@@ -240,6 +260,14 @@ mongo_tls_ca_file = {{ platform_mongo_tls_ca_file }}
 # mongo_tls_ca_file =
 {% endif %}
 
+# Root certificate chain from the Certificate Authority. This should be a string containing
+# the PEM-encoded certificate.
+{% if platform_mongo_tls_ca_contents %}
+mongo_tls_ca_contents = {{ platform_mongo_tls_ca_contents }}
+{% else %}
+# mongo_tls_ca_contents =
+{% endif %}
+
 # The maximum number of connections in a connection pool.
 # Each application/adapter has its own connection pool.
 {% if platform_mongo_max_pool_size %}
@@ -248,10 +276,25 @@ mongo_max_pool_size = {{ platform_mongo_max_pool_size }}
 # mongo_max_pool_size =
 {% endif %}
 
+# The maximum number of milliseconds that a connection can remain idle in the pool.
+# Set to 0 for no limit.
+{% if platform_mongo_max_idle_time_ms %}
+mongo_max_idle_time_ms = {{ platform_mongo_max_idle_time_ms }}
+{% else %}
+# mongo_max_idle_time_ms =
+{% endif %}
+
 
 ####################
 # REDIS CONNECTION #
 ####################
+# The platform will match Bull queue names included to persist in Redis on restarts.
+{% if platform_redis_persist_queues %}
+redis_persist_queues = {{ platform_redis_persist_queues | join(',') }}
+{% else %}
+# redis_persist_queues =
+{% endif %}
+
 # The Redis keyspace (database number) to use for the connection.
 {% if platform_redis_db %}
 redis_db = {{ platform_redis_db }}
@@ -282,6 +325,13 @@ redis_password = {{ platform_redis_password }}
 redis_max_retries_per_request = {{ platform_redis_max_retries_per_request }}
 {% else %}
 # redis_max_retries_per_request =
+{% endif %}
+
+# The maximum time in milliseconds to wait for initial Redis connection before timing out.
+{% if platform_redis_connect_timeout %}
+redis_connect_timeout = {{ platform_redis_connect_timeout }}
+{% else %}
+# redis_connect_timeout =
 {% endif %}
 
 # The maximum number of times to retry writing a heartbeat message to Redis from a service.
@@ -345,6 +395,30 @@ redis_tls = {{ {'rejectUnauthorized': false, 'ca': platform_redis_ca_dest} | com
 # redis_tls =
 {% endif %}
 
+# CA certificate used to verify the Redis server certificate when using TLS. This should be a
+# string containing the PEM-encoded CA certificate.
+{% if platform_redis_tls_ca %}
+redis_tls_ca = {{ platform_redis_tls_ca }}
+{% else %}
+# redis_tls_ca =
+{% endif %}
+
+# Client certificate used to authenticate the client to the Redis server when using TLS. This
+# should be a string containing the PEM-encoded client certificate.
+{% if platform_redis_tls_cert %}
+redis_tls_cert = {{ platform_redis_tls_cert }}
+{% else %}
+# redis_tls_cert =
+{% endif %}
+
+# Client private key used to authenticate the client to the Redis server when using TLS. This
+# should be a string containing the PEM-encoded client private key.
+{% if platform_redis_tls_key %}
+redis_tls_key = {{ platform_redis_tls_key }}
+{% else %}
+# redis_tls_key =
+{% endif %}
+
 # Enables TLS when connecting to Redis via Sentinel. When true, the Redis client
 # uses TLS for both the Sentinel connection and the Redis data connection.
 {% if platform_redis_tls_enabled | bool %}
@@ -355,54 +429,92 @@ redis_sentinel_tls = {{ {'rejectUnauthorized': false, 'ca': platform_redis_ca_de
 # redis_sentinel_tls =
 {% endif %}
 
+# The maximum time in milliseconds to wait for a Redis Sentinel command to complete. Only
+# applies when connecting via Redis Sentinel.
+{% if platform_redis_sentinel_command_timeout %}
+redis_sentinel_command_timeout = {{ platform_redis_sentinel_command_timeout }}
+{% else %}
+# redis_sentinel_command_timeout =
+{% endif %}
 
+# The maximum time in milliseconds to wait for a Redis command to complete before timing out.
+{% if platform_redis_command_timeout %}
+redis_command_timeout = {{ platform_redis_command_timeout }}
+{% else %}
+# redis_command_timeout =
+{% endif %}
+
+# Enables TCP keepalive on the Redis socket. Value is the keepalive delay in milliseconds.
+{% if platform_redis_keep_alive %}
+redis_keep_alive = {{ platform_redis_keep_alive }}
+{% else %}
+# redis_keep_alive =
+{% endif %}
+
+
+# Name of the secrets provider. Required for CyberArk CCP. Not required for Hashicorp Vault.
+{% if platform_secret_provider_name %}
+secret_provider_name = {{ platform_secret_provider_name }}
+{% else %}
+# secret_provider_name =
+{% endif %}
+
+{% if platform_configure_vault | bool %}
 ##############################
 # HASHICORP VAULT CONNECTION #
 ##############################
 # The URL to the Hashicorp Vault server.
-{% if platform_configure_vault | bool and platform_vault_url %}
+{% if platform_vault_url %}
 vault_url = {{ platform_vault_url }}
 {% else %}
 # vault_url =
 {% endif %}
 
+# The Vault Enterprise namespace to scope all secret operations to. Required for multi-tenant
+# Vault Enterprise configurations. Not required for open-source Vault.
+{% if platform_vault_namespace %}
+vault_namespace = {{ platform_vault_namespace }}
+{% else %}
+# vault_namespace =
+{% endif %}
+
 # The authorization method to connect to Hashicorp Vault. Either token or approle.
-{% if platform_configure_vault | bool and platform_vault_auth_method %}
+{% if platform_vault_auth_method %}
 vault_auth_method = {{ platform_vault_auth_method }}
 {% else %}
 # vault_auth_method =
 {% endif %}
 
 # Hashicorp Vault Role ID used for AppRole authentication.
-{% if platform_configure_vault and platform_vault_role_id_property %}
+{% if platform_vault_role_id_property %}
 vault_role_id = {{ platform_vault_role_id_property }}
 {% else %}
 # vault_role_id =
 {% endif %}
 
 # Hashicorp Vault Secret ID used for AppRole login.
-{% if platform_configure_vault and platform_vault_secret_id_property %}
+{% if platform_vault_secret_id_property %}
 vault_secret_id = {{ platform_vault_secret_id_property }}
 {% else %}
 # vault_secret_id =
 {% endif %}
 
 # The path where the AppRole was enabled.
-{% if platform_configure_vault and platform_vault_approle_path %}
+{% if platform_vault_approle_path %}
 vault_approle_path = {{ platform_vault_approle_path }}
 {% else %}
 # vault_approle_path =
 {% endif %}
 
 # The file path to a token file. The token is used for authentication to access Vault secrets.
-{% if platform_configure_vault and platform_vault_auth_method == "token" and platform_vault_token_file %}
+{% if platform_vault_auth_method == "token" and platform_vault_token_file %}
 vault_token = {{ platform_vault_token_file }}
 {% else %}
 # vault_token =
 {% endif %}
 
 # The endpoint for the Secrets Engine that is used.
-{% if platform_configure_vault and platform_vault_secrets_endpoint %}
+{% if platform_vault_secrets_endpoint %}
 vault_secrets_endpoint = {{ platform_vault_secrets_endpoint }}
 {% else %}
 # vault_secrets_endpoint =
@@ -410,11 +522,109 @@ vault_secrets_endpoint = {{ platform_vault_secrets_endpoint }}
 
 # If true, only reads secrets from Hashicorp Vault. Otherwise, the platform can write secrets
 # to Vault for storage.
-{% if ( (platform_configure_vault is defined) and
-        (platform_vault_read_only is boolean) ) %}
+{% if platform_vault_read_only is boolean %}
 vault_read_only = {{ platform_vault_read_only | to_nice_json }}
 {% else %}
 # vault_read_only =
+{% endif %}
+
+# The number of milliseconds to wait before timing out requests to the Hashicorp Vault server.
+# Used by Hashicorp Vault only.
+{% if platform_vault_connection_timeout %}
+vault_connection_timeout = {{ platform_vault_connection_timeout }}
+{% else %}
+# vault_connection_timeout =
+{% endif %}
+{% endif %}
+
+{% if platform_secret_provider_name == 'CyberArkCcp' %}
+###############################
+# CYBERARK CCP CONNECTION #
+###############################
+# The URL to the CyberArk Central Credential Provider.
+{% if platform_cyberark_url %}
+cyberark_url = {{ platform_cyberark_url }}
+{% else %}
+# cyberark_url =
+{% endif %}
+
+# Specifies the unique ID of the application issuing the password request to CyberArk CCP.
+{% if platform_cyberark_app_id %}
+cyberark_app_id = {{ platform_cyberark_app_id }}
+{% else %}
+# cyberark_app_id =
+{% endif %}
+
+# If true, disables the validation checks for TLS certificates and allows the use of invalid
+# or self-signed certificates to connect. Used by CyberArk CCP only.
+{% if ( (platform_cyberark_allow_invalid_certificates is defined) and
+        (platform_cyberark_allow_invalid_certificates is boolean) ) %}
+cyberark_allow_invalid_certificates = {{ platform_cyberark_allow_invalid_certificates | to_nice_json }}
+{% else %}
+# cyberark_allow_invalid_certificates =
+{% endif %}
+
+# The .pem file that contains the root certificate chain from the Certificate Authority.
+# Specify the file name of the .pem file using absolute paths. Used by CyberArk CCP only.
+{% if platform_cyberark_ca %}
+cyberark_ca = {{ platform_cyberark_ca }}
+{% else %}
+# cyberark_ca =
+{% endif %}
+
+# The certificate key file location. Specify the location of the key file using absolute paths.
+# Used by CyberArk CCP only.
+{% if platform_cyberark_key %}
+cyberark_key = {{ platform_cyberark_key }}
+{% else %}
+# cyberark_key =
+{% endif %}
+
+# The .pem file that contains the client certificate. Specify the file name of the .pem file
+# using absolute paths. Used by CyberArk CCP only.
+{% if platform_cyberark_certificate %}
+cyberark_certificate = {{ platform_cyberark_certificate }}
+{% else %}
+# cyberark_certificate =
+{% endif %}
+
+# String representation of the PEM-encoded root certificate chain from the Certificate
+# Authority. Used by CyberArk CCP only.
+{% if platform_cyberark_ca_contents %}
+cyberark_ca_contents = {{ platform_cyberark_ca_contents }}
+{% else %}
+# cyberark_ca_contents =
+{% endif %}
+
+# String representation of the PEM-encoded certificate key. Used by CyberArk CCP only.
+{% if platform_cyberark_key_contents %}
+cyberark_key_contents = {{ platform_cyberark_key_contents }}
+{% else %}
+# cyberark_key_contents =
+{% endif %}
+
+# String representation of the PEM-encoded client certificate. Used by CyberArk CCP only.
+{% if platform_cyberark_certificate_contents %}
+cyberark_certificate_contents = {{ platform_cyberark_certificate_contents }}
+{% else %}
+# cyberark_certificate_contents =
+{% endif %}
+
+# The number of seconds that the Central Credential Provider will try to retrieve the secret
+# value. Used by CyberArk CCP only.
+{% if platform_cyberark_connection_timeout %}
+cyberark_connection_timeout = {{ platform_cyberark_connection_timeout }}
+{% else %}
+# cyberark_connection_timeout =
+{% endif %}
+
+# Set this property to the reason for retrieving the password to have the reason text appear
+# in CyberArk Credential Provider's audit log. Used by CyberArk CCP only.
+{% if platform_cyberark_reason_text %}
+cyberark_reason_text = {{ platform_cyberark_reason_text }}
+{% else %}
+# cyberark_reason_text =
+{% endif %}
 {% endif %}
 
 
@@ -428,6 +638,27 @@ vault_read_only = {{ platform_vault_read_only | to_nice_json }}
 task_worker_enabled = {{ platform_task_worker_enabled | to_nice_json }}
 {% else %}
 # task_worker_enabled =
+{% endif %}
+
+# The number of worker threads available for task processing.
+{% if platform_task_worker_thread_count %}
+task_worker_thread_count = {{ platform_task_worker_thread_count }}
+{% else %}
+# task_worker_thread_count =
+{% endif %}
+
+# The maximum number of tasks to run per period. The value 0 disables the rate limiter.
+{% if platform_task_worker_rate_limit %}
+task_worker_rate_limit = {{ platform_task_worker_rate_limit }}
+{% else %}
+# task_worker_rate_limit =
+{% endif %}
+
+# The time period in seconds for the task worker rate limit.
+{% if platform_task_worker_rate_limit_period %}
+task_worker_rate_limit_period = {{ platform_task_worker_rate_limit_period }}
+{% else %}
+# task_worker_rate_limit_period =
 {% endif %}
 
 # If true, will allow jobs to be started after the server startup process is complete.
@@ -545,6 +776,21 @@ auth_session_ttl = {{ platform_auth_session_ttl }}
 # auth_session_ttl =
 {% endif %}
 
+# The time in minutes before a user principal expires. If not supplied it will fallback to
+# the session ttl.
+{% if platform_auth_principal_ttl %}
+auth_principal_ttl = {{ platform_auth_principal_ttl }}
+{% else %}
+# auth_principal_ttl =
+{% endif %}
+
+# The time in seconds before the RelayState from sso expires.
+{% if platform_auth_relay_state_ttl %}
+auth_relay_state_ttl = {{ platform_auth_relay_state_ttl }}
+{% else %}
+# auth_relay_state_ttl =
+{% endif %}
+
 # Enables a default user to be used for login when SSO is not configured and no AAA Adapter exists.
 {% if ( (platform_default_user_enabled is defined) and
         (platform_default_user_enabled is boolean) ) %}
@@ -632,6 +878,13 @@ webserver_https_key = {{ platform_https_key_dest }}
 # webserver_https_key =
 {% endif %}
 
+# Public key used for HTTPS connections. This should be a string containing the PEM-encoded key.
+{% if platform_webserver_https_key_contents %}
+webserver_https_key_contents = {{ platform_webserver_https_key_contents }}
+{% else %}
+# webserver_https_key_contents =
+{% endif %}
+
 # The passphrase for the private key used to enable TLS sessions.
 {% if platform_webserver_https_passphrase %}
 webserver_https_passphrase = {{ platform_webserver_https_passphrase }}
@@ -646,7 +899,30 @@ webserver_https_cert = {{ platform_https_cert_dest }}
 # webserver_https_cert =
 {% endif %}
 
-# The set of allowed SSL/TLS protocol versions.
+# Certificate used for HTTPS connections. This should be a string containing the PEM-encoded
+# certificate.
+{% if platform_webserver_https_cert_contents %}
+webserver_https_cert_contents = {{ platform_webserver_https_cert_contents }}
+{% else %}
+# webserver_https_cert_contents =
+{% endif %}
+
+# Minimum permitted TLS version. Overrides webserver_https_secure_protocol.
+{% if platform_webserver_https_tls_min_version %}
+webserver_https_tls_min_version = {{ platform_webserver_https_tls_min_version }}
+{% else %}
+# webserver_https_tls_min_version =
+{% endif %}
+
+# Maximum permitted TLS version. Overrides webserver_https_secure_protocol.
+{% if platform_webserver_https_tls_max_version %}
+webserver_https_tls_max_version = {{ platform_webserver_https_tls_max_version }}
+{% else %}
+# webserver_https_tls_max_version =
+{% endif %}
+
+# The set of allowed SSL/TLS protocol versions. Ignored when either tlsMinVersion or
+# tlsMaxVersion is given.
 {% if platform_webserver_https_secure_protocol %}
 webserver_https_secure_protocol = {{ platform_webserver_https_secure_protocol }}
 {% else %}
@@ -725,6 +1001,24 @@ log_filename = {{ platform_log_filename }}
 log_level_console = {{ platform_log_level_console }}
 {% else %}
 # log_level_console =
+{% endif %}
+
+# If true, log entries will be written in JSON format. Otherwise, log entries will be written
+# in plaintext.
+{% if ( (platform_log_format_json is defined) and
+        (platform_log_format_json is boolean) ) %}
+log_format_json = {{ platform_log_format_json | to_nice_json }}
+{% else %}
+# log_format_json =
+{% endif %}
+
+# If true, console logs will be written in JSON format. Otherwise, log entries will be written
+# in plaintext.
+{% if ( (platform_console_format_json is defined) and
+        (platform_console_format_json is boolean) ) %}
+console_format_json = {{ platform_console_format_json | to_nice_json }}
+{% else %}
+# console_format_json =
 {% endif %}
 
 # The absolute directory path where webserver log files are written.
@@ -818,6 +1112,15 @@ syslog_eol = {{ platform_syslog_eol }}
 # syslog_eol =
 {% endif %}
 
+# If true, syslog logs will be written in JSON format. Otherwise, log entries will be written
+# in plaintext.
+{% if ( (platform_syslog_format_json is defined) and
+        (platform_syslog_format_json is boolean) ) %}
+syslog_format_json = {{ platform_syslog_format_json | to_nice_json }}
+{% else %}
+# syslog_format_json =
+{% endif %}
+
 
 ###########
 # BROKERS #
@@ -854,4 +1157,17 @@ broker_validation_enabled = {{ platform_broker_validation_enabled | to_nice_json
 snmp_alarm_configs = {{ platform_snmp_alarm_configs | to_json }}
 {% else %}
 # snmp_alarm_configs =
+{% endif %}
+
+
+#############
+# TELEMETRY #
+#############
+# Toggle for OpenTelemetry webserver metrics (requests, errors, duration, payload sizes --
+# served at /metrics/webserver).
+{% if ( (platform_otel_webserver_metrics_enabled is defined) and
+        (platform_otel_webserver_metrics_enabled is boolean) ) %}
+otel_webserver_metrics_enabled = {{ platform_otel_webserver_metrics_enabled | to_nice_json }}
+{% else %}
+# otel_webserver_metrics_enabled =
 {% endif %}
