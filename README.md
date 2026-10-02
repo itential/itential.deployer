@@ -33,7 +33,7 @@
     2. [Redis](#redis)
     3. [Itential Platform](#itential-platform)
     4. [Itential Gateway](#itential-gateway)
-7. [Patching Itential Platform and IAG](#patching-itential-platform-and-iag)
+7. [Patching Itential Platform and Gateway](#patching-itential-platform-and-gateway)
 8. [Using Internal YUM Repositories](#using-internal-yum-repositories)
 9. [Running the Deployer in Offline Mode](#running-the-deployer-in-offline-mode)
 10. [Appendix A: Definition of "Highly Available" Dependencies](#appendix-a-definition-of-highly-available-dependencies)
@@ -44,7 +44,7 @@ An Itential environment is composed of several applications working in conjuncti
 At its most basic, the following must be installed.
 
 - Itential Platform
-- Itential Automation Gateway (IAG)
+- Itential Gateway
 - Redis
 - MongoDB
 
@@ -107,7 +107,7 @@ The ideal HA2 environment will have 9 VMs:
 - 2 VMs hosting Itential Platform.
 - 3 VMs hosting MongoDB configured as a replica set.
 - 3 VMs hosting Redis configured as a highly available replica set using Redis Sentinel.
-- 1 VM hosting IAG.
+- 1 VM hosting Gateway.
 
 Itential recommends applying sound security principles to ALL environments. This would include
 configuring all components to use authentication within the HA2. Additionally, we recommend using
@@ -269,14 +269,14 @@ network traffic flows need to be allowed.
 | ------ | ----------- | ---- | -------- | ----------- |
 | Desktop Devices | Itential Platform | 3000 | TCP | Web browser connections to Itential Platform over HTTP |
 | Desktop Devices | Itential Platform | 3443 | TCP | Web browser connections to Itential Platform over HTTPS |
-| Desktop Devices | IAG | 8083 | TCP | Web browser connections to IAG over HTTP |
-| Desktop Devices | IAG | 8443 | TCP | Web browser connections to IAG over HTTPS  |
+| Desktop Devices | Gateway | 8083 | TCP | Web browser connections to Gateway over HTTP |
+| Desktop Devices | Gateway | 8443 | TCP | Web browser connections to Gateway over HTTPS  |
 | Desktop Devices | Vault | 8200 | TCP | Web browser connections to Hashicorp Vault |
 | Itential Platform | MongoDB | 27017 | TCP | Itential Platform connections to MongoDB |
 | Itential Platform | Redis | 6379 | TCP | Itential Platform connections to Redis |
 | Itential Platform | Redis | 26379 | TCP | Itential Platform connections to Redis Sentinel |
-| Itential Platform | IAG | 8083 | TCP | Itential Platform connections to IAG over HTTP |
-| Itential Platform | IAG | 8443 | TCP | Itential Platform connections to IAG over HTTPS |
+| Itential Platform | Gateway | 8083 | TCP | Itential Platform connections to Gateway over HTTP |
+| Itential Platform | Gateway | 8443 | TCP | Itential Platform connections to Gateway over HTTPS |
 | Itential Platform | Vault | 8200 | TCP | Itential Platform connections to Hashicorp Vault |
 | Itential Platform | LDAP | 389 | TCP | Itential Platform connections to LDAP when LDAP adapter is used for authentication |
 | Itential Platform | LDAP | 636 | TCP | Itential Platform connections to LDAP with TLS when LDAP adapter is used for authentication |
@@ -300,7 +300,7 @@ can be used and what their purpose is.
 | Certificate | Description |
 | :-----------| :-----------|
 | Itential Platform webserver | Enables HTTPS communications with the Itential Platform webserver. |
-| IAG webserver | Enables HTTPS communications with the IAG webserver. |
+| Gateway webserver | Enables HTTPS communications with the Gateway webserver. |
 | MongoDB | Enables secure communications with the MongoDB server. Also used for intra-node mongo replication. |
 | Redis | Enables secure communications with the Redis server. Also used for intra-node redis replication. |
 | LDAP | Enables secure communications with LDAP server. |
@@ -334,11 +334,11 @@ these variables just define the variable in the deployer host file.
 
 #### SaaS
 
-The latest IAG whl file is available to download from hub.itential.io.
+The latest Gateway whl file is available to download from hub.itential.io.
 
 #### On prem customers
 
-The Itential Platform and IAG binary files are hosted on the Itential Nexus repository. An account
+The Itential Platform and Gateway binary files are hosted on the Itential Nexus repository. An account
 is required to access Itential Nexus. If you do not have an account, contact your Itential Sales
 representative.
 
@@ -396,7 +396,7 @@ Before running the deployer we must ensure the following:
 
 - **Compatible OS**: Any managed nodes to be configured by the Itential Deployer must use an
 operating system that is compatible with the target version of Itential Platform (and, if
-applicable, IAG). For more information, refer to the [Itential Dependencies] page.
+applicable, Gateway). For more information, refer to the [Itential Dependencies] page.
 - **Hostnames**: Any hostnames used by managed nodes must be DNS-resolvable.
 - **Administrative Privileges**: The `ansible` user must have administrative privileges on managed
 nodes.
@@ -494,7 +494,7 @@ mkdir files
 #### Download Installation Artifacts
 
 Download the Itential Platform binary along with any desired Itential Platform adapters (and, if
-applicable, the IAG binary) from the [Itential Nexus Repository] to local storage.
+applicable, the Gateway binary) from the [Itential Nexus Repository] to local storage.
 
 **&#9432; Note:**
 If you are unsure which files should be downloaded for your environment, contact your Itential
@@ -533,7 +533,7 @@ the steps below based on the repository type:
 Copy the link provided in the **Path** field to obtain the download URL.
 - **For JFrog**: Locate the file in the JFrog repository and copy the File URL.
 
-This download method supports both the Itential Platform (bin/tar/rpm) files and the IAG (whl) files.
+This download method supports both the Itential Platform (bin/tar/rpm) files and the Gateway (whl) files.
 
 #### Configure Repository Credentials
 
@@ -554,8 +554,8 @@ install on them. In the following example:
 
 - All required variables have been defined.
 - The managed node `example1.host.com` has been assigned to all groups, with the **exception** of
-the `gateway` group. As such, all components **except** IAG will be installed on this node.
-- The managed node `example2.host.com` has been assigned to the `gateway` group. As such, IAG will
+the `gateway` group. As such, all components **except** Gateway will be installed on this node.
+- The managed node `example2.host.com` has been assigned to the `gateway` group. As such, Gateway will
 be installed on this node.
 
 **&#9432; Note:**
@@ -664,11 +664,11 @@ default, these files will be copied to `/tmp/itential-reports/` on the control n
 
 Additionally, perform the following checks on each component to confirm successful installation.
 
-#### Itential Platform and IAG
+#### Itential Platform and Gateway
 
-Use a web browser to navigate to the login page of your Itential Platform/IAG servers. By default,
+Use a web browser to navigate to the login page of your Itential Platform/Gateway servers. By default,
 it is located at `http://<hostname>:3000` or `http://<hostname>:8083`, respectively. If the
-Itential Platform/IAG login page is displayed, the installation was successful.
+Itential Platform/Gateway login page is displayed, the installation was successful.
 
 If the login page is not displayed, check that the relevant service is running on the affected
 server using the `sudo systemctl status itential-platform` or
@@ -708,7 +708,7 @@ $ sudo systemctl status itential-platform
 
 </br>
 
-#### Example Output: IAG System Status
+#### Example Output: Gateway System Status
 
 ```bash
 $ sudo systemctl status automation-gateway
@@ -793,14 +793,14 @@ corresponding variables are detailed in the following guides.
 
 [Itential Gatway Guide](docs/itential_gateway_guide.md)
 
-## Patching Itential Platform and IAG
+## Patching Itential Platform and Gateway
 
-The Deployer supports patching Itential Platform and IAG.  Refer to the following guide for
+The Deployer supports patching Itential Platform and Gateway.  Refer to the following guide for
 instructions on running the patch playbooks.
 
 [Patch Itential Platform Guide](docs/patch_itential_platform_guide.md)
 
-[Patch IAG Guide](docs/patch_itential_gateway_guide.md)
+[Patch Gateway Guide](docs/patch_itential_gateway_guide.md)
 
 ## Using Internal YUM Repositories
 
