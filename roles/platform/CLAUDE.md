@@ -15,7 +15,7 @@ Installs and configures Itential Platform (IAP). Handles OS user/directory setup
 3. Install Dependencies, Platform, Adapters, App Artifacts (notifies `Update Itential release file`):
    a. `install-platform-dependency-packages.yml` — install OS packages
    b. `install-nodejs.yml` — install NodeJS
-   c. `install-python.yml` — install Python
+   c. `install-python.yml` — install Python; installs pip dependencies as `platform_user` (`itential`) via `pip install --user` rather than system-wide as root, then validates each application dependency actually imports (see `roles/python/CLAUDE.md`). No `/usr/local/bin` python3/pip3 symlinks are created — the P6 Platform RPM already creates its own `python3` symlink under `/home/itential/bin`.
    d. `install-platform.yml` — install IAP RPM packages
    e. `install-adapters.yml` — install configured adapters
    f. `install-app-artifacts.yml` — when `platform_app_artifacts_enabled: true`

@@ -1,0 +1,32 @@
+# Copyright (c) 2026, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+- name: Validate that python_executable and python_app_dependencies are set
+  ansible.builtin.assert:
+    that:
+      - python_executable is defined
+      - python_app_dependencies is defined
+    msg: python_executable and python_app_dependencies must be set
+
+# python_app_dependencies entries are pip install specs (e.g. "jinja2==3.1.2").
+# This strips a "=="-style version pin to get the import name. Pip package
+# names that don't match their import name 1:1 (e.g. PyYAML -> yaml) aren't
+# handled - this is sufficient for the dependency lists this role is
+# currently called with (jinja2, markupsafe, textfsm).
+- name: Build import names from python_app_dependencies pip specs
+  ansible.builtin.set_fact:
+    python_validate_import_names: "{{ python_app_dependencies
+      | map('regex_replace', '==.*$', '')
+      | map('replace', '-', '_')
+      | list }}"
+
+- name: Validate each application dependency is importable
+  ansible.builtin.command:
+    argv:
+      - "{{ python_executable }}"
+      - "-c"
+      - "import {{ item }}"
+  become: true
+  become_user: "{{ python_validate_become_user | default(omit) }}"
+  loop: "{{ python_validate_import_names }}"
+  changed_when: false
