@@ -16,7 +16,7 @@ Installs and configures Itential Platform (IAP). Handles OS user/directory setup
    a. `install-platform-dependency-packages.yml` — install OS packages
    b. `install-nodejs.yml` — install NodeJS
    c. `install-python.yml` — install Python; installs pip dependencies as `platform_user` (`itential`) via `pip install --user` rather than system-wide as root, then validates each application dependency actually imports (see `roles/python/CLAUDE.md`). No `/usr/local/bin` python3/pip3 symlinks are created — the P6 Platform RPM already creates its own `python3` symlink under `/home/itential/bin`.
-   d. `install-platform.yml` — install IAP RPM packages
+   d. `install-platform.yml` — install IAP RPM packages. The itential-platform RPM declares a hardcoded `itential:itential` owner for `platform_server_dir`/`platform_config_dir`/`platform_log_dir` in its own package metadata, so installing/upgrading it silently resets ownership on these directories. Immediately after this step, `platform_user`/`platform_group` ownership is re-applied to all three (same `ansible.builtin.file` call as step 2b) so a non-default `platform_user` can actually start the service afterward.
    e. `install-adapters.yml` — install configured adapters
    f. `install-app-artifacts.yml` — when `platform_app_artifacts_enabled: true`
 4. `configure-selinux.yml` — apply SELinux configuration
