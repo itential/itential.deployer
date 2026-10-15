@@ -846,12 +846,19 @@ broker_validation_enabled = {{ platform_broker_validation_enabled | to_nice_json
 {% endif %}
 
 
-########
-# SNMP #
-########
+##############
+# MONITORING #
+##############
 # Remote SNMP destination configuration objects.
 {% if platform_snmp_alarm_configs %}
 snmp_alarm_configs = {{ platform_snmp_alarm_configs | to_json }}
 {% else %}
 # snmp_alarm_configs =
+{% endif %}
+
+# Enables collection of web server metrics exposed at the /metrics/webserver endpoint.
+{% if platform_otel_webserver_metrics_enabled is boolean %}
+otel_webserver_metrics_enabled = {{ platform_otel_webserver_metrics_enabled | to_nice_json }}
+{% else %}
+# otel_webserver_metrics_enabled =
 {% endif %}

@@ -174,14 +174,15 @@ variables located in `roles/platform/defaults/main/redis.yml`.
 | platform_redis_name | String | The Redis primary name. This only has meaning when Redis is running with replication enabled. The sentinels will monitor this node and consider it down only when the sentinels agree. Note: The primary name should not include special characters other than: .-_ and no whitespaces. | `itentialmaster` |
 | platform_redis_tls | Object | Redis TLS configuration options for secure connections. Refer to NodeJS TLS library for all supported options. |  |
 
-#### SNMP Variables
+#### Monitoring Variables
 
-These variables control SNMP behaviors. The following table lists the default variables located in
-`roles/platform/defaults/main/snmp.yml`.
+These variables control SNMP and metrics behaviors. The following table lists the default variables
+located in `roles/platform/defaults/main/monitoring.yml`.
 
 | Variable | Type | Description | Default Value |
 | :------- | :--- | :---------- | :------------ |
 | platform_snmp_alarm_configs | List(Object) |  | `{ "ip": "localhost", "community": "public", "type": "trap", "properties": { "port": 161, "retries": 1, "timeout": 5000, "transport": "udp4", "trapPort": 162, "version": "V1" } }` |
+| platform_otel_webserver_metrics_enabled | Boolean | Enables collection of web server metrics exposed at the `/metrics/webserver` endpoint. When not set in the inventory, `otel_webserver_metrics_enabled` is not written to the properties file and the Itential Platform default (`true`) applies. Must be a boolean when set. | `null` |
 
 #### Vault Variables
 

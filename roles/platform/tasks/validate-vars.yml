@@ -70,6 +70,13 @@
         fail_msg: platform_encryption_key must be a 64 character hexadecimal string
       when: validate_platform_encryption_key | default(true)
 
+    - name: Validate that platform_otel_webserver_metrics_enabled is a boolean when set
+      ansible.builtin.assert:
+        that: platform_otel_webserver_metrics_enabled is none or platform_otel_webserver_metrics_enabled is boolean
+        fail_msg: >-
+          platform_otel_webserver_metrics_enabled must be a boolean (true or false) when set.
+          Strings such as "true" or "false" are not accepted.
+
     - name: Validate Hashicorp Vault variables
       when: platform_configure_vault | bool
       block:
