@@ -264,7 +264,7 @@ Both groups receive the same role. The `platform_server_id` defaults to `invento
 
 | Variable | RHEL 8 | RHEL 9 / AL2023 |
 |----------|--------|-----------------|
-| `platform_nodejs_package` | `@nodejs:20/common` | `@nodejs:20` / `nodejs20` |
+| `platform_nodejs_package` | `@nodejs:22/common` | `@nodejs:22` / `nodejs22` |
 | `platform_python_version` | `3.11` | `3.11` |
 | `platform_python_packages` | `python3.11`, `python3.11-pip` | same |
 | `platform_python_app_dependencies` | `jinja2==3.1.2`, `markupsafe==2.1.4`, `textfsm==1.1.3` | same |
