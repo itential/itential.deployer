@@ -30,13 +30,6 @@
             - "{{ platform_config_dir }}"
             - "{{ platform_log_dir }}"
 
-        - name: Ensure secure mode for TemplateBuilder
-          ansible.builtin.lineinfile:
-            path: /etc/sudoers
-            insertafter: EOF
-            state: present
-            line: "{{ platform_user }} ALL=(ALL) NOPASSWD: /usr/sbin/chroot, /sbin/chroot"
-
         - name: Configure firewalld
           ansible.builtin.include_tasks:
             file: configure-firewalld.yml
