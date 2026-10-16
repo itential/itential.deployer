@@ -39,9 +39,10 @@
   ansible.builtin.set_fact:
     os_valid: >-
       {{
-        (os.distribution == 'RedHat' and ansible_distribution_major_version in ['8', '9']) or
-        (os.distribution == 'Rocky' and ansible_distribution_major_version in ['8', '9']) or
-        (os.distribution == 'OracleLinux' and ansible_distribution_major_version in ['8', '9']) or
+        (os.distribution == 'RedHat' and ansible_distribution_major_version in ['8', '9', '10']) or
+        (os.distribution == 'Rocky' and ansible_distribution_major_version in ['8', '9', '10']) or
+        (os.distribution == 'OracleLinux' and ansible_distribution_major_version in ['8', '9', '10']) or
+        (os.distribution == 'AlmaLinux' and ansible_distribution_major_version in ['8', '9', '10']) or
         (os.distribution == 'Amazon' and ansible_distribution_major_version == '2023')
       }}
 

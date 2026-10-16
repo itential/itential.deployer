@@ -172,7 +172,7 @@
             that: ansible_os_family == 'RedHat'
             fail_msg: >-
               Deployer does not support installing Itential Platform on {{ ansible_distribution }}.
-              Supported platforms: Red Hat family (RHEL 8/9, Rocky Linux 8/9, AlmaLinux 8/9, Amazon Linux 2023).
+              Supported platforms: Red Hat family (RHEL 8/9/10, Rocky Linux 8/9/10, AlmaLinux 8/9/10, Amazon Linux 2023).
 
         - name: Set platform_nodejs_package to the default value
                 when not defined in inventory
