@@ -70,6 +70,12 @@
           vars:
             tuned_action: always
 
+        - name: Ensure tuned service is running
+          ansible.builtin.systemd:
+            name: tuned
+            state: started
+            enabled: true
+
         - name: Enable tuned profile
           ansible.builtin.command:
             cmd: tuned-adm profile virtual-guest-no-thp

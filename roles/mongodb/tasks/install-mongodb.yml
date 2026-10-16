@@ -119,6 +119,14 @@
   delay: "{{ mongodb_mongod_service_delay }}"
   tags: initialize_mongo_config
 
+# systemd reports "active" before mongod is listening
+- name: Wait for mongod to accept connections
+  ansible.builtin.wait_for:
+    host: "{{ inventory_hostname }}"
+    port: "{{ mongodb_port }}"
+    timeout: 60
+  tags: create_mongo_users
+
 - name: Discover MongoDB configuration state
   tags: create_mongo_users
   itential.deployer.mongodb_config_state:
