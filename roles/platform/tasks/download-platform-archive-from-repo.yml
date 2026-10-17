@@ -24,5 +24,9 @@
     url_username: "{{ repository_username | default(omit) }}"
     url_password: "{{ repository_password | default(omit) }}"
     validate_certs: true
+    # Optional per-URL checksum (e.g. "sha256:abcdef...") for customers who require
+    # validated downloads. Omitted (no verification) when this URL has no entry in
+    # platform_package_checksums.
+    checksum: "{{ platform_package_checksums[artifact] | default(omit) }}"
   register: platform_package_download_result
   changed_when: false
