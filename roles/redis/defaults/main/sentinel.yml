@@ -13,8 +13,10 @@ redis_sentinel_master_name: itentialmaster
 # The default redis sentinel listen port
 redis_sentinel_port: "{{ redis_sentinel_port_default }}"
 
-# Bind to localhost + private network interface
-redis_sentinel_bind: 127.0.0.1 {{ ansible_default_ipv4.address }}
+# Bind to localhost + private network interface.
+# ansible_default_ipv4.address is not guaranteed to be present (e.g. hosts
+# with no default route), so fall back to an empty string when undefined.
+redis_sentinel_bind: "127.0.0.1 {{ ansible_default_ipv4.address | default('') }}"
 
 # Auto-calculate quorum based on sentinel count (recommended)
 # Set to explicit number to override (must be <= number of sentinels)

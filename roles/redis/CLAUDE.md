@@ -84,6 +84,7 @@ Installs and configures Redis and Redis Sentinel for use with Itential Platform.
 | `redis_security_packages` | `policycoreutils-python-utils` | SELinux management package |
 | `redis_remi_repo_url` | Remi enterprise URL | Used when installing from Remi repo |
 | `redis_epel_repo_url` | Fedora EPEL URL | Used when installing EPEL for Remi |
+| `redis_build_temp_dir_path` | (undefined) | Optional `path` for the source-build working directory's `ansible.builtin.tempfile` task. Undefined by default so the module falls back to its own directory resolution; set explicitly (e.g. `/var/tmp`) on hosts where `/tmp` is mounted `noexec`, which breaks the `make`/`make install` steps |
 
 ### pki.yml defaults (TLS paths)
 
