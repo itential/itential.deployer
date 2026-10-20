@@ -188,14 +188,15 @@ variables located in `roles/platform/defaults/main/redis.yml`.
 | platform_redis_command_timeout | Integer | The maximum time in milliseconds to wait for a Redis command to complete before timing out. | 60000 |
 | platform_redis_keep_alive | Integer | Enables TCP keepalive on the Redis socket. Value is the keepalive delay in milliseconds. | 5000 |
 
-#### SNMP Variables
+#### Monitoring Variables
 
-These variables control SNMP behaviors. The following table lists the default variables located in
-`roles/platform/defaults/main/snmp.yml`.
+These variables control SNMP and metrics behaviors. The following table lists the default variables
+located in `roles/platform/defaults/main/monitoring.yml`.
 
 | Variable | Type | Description | Default Value |
 | :------- | :--- | :---------- | :------------ |
 | platform_snmp_alarm_configs | List(Object) |  | `{ "ip": "localhost", "community": "public", "type": "trap", "properties": { "port": 161, "retries": 1, "timeout": 5000, "transport": "udp4", "trapPort": 162, "version": "V1" } }` |
+| platform_otel_webserver_metrics_enabled | Boolean | Enables collection of web server metrics exposed at the `/metrics/webserver` endpoint. When not set in the inventory, `otel_webserver_metrics_enabled` is not written to the properties file and the Itential Platform default (`true`) applies. Must be a boolean when set. | `null` |
 
 #### Vault Variables
 
