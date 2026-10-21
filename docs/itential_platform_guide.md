@@ -71,9 +71,24 @@ These variables will effect how the installation occurs.
 | `repository_username` | `platform` | String | The username for authentication of the repository. | N/A |
 | `repository_password` | `platform` | String | The password for authentication of the repository. | N/A |
 | `repository_api_key` | `platform` | String | The API for authentication of the repository. Can be used instead of username/password for authentication.| N/A |
+| `platform_nodejs_package` | `platform` | String | The Node.js package or module stream to install. The default depends on the OS major version, see below. | `@nodejs:22/common` (RHEL, Rocky, Alma 8), `@nodejs:22` (RHEL, Rocky, Alma 9), `nodejs22` (Amazon Linux 2023) |
 
 If `platform_packages` contains URLs, either `repository_api_key` or `repository_username` and
 `repository_password` must be defined.
+
+Itential Platform 6.6 and later requires Node 22. For Itential Platform 6.5.x and earlier, set
+`platform_nodejs_package` in the inventory.
+
+| OS | Node 20 value | Node 22 value (default) |
+| :-- | :------------ | :---------------------- |
+| RHEL/Rocky/Alma 8 | `@nodejs:20/common` | `@nodejs:22/common` |
+| RHEL/Rocky/Alma 9 | `@nodejs:20` | `@nodejs:22` |
+| Amazon Linux 2023 | `nodejs20` | `nodejs22` |
+
+```yaml
+platform_release: 6
+platform_nodejs_package: "@nodejs:20" # Itential Platform 6.5.x on RHEL/Rocky 9
+```
 
 #### Authentication Variables
 

@@ -269,6 +269,10 @@ Both groups receive the same role. The `platform_server_id` defaults to `invento
 | `platform_python_packages` | `python3.11`, `python3.11-pip` | same |
 | `platform_python_app_dependencies` | `jinja2==3.1.2`, `markupsafe==2.1.4`, `textfsm==1.1.3` | same |
 
+Itential Platform 6.6 and later requires Node 22. For Itential Platform 6.5.x and earlier, override
+`platform_nodejs_package` in the inventory with the Node 20 value: `@nodejs:20/common` (RHEL 8),
+`@nodejs:20` (RHEL 9), `nodejs20` (Amazon Linux 2023).
+
 Hardware specs for `verify` playbook (`platform_hw_specs`):
 - dev: 8 CPU, 32 GB RAM, 250 GB disk
 - test/prod: 16 CPU, 64 GB RAM, 250 GB disk
