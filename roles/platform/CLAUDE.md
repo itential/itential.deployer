@@ -71,7 +71,7 @@ Installs and configures Itential Platform (IAP). Handles OS user/directory setup
 | `platform_audit_enabled` | `false` | Enable detailed audit events |
 | `platform_event_worker_thread_count` | (unset) | Worker threads for event processing |
 | `platform_transformation_worker_thread_count` | (unset) | Worker threads for transformation processing |
-| `platform_otel_webserver_metrics_enabled` | `true` (in `telemetry.yml`) | Toggle for OpenTelemetry webserver metrics at `/metrics/webserver` |
+| `platform_otel_webserver_metrics_enabled` | (unset, in `monitoring.yml`) | Toggle for OpenTelemetry webserver metrics at `/metrics/webserver`; when unset it is not written to the properties file and Itential Platform's own default (`true`) applies |
 
 ### webserver.yml defaults
 

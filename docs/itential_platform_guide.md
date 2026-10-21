@@ -413,15 +413,6 @@ located in `roles/platform/defaults/main/server.yml`.
 | platform_transformation_worker_thread_count | Integer | The number of worker threads available for transformation processing. |  |
 | platform_audit_enabled | Boolean | If true, the platform will track detailed audit events. | `false` |
 
-#### Telemetry Variables
-
-These variables control OpenTelemetry integration behaviors. The following table lists the
-default variables located in `roles/platform/defaults/main/telemetry.yml`.
-
-| Variable | Type | Description | Default Value |
-| :------- | :--- | :---------- | :------------ |
-| platform_otel_webserver_metrics_enabled | Boolean | Toggle for OpenTelemetry webserver metrics (requests, errors, duration, payload sizes -- served at `/metrics/webserver`). | `true` |
-
 ## Building the Inventory
 
 ### Example Inventory - Single Itential Platform Node
