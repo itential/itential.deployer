@@ -163,7 +163,7 @@ control node for the deployer project. That node should meet or exceed the follo
 
 | Component | Value                |
 |-----------|----------------------|
-| OS        | RHEL8/9 or Rocky 8/9 |
+| OS        | RHEL8/9/10 or Rocky 8/9/10 |
 | RAM       | 4 GB                 |
 | CPUs      | 2                    |
 | Disk      | 20 GB                |
@@ -423,7 +423,7 @@ ansible-playbook -i <path-to-inventory> itential.deployer.verify_gateway
 
 **&#9432; Note:**
 Although the Itential Deployer can be used to configure nodes that use any supported operating
-system, it is optimized for RHEL 8 and 9.
+system, it is optimized for RHEL 8, 9, and 10.
 
 ### Determine the Working and Deployer Directories
 

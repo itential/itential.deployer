@@ -62,6 +62,8 @@
   when:
     - ansible_facts.selinux.status == 'enabled'
     - ansible_facts.selinux.mode == 'enforcing'
+    # EL10 selinux-policy has no MongoDB domain (mongod_t), so there is nothing to extend
+    - ansible_distribution_major_version != '10'
 
 - name: Configure logrotate for MongoDB
   ansible.builtin.include_tasks:
@@ -118,6 +120,14 @@
   retries: "{{ mongodb_mongod_service_retries }}"
   delay: "{{ mongodb_mongod_service_delay }}"
   tags: initialize_mongo_config
+
+# systemd reports "active" before mongod is listening
+- name: Wait for mongod to accept connections
+  ansible.builtin.wait_for:
+    host: "{{ inventory_hostname }}"
+    port: "{{ mongodb_port }}"
+    timeout: 60
+  tags: create_mongo_users
 
 - name: Discover MongoDB configuration state
   tags: create_mongo_users

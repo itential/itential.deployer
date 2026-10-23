@@ -51,11 +51,14 @@
 
     - name: Install and configure tuned
       when: ansible_distribution_file_variety == "RedHat"
+      vars:
+        # TuneD 2.27 (EL10) only searches /etc/tuned/profiles for custom profiles
+        mongodb_tuned_profile_dir: "{{ '/etc/tuned/profiles' if ansible_distribution_major_version == '10' else '/etc/tuned' }}/virtual-guest-no-thp"
       block:
         - name: Create custom tuned profile directory
           ansible.builtin.file:
             state: directory
-            path: "/etc/tuned/virtual-guest-no-thp"
+            path: "{{ mongodb_tuned_profile_dir }}"
             owner: root
             group: root
             mode: "0755"
@@ -63,12 +66,18 @@
         - name: Ensure tuned does not re-enable THP
           ansible.builtin.template:
             src: tuned.conf.j2
-            dest: "/etc/tuned/virtual-guest-no-thp/tuned.conf"
+            dest: "{{ mongodb_tuned_profile_dir }}/tuned.conf"
             owner: root
             group: root
             mode: "0644"
           vars:
             tuned_action: always
+
+        - name: Ensure tuned service is running
+          ansible.builtin.systemd:
+            name: tuned
+            state: started
+            enabled: true
 
         - name: Enable tuned profile
           ansible.builtin.command:

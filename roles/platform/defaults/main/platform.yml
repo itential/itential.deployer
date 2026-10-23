@@ -11,6 +11,7 @@ platform_itential_home_dir: "{{ platform_itential_home_dir_default }}"
 # this is the location as seen from the Itential Platform host.
 
 platform_package_dependencies:
+  - acl
   - glibc-common
   - openldap
   - openldap-clients
