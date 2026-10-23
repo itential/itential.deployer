@@ -1,0 +1,13 @@
+# Copyright (c) 2024, Itential, Inc
+# GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
+---
+# Remote SNMP destination configuration objects
+platform_snmp_alarm_configs:
+  - { "ip": "localhost", "community": "public", "type": "trap", "properties": { "port": 161, "retries": 1, "timeout": 5000, "transport": "udp4", "trapPort": 162, "version": "V1" } }  # noqa yaml[line-length]
+
+# Enables collection of web server metrics exposed at the /metrics/webserver endpoint
+# The default in Platform is 'true'. The default in the role is null to allow us to determine if
+# the variable is set in the inventory. If it is not set in the inventory, then the variable will
+# not be written to the properties file. If it is set in the inventory, then the variable will be
+# set in the properties file.
+platform_otel_webserver_metrics_enabled:

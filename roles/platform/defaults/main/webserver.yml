@@ -24,10 +24,27 @@ platform_webserver_https_enabled: true
 # The port on which the webserver listens for HTTPS requests.
 platform_webserver_https_port: 3443
 
+# Public key used for HTTPS connections, as a PEM-encoded string. Alternative to the file-based
+# key deployed via platform_webserver_https_copy_certs when the key contents should be inlined.
+platform_webserver_https_key_contents:
+
 # The passphrase for the private key used to enable TLS sessions.
 platform_webserver_https_passphrase:
 
-# The set of allowed SSL/TLS protocol versions.
+# Certificate used for HTTPS connections, as a PEM-encoded string. Alternative to the file-based
+# cert deployed via platform_webserver_https_copy_certs when the cert contents should be inlined.
+platform_webserver_https_cert_contents:
+
+# Minimum permitted TLS version. Overrides platform_webserver_https_secure_protocol.
+# Valid values: TLSv1.3, TLSv1.2, TLSv1.1, TLSv1
+platform_webserver_https_tls_min_version:
+
+# Maximum permitted TLS version. Overrides platform_webserver_https_secure_protocol.
+# Valid values: TLSv1.3, TLSv1.2, TLSv1.1, TLSv1
+platform_webserver_https_tls_max_version:
+
+# The set of allowed SSL/TLS protocol versions. Ignored when either tls_min_version or
+# tls_max_version is given.
 platform_webserver_https_secure_protocol: TLS_method
 
 # The allowed SSL/TLS cipher suite.

@@ -18,6 +18,13 @@ platform_auth_session_cookie_name:
 # The time in minutes before a user session expires.
 platform_auth_session_ttl:
 
+# The time in minutes before a user principal expires. If not supplied it will fallback to
+# platform_auth_session_ttl.
+platform_auth_principal_ttl:
+
+# The time in seconds before the RelayState from SSO expires.
+platform_auth_relay_state_ttl: 600
+
 # Enables a default user to be used for login when SSO is not configured and no AAA Adapter exists.
 platform_default_user_enabled:
 
