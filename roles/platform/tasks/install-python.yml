@@ -11,15 +11,6 @@
       vars:
         python_packages: "{{ platform_python_packages }}"
 
-    - name: Create python3 symlinks
-      ansible.builtin.include_role:
-        name: python
-        tasks_from: create-symlinks
-      tags: install_python
-      vars:
-        python_executable: "{{ platform_python_executable }}"
-        python_pip_executable: "{{ platform_pip_executable }}"
-
     - name: Install Python dependencies
       ansible.builtin.include_role:
         name: python
@@ -29,6 +20,17 @@
         python_pip_executable: "{{ platform_pip_executable }}"
         python_base_dependencies: "{{ platform_python_base_dependencies }}"
         python_app_dependencies: "{{ platform_python_app_dependencies }}"
+        python_pip_become_user: "{{ platform_user }}"
+
+    - name: Validate Python dependencies
+      ansible.builtin.include_role:
+        name: python
+        tasks_from: validate-dependencies
+      tags: install_python
+      vars:
+        python_executable: "{{ platform_python_executable }}"
+        python_app_dependencies: "{{ platform_python_app_dependencies }}"
+        python_validate_become_user: "{{ platform_user }}"
 
 - name: Install Python (offline)
   when: offline_install_enabled

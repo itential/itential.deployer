@@ -32,11 +32,20 @@
     - python_pip_executable is defined
     - python_venv is not defined
   block:
+    # When python_pip_become_user is set, these packages are installed as that
+    # user (not root) into their own --user site-packages, rather than the
+    # system-wide location. Undefined by default, so callers that don't pass
+    # it (mongodb, gateway don't use this branch at all; any future caller of
+    # this branch that doesn't opt in) keep today's root/global-install
+    # behavior unchanged.
     - name: Install base Python dependencies using pip executable
       ansible.builtin.pip:
         name: "{{ python_base_dependencies }}"
         executable: "{{ python_pip_executable }}"
         umask: "0022"
+        extra_args: "{{ '--user' if python_pip_become_user is defined else omit }}"
+      become: true
+      become_user: "{{ python_pip_become_user | default(omit) }}"
       when:
         - python_base_dependencies is defined
         - python_base_dependencies is iterable
@@ -47,6 +56,9 @@
         name: "{{ python_app_dependencies }}"
         executable: "{{ python_pip_executable }}"
         umask: "0022"
+        extra_args: "{{ '--user' if python_pip_become_user is defined else omit }}"
+      become: true
+      become_user: "{{ python_pip_become_user | default(omit) }}"
       when:
         - python_app_dependencies is defined
         - python_app_dependencies is iterable
