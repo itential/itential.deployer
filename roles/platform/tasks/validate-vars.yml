@@ -70,6 +70,24 @@
         fail_msg: platform_encryption_key must be a 64 character hexadecimal string
       when: validate_platform_encryption_key | default(true)
 
+    - name: Validate Itential Platform directories are not system directories
+      ansible.builtin.assert:
+        that: >-
+          (item | regex_replace('(?<=.)/+$', '')) not in
+          ['/', '/bin', '/boot', '/dev', '/etc', '/home', '/lib', '/lib64', '/media', '/mnt',
+           '/opt', '/proc', '/root', '/run', '/sbin', '/srv', '/sys', '/tmp', '/usr', '/var',
+           '/var/log']
+        fail_msg: >-
+          {{ item }} is a system directory. Itential Platform changes ownership of
+          platform_root_dir, platform_config_dir, platform_log_dir and
+          platform_itential_home_dir to platform_user:platform_group. Set them to
+          dedicated directories.
+      loop:
+        - "{{ platform_root_dir }}"
+        - "{{ platform_config_dir }}"
+        - "{{ platform_log_dir }}"
+        - "{{ platform_itential_home_dir }}"
+
     - name: Validate that platform_otel_webserver_metrics_enabled is a boolean when set
       ansible.builtin.assert:
         that: platform_otel_webserver_metrics_enabled is none or platform_otel_webserver_metrics_enabled is boolean
