@@ -176,10 +176,64 @@
 
         - name: Set platform_nodejs_package to the default value
                 when not defined in inventory
-          ansible.builtin.set_fact:
-            platform_nodejs_package:
-              "{{ platform_nodejs_package_default[ansible_distribution_major_version] }}"
           when: platform_nodejs_package is not defined
+          block:
+            - name: Find the Itential Platform RPM on the control node
+              ansible.builtin.find:
+                paths: "{{ platform_offline_control_node_rpms_dir }}/platform"
+                patterns: "itential-platform-*.rpm"
+              register: platform_offline_rpm_find
+              delegate_to: localhost
+              become: false
+              when: offline_install_enabled | bool
+
+            - name: Determine the Itential Platform version from the Itential Platform RPM
+              ansible.builtin.set_fact:
+                platform_rpm_versions: >-
+                  {{ ((platform_offline_rpm_find.files | map(attribute='path')
+                       if offline_install_enabled | bool else platform_packages)
+                      | map('basename')
+                      | select('match', 'itential-platform-[0-9]')
+                      | map('regex_search', '[0-9]+[.][0-9]+[.][0-9]+')
+                      | select | unique | list) }}
+
+            - name: Validate a single Itential Platform version was found
+              ansible.builtin.assert:
+                that: platform_rpm_versions | length == 1
+                fail_msg: >-
+                  Unable to determine the Itential Platform version from the
+                  itential-platform RPM. Found versions: {{ platform_rpm_versions }}.
+                  Exactly one itential-platform-X.Y.Z RPM is required in
+                  {{ (platform_offline_control_node_rpms_dir + '/platform')
+                     if offline_install_enabled | bool else 'platform_packages' }}.
+                  Alternatively, define platform_nodejs_package.
+
+            - name: Set platform_version from the Itential Platform RPM
+              ansible.builtin.set_fact:
+                platform_version: "{{ platform_rpm_versions | first }}"
+
+            - name: Set the Node.js major version required by the Itential Platform version
+              ansible.builtin.set_fact:
+                platform_nodejs_major_version: >-
+                  {{ '22' if platform_version is version(
+                       platform_nodejs_22_min_platform_version, '>=')
+                     else '20' }}
+
+            - name: Validate Node.js is available for the OS
+              ansible.builtin.assert:
+                that: >-
+                  ansible_distribution_major_version in
+                  platform_nodejs_package_default[platform_nodejs_major_version]
+                fail_msg: >-
+                  Itential Platform {{ platform_version }} requires
+                  Node {{ platform_nodejs_major_version }}, which is not available on
+                  {{ ansible_distribution }} {{ ansible_distribution_major_version }}.
+
+            - name: Set platform_nodejs_package from the Node.js major version and OS
+              ansible.builtin.set_fact:
+                platform_nodejs_package: >-
+                  {{ platform_nodejs_package_default[platform_nodejs_major_version]
+                     [ansible_distribution_major_version] }}
 
         - name: Set platform_python_version to the default value
                 when not defined in inventory
