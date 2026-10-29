@@ -27,7 +27,10 @@
   changed_when: false
 
 - name: Check Itential listening ports
-  ansible.builtin.shell: ss -tulpn | grep itential-platform
+  ansible.builtin.shell: "ss -H -tln 'sport = :{{ item }}' | grep -q ."
+  loop: >-
+    {{ ([platform_webserver_http_port] if platform_webserver_http_enabled | bool else [])
+       + ([platform_webserver_https_port] if platform_webserver_https_enabled | bool else []) }}
   register: platform_ports
   ignore_errors: true
   changed_when: false
