@@ -71,23 +71,31 @@ These variables will effect how the installation occurs.
 | `repository_username` | `platform` | String | The username for authentication of the repository. | N/A |
 | `repository_password` | `platform` | String | The password for authentication of the repository. | N/A |
 | `repository_api_key` | `platform` | String | The API for authentication of the repository. Can be used instead of username/password for authentication.| N/A |
-| `platform_nodejs_package` | `platform` | String | The Node.js package or module stream to install. The default depends on the OS major version, see below. | `@nodejs:22/common` (RHEL, Rocky, Alma 8), `@nodejs:22` (RHEL, Rocky, Alma 9), `nodejs22` (Amazon Linux 2023) |
+| `platform_nodejs_package` | `platform` | String | The Node.js package or module stream to install. The default depends on the Itential Platform version and the OS major version, see below. | Node 22 for Itential Platform 6.6.0 and later, Node 20 for earlier releases |
 
 If `platform_packages` contains URLs, either `repository_api_key` or `repository_username` and
 `repository_password` must be defined.
 
-Itential Platform 6.6 and later requires Node 22. For Itential Platform 6.5.x and earlier, set
-`platform_nodejs_package` in the inventory.
+Itential Platform 6.6.0 and later requires Node 22. Earlier releases require Node 20. The deployer
+reads the Itential Platform version from the `itential-platform-X.Y.Z` RPM in `platform_packages`
+(or, for offline installs, from the `itential-platform` RPM in the `platform` directory under the
+offline RPM directory on the control node) and selects the matching Node.js package. The install
+fails if the version cannot be determined or if Node 20 is required on an OS that does not provide
+it. Node 20 is not available on RHEL/Rocky/Alma 10.
 
-| OS | Node 20 value | Node 22 value (default) |
-| :-- | :------------ | :---------------------- |
+| OS | Node 20 value | Node 22 value |
+| :-- | :------------ | :------------ |
 | RHEL/Rocky/Alma 8 | `@nodejs:20/common` | `@nodejs:22/common` |
 | RHEL/Rocky/Alma 9 | `@nodejs:20` | `@nodejs:22` |
+| RHEL/Rocky/Alma 10 | N/A | `nodejs22` |
 | Amazon Linux 2023 | `nodejs20` | `nodejs22` |
+
+To use a different Node.js package, set `platform_nodejs_package` in the inventory. When it is set,
+the version lookup is skipped.
 
 ```yaml
 platform_release: 6
-platform_nodejs_package: "@nodejs:20" # Itential Platform 6.5.x on RHEL/Rocky 9
+platform_nodejs_package: "@nodejs:20" # Override the default Node.js package
 ```
 
 #### Authentication Variables
