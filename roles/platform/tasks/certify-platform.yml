@@ -42,11 +42,11 @@
 
 - name: Check Itential config file exists
   ansible.builtin.stat:
-    path: /etc/itential/platform.properties
+    path: "{{ platform_config_dir }}/platform.properties"
   register: platform_conf_file
 
 - name: Get Itential config file permissions
-  ansible.builtin.command: ls -la /etc/itential/platform.properties
+  ansible.builtin.command: ls -la {{ platform_config_dir }}/platform.properties
   register: platform_conf_permissions
   ignore_errors: true
   changed_when: false
@@ -59,7 +59,7 @@
 - name: Parse Itential config for server_id
   ansible.builtin.shell:
     cmd: >
-      grep '^server_id' /etc/itential/platform.properties |
+      grep '^server_id' {{ platform_config_dir }}/platform.properties |
       awk -F'=' '{print $2}' |
       xargs
   register: platform_server_id
@@ -70,7 +70,7 @@
 - name: Parse Itential config for mongo_auth_enabled
   ansible.builtin.shell:
     cmd: >
-      grep '^mongo_auth_enabled' /etc/itential/platform.properties
+      grep '^mongo_auth_enabled' {{ platform_config_dir }}/platform.properties
       | awk -F'=' '{print $2}' |
       xargs
   register: platform_mongo_auth_enabled
@@ -81,7 +81,7 @@
 - name: Parse Itential config for mongo_user
   ansible.builtin.shell:
     cmd: >
-      grep '^mongo_user' /etc/itential/platform.properties
+      grep '^mongo_user' {{ platform_config_dir }}/platform.properties
       | awk -F'=' '{print $2}' |
       xargs
   register: platform_mongo_user
@@ -92,7 +92,7 @@
 - name: Parse Itential config for mongo_auth_db
   ansible.builtin.shell:
     cmd: >
-      grep '^mongo_auth_db' /etc/itential/platform.properties |
+      grep '^mongo_auth_db' {{ platform_config_dir }}/platform.properties |
       awk -F'=' '{print $2}' |
       xargs
   register: platform_mongo_auth_db
@@ -103,7 +103,7 @@
 - name: Parse Itential config for mongo_db_name
   ansible.builtin.shell:
     cmd: >
-      grep '^mongo_db_name' /etc/itential/platform.properties |
+      grep '^mongo_db_name' {{ platform_config_dir }}/platform.properties |
       awk -F'=' '{print $2}' |
       xargs
   register: platform_mongo_db_name
@@ -114,7 +114,7 @@
 - name: Parse Itential config for mongo_url
   ansible.builtin.shell:
     cmd: >
-      grep '^mongo_url' /etc/itential/platform.properties |
+      grep '^mongo_url' {{ platform_config_dir }}/platform.properties |
       sed 's/^mongo_url[[:space:]]*=[[:space:]]*//' |
       xargs
   register: platform_mongo_url
@@ -135,7 +135,7 @@
 - name: Parse Itential config for mongo_tls_enabled
   ansible.builtin.shell:
     cmd: >
-      grep '^mongo_tls_enabled' /etc/itential/platform.properties |
+      grep '^mongo_tls_enabled' {{ platform_config_dir }}/platform.properties |
       awk -F'=' '{print $2}' |
       xargs
   register: platform_mongo_tls_enabled
@@ -146,7 +146,7 @@
 - name: Parse Itential config for mongo_read_concern
   ansible.builtin.shell:
     cmd: >
-      grep '^mongo_read_concern' /etc/itential/platform.properties |
+      grep '^mongo_read_concern' {{ platform_config_dir }}/platform.properties |
       awk -F'=' '{print $2}' |
       xargs
   register: platform_mongo_read_concern
@@ -157,7 +157,7 @@
 - name: Parse Itential config for mongo_write_concern
   ansible.builtin.shell:
     cmd: >
-      grep '^mongo_write_concern' /etc/itential/platform.properties |
+      grep '^mongo_write_concern' {{ platform_config_dir }}/platform.properties |
       awk -F'=' '{print $2}' |
       xargs
   register: platform_mongo_write_concern
@@ -168,7 +168,7 @@
 - name: Parse Itential config for redis_username
   ansible.builtin.shell:
     cmd: >
-      grep '^redis_username' /etc/itential/platform.properties |
+      grep '^redis_username' {{ platform_config_dir }}/platform.properties |
       awk -F'=' '{print $2}' |
       xargs
   register: platform_redis_username
@@ -179,7 +179,7 @@
 - name: Parse Itential config for redis_host
   ansible.builtin.shell:
     cmd: >
-      grep '^redis_host' /etc/itential/platform.properties |
+      grep '^redis_host' {{ platform_config_dir }}/platform.properties |
       awk -F'=' '{print $2}' |
       xargs
   register: platform_redis_host
@@ -190,7 +190,7 @@
 - name: Parse Itential config for redis_sentinel_username
   ansible.builtin.shell:
     cmd: >
-      grep '^redis_sentinel_username' /etc/itential/platform.properties |
+      grep '^redis_sentinel_username' {{ platform_config_dir }}/platform.properties |
       awk -F'=' '{print $2}' |
       xargs
   register: platform_redis_sentinel_username
@@ -201,7 +201,7 @@
 - name: Parse Itential config for redis_sentinels
   ansible.builtin.shell:
     cmd: >
-      grep '^redis_sentinels' /etc/itential/platform.properties |
+      grep '^redis_sentinels' {{ platform_config_dir }}/platform.properties |
       awk -F'=' '{print $2}' |
       xargs
   register: platform_redis_sentinels
@@ -212,7 +212,7 @@
 - name: Parse Itential config for redis_name
   ansible.builtin.shell:
     cmd: >
-      grep '^redis_name' /etc/itential/platform.properties |
+      grep '^redis_name' {{ platform_config_dir }}/platform.properties |
       awk -F'=' '{print $2}' |
       xargs
   register: platform_redis_name
@@ -223,7 +223,7 @@
 - name: Parse Itential config for redis_tls
   ansible.builtin.shell:
     cmd: >
-      grep '^redis_tls' /etc/itential/platform.properties
+      grep '^redis_tls' {{ platform_config_dir }}/platform.properties
       | awk -F'=' '{print $2}' |
       xargs
   register: platform_redis_tls
@@ -234,7 +234,7 @@
 - name: Parse Itential config for task_worker_enabled
   ansible.builtin.shell:
     cmd: >
-      grep '^task_worker_enabled' /etc/itential/platform.properties |
+      grep '^task_worker_enabled' {{ platform_config_dir }}/platform.properties |
       awk -F'=' '{print $2}' |
       xargs
   register: platform_task_worker_enabled
@@ -245,7 +245,7 @@
 - name: Parse Itential config for job_worker_enabled
   ansible.builtin.shell:
     cmd: >
-      grep '^job_worker_enabled' /etc/itential/platform.properties |
+      grep '^job_worker_enabled' {{ platform_config_dir }}/platform.properties |
       awk -F'=' '{print $2}' |
       xargs
   register: platform_job_worker_enabled
@@ -256,7 +256,7 @@
 - name: Parse Itential config for default_user_username
   ansible.builtin.shell:
     cmd: >
-      grep '^default_user_username' /etc/itential/platform.properties |
+      grep '^default_user_username' {{ platform_config_dir }}/platform.properties |
       awk -F'=' '{print $2}' |
       xargs
   register: platform_default_user_username
@@ -267,7 +267,7 @@
 - name: Parse Itential config for webserver_http_enabled
   ansible.builtin.shell:
     cmd: >
-      grep '^webserver_http_enabled' /etc/itential/platform.properties |
+      grep '^webserver_http_enabled' {{ platform_config_dir }}/platform.properties |
       awk -F'=' '{print $2}' |
       xargs
   register: platform_webserver_http_enabled
@@ -278,7 +278,7 @@
 - name: Parse Itential config for webserver_https_enabled
   ansible.builtin.shell:
     cmd: >
-      grep '^webserver_https_enabled' /etc/itential/platform.properties |
+      grep '^webserver_https_enabled' {{ platform_config_dir }}/platform.properties |
       awk -F'=' '{print $2}' |
       xargs
   register: platform_webserver_https_enabled
@@ -289,7 +289,7 @@
 - name: Parse Itential config for webserver_http_port
   ansible.builtin.shell:
     cmd: >
-      grep '^webserver_http_port' /etc/itential/platform.properties |
+      grep '^webserver_http_port' {{ platform_config_dir }}/platform.properties |
       awk -F'=' '{print $2}' |
       xargs
   register: platform_webserver_http_port
@@ -300,7 +300,7 @@
 - name: Parse Itential config for webserver_https_port
   ansible.builtin.shell:
     cmd: >
-      grep '^webserver_https_port' /etc/itential/platform.properties |
+      grep '^webserver_https_port' {{ platform_config_dir }}/platform.properties |
       awk -F'=' '{print $2}' |
       xargs
   register: platform_webserver_https_port
@@ -311,7 +311,7 @@
 - name: Parse Itential config for webserver_https_key
   ansible.builtin.shell:
     cmd: >
-      grep '^webserver_https_key' /etc/itential/platform.properties |
+      grep '^webserver_https_key' {{ platform_config_dir }}/platform.properties |
       awk -F'=' '{print $2}' |
       xargs
   register: platform_webserver_https_key
@@ -322,7 +322,7 @@
 - name: Parse Itential config for webserver_https_cert
   ansible.builtin.shell:
     cmd: >
-      grep '^webserver_https_cert' /etc/itential/platform.properties |
+      grep '^webserver_https_cert' {{ platform_config_dir }}/platform.properties |
       awk -F'=' '{print $2}' |
       xargs
   register: platform_webserver_https_cert
@@ -333,7 +333,7 @@
 - name: Parse Itential config for log_directory
   ansible.builtin.shell:
     cmd: >
-      grep '^log_directory' /etc/itential/platform.properties |
+      grep '^log_directory' {{ platform_config_dir }}/platform.properties |
       awk -F'=' '{print $2}' |
       xargs
   register: platform_log_directory
@@ -344,7 +344,7 @@
 - name: Parse Itential config for log_file
   ansible.builtin.shell:
     cmd: >
-      grep '^log_file' /etc/itential/platform.properties |
+      grep '^log_file' {{ platform_config_dir }}/platform.properties |
       awk -F'=' '{print $2}' |
       xargs
   register: platform_log_file
@@ -355,7 +355,7 @@
 - name: Parse Itential config for log_level
   ansible.builtin.shell:
     cmd: >
-      grep '^log_level[[:space:]]*=' /etc/itential/platform.properties |
+      grep '^log_level[[:space:]]*=' {{ platform_config_dir }}/platform.properties |
       awk -F'=' '{print $2}' |
       xargs
   register: platform_log_level
@@ -366,7 +366,7 @@
 - name: Parse Itential config for webserver_log_directory
   ansible.builtin.shell:
     cmd: >
-      grep '^webserver_log_directory' /etc/itential/platform.properties |
+      grep '^webserver_log_directory' {{ platform_config_dir }}/platform.properties |
       awk -F'=' '{print $2}' |
       xargs
   register: platform_webserver_log_directory
@@ -377,7 +377,7 @@
 - name: Parse Itential config for webserver_log_filename
   ansible.builtin.shell:
     cmd: >
-      grep '^webserver_log_filename' /etc/itential/platform.properties |
+      grep '^webserver_log_filename' {{ platform_config_dir }}/platform.properties |
       awk -F'=' '{print $2}' |
       xargs
   register: platform_webserver_log_filename
@@ -388,7 +388,7 @@
 - name: Parse Itential config for services_directory
   ansible.builtin.shell:
     cmd: >
-      grep '^service_directory' /etc/itential/platform.properties |
+      grep '^service_directory' {{ platform_config_dir }}/platform.properties |
       awk -F'=' '{print $2}' |
       xargs
   register: platform_service_directory
@@ -631,7 +631,7 @@
   changed_when: false
   failed_when: false
   become: true
-  become_user: "itential"
+  become_user: "{{ platform_user }}"
   become_flags: '-i'
   # become_method: ansible.builtin.su
 
@@ -642,7 +642,7 @@
   changed_when: false
   failed_when: false
   become: true
-  become_user: "itential"
+  become_user: "{{ platform_user }}"
   become_flags: '-i'
 
 - name: Get list of installed Python modules
@@ -652,7 +652,7 @@
   changed_when: false
   failed_when: false
   become: true
-  become_user: "itential"
+  become_user: "{{ platform_user }}"
   become_flags: '-i'
 
 - name: Get pip version
@@ -662,7 +662,7 @@
   changed_when: false
   failed_when: false
   become: true
-  become_user: "itential"
+  become_user: "{{ platform_user }}"
   become_flags: '-i'
 
 # ============================================================================
