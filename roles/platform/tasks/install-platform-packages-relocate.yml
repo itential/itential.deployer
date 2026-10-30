@@ -27,7 +27,7 @@
   vars:
     relocations:
       - { old: "{{ platform_root_dir_default }}", new: "{{ platform_root_dir }}" }
-      - { old: "{{ platform_log_dir_default }}", new: "{{ platform_log_dir }}" }
+      - { old: "{{ platform_log_dir_default | dirname }}", new: "{{ platform_log_dir | dirname }}" }
       - { old: "{{ platform_config_dir_default }}", new: "{{ platform_config_dir }}" }
       - { old: "{{ platform_itential_home_dir_default }}", new: "{{ platform_itential_home_dir }}" }
   loop: "{{ platform_packages_find_result.files | map(attribute='path') }}"
