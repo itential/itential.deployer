@@ -9,14 +9,12 @@ Installs and configures Itential Platform (IAP). Handles OS user/directory setup
 1. `validate-vars.yml` (always tagged) — validates required variables and loads release-specific vars
 2. Configure OS:
    a. `create-itential-user.yml` — create `itential` user and group
-   b. Create directories: `platform_server_dir`, `platform_config_dir`, `platform_log_dir`
-   c. Add sudoers entry for `chroot` (required by TemplateBuilder)
-   d. `configure-firewalld.yml` — open HTTP and HTTPS ports
+   b. `configure-firewalld.yml` — open HTTP and HTTPS ports
 3. Install Dependencies, Platform, Adapters, App Artifacts (notifies `Update Itential release file`):
    a. `install-platform-dependency-packages.yml` — install OS packages
    b. `install-nodejs.yml` — install NodeJS
    c. `install-python.yml` — install Python; installs pip dependencies as `platform_user` (`itential`) via `pip install --user` rather than system-wide as root, then validates each application dependency actually imports (see `roles/python/CLAUDE.md`). No `/usr/local/bin` python3/pip3 symlinks are created — the P6 Platform RPM already creates its own `python3` symlink under `/home/itential/bin`.
-   d. `install-platform.yml` — install IAP RPM packages. The itential-platform RPM declares a hardcoded `itential:itential` owner for `platform_server_dir`/`platform_config_dir`/`platform_log_dir` in its own package metadata, so installing/upgrading it silently resets ownership on these directories. Immediately after this step, `platform_user`/`platform_group` ownership is re-applied to all three (same `ansible.builtin.file` call as step 2b) so a non-default `platform_user` can actually start the service afterward.
+   d. `install-platform.yml` — install IAP RPM packages. The itential-platform RPM declares a hardcoded `itential:itential` owner for the paths it ships (`platform_root_dir`, `platform_services_dir`, `platform_server_dir`, `platform_config_dir`, `platform_log_dir`, and `platform_itential_home_dir`), so installing/upgrading it silently resets ownership on them. At the end of `install-platform.yml`, when `platform_user`/`platform_group` is not `itential`, a task runs `chown -hR platform_user:platform_group` on `platform_root_dir` (which contains the server and services dirs) and `platform_itential_home_dir`, and a non-recursive `chown -h` on `platform_config_dir` and `platform_log_dir` (their contents are created after the install). It uses `chown` rather than the `file` module because a recursive `file` run over ~250k files takes minutes. This lets a non-default `platform_user` start the service afterward.
    e. `install-adapters.yml` — install configured adapters
    f. `install-app-artifacts.yml` — when `platform_app_artifacts_enabled: true`
 4. `configure-selinux.yml` — apply SELinux configuration
@@ -31,6 +29,8 @@ Installs and configures Itential Platform (IAP). Handles OS user/directory setup
 - Asserts repo credentials when packages are downloaded from HTTP URLs
 - Asserts `platform_release` is defined OR all individual vars (`platform_nodejs_package`, `platform_python_version`, `platform_python_packages`, `platform_python_app_dependencies`) are defined
 - Asserts `platform_encryption_key` is a 64-character hex string
+- Asserts `platform_root_dir`, `platform_config_dir`, `platform_log_dir` and `platform_itential_home_dir` are not top-level system directories (`/`, `/etc`, `/home`, `/var`, `/var/log`, etc.), since ownership of these is changed to `platform_user:platform_group`
+- Asserts `platform_log_dir` ends in `/platform`. The RPM's relocatable prefix is `/var/log/itential` and it always creates `platform` beneath it, so `install-platform-packages-relocate.yml` relocates the parent of `platform_log_dir`
 - Validates Vault variables when `platform_configure_vault: true`
 - Validates PKI source directories when copy-certs flags are enabled
 - Loads `vars/platform-release-<N>.yml` and sets release-specific defaults for NodeJS/Python when not overridden in inventory

@@ -82,7 +82,7 @@ Host details not available
 ## Configuration Files
 - **Config File Exists:** {{ 'YES ✓' if (platform_conf_file is defined and platform_conf_file.stat is defined and platform_conf_file.stat.exists) else 'NO ✗' }}
 {% if platform_conf_file is defined and platform_conf_file.stat is defined and platform_conf_file.stat.exists %}
-- **Config File Path:** `/etc/itential/platform.properties`
+- **Config File Path:** `{{ platform_config_dir }}/platform.properties`
 - **Permissions:** {{ platform_conf_permissions.stdout | default('Unknown') if platform_conf_permissions is defined else 'Unknown' }}
 {% endif %}
 
