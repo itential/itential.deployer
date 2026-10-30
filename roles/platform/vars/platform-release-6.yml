@@ -1,11 +1,20 @@
 # Copyright (c) 2024, Itential, Inc
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
+# Itential Platform >= this version requires Node 22, earlier releases require Node 20.
+platform_nodejs_22_min_platform_version: "6.6.0"
+
+# Node.js package by Node major version, then OS major version. Node 20 is not available on EL10.
 platform_nodejs_package_default:
-  "8": "@nodejs:22/common"
-  "9": "@nodejs:22"
-  "10": "nodejs22"
-  "2023": "nodejs22"
+  "22":
+    "8": "@nodejs:22/common"
+    "9": "@nodejs:22"
+    "10": "nodejs22"
+    "2023": "nodejs22"
+  "20":
+    "8": "@nodejs:20/common"
+    "9": "@nodejs:20"
+    "2023": "nodejs20"
 
 platform_python_version_default:
   "8": 3.11

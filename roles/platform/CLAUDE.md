@@ -34,6 +34,7 @@ Installs and configures Itential Platform (IAP). Handles OS user/directory setup
 - Validates Vault variables when `platform_configure_vault: true`
 - Validates PKI source directories when copy-certs flags are enabled
 - Loads `vars/platform-release-<N>.yml` and sets release-specific defaults for NodeJS/Python when not overridden in inventory
+- When `platform_nodejs_package` is not set, derives `platform_version` from the `itential-platform-X.Y.Z` RPM (`platform_packages` online, or `{{ platform_offline_control_node_rpms_dir }}/platform` on the control node offline), then picks Node 22 for `>= 6.6.0` and Node 20 otherwise. Fails if no single version is found or Node 20 is required on EL10
 
 ## Key Variables
 
@@ -264,14 +265,12 @@ Both groups receive the same role. The `platform_server_id` defaults to `invento
 
 | Variable | RHEL 8 | RHEL 9 / AL2023 |
 |----------|--------|-----------------|
-| `platform_nodejs_package` | `@nodejs:22/common` | `@nodejs:22` / `nodejs22` |
+| `platform_nodejs_package` | `@nodejs:22/common` (Node 22) / `@nodejs:20/common` (Node 20) | `@nodejs:22` / `@nodejs:20` (RHEL 9), `nodejs22` / `nodejs20` (AL2023), `nodejs22` only (RHEL 10) |
 | `platform_python_version` | `3.11` | `3.11` |
 | `platform_python_packages` | `python3.11`, `python3.11-pip` | same |
 | `platform_python_app_dependencies` | `jinja2==3.1.2`, `markupsafe==2.1.4`, `textfsm==1.1.3` | same |
 
-Itential Platform 6.6 and later requires Node 22. For Itential Platform 6.5.x and earlier, override
-`platform_nodejs_package` in the inventory with the Node 20 value: `@nodejs:20/common` (RHEL 8),
-`@nodejs:20` (RHEL 9), `nodejs20` (Amazon Linux 2023).
+Itential Platform 6.6.0 and later requires Node 22, earlier releases require Node 20 (`platform_nodejs_22_min_platform_version`). `platform_nodejs_package_default` is keyed by Node major version, then OS major version. Setting `platform_nodejs_package` in the inventory overrides the default and skips the version lookup.
 
 Hardware specs for `verify` playbook (`platform_hw_specs`):
 - dev: 8 CPU, 32 GB RAM, 250 GB disk
