@@ -67,7 +67,7 @@ These variables will effect how the installation occurs.
 
 | Variable | Group | Type | Description | Default Value |
 | :------- | :---- | :--- | :---------- | :------------ |
-| `platform_packages` | `platform` | List of Strings | The Itential Platform RPMs to install. The items can either be filenames or URLs. | N/A |
+| `platform_packages` | `platform` | List of Strings or Dictionaries | The Itential Platform RPMs to install. Each item can either be a filename/URL string, or a `{url, checksum}` dictionary for customers who require validated downloads. | N/A |
 | `repository_username` | `platform` | String | The username for authentication of the repository. | N/A |
 | `repository_password` | `platform` | String | The password for authentication of the repository. | N/A |
 | `repository_api_key` | `platform` | String | The API for authentication of the repository. Can be used instead of username/password for authentication.| N/A |
@@ -96,6 +96,16 @@ the version lookup is skipped.
 ```yaml
 platform_release: 6
 platform_nodejs_package: "@nodejs:20" # Override the default Node.js package
+```
+
+To validate a downloaded RPM's checksum, use the `{url, checksum}` dictionary form for that entry
+instead of a plain string. The checksum must be in the format Ansible's `get_url` module expects,
+e.g. `sha256:<hash>`. Entries left as plain strings are downloaded without checksum verification:
+
+```yaml
+platform_packages:
+  - url: https://registry.aws.itential.com/repository/PLATFORM/Platform%206/Platform%206.5.1/itential-platform-6.5.1-1.noarch.rpm
+    checksum: "sha256:440353320215dcc737184744579362d78400da0bc46839fa4f6d220129843531"
 ```
 
 #### Authentication Variables
