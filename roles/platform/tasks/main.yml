@@ -51,15 +51,6 @@
               ansible.builtin.include_tasks:
                 file: install-platform.yml
 
-            # The itential-platform RPM hardcodes itential:itential ownership on
-            # every path it ships (root, home, config and log dirs), on both
-            # install and upgrade. Re-own them to platform_user/platform_group
-            # so a non-default user owns everything.
-            - name: Set ownership of Itential Platform files after RPM install
-              ansible.builtin.include_tasks:
-                file: set-file-ownership.yml
-              when: platform_user != 'itential' or platform_group != 'itential'
-
         - name: Install Adapters
           tags: install_adapters
           block:
