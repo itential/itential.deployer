@@ -12,30 +12,9 @@
     - name: Configure OS
       tags: configure_os
       block:
-        # TODO: Remove once the Itential RPM is creating the directories correctly
         - name: Create itential user
           ansible.builtin.include_tasks:
             file: create-itential-user.yml
-
-        # TODO: Remove once the Itential RPM is creating the directories correctly
-        - name: Create itential directories
-          ansible.builtin.file:
-            name: "{{ item }}"
-            state: directory
-            owner: "{{ platform_user }}"
-            group: "{{ platform_group }}"
-            mode: "0775"
-          with_items:
-            - "{{ platform_server_dir }}"
-            - "{{ platform_config_dir }}"
-            - "{{ platform_log_dir }}"
-
-        - name: Ensure secure mode for TemplateBuilder
-          ansible.builtin.lineinfile:
-            path: /etc/sudoers
-            insertafter: EOF
-            state: present
-            line: "{{ platform_user }} ALL=(ALL) NOPASSWD: /usr/sbin/chroot, /sbin/chroot"
 
         - name: Configure firewalld
           ansible.builtin.include_tasks:

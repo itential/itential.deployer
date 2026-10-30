@@ -84,6 +84,7 @@ Installs and configures Redis and Redis Sentinel for use with Itential Platform.
 | `redis_security_packages` | `policycoreutils-python-utils` | SELinux management package |
 | `redis_remi_repo_url` | Remi enterprise URL | Used when installing from Remi repo |
 | `redis_epel_repo_url` | Fedora EPEL URL | Used when installing EPEL for Remi |
+| `redis_build_temp_dir_path` | (undefined) | Optional `path` for the source-build working directory's `ansible.builtin.tempfile` task. Undefined by default so the module falls back to its own directory resolution; set explicitly (e.g. `/var/tmp`) on hosts where `/tmp` is mounted `noexec`, which breaks the `make`/`make install` steps |
 
 ### pki.yml defaults (TLS paths)
 
@@ -101,6 +102,12 @@ Installs and configures Redis and Redis Sentinel for use with Itential Platform.
 | `redis_pki_group` | `redis` | File/dir group |
 | All `_dest` vars | Built from base dir + filename | Destination paths on target |
 | All `_src` vars | Built from `redis_pki_src_dir` + filename | Source paths on control node |
+
+### vars/main.yml
+
+| Variable | Purpose |
+|----------|---------|
+| `redis_required_repositories` | List of repository dicts (`url`, `type`, optional `check_target`, `notes`) checked by `verify-redis.yml` and `verify-sentinel.yml` via `common:verify-connectivity`. Mirrors the Redis rows of the README "Required Public Repositories" table. |
 
 ## TLS Configuration
 

@@ -10,6 +10,10 @@ platform_vault_token_dir: "{{ platform_server_dir }}/keys"
 # The URL to the Hashicorp Vault server.
 platform_vault_url: http://localhost:8200
 
+# The Vault Enterprise namespace to scope all secret operations to. Required for multi-tenant
+# Vault Enterprise configurations. Not required for open-source Vault.
+platform_vault_namespace:
+
 # The authorization method to connect to Hashicorp Vault. Either token or approle.
 platform_vault_auth_method: token
 
@@ -49,3 +53,7 @@ platform_vault_secrets_endpoint: itential/data
 # If true, only reads secrets from Hashicorp Vault. Otherwise, the platform can write secrets
 # to Vault for storage.
 platform_vault_read_only: true
+
+# The number of milliseconds to wait before timing out requests to the Hashicorp Vault server.
+# Used by Hashicorp Vault only.
+platform_vault_connection_timeout:

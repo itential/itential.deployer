@@ -11,6 +11,7 @@ platform_itential_home_dir: "{{ platform_itential_home_dir_default }}"
 # this is the location as seen from the Itential Platform host.
 
 platform_package_dependencies:
+  - acl
   - glibc-common
   - openldap
   - openldap-clients
@@ -23,7 +24,6 @@ platform_python_base_dependencies:
   - wheel
 
 # The python and pip executable locations.
-# These will be symlinks to the appropriate executables in /usr/bin.
 platform_python_executable: "/usr/bin/python{{ platform_python_version }}"
 platform_pip_executable: "/usr/bin/pip{{ platform_python_version }}"
 

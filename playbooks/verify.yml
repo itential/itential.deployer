@@ -10,3 +10,26 @@
 
 - name: Verify Platform Installation
   import_playbook: itential.deployer.verify_platform
+
+- name: Verify Gateway Installation
+  import_playbook: itential.deployer.verify_gateway
+
+# Each component's own final assert is non-fatal (ignore_errors) so that a failure in one
+# component (e.g. verify_redis) doesn't abort the ansible-playbook run before the remaining
+# import_playbooks above get a chance to execute -- Ansible stops the whole run, not just the
+# current play, when a play ends with 100% of its hosts failed. This final play is the one
+# place that actually fails the run, and since nothing runs after it, that's safe to do.
+- name: Report Overall Verification Result
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Display per-component verification failures for this host
+      ansible.builtin.debug:
+        var: component_validation_errors
+      when: component_validation_errors is defined and component_validation_errors | length > 0
+
+    - name: Fail if any verification check failed for this host
+      ansible.builtin.assert:
+        that: verification_passed | default(true)
+        fail_msg: "One or more Itential Deployer verification checks failed for this host. See output above for details."
+        success_msg: "All Itential Deployer verification checks passed for this host."

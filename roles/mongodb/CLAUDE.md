@@ -104,6 +104,12 @@ Conditionally includes (in order):
 | `mongodb_tls_cert_src` | `{{ mongodb_pki_src_dir }}/{{ mongodb_tls_server_cert_file }}` | Cert source |
 | `mongodb_tls_ca_src` | `{{ mongodb_pki_src_dir }}/{{ mongodb_tls_ca_file }}` | CA source |
 
+### vars/main.yml
+
+| Variable | Purpose |
+|----------|---------|
+| `mongodb_required_repositories` | List of repository dicts (`url`, `type`, optional `check_target`, `notes`) checked by `verify-mongodb.yml` via `common:verify-connectivity`. Mirrors the MongoDB rows of the README "Required Public Repositories" table. |
+
 ## TLS Configuration
 
 TLS is **enabled by default** (`mongodb_tls_enabled: true`, `mongodb_tls_copy_certs: true`).

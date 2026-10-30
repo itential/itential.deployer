@@ -9,14 +9,12 @@ Installs and configures Itential Platform (IAP). Handles OS user/directory setup
 1. `validate-vars.yml` (always tagged) — validates required variables and loads release-specific vars
 2. Configure OS:
    a. `create-itential-user.yml` — create `itential` user and group
-   b. Create directories: `platform_server_dir`, `platform_config_dir`, `platform_log_dir`
-   c. Add sudoers entry for `chroot` (required by TemplateBuilder)
-   d. `configure-firewalld.yml` — open HTTP and HTTPS ports
+   b. `configure-firewalld.yml` — open HTTP and HTTPS ports
 3. Install Dependencies, Platform, Adapters, App Artifacts (notifies `Update Itential release file`):
    a. `install-platform-dependency-packages.yml` — install OS packages
    b. `install-nodejs.yml` — install NodeJS
-   c. `install-python.yml` — install Python
-   d. `install-platform.yml` — install IAP RPM packages
+   c. `install-python.yml` — install Python; installs pip dependencies as `platform_user` (`itential`) via `pip install --user` rather than system-wide as root, then validates each application dependency actually imports (see `roles/python/CLAUDE.md`). No `/usr/local/bin` python3/pip3 symlinks are created — the P6 Platform RPM already creates its own `python3` symlink under `/home/itential/bin`.
+   d. `install-platform.yml` — install IAP RPM packages. The itential-platform RPM declares a hardcoded `itential:itential` owner for the paths it ships (`platform_root_dir`, `platform_services_dir`, `platform_server_dir`, `platform_config_dir`, `platform_log_dir`, and `platform_itential_home_dir`), so installing/upgrading it silently resets ownership on them. At the end of `install-platform.yml`, when `platform_user`/`platform_group` is not `itential`, a task runs `chown -hR platform_user:platform_group` on `platform_root_dir` (which contains the server and services dirs) and `platform_itential_home_dir`, and a non-recursive `chown -h` on `platform_config_dir` and `platform_log_dir` (their contents are created after the install). It uses `chown` rather than the `file` module because a recursive `file` run over ~250k files takes minutes. This lets a non-default `platform_user` start the service afterward.
    e. `install-adapters.yml` — install configured adapters
    f. `install-app-artifacts.yml` — when `platform_app_artifacts_enabled: true`
 4. `configure-selinux.yml` — apply SELinux configuration
@@ -31,9 +29,12 @@ Installs and configures Itential Platform (IAP). Handles OS user/directory setup
 - Asserts repo credentials when packages are downloaded from HTTP URLs
 - Asserts `platform_release` is defined OR all individual vars (`platform_nodejs_package`, `platform_python_version`, `platform_python_packages`, `platform_python_app_dependencies`) are defined
 - Asserts `platform_encryption_key` is a 64-character hex string
+- Asserts `platform_root_dir`, `platform_config_dir`, `platform_log_dir` and `platform_itential_home_dir` are not top-level system directories (`/`, `/etc`, `/home`, `/var`, `/var/log`, etc.), since ownership of these is changed to `platform_user:platform_group`
+- Asserts `platform_log_dir` ends in `/platform`. The RPM's relocatable prefix is `/var/log/itential` and it always creates `platform` beneath it, so `install-platform-packages-relocate.yml` relocates the parent of `platform_log_dir`
 - Validates Vault variables when `platform_configure_vault: true`
 - Validates PKI source directories when copy-certs flags are enabled
 - Loads `vars/platform-release-<N>.yml` and sets release-specific defaults for NodeJS/Python when not overridden in inventory
+- When `platform_nodejs_package` is not set, derives `platform_version` from the `itential-platform-X.Y.Z` RPM (`platform_packages` online, or `{{ platform_offline_control_node_rpms_dir }}/platform` on the control node offline), then picks Node 22 for `>= 6.6.0` and Node 20 otherwise. Fails if no single version is found or Node 20 is required on EL10
 
 ## Key Variables
 
@@ -62,12 +63,16 @@ Installs and configures Itential Platform (IAP). Handles OS user/directory setup
 | Variable | Default | Purpose |
 |----------|---------|---------|
 | `platform_server_id` | `{{ inventory_hostname }}` | Unique server identifier in multi-node deployments |
+| `platform_server_id_strategy` | `mac:port` | Strategy to generate `server_id` when not explicitly set (`mac:port` or `random`) |
 | `platform_encrypted` | `true` | Platform uses encrypted code files |
-| `platform_task_worker_enabled` | `true` | Start task worker on boot |
-| `platform_job_worker_enabled` | `true` | Allow jobs to start on boot |
+| `platform_task_worker_enabled` | (unset) | Start task worker on boot; left unset so Itential Platform's own application default is used |
+| `platform_job_worker_enabled` | (unset) | Allow jobs to start on boot; left unset so Itential Platform's own application default is used |
 | `platform_service_launch_timeout` | `600` | Seconds before adapter launch is considered failed |
 | `platform_shutdown_timeout` | `3` | Seconds to wait before forcing shutdown |
 | `platform_audit_enabled` | `false` | Enable detailed audit events |
+| `platform_event_worker_thread_count` | (unset) | Worker threads for event processing |
+| `platform_transformation_worker_thread_count` | (unset) | Worker threads for transformation processing |
+| `platform_otel_webserver_metrics_enabled` | (unset, in `monitoring.yml`) | Toggle for OpenTelemetry webserver metrics at `/metrics/webserver`; when unset it is not written to the properties file and Itential Platform's own default (`true`) applies |
 
 ### webserver.yml defaults
 
@@ -79,8 +84,11 @@ Installs and configures Itential Platform (IAP). Handles OS user/directory setup
 | `platform_webserver_https_port` | `3443` | HTTPS port |
 | `platform_webserver_https_ciphers` | Long cipher list | Allowed TLS ciphers |
 | `platform_webserver_https_secure_protocol` | `TLS_method` | OpenSSL method |
-| `platform_webserver_cache_control_enabled` | `false` | HTTP cache control headers |
+| `platform_webserver_cache_control_enabled` | `true` | HTTP cache control headers. Itential Platform's own application default (when left unset in `platform.properties`) is `false` — the deployer explicitly overrides it to `true`. |
 | `platform_webserver_timeout` | `300000` | Request timeout (ms) |
+| `platform_webserver_https_key_contents` | (unset) | Inline PEM-encoded HTTPS private key, alternative to the file-based `platform_https_key_dest` |
+| `platform_webserver_https_cert_contents` | (unset) | Inline PEM-encoded HTTPS certificate, alternative to the file-based `platform_https_cert_dest` |
+| `platform_webserver_https_tls_min_version` / `_max_version` | (unset) | Pin TLS version range (`TLSv1.3`..`TLSv1`); overrides `platform_webserver_https_secure_protocol` |
 
 ### mongodb.yml defaults
 
@@ -94,6 +102,8 @@ Installs and configures Itential Platform (IAP). Handles OS user/directory setup
 | `platform_mongo_tls_enabled` | `true` | Use TLS for MongoDB connection |
 | `platform_mongo_tls_allow_invalid_certificates` | `false` (when TLS enabled) | Accept invalid/self-signed certs |
 | `platform_mongo_bypass_version_check` | `false` | Skip MongoDB version compatibility check |
+| `platform_mongo_max_idle_time_ms` | `300000` | Max time (ms) a pooled connection may sit idle; `0` disables the limit |
+| `platform_mongo_tls_ca_contents` | (unset) | Inline PEM-encoded CA chain, alternative to the file-based `platform_mongo_tls_ca_file` |
 
 ### redis.yml defaults
 
@@ -110,7 +120,13 @@ Installs and configures Itential Platform (IAP). Handles OS user/directory setup
 | `platform_redis_name` | `itentialmaster` | Redis primary name (must match `redis_sentinel_master_name`) |
 | `platform_redis_tls_enabled` | `true` | Enable TLS for both the Redis data connection and the Sentinel connection |
 | `platform_redis_tls` | (empty) | TLS options dict for NodeJS Redis client |
+| `platform_redis_tls_ca` / `_cert` / `_key` | (unset) | Inline PEM-encoded CA/cert/key, alternative to setting them inside `platform_redis_tls` |
 | `platform_redis_sentinel_tls` | (empty) | TLS options dict for Sentinel connection; used when `platform_redis_tls_enabled: true` |
+| `platform_redis_connect_timeout` | `30000` | Max time (ms) to wait for the initial Redis connection |
+| `platform_redis_command_timeout` | `60000` | Max time (ms) to wait for a Redis command to complete |
+| `platform_redis_sentinel_command_timeout` | `3000` | Max time (ms) to wait for a Sentinel command to complete |
+| `platform_redis_keep_alive` | `5000` | TCP keepalive delay (ms) on the Redis socket |
+| `platform_redis_persist_queues` | (empty) | Bull queue names to persist in Redis across restarts |
 
 ### pki.yml defaults (TLS paths)
 
@@ -144,9 +160,14 @@ Installs and configures Itential Platform (IAP). Handles OS user/directory setup
 | `platform_default_user_username` | `admin` | Default admin username |
 | `platform_default_user_password` | `admin` | Default admin password (change in production) |
 | `platform_auth_session_ttl` | `60` | Session timeout (minutes) |
+| `platform_auth_principal_ttl` | (unset) | User principal timeout (minutes); falls back to `platform_auth_session_ttl` when unset |
+| `platform_auth_relay_state_ttl` | `600` | SSO RelayState timeout (seconds) |
 | `platform_auth_unique_sessions_enabled` | `false` | Log out existing sessions on new login |
 
-### vault.yml defaults
+### hashivault.yml defaults
+
+In `6-properties.j2`, the entire `HASHICORP VAULT CONNECTION` section (header and all `vault_*`
+lines, including commented-out placeholders) is only rendered when `platform_configure_vault: true`.
 
 | Variable | Default | Purpose |
 |----------|---------|---------|
@@ -157,6 +178,24 @@ Installs and configures Itential Platform (IAP). Handles OS user/directory setup
 | `platform_vault_role_id` | (required if approle) | AppRole role ID |
 | `platform_vault_secret_id` | (required if approle) | AppRole secret ID |
 | `platform_vault_read_only` | `true` | Read-only Vault access |
+| `platform_vault_namespace` | (unset) | Vault Enterprise namespace; not used with open-source Vault |
+| `platform_vault_connection_timeout` | (unset) | Vault request timeout (ms) |
+
+### secret_provider.yml defaults
+
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `platform_secret_provider_name` | (unset) | Secrets provider name; required for CyberArk CCP (`CyberArkCcp`), not required for Hashicorp Vault |
+
+### cyberark.yml defaults
+
+In `6-properties.j2`, the entire `CYBERARK CCP CONNECTION` section (header and all `cyberark_*`
+lines, including commented-out placeholders) is only rendered when
+`platform_secret_provider_name: CyberArkCcp`.
+
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `platform_cyberark_url`, `_app_id`, `_ca(_contents)`, `_key(_contents)`, `_certificate(_contents)`, `_allow_invalid_certificates`, `_connection_timeout`, `_reason_text` | (all unset) | CyberArk CCP connection settings; only relevant when `platform_secret_provider_name: CyberArkCcp` |
 
 ### logging.yml defaults
 
@@ -167,6 +206,12 @@ Installs and configures Itential Platform (IAP). Handles OS user/directory setup
 | `platform_log_max_files` | `100` | Max rotated log files |
 | `platform_log_max_file_size` | `1048576` | Max log file size (bytes; ~1 MB) |
 | `platform_log_filename` | `platform.log` | Primary log filename |
+
+### vars/main.yml
+
+| Variable | Purpose |
+|----------|---------|
+| `platform_required_repositories` | List of repository dicts (`url`, `type`, optional `check_target`, `notes`) checked by `verify-platform.yml` via `common:verify-connectivity`. Mirrors the Platform rows of the README "Required Public Repositories" table. |
 
 ## TLS Configuration
 
@@ -220,10 +265,12 @@ Both groups receive the same role. The `platform_server_id` defaults to `invento
 
 | Variable | RHEL 8 | RHEL 9 / AL2023 |
 |----------|--------|-----------------|
-| `platform_nodejs_package` | `@nodejs:20/common` | `@nodejs:20` / `nodejs20` |
+| `platform_nodejs_package` | `@nodejs:22/common` (Node 22) / `@nodejs:20/common` (Node 20) | `@nodejs:22` / `@nodejs:20` (RHEL 9), `nodejs22` / `nodejs20` (AL2023), `nodejs22` only (RHEL 10) |
 | `platform_python_version` | `3.11` | `3.11` |
 | `platform_python_packages` | `python3.11`, `python3.11-pip` | same |
 | `platform_python_app_dependencies` | `jinja2==3.1.2`, `markupsafe==2.1.4`, `textfsm==1.1.3` | same |
+
+Itential Platform 6.6.0 and later requires Node 22, earlier releases require Node 20 (`platform_nodejs_22_min_platform_version`). `platform_nodejs_package_default` is keyed by Node major version, then OS major version. Setting `platform_nodejs_package` in the inventory overrides the default and skips the version lookup.
 
 Hardware specs for `verify` playbook (`platform_hw_specs`):
 - dev: 8 CPU, 32 GB RAM, 250 GB disk

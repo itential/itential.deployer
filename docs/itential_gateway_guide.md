@@ -48,6 +48,7 @@ The following table lists the default variables located in `roles/gateway/defaul
 | `gateway_enable_grpc` | Boolean | Flag to enable GRPC requests. | `true` |
 | `gateway_enable_git` | Boolean | Flag to enable Git integration. | `true` |
 | `gateway_install_dir` | String | The base directory where to install the IAG files. | `/opt/automation-gateway` |
+| `gateway_build_temp_dir_path` | String | Optional directory for the build/staging working directory. Undefined by default, in which case Ansible's own temp-directory resolution is used unchanged. Set this (e.g. to `/var/tmp`) only if `/tmp` is mounted `noexec` on the target host. | Undefined |
 | `gateway_ansible_collections_path` | String | The location of IAG Ansible collections. | `{{ gateway_install_dir }}/ansible/collections` |
 | `gateway_data_dir` | String | The IAG data directory. | `/var/lib/automation-gateway` |
 | `gateway_log_dir` | String | The IAG log directory. | `/var/log/automation-gateway` |

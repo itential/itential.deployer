@@ -19,6 +19,14 @@ platform_log_filename:
 # The minimum log level to display in the console (stdout).
 platform_log_level_console:
 
+# If true, log entries will be written in JSON format. Otherwise, log entries will be written
+# in plaintext.
+platform_log_format_json: false
+
+# If true, console logs will be written in JSON format. Otherwise, log entries will be written
+# in plaintext.
+platform_console_format_json: false
+
 # The absolute directory path where webserver log files are written.
 platform_webserver_log_directory: "{{ platform_log_dir }}"
 
@@ -57,3 +65,7 @@ platform_syslog_app_name:
 
 # The end of line character to include in the syslog message.
 platform_syslog_eol:
+
+# If true, syslog logs will be written in JSON format. Otherwise, log entries will be written
+# in plaintext.
+platform_syslog_format_json: false

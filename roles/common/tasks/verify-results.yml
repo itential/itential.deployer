@@ -2,20 +2,55 @@
 # GNU General Public License v3.0+ (see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt)
 ---
 
+# Expects one variable from the caller:
+#   - component_name: label used to group this component's errors in component_validation_errors
+#     for playbooks/verify.yml's final report, e.g. "Redis", "Redis Sentinel", "MongoDB", "Platform"
+#
+# Not every caller registers every one of these (e.g. verify-sentinel.yml skips
+# verify-connectivity.yml entirely), so each lookup is defaulted to a non-failed result
+# before the "failed" test runs -- that test raises an error on a plain undefined value.
 # Display results
 - name: Display failed validation results
   ansible.builtin.debug:
     msg: "{{ validation_errors }}"
-  when: cpu_validation is failed or memory_validation is failed or disk_validation is failed or platform_validation is failed
+  when: >-
+    (cpu_validation | default({'failed': false})) is failed or
+    (memory_validation | default({'failed': false})) is failed or
+    (disk_validation | default({'failed': false})) is failed or
+    (os_validation | default({'failed': false})) is failed or
+    (arch_validation | default({'failed': false})) is failed or
+    (connectivity_validation | default({'failed': false})) is failed
 
 # Assert that none of the tests failed
 - name: Verify that all tests passed
   ansible.builtin.assert:
     that:
-      - "cpu_validation is not failed"
-      - "memory_validation is not failed"
-      - "disk_validation is not failed"
-      - "proxy_validation is not failed"
-      - "platform_validation is not failed"
+      - "(cpu_validation | default({'failed': false})) is not failed"
+      - "(memory_validation | default({'failed': false})) is not failed"
+      - "(disk_validation | default({'failed': false})) is not failed"
+      - "(os_validation | default({'failed': false})) is not failed"
+      - "(arch_validation | default({'failed': false})) is not failed"
+      - "(proxy_validation | default({'failed': false})) is not failed"
+      - "(connectivity_validation | default({'failed': false})) is not failed"
     fail_msg: "See above, assertions not passed! ✗"
     success_msg: "All assertions passed! ✓"
+  ignore_errors: true
+  register: component_verification
+
+# Recorded per-host so playbooks/verify.yml can do one final, non-fatal-until-the-end
+# assert after every component has been checked, instead of aborting the whole
+# ansible-playbook run the moment one component's checks fail on a host. ANDed with any
+# prior value (default true) rather than overwritten -- a host can belong to more than one
+# component group (e.g. an all-in-one host), and a later component passing must not erase
+# an earlier component's failure on the same host.
+- name: Record overall verification result for this host
+  ansible.builtin.set_fact:
+    verification_passed: "{{ (verification_passed | default(true)) and (component_verification is not failed) }}"
+
+# Keyed by component_name and merged via combine() rather than overwritten, since a host can
+# be checked by more than one component (e.g. an all-in-one host) -- lets playbooks/verify.yml's
+# final report show exactly which checks failed for which component, not just a pass/fail flag.
+- name: Record this component's validation errors for the final report
+  ansible.builtin.set_fact:
+    component_validation_errors: "{{ (component_validation_errors | default({})) | combine({component_name: validation_errors}) }}"
+  when: validation_errors | length > 0
