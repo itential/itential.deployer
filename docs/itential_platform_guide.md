@@ -67,12 +67,11 @@ These variables will effect how the installation occurs.
 
 | Variable | Group | Type | Description | Default Value |
 | :------- | :---- | :--- | :---------- | :------------ |
-| `platform_packages` | `platform` | List of Strings | The Itential Platform RPMs to install. The items can either be filenames or URLs. | N/A |
+| `platform_packages` | `platform` | List of Strings or Dictionaries | The Itential Platform RPMs to install. Each item can either be a filename/URL string, or a `{url, checksum}` dictionary for customers who require validated downloads. | N/A |
 | `repository_username` | `platform` | String | The username for authentication of the repository. | N/A |
 | `repository_password` | `platform` | String | The password for authentication of the repository. | N/A |
 | `repository_api_key` | `platform` | String | The API for authentication of the repository. Can be used instead of username/password for authentication.| N/A |
 | `platform_nodejs_package` | `platform` | String | The Node.js package or module stream to install. The default depends on the Itential Platform version and the OS major version, see below. | Node 22 for Itential Platform 6.6.0 and later, Node 20 for earlier releases |
-| `platform_package_checksums` | `platform` | Dictionary | Optional per-URL checksums for `platform_packages` entries downloaded via repository. Keys are the download URL (must match the `platform_packages` entry exactly); values are in the format Ansible's `get_url` module expects, e.g. `sha256:<hash>`. URLs with no matching key are downloaded without checksum verification. | `{}` |
 
 If `platform_packages` contains URLs, either `repository_api_key` or `repository_username` and
 `repository_password` must be defined.
@@ -99,14 +98,14 @@ platform_release: 6
 platform_nodejs_package: "@nodejs:20" # Override the default Node.js package
 ```
 
-To validate a downloaded RPM's checksum, add an entry to `platform_package_checksums` keyed by
-that RPM's exact download URL:
+To validate a downloaded RPM's checksum, use the `{url, checksum}` dictionary form for that entry
+instead of a plain string. The checksum must be in the format Ansible's `get_url` module expects,
+e.g. `sha256:<hash>`. Entries left as plain strings are downloaded without checksum verification:
 
 ```yaml
 platform_packages:
-  - https://registry.aws.itential.com/repository/PLATFORM/Platform%206/Platform%206.5.1/itential-platform-6.5.1-1.noarch.rpm
-platform_package_checksums:
-  "https://registry.aws.itential.com/repository/PLATFORM/Platform%206/Platform%206.5.1/itential-platform-6.5.1-1.noarch.rpm": "sha256:440353320215dcc737184744579362d78400da0bc46839fa4f6d220129843531"
+  - url: https://registry.aws.itential.com/repository/PLATFORM/Platform%206/Platform%206.5.1/itential-platform-6.5.1-1.noarch.rpm
+    checksum: "sha256:440353320215dcc737184744579362d78400da0bc46839fa4f6d220129843531"
 ```
 
 #### Authentication Variables

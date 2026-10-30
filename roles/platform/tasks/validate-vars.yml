@@ -4,6 +4,31 @@
 - name: Validate and set installation variables
   tags: always
   block:
+    # platform_packages entries can be a plain string (filename or URL, as
+    # before) or a {url, checksum} dict for customers who require validated
+    # downloads. Normalizes to the format every other task in this role
+    # expects (a flat list of strings) plus an internally-computed
+    # platform_package_checksums dict, so nothing downstream needs to know
+    # about the two accepted input shapes.
+    - name: Initialize normalized platform package facts
+      ansible.builtin.set_fact:
+        platform_package_urls: []
+        platform_package_checksums: {}
+      when: platform_packages is defined
+
+    - name: Normalize platform_packages entries into URLs/filenames and checksums
+      ansible.builtin.set_fact:
+        platform_package_urls: "{{ platform_package_urls + [(item is mapping) | ternary(item.url, item)] }}"
+        platform_package_checksums: >-
+          {{ platform_package_checksums | combine({(item.url): item.checksum} if (item is mapping and item.checksum is defined) else {}) }}
+      loop: "{{ platform_packages }}"
+      when: platform_packages is defined
+
+    - name: Replace platform_packages with its normalized plain-string form
+      ansible.builtin.set_fact:
+        platform_packages: "{{ platform_package_urls }}"
+      when: platform_packages is defined
+
     - name: Validate Itential Platform packages array is populated
       ansible.builtin.assert:
         that:
