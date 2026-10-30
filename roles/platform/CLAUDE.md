@@ -30,6 +30,7 @@ Installs and configures Itential Platform (IAP). Handles OS user/directory setup
 - Asserts `platform_release` is defined OR all individual vars (`platform_nodejs_package`, `platform_python_version`, `platform_python_packages`, `platform_python_app_dependencies`) are defined
 - Asserts `platform_encryption_key` is a 64-character hex string
 - Asserts `platform_root_dir`, `platform_config_dir`, `platform_log_dir` and `platform_itential_home_dir` are not top-level system directories (`/`, `/etc`, `/home`, `/var`, `/var/log`, etc.), since ownership of these is changed to `platform_user:platform_group`
+- Asserts `platform_log_dir` ends in `/platform`. The RPM's relocatable prefix is `/var/log/itential` and it always creates `platform` beneath it, so `install-platform-packages-relocate.yml` relocates the parent of `platform_log_dir`
 - Validates Vault variables when `platform_configure_vault: true`
 - Validates PKI source directories when copy-certs flags are enabled
 - Loads `vars/platform-release-<N>.yml` and sets release-specific defaults for NodeJS/Python when not overridden in inventory

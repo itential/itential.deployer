@@ -88,6 +88,15 @@
         - "{{ platform_log_dir }}"
         - "{{ platform_itential_home_dir }}"
 
+    - name: Validate platform_log_dir can be relocated
+      ansible.builtin.assert:
+        that: platform_log_dir | basename == platform_log_dir_default | basename
+        fail_msg: >-
+          platform_log_dir must end in /{{ platform_log_dir_default | basename }}. The
+          itential-platform RPM only relocates the parent directory
+          ({{ platform_log_dir_default | dirname }}) and always creates
+          {{ platform_log_dir_default | basename }} beneath it.
+
     - name: Validate that platform_otel_webserver_metrics_enabled is a boolean when set
       ansible.builtin.assert:
         that: platform_otel_webserver_metrics_enabled is none or platform_otel_webserver_metrics_enabled is boolean
