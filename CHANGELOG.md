@@ -1,5 +1,27 @@
 # Changelog
 
+## v4.3.0 (October 30, 2026)
+
+* Add Itential Artifactory to required repository list and verify connectivity check  https://github.com/itential/itential.deployer/pull/368
+* Add configurable path for Redis/Gateway build temp directories  https://github.com/itential/itential.deployer/pull/373
+* Add missing Itential Platform properties to template and docs  https://github.com/itential/itential.deployer/pull/370
+* Add path env var to platform service script  https://github.com/itential/itential.deployer/pull/381
+* Add repo connectivty checks to verify (preflight) playbooks  https://github.com/itential/itential.deployer/pull/367
+* Add support for EL10  https://github.com/itential/itential.deployer/pull/380
+* Add support for enabling Platform open telemetry metrics  https://github.com/itential/itential.deployer/pull/378
+* Change platform Nodejs version from 20 to 22  https://github.com/itential/itential.deployer/pull/377
+* Change platform webserver cache control enabled default to true  https://github.com/itential/itential.deployer/pull/369
+* Fix crash when ansible_default_ipv4.address is undefined (PE-1998)  https://github.com/itential/itential.deployer/pull/371
+* Fix platform listen port certify check  https://github.com/itential/itential.deployer/pull/383
+* Fixes ownership and relocation problems when Itential Platform is installed with a custom platform_user/platform_group and relocated directories  https://github.com/itential/itential.deployer/pull/384
+* Remove custom python3/pip3 symlinks for Platform  https://github.com/itential/itential.deployer/pull/376
+* Remove duplicate platform_otel_webserver_metrics_enabled default  https://github.com/itential/itential.deployer/pull/379
+* Select platform Node version based on RPM version  https://github.com/itential/itential.deployer/pull/382
+* docs: rebrand to Itential Platform and Itential Gateway in README  https://github.com/itential/itential.deployer/pull/375
+
+Full Changelog: https://github.com/itential/itential.deployer/compare/v4.2.0...v4.3.0 
+
+
 ## v4.2.0 (August 11, 2026)
 
 * Add CLAUDE.md documentation for collection root and all roles  https://github.com/itential/itential.deployer/pull/332
@@ -34,6 +56,7 @@
 * Set vm.max_map_count kernel parameter on MongoDB servers  https://github.com/itential/itential.deployer/pull/288
 * Update Gateway docs with 4.4 info  https://github.com/itential/itential.deployer/pull/360
 * Update galaxy version and changelog for release 3.7.2 [skip ci]  https://github.com/itential/itential.deployer/pull/324
+* Update galaxy version and changelog for release 4.2.0 [skip ci]
 * Updated examples to reflect new mongodb group names  https://github.com/itential/itential.deployer/pull/341
 * added readme check  https://github.com/itential/itential.deployer/pull/361
 * redis: grant monitor user ACL perms needed for BullMQ queue metrics
