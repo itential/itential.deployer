@@ -434,4 +434,5 @@
     msg:
       - "Redis validation complete for {{ inventory_hostname }}"
       - "Overall Status: {{ 'PASSED ✓' if (redis_ping.rc == 0 and redis_process.rc == 0) else 'FAILED ✗' }}"
-      - "Report saved to: {{ redis_certify_report_file }} on both the remote and control nodes."
+      - "Remote report: {{ redis_certify_report_file }}"
+      - "Local report:  {{ redis_certify_report_dir_local }}/{{ redis_certify_report_file | basename }}"
