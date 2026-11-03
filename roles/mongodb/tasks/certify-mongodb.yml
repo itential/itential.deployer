@@ -487,4 +487,5 @@
     msg:
       - "MongoDB validation complete for {{ inventory_hostname }}"
       - "Overall Status: {{ 'PASSED ✓' if (mongodb_process is defined and mongodb_process.rc == 0) else 'FAILED ✗' }}"
-      - "Report saved to: {{ mongodb_certify_report_file }} on both the remote and control nodes."
+      - "Remote report: {{ mongodb_certify_report_file }}"
+      - "Local report:  {{ mongodb_certify_report_dir_local }}/{{ mongodb_certify_report_file | basename }}"

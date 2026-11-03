@@ -373,6 +373,7 @@
     msg:
       - "Redis validation complete for {{ inventory_hostname }}"
       - "Overall Status: {{ 'PASSED ✓' if (sentinel_ping.rc == 0 and sentinel_process.rc == 0) else 'FAILED ✗' }}"
-      - "Report saved to: {{ redis_sentinel_certify_report_file }} on both the remote and control nodes."
+      - "Remote report: {{ redis_sentinel_certify_report_file }}"
+      - "Local report:  {{ redis_sentinel_certify_report_dir_local }}/{{ redis_sentinel_certify_report_file | basename }}"
   when:
     - sentinel_is_running | bool
