@@ -291,6 +291,11 @@ all:
 To add an arbiter to the replica set, define a `mongodb_arbiter` group. Arbiters participate in
 elections but hold no data.
 
+An existing data-bearing member cannot be converted to an arbiter by re-running the playbook.
+MongoDB does not allow `arbiterOnly` to change in a reconfig, so the run fails at "Create or
+reconfigure the replicaset". Remove the member with `rs.remove()`, delete its data directory,
+restart `mongod`, and re-add it with `rs.addArb()`, or use a host that is not yet in the replica set.
+
 ```yaml
 all:
   children:
