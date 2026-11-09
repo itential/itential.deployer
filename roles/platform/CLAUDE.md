@@ -25,6 +25,7 @@ Installs and configures Itential Platform (IAP). Handles OS user/directory setup
 
 ## validate-vars.yml
 
+- Normalizes `platform_packages` entries (each either a plain string, or a `{url, checksum}` dict for customers who require validated downloads) into a flat list of strings plus an internally-computed `platform_package_checksums` dict, before anything else in the role touches `platform_packages`
 - Asserts `platform_packages` is defined and contains only `.rpm` files (online installs)
 - Asserts repo credentials when packages are downloaded from HTTP URLs
 - Asserts `platform_release` is defined OR all individual vars (`platform_nodejs_package`, `platform_python_version`, `platform_python_packages`, `platform_python_app_dependencies`) are defined
@@ -49,7 +50,8 @@ Installs and configures Itential Platform (IAP). Handles OS user/directory setup
 | `platform_group` | `itential` | OS group |
 | `platform_package_dependencies` | `glibc-common`, `openldap`, `openldap-clients`, `openssl`, `git` | OS packages required before Platform RPM |
 | `platform_encryption_key` | (required) | 64-char hex string (256-bit AES key); generate with `openssl rand -hex 32` |
-| `platform_packages` | (required) | List of RPM package names or download URLs |
+| `platform_packages` | (required) | List of RPM package names/download URLs, or `{url, checksum}` dicts (checksum optional, in `get_url`-format e.g. `sha256:<hash>`). Normalized in `validate-vars.yml` into a flat string list before anything else in the role reads it. |
+| `platform_package_checksums` | (computed) | Internal fact derived from any `{url, checksum}` entries in `platform_packages`; not meant to be set directly by callers. |
 | `platform_app_artifacts_enabled` | `false` | Install app artifacts |
 | `platform_start_service` | `true` | Start the service after install |
 | `platform_upload_using_rsync` | `false` | Use rsync for artifact upload |
