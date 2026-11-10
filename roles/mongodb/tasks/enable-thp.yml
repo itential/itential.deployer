@@ -53,7 +53,7 @@
       when: ansible_distribution_file_variety == "RedHat"
       vars:
         # TuneD 2.27 (EL10) only searches /etc/tuned/profiles for custom profiles
-        mongodb_tuned_profile_dir: "{{ '/etc/tuned/profiles' if ansible_distribution_major_version == '10' else '/etc/tuned' }}/virtual-guest-no-thp"
+        mongodb_tuned_profile_dir: "{{ '/etc/tuned/profiles' if ansible_distribution_major_version is version('10', '>=') else '/etc/tuned' }}/virtual-guest-no-thp"
       block:
         - name: Create custom tuned profile directory
           ansible.builtin.file:
