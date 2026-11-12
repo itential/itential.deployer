@@ -66,6 +66,8 @@
             repo: "{{ item }}"
             dest: "{{ platform_services_dir }}/{{ platform_adapter_names[i] }}"
             force: true
+            accept_hostkey: "{{ true if (item is match('^ssh://|^git@')) else omit }}"
+            key_file: "{{ platform_adapter_ssh_key_dir ~ '/' ~ platform_adapter_ssh_key_file if (item is match('^ssh://|^git@')) else omit }}"
           loop: "{{ platform_adapters | default([], true) }}"
           loop_control:
             index_var: i
